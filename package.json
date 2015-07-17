@@ -1,0 +1,19 @@
+{
+  "name": "huge-play",
+  "version": "1.0.0",
+  "description": "FreeSwitch CCNQ4 middlewares",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shimaore/huge-play.git"
+  },
+  "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/shimaore/huge-play/issues"
+  },
+  "homepage": "https://github.com/shimaore/huge-play"
+}
