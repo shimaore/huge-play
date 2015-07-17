@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/shimaore/huge-play/issues"
   },
-  "homepage": "https://github.com/shimaore/huge-play"
+  "homepage": "https://github.com/shimaore/huge-play",
+  "dependencies": {
+    "seem": "^1.0.0"
+  }
 }

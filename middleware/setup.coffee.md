@@ -1,4 +1,9 @@
     seem = require 'seem'
+    nimble = require 'nimble-direction'
+
+    @server_pre = ->
+      nimble @cfg
+
     @include = (ctx) ->
 
       ctx[k] = v for own k,v of {

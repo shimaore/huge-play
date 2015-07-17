@@ -3,7 +3,10 @@
     @include = seem ->
 
       return unless @session.direction is 'ingress'
-      unless @session.dialplan is 'national'
+
+One of the national translations should have mapped us to a different dialplan (e.g. 'national').
+
+      if @session.dialplan is 'e164'
         return @respond 'INVALID_NUMBER_FORMAT'
 
       yield @set
