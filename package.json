@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FreeSwitch CCNQ4 middlewares",
   "main": "index.js",
   "scripts": {
