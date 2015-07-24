@@ -1,10 +1,9 @@
 {
   "name": "huge-play",
   "version": "1.0.1",
-  "description": "FreeSwitch CCNQ4 middlewares",
-  "main": "index.js",
+  "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,8 +16,15 @@
   },
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
+    "acoustic-line": "^1.5.0",
+    "bumpy-lawyer": "^1.0.8",
     "debug": "^2.2.0",
     "nimble-direction": "^2.1.2",
     "seem": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "coffee-script": "^1.9.3",
+    "mocha": "^2.2.5"
   }
 }

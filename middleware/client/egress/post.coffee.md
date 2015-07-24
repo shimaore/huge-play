@@ -12,12 +12,18 @@
 
       assert @cfg.profile_name, 'Missing profile_name'
 
-      unless ccnq_from_e164?  and ccnq_to_e164?
+      unless ccnq_from_e164? and ccnq_to_e164?
         return @respond 'INVALID_NUMBER_FORMAT'
+
+      @session.e164_number = yield @prov.get "number:#{@session.ccnq_from_e164}"
+
+      if @session.e164_number.fs_variables?
+        yield @set @session.e164_number.fs_variables
 
 The URL module parses the SIP username as `auth`.
 
       pci = @req.header 'p-charge-info'
+      pci ?= @session.e164_number.account
       unless pci?
         return @respond '403 No Charge-Info'
 

@@ -10,14 +10,16 @@ Rewrite destination
 
       switch
 
-to: french number
-
         when $ = @destination.match /^33([1-9][0-9]+)$/
           @session.ccnq_to_e164 = @destination
           @destination = "0#{$[1]}"
           @session.country = 'fr'
 
         else
+
+Destination _must_ be a France number.
+Otherwise let it be parsed by another module.
+
           return
 
 Rewrite source
@@ -44,18 +46,3 @@ Update the dialplan
 ===================
 
       @session.dialplan = 'national'
-
-Handle privacy request
-======================
-
-Privacy: id or other requested privacy
-
-TODO: populate `@session.privacy_hide_number`
-
-      if @session.privacy_hide_number
-        @source = 'anonymous'
-        yield @action 'privacy', 'full'
-        yield @set
-          effective_caller_id_name: '_undef_'
-          effective_caller_id_number: 'anonymous'
-          origination_privacy: 'screen+hide_name+hide_number'
