@@ -1,5 +1,7 @@
     seem = require 'seem'
     nimble = require 'nimble-direction'
+    pkg = require '../package.json'
+    @name = "#{pkg.name}:middleware:setup"
 
     @server_pre = ->
       nimble @cfg

@@ -15,7 +15,7 @@
       unless ccnq_from_e164? and ccnq_to_e164?
         return @respond 'INVALID_NUMBER_FORMAT'
 
-      @session.e164_number = yield @prov.get "number:#{@session.ccnq_from_e164}"
+      @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_from_e164}"
 
       if @session.e164_number.fs_variables?
         yield @set @session.e164_number.fs_variables

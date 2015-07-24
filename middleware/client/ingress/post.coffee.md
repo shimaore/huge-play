@@ -1,5 +1,6 @@
     seem = require 'seem'
-    @name = 'ingress (client)'
+    pkg = require '../../../package.json'
+    @name = "#{pkg.name}:middleware:client:ingress:post"
     @include = seem ->
 
       return unless @session.direction is 'ingress'
@@ -12,7 +13,7 @@ One of the national translations should have mapped us to a different dialplan (
       assert @session.number_domain
 
       dst_number = "#{@destination}@#{@session.number_domain}"
-      @session.number = yield @prov.get "number:#{dst_number}"
+      @session.number = yield @cfg.prov.get "number:#{dst_number}"
 
       ###
 
@@ -27,7 +28,7 @@ Call rejection: reject anonymous caller
 
       if @session.number.use_blacklist or @session.number.use_whitelist
         list_id = "list:#{@dst_number}@#{url.parse(@req.header 'P-Asserted-Identity').auth}"
-        list = yield @prov.get(list_id).catch -> {}
+        list = yield @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
             return @respond '603 Decline (blacklisted)'
@@ -63,7 +64,7 @@ Call rejection: reject anonymous caller
 
 
 
-      # @session.endpoint_data = yield @prov.get "endpoint:#{@session.number_data.endpoint}"
+      # @session.endpoint_data = yield @cfg.prov.get "endpoint:#{@session.number_data.endpoint}"
 
       ###
 

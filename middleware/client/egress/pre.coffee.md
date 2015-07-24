@@ -13,7 +13,7 @@ First-line handler for outbound calls
       @session.endpoint_name = @req.header 'X-CCNQ3-Endpoint'
       unless @session.endpoint_name?
         return @respond '485 Missing X-CCNQ3-Endpoint'
-      @session.endpoint = yield @prov.get "endpoint:#{@session.endpoint_name}"
+      @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
 
       @session.outbound_route = @session.endpoint.outbound_route
       unless @session.outbound_route?
@@ -27,7 +27,7 @@ First-line handler for outbound calls
       @session.number_domain = number_domain
 
       src_number = "#{@source}@#{number_domain}"
-      @session.number = yield @prov.get "number:#{src_number}"
+      @session.number = yield @cfg.prov.get "number:#{src_number}"
 
 Upcoming changes
 
