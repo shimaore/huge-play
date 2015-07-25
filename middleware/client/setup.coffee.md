@@ -8,9 +8,9 @@
       @session.profile = @req.variable 'profile'
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
-        @session.sip_profile ?= "#{@session.profile}-egress"
+        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
       if @session.direction is 'egress'
-        @session.sip_profile ?= "#{@session.profile}-ingress"
+        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
 
       debug 'Ready',
         direction: @session.direction
