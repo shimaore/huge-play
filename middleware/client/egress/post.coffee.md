@@ -13,7 +13,7 @@
         debug 'Missing e164 numbers'
         return @respond 'INVALID_NUMBER_FORMAT'
 
-      @session.e164_number = yield @cfg.prov.getr("number:#{@session.ccnq_from_e164}").catch -> {}
+      @session.e164_number = yield @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
 
       if @session.e164_number.fs_variables?
         yield @set @session.e164_number.fs_variables
