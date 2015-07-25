@@ -15,7 +15,8 @@ For example:
 
 See http://www.arcep.fr/index.php?id=interactivenumeros
 
-    @name = 'france-egress'
+    pkg = require '../../../package.json'
+    @name = "#{pkg.name}:middleware:client:egress:france"
     @include = ->
 
       return unless @session.direction is 'egress'
