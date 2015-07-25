@@ -10,6 +10,7 @@
       return unless @session.direction is 'egress'
 
       unless ccnq_from_e164? and ccnq_to_e164?
+        debug 'Missing e164 numbers'
         return @respond 'INVALID_NUMBER_FORMAT'
 
       @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_from_e164}"
@@ -22,10 +23,12 @@ The URL module parses the SIP username as `auth`.
       pci = @req.header 'p-charge-info'
       pci ?= @session.e164_number.account
       unless pci?
+        debug 'No Charge-Info'
         return @respond '403 No Charge-Info'
 
       @session.ccnq_account = (url.parse pci).auth
       unless @session.ccnq_account?
+        debug 'Invalid Charge-Info'
         return @respond '403 Invalid Charge-Info'
 
       yield @set
@@ -49,3 +52,5 @@ SIP parameters
       @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
+
+      debug 'OK'

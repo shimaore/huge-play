@@ -11,3 +11,8 @@
         @session.sip_profile ?= "#{@session.profile}-egress"
       if @session.direction is 'egress'
         @session.sip_profile ?= "#{@session.profile}-ingress"
+
+      debug 'Ready',
+        direction: @session.direction
+        profile: @session.profile
+        sip_profile: @session.sip_profile

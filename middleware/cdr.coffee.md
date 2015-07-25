@@ -6,8 +6,8 @@
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
-        debug "CDR: Channel Hangup Complete"
         data = res.body
+        debug "CDR: Channel Hangup Complete", data
 
         debug "CDR: Channel Hangup Complete", billmsec: data.variable_billmsec
         data =

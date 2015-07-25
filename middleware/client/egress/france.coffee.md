@@ -23,6 +23,8 @@ See http://www.arcep.fr/index.php?id=interactivenumeros
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
 
+      debug 'Ready'
+
 Verify that the caller-id follows the proper format
 ---------------------------------------------------
 
@@ -128,4 +130,7 @@ international call
         m = @destination.match entry.match
         if m?
           @session.ccnq_to_e164 = entry.now m
+          debug 'Found', to_e164: @session.ccnq_to_e164
           return
+
+      debug 'None found', destination: @destination
