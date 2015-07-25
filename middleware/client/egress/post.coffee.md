@@ -9,6 +9,8 @@
     @include = seem ->
       return unless @session.direction is 'egress'
 
+      debug 'Ready'
+
       unless @session.ccnq_from_e164? and @session.ccnq_to_e164?
         debug 'Missing e164 numbers'
         return @respond 'INVALID_NUMBER_FORMAT'
@@ -48,8 +50,8 @@ SIP parameters
           sip_contact_user: @session.ccnq_from_e164
           sip_cid: 'pid'
 
-      debug 'OK'
-
-      @export
+      yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
+
+      debug 'OK'
