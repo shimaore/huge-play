@@ -9,11 +9,11 @@
     @include = seem ->
       return unless @session.direction is 'egress'
 
-      unless ccnq_from_e164? and ccnq_to_e164?
+      unless @session.ccnq_from_e164? and @session.ccnq_to_e164?
         debug 'Missing e164 numbers'
         return @respond 'INVALID_NUMBER_FORMAT'
 
-      @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_from_e164}"
+      @session.e164_number = yield @cfg.prov.getr("number:#{@session.ccnq_from_e164}").catch -> {}
 
       if @session.e164_number.fs_variables?
         yield @set @session.e164_number.fs_variables
@@ -49,8 +49,8 @@ SIP parameters
           sip_contact_user: @session.ccnq_from_e164
           sip_cid: 'pid'
 
+      debug 'OK'
+
       @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
-
-      debug 'OK'
