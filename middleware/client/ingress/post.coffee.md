@@ -1,5 +1,6 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
+    assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
     @include = seem ->
 
@@ -10,7 +11,7 @@ One of the national translations should have mapped us to a different dialplan (
       if @session.dialplan is 'e164'
         return @respond 'INVALID_NUMBER_FORMAT'
 
-      assert @session.number_domain
+      assert @session.number_domain?, 'Missing number_domain'
 
       dst_number = "#{@destination}@#{@session.number_domain}"
       @session.number = yield @cfg.prov.get "number:#{dst_number}"
@@ -74,7 +75,7 @@ These are injected so that they may eventually show up in CDRs.
 
           ccnq_direction: @session.direction
           ccnq_account: @session.number.account
-          ccnq_profile: @cfg.profile_name
+          ccnq_profile: @session.profile
           ccnq_from_e164: @session.ccnq_from_e164
           ccnq_to_e164: @session.ccnq_to_e164
 

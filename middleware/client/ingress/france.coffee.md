@@ -1,6 +1,6 @@
-    seem = require 'seem'
-    @name = 'france-ingress'
-    @include = seem ->
+    pkg = require '../../../package.json'
+    @name = "#{pkg.name}:middleware:client:ingress:france"
+    @include = ->
 
       return unless @session.direction is 'ingress'
       return unless @session.dialplan is 'e164'

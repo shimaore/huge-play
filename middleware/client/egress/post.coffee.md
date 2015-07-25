@@ -1,16 +1,13 @@
-    pkg = require '../../../package.json'
-
     seem = require 'seem'
     url = require 'url'
 
+    pkg = require '../../../package.json'
     @name = "#{pkg.name}/middleware/client/egress/post"
     debug = (require 'debug') @name
     assert = require 'assert'
 
     @include = seem ->
       return unless @session.direction is 'egress'
-
-      assert @cfg.profile_name, 'Missing profile_name'
 
       unless ccnq_from_e164? and ccnq_to_e164?
         return @respond 'INVALID_NUMBER_FORMAT'
@@ -37,7 +34,7 @@ These are injected so that they may eventually show up in CDRs.
 
           ccnq_direction: @session.direction
           ccnq_account: @session.ccnq_account
-          ccnq_profile: @cfg.profile_name
+          ccnq_profile: @session.profile
           ccnq_from_e164: @session.ccnq_from_e164
           ccnq_to_e164: @session.ccnq_to_e164
 
