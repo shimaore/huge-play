@@ -20,15 +20,14 @@
 
 The URL module parses the SIP username as `auth`.
 
-      pci = @req.header 'p-charge-info'
-      pci ?= @session.e164_number.account
+      pci = @req.header 'P-Charge-Info'
       unless pci?
         debug 'No Charge-Info'
         return @respond '403 No Charge-Info'
 
       @session.ccnq_account = (url.parse pci).auth
       unless @session.ccnq_account?
-        debug 'Invalid Charge-Info'
+        debug 'Invalid Charge-Info', pci
         return @respond '403 Invalid Charge-Info'
 
       yield @set
