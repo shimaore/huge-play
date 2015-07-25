@@ -1,9 +1,12 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:france"
+    debug = (require 'debug') @name
     @include = ->
 
       return unless @session.direction is 'ingress'
       return unless @session.dialplan is 'e164'
+
+      debug 'Ready'
 
 Rewrite destination
 ===================
@@ -46,3 +49,10 @@ Update the dialplan
 ===================
 
       @session.dialplan = 'national'
+
+      debug 'OK',
+        source: @source
+        destination: @destination
+        diaplan: @session.dialplan
+        country: @session.country
+      return

@@ -2,19 +2,26 @@
     pkg = require '../../../package.json'
     assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
+    debug = (require 'debug') @name
     @include = seem ->
 
       return unless @session.direction is 'ingress'
+
+      debug 'Ready',
+        dialplan: @session.dialplan
+        number_domain: @session.number_domain
+
+      assert @session.number_domain?, 'Missing number_domain'
 
 One of the national translations should have mapped us to a different dialplan (e.g. 'national').
 
       if @session.dialplan is 'e164'
         return @respond 'INVALID_NUMBER_FORMAT'
 
-      assert @session.number_domain?, 'Missing number_domain'
-
       dst_number = "#{@destination}@#{@session.number_domain}"
       @session.number = yield @cfg.prov.get "number:#{dst_number}"
+
+      debug "Got dst_number #{dst_number}", @session.number
 
       ###
 
@@ -104,6 +111,9 @@ These should not be forwarded towards customers.
           'sip_h_X-CCNQ3-Registrant-Target': null
           'sip_h_X-CCNQ3-Routing': null
 
-      @export
+      yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
+
+      debug 'OK'
+      return

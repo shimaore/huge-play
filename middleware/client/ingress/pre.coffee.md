@@ -1,15 +1,19 @@
 This module should be called before 'local/carrier-ingress' and before 'client-sbc/$${profile_type}-ingress'
 
     seem = require 'seem'
-    @name = 'client/ingress/pre'
+    pkg = require '../../../package.json'
+    @name = "#{pkg.name}:middleware:client:ingress:pre"
+    debug = (require 'debug') @name
     @include = seem ->
       return unless @session.direction is 'ingress'
+
+      debug 'Ready'
 
       @session.dialplan = 'e164'
       @session.ccnq_from_e164 = @source
       @session.ccnq_to_e164 = @destination
 
-      @session.e164_number = yield @prov.get "number:#{@session.ccnq_to_e164}"
+      @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_to_e164}"
 
 These are used e.g. for Centrex. Haven't established conventions for that yet, though.
 
@@ -29,3 +33,6 @@ Directly translate (do not use the national modules).
         [number,number_domain] = @session.e164_number.local_number.split '@'
         @session.number_domain = number_domain
         @destination = number
+
+      debug 'OK'
+      return
