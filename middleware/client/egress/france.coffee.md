@@ -17,27 +17,33 @@ See http://www.arcep.fr/index.php?id=interactivenumeros
 
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:france"
+    debug = (require 'debug') @name
+
     @include = ->
 
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
 
-      debug 'Ready'
+      debug 'source', @source
 
 Verify that the caller-id follows the proper format
 ---------------------------------------------------
 
       switch
+
+From: national number
+
         when $ = @source.match /^(0|\+33)([123456789].{8})$/
           @session.ccnq_from_e164 = "33#{$[2]}"
 
-from: international number
+From: international number (why??)
 
         when $ = @source.match /^(00|\+)([2-9][0-9]*)$/
           @session.ccnq_from_e164 = $[2]
 
         else
+          debug 'Cannot translate source'
           return
 
 Verify that the called number follows the proper format
