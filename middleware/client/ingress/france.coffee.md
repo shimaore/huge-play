@@ -42,6 +42,11 @@ from: international number
           @session.ccnq_from_e164 = @source
           @source = "00#{$[1]}"
 
+from: anonymous
+
+        when @source is 'anonymous'
+          debug 'Source is anonymous'
+
         else
           return @respond '484 Invalid source'
 
