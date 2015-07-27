@@ -75,6 +75,9 @@ module.exports = renderable (o) ->
           param name:'disable-rtp-auto-adjust', value:true
           param name:'rtp-autoflush-during-bridge', value:true
           param name:'rtp-autofix-timing', value:false
+          param name:'rtp-rewrite-timestamps', value:false # might need true for cirpak
+          param name:'suppress-cng', value:false
+          param name:'vad', value:'none'
         else
           param name:'inbound-bypass-media', value:true
           # Enter the dialplan without the codec having been negotiated.
