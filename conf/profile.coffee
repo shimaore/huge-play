@@ -72,7 +72,7 @@ module.exports = renderable (o) ->
         when true
           param name:'inbound-bypass-media', value:false
           param name:'inbound-late-negotiation', value:false
-          param name:'disable-rtp-auto-adjust', value:true
+          param name:'disable-rtp-auto-adjust', value:false
           param name:'rtp-autoflush-during-bridge', value:true
           param name:'rtp-autofix-timing', value:false
           param name:'rtp-rewrite-timestamps', value:false # might need true for cirpak
@@ -114,7 +114,7 @@ module.exports = renderable (o) ->
       # NAT
       switch o.media
         when true
-          param name:'apply-nat-acl', value:'rfc1918.auto'
+          param name:'apply-nat-acl', value: o.nat_acl ? 'nat.auto'
           param name:'aggressive-nat-detection', value:true
         else
           param name:'aggressive-nat-detection', value:false
