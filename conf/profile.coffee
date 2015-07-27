@@ -114,7 +114,7 @@ module.exports = renderable (o) ->
       # NAT
       switch o.media
         when true
-          param name:'apply-nat-acl', value:'rfc1918'
+          param name:'apply-nat-acl', value:'rfc1918.auto'
           param name:'aggressive-nat-detection', value:true
         else
           param name:'aggressive-nat-detection', value:false
