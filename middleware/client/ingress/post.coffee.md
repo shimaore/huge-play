@@ -16,7 +16,7 @@
 One of the national translations should have mapped us to a different dialplan (e.g. 'national').
 
       if @session.dialplan is 'e164'
-        return @respond 'INVALID_NUMBER_FORMAT'
+        return @respond '484'
 
       dst_number = "#{@destination}@#{@session.number_domain}"
       @session.number = yield @cfg.prov.get "number:#{dst_number}"

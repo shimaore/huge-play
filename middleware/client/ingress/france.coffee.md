@@ -43,7 +43,7 @@ from: international number
           @source = "00#{$[1]}"
 
         else
-          return @respond 'INVALID_NUMBER_FORMAT'
+          return @respond '484 Invalid source'
 
 Update the dialplan
 ===================
