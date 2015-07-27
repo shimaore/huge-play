@@ -109,7 +109,11 @@ module.exports = renderable (o) ->
       param name:'pass-rfc2833', value:true
 
       # NAT
-      # param name:'apply-nat-acl'
-      param name:'aggressive-nat-detection', value:false
+      switch o.media
+        when true
+          param name:'apply-nat-acl', value:'rfc1918'
+          param name:'aggressive-nat-detection', value:true
+        else
+          param name:'aggressive-nat-detection', value:false
       param name:'stun-enabled', value:false
       param name:'stun-auto-disable', value:true
