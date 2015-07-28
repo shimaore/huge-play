@@ -1,4 +1,5 @@
-    {expect} = require 'chai'
+    chai = require 'chai'
+    chai.should()
 
     it 'The FreeSwitch configuration should accept phrases', ->
       options = require './example.json'
@@ -9,7 +10,7 @@
         require 'bumpy-lawyer/fr'
       ]
       config = (require '../conf/freeswitch') opts
-      expect(config.match /<action function="play" data="voicemail\/vm-record_greeting.wav"\/>/)
+      config.should.match /<action function="play-file" data="voicemail\/vm-to_record_greeting.wav"\/>/
 
     it 'The FreeSwitch configuration', ->
       options = require './example.json'
@@ -2369,4 +2370,4 @@
 
       '''.replace /\n */g, '\n'
 
-      expect(config).to.equal expected_config
+      config.should.equal expected_config
