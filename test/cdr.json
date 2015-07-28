@@ -1,0 +1,22 @@
+{
+  "port": 5701
+, "provisioning": "http://127.0.0.1:5984/provisioning"
+, "sip_domain_name": "sip.local"
+, "profile": "tough-rate-sender"
+, "host": "host.local"
+, "default_outbound_route": "the_default_outbound_route"
+, "acls": {
+    "default": [
+      "172.17.42.0/8"
+    , "127.0.0.0/8"
+    ]
+  }
+, "web": {
+    "port": 35704
+  , "host": "127.0.0.1"
+  , "io": false
+  }
+, "cdr": {
+    "url": "http://127.0.0.1:5984/cdr"
+  }
+}

@@ -19,6 +19,8 @@ module.exports = renderable (cfg) ->
     'mod_tone_stream'
     'mod_httapi'
   ]
+  if cfg.cdr?.url?
+    modules_to_load.push 'mod_json_cdr'
   if cfg.modules?
     modules_to_load = modules_to_load.concat cfg.modules
 
@@ -70,6 +72,28 @@ module.exports = renderable (cfg) ->
             list name:name, default:'deny', ->
               for cidr in cidrs
                 node type:'allow', cidr:cidr
+
+      if cfg.cdr?.url?
+        configuration name:'json_cdr.conf', ->
+          settings ->
+            param
+              name:'auth-scheme'
+              value: cfg.cdr.auth_scheme ? 'basic'
+            param
+              name:'encode-values'
+              value: cfg.cdr.encode_values ? false
+            param
+              name:'log-dir'
+              value: cfg.cdr.log_dir ? 'cdr'
+            param
+              name:'log-b-leg'
+              value: cfg.cdr.log_b_leg ? false
+            param
+              name:'cred'
+              value: cfg.cdr.cred ? ''
+            param
+              name:'url'
+              value: cfg.cdr.url
 
       configuration name:'sofia.conf', ->
         global_settings ->
