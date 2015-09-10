@@ -13,5 +13,6 @@
           'middleware/client/ingress/privacy.coffee.md'
           'middleware/client/ingress/france.coffee.md'
           'middleware/client/ingress/pre.coffee.md'
+          'middleware/carrier/setup.coffee.md'
         ]
           require "../#{m}"
