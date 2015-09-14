@@ -3,6 +3,9 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:setup"
 
+    @config = ->
+      nimble @cfg
+
     @server_pre = ->
       nimble @cfg
 
