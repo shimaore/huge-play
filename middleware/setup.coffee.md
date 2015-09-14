@@ -21,6 +21,13 @@
           else
             yield ctx.set k,v for own k,v of name
 
+        unset: seem (name) ->
+          return unless name?
+          if typeof name is 'string'
+              ctx.action 'unset', name
+          else
+            yield ctx.unset k for k in name
+
         export: seem (name,value) ->
           return unless name?
           if typeof name is 'string'
