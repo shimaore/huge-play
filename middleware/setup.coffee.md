@@ -3,11 +3,13 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:setup"
 
-    @config = ->
-      nimble @cfg
+    @config = seem ->
+      yield nimble @cfg
+      assert cfg.prov?, 'Nimble did not inject cfg.prov'
 
     @server_pre = ->
-      nimble @cfg
+      yield nimble @cfg
+      assert cfg.prov?, 'Nimble did not inject cfg.prov'
 
     @include = (ctx) ->
 
