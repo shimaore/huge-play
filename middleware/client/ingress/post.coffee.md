@@ -3,6 +3,7 @@
     assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
     debug = (require 'debug') @name
+    url = require 'url'
     @include = seem ->
 
       return unless @session.direction is 'ingress'
@@ -23,27 +24,32 @@ One of the national translations should have mapped us to a different dialplan (
 
       debug "Got dst_number #{dst_number}", @session.number
 
-      ###
-
       if @session.number.disabled
-        return @respond '480 Administratively Forbidden'
+        debug "Number #{dst_number} is disabled"
+        return @respond '486 Administratively Forbidden' # was 403
 
 Call rejection: reject anonymous caller
 
+      ###
       if @session.number.reject_anonymous
         if is_privacy 'id'
           return @respond '603 Decline (anonymous)'
+      ###
 
       if @session.number.use_blacklist or @session.number.use_whitelist
-        list_id = "list:#{@dst_number}@#{url.parse(@req.header 'P-Asserted-Identity').auth}"
+        pid = @req.header 'P-Asserted-Identity'
+        caller = if pid? then url.parse(pid).auth else @source
+        list_id = "list:#{dst_number}@#{caller}"
+        debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
         list = yield @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
-            return @respond '603 Decline (blacklisted)'
+            return @respond '486 Decline (blacklisted)' # was 603
           unless @session.number.use_whitelist and list.whitelist
-            return @repond '603 Decline (not whitelisted)'
+            return @repond '486 Decline (not whitelisted)' # was 603
 
 
+      ###
       FIXME
 
       dlg_timeout = @session.number.dialog_timer
