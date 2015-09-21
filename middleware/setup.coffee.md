@@ -6,11 +6,11 @@
 
     @config = seem ->
       yield nimble @cfg
-      assert cfg.prov?, 'Nimble did not inject cfg.prov'
+      assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
     @server_pre = ->
       yield nimble @cfg
-      assert cfg.prov?, 'Nimble did not inject cfg.prov'
+      assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
     @include = (ctx) ->
 
