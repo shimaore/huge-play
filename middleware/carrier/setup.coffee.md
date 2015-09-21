@@ -42,7 +42,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
     @server_pre = ->
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = cfg.prov.get "host:#{@cfg.host}"
+      @cfg.host_data = @cfg.prov.get "host:#{@cfg.host}"
       @cfg.sip_profiles = @cfg.host_data.sip_profiles ? {}
 
     @include = ->
