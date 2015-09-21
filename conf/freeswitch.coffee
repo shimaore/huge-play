@@ -106,7 +106,7 @@ module.exports = renderable (cfg) ->
             p.timer_t4 ?= 5000
             p.timer_t2 ?= 4000
             p.timer_t1x64 ?= 64*p.timer_t1
-            p.local_ip = 'auto'
+            p.local_ip ?= 'auto'
             p.inbound_codec ?= 'PCMA'
             p.outbound_codec ?= 'PCMA'
 
