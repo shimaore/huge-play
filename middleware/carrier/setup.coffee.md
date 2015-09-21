@@ -11,8 +11,9 @@ Create the proper profiles and ACLs
 
       cfg = @cfg
 
-      cfg.host = cfg.prov.get "host:#{cfg.hostname}"
-      sip_profiles = @cfg.host.sip_profiles ? {}
+      assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
+      cfg.host_data = cfg.prov.get "host:#{cfg.host}"
+      sip_profiles = @cfg.host_data.sip_profiles ? {}
 
       cfg.profiles = {}
       cfg.acls = {}
@@ -39,8 +40,9 @@ Server
 Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
     @server_pre = ->
-      @cfg.host = cfg.prov.get "host:#{cfg.hostname}"
-      @cfg.sip_profiles = @cfg.host.sip_profiles ? {}
+      assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
+      @cfg.host_data = cfg.prov.get "host:#{@cfg.host}"
+      @cfg.sip_profiles = @cfg.host_data.sip_profiles ? {}
 
     @include = ->
 
