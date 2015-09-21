@@ -50,6 +50,7 @@ If these variables are provided then we will directly translate (instead of usin
         [number,number_domain] = @session.e164_number.local_number.split '@'
         @session.number_domain = number_domain
         @destination = number
+        @session.number = yield @cfg.prov.get "number:#{@destination}@#{@session.number_domain}"
 
       debug 'OK'
       return
