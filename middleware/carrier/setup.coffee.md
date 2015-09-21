@@ -1,6 +1,7 @@
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
     debug = (require 'debug') @name
+    assert = require 'assert'
 
 Config
 ======
