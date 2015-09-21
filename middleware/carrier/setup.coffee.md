@@ -10,30 +10,28 @@ Config
 
 Create the proper profiles and ACLs
 
-      cfg = @cfg
-
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      cfg.host_data = cfg.prov.get "host:#{cfg.host}"
+      @cfg.host_data = @cfg.prov.get "host:#{@cfg.host}"
       sip_profiles = @cfg.host_data.sip_profiles ? {}
 
-      cfg.profiles = {}
-      cfg.acls = {}
+      @cfg.profiles = {}
+      @cfg.acls = {}
       for own name,profile of sip_profiles
         ingress = "ingress-#{name}"
         egress = "egress-#{name}"
 
-        cfg.profiles[ingress] =
+        @cfg.profiles[ingress] =
           sip_port: profile.ingress_sip_port
           sip_ip: profile.ingress_sip_ip
-          socket_port: cfg.socket_port ? 5702
+          socket_port: @cfg.socket_port ? 5702
 
-        cfg.profiles[egress] =
+        @cfg.profiles[egress] =
           sip_port: profile.egress_sip_port ? (profile.ingress_sip_port+10000)
           sip_ip: profile.egress_sip_ip ? profile.ingress_sip_ip
-          socket_port: cfg.socket_port ? 5702
+          socket_port: @cfg.socket_port ? 5702
 
-        cfg.acls[ingress] = profile.ingress_acl ? []
-        cfg.acls[egress] = profile.egress_acl ? []
+        @cfg.acls[ingress] = profile.ingress_acl ? []
+        @cfg.acls[egress] = profile.egress_acl ? []
 
 Server
 ======
