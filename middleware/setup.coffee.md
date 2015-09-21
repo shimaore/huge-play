@@ -8,7 +8,7 @@
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
-    @server_pre = ->
+    @server_pre = seem ->
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
