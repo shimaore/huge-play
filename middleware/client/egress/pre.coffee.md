@@ -10,6 +10,9 @@ First-line handler for outbound calls
 
       return unless @session.direction is 'egress'
 
+Endpoint
+--------
+
       @session.endpoint_name = @req.header 'X-CCNQ3-Endpoint'
       unless @session.endpoint_name?
         debug 'Missing endpoint_name'
@@ -19,12 +22,18 @@ First-line handler for outbound calls
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
 
+Outbound-route
+--------------
+
       @session.outbound_route = @session.endpoint.outbound_route
       unless @session.outbound_route?
         debug 'Missing outbound_route'
         return @respond '500 Endpoint has no outbound_route'
 
       debug 'outbound_route', @session.outbound_route
+
+Number-domain
+-------------
 
       number_domain = @req.header 'X-CCNQ3-Number-Domain'
       number_domain ?= @session.endpoint.number_domain
@@ -34,6 +43,9 @@ First-line handler for outbound calls
       @session.number_domain = number_domain
 
       debug 'number_domain', number_domain
+
+Source (calling) number
+-----------------------
 
       src_number = "#{@source}@#{number_domain}"
       @session.number = yield @cfg.prov.get "number:#{src_number}"
