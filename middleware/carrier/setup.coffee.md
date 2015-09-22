@@ -12,12 +12,19 @@ Config
 Create the proper profiles and ACLs
 
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = yield @cfg.prov.get "host:#{@cfg.host}"
-      sip_profiles = @cfg.sip_profiles ? @cfg.host_data?.sip_profiles ? {}
 
       @cfg.profiles = {}
       @cfg.acls = {}
-      for own name,profile of sip_profiles
+
+      @cfg.host_data = yield @cfg.prov
+        .get "host:#{@cfg.host}"
+        .catch (error) ->
+          debug "Host #{cfg.host}: #{error}"
+          {}
+
+      @cfg.sip_profiles ?= @cfg.host_data?.sip_profiles ? {}
+
+      for own name,profile of @cfg.sip_profiles
         ingress = "ingress-#{name}"
         egress = "egress-#{name}"
 
@@ -34,6 +41,8 @@ Create the proper profiles and ACLs
         @cfg.acls[ingress] = profile.ingress_acl ? []
         @cfg.acls[egress] = profile.egress_acl ? []
 
+      null
+
 Server
 ======
 
@@ -41,8 +50,13 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
     @server_pre = seem ->
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = yield @cfg.prov.get "host:#{@cfg.host}"
-      @cfg.sip_profiles = @cfg.sip_profiles ? @cfg.host_data?.sip_profiles ? {}
+      @cfg.host_data = yield @cfg.prov
+        .get "host:#{@cfg.host}"
+        .catch (error) ->
+          debug "Host #{cfg.host}: #{error}"
+          {}
+
+      @cfg.sip_profiles ?= @cfg.host_data?.sip_profiles ? {}
 
     @include = ->
 
