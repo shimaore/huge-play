@@ -16,12 +16,14 @@ Create the proper profiles and ACLs
 
       @cfg.host_data =
         if @cfg.host?
+          debug "Retrieving data for #{@cfg.host}"
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) ->
               debug "Host #{cfg.host}: #{error}"
               {}
         else
+          debug 'No cfg.host'
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
@@ -48,12 +50,14 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
     @server_pre = seem ->
       @cfg.host_data =
         if @cfg.host?
+          debug "Retrieving data for #{@cfg.host}"
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) ->
               debug "Host #{cfg.host}: #{error}"
               {}
         else
+          debug 'No cfg.host'
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
