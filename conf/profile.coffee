@@ -2,7 +2,7 @@
 pkg = require '../package.json'
 
 module.exports = renderable (o) ->
-  {profile,settings,param} = require 'acoustic-line'
+  {profile,settings,param} = this
   profile name:"#{pkg.name}-#{o.name}", ->
     settings ->
       param name:'user-agent-string', value:"#{pkg.name}-#{o.name}-#{o.sip_port}"

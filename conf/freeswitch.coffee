@@ -1,7 +1,7 @@
-{renderable} = require 'acoustic-line'
+{renderable} = L = require 'acoustic-line'
 
 module.exports = renderable (cfg) ->
-  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros} = require 'acoustic-line'
+  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros} = L
   name = cfg.name ? 'server'
   the_profiles = cfg.profiles ?
     sbc:
@@ -116,13 +116,13 @@ module.exports = renderable (cfg) ->
             # Ingress profile (carrier-side) is at port `sip_port`.
 
             q.name = q.context = "#{name}-ingress"
-            profile_module q
+            profile_module.call L, q
 
             # Egress profile (client-side) is at port 'sip_port+10000'.
 
             q.name = q.context = "#{name}-egress"
             q.sip_port = 10000 + p.sip_port
-            profile_module q
+            profile_module.call L, q
 
       configuration name:'httapi.conf', ->
         settings ->
