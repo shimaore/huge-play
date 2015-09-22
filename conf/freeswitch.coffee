@@ -116,12 +116,13 @@ module.exports = renderable (cfg) ->
             # Ingress profile (carrier-side) is at port `sip_port`.
 
             q.name = q.context = "#{name}-ingress"
+            q.sip_port = p.ingress_sip_port ? p.sip_port
             profile_module.call L, q
 
             # Egress profile (client-side) is at port 'sip_port+10000'.
 
             q.name = q.context = "#{name}-egress"
-            q.sip_port = 10000 + p.sip_port
+            q.sip_port = p.egress_sip_port ? 10000 + q.sip_port
             profile_module.call L, q
 
       configuration name:'httapi.conf', ->

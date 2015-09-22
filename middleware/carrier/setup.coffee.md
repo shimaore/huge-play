@@ -29,21 +29,14 @@ Create the proper profiles and ACLs
       debug 'Configuring SIP Profiles', @cfg.sip_profiles
 
       for own name,profile of @cfg.sip_profiles
-        ingress = "ingress-#{name}"
-        egress = "egress-#{name}"
-
-        @cfg.profiles[ingress] =
-          sip_port: profile.ingress_sip_port
-          sip_ip: profile.ingress_sip_ip
+        p =
+          local_ip: profile.ingress_sip_ip
           socket_port: @cfg.socket_port ? 5702
+        p[k] = v for own k,v of profile
+        @cfg.profiles[name] = p
 
-        @cfg.profiles[egress] =
-          sip_port: profile.egress_sip_port ? (profile.ingress_sip_port+10000)
-          sip_ip: profile.egress_sip_ip ? profile.ingress_sip_ip
-          socket_port: @cfg.socket_port ? 5702
-
-        @cfg.acls[ingress] = profile.ingress_acl ? []
-        @cfg.acls[egress] = profile.egress_acl ? []
+        @cfg.acls["#{name}-ingress"] = profile.ingress_acl ? []
+        @cfg.acls["#{name}-egress"] = profile.egress_acl ? []
 
       null
 
