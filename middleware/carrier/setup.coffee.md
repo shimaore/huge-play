@@ -22,7 +22,9 @@ Create the proper profiles and ACLs
           debug "Host #{cfg.host}: #{error}"
           {}
 
-      @cfg.sip_profiles ?= @cfg.host_data?.sip_profiles ? {}
+      @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
+
+      debug 'Configuring SIP Profiles', @cfg.sip_profiles
 
       for own name,profile of @cfg.sip_profiles
         ingress = "ingress-#{name}"
@@ -56,7 +58,10 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
           debug "Host #{cfg.host}: #{error}"
           {}
 
-      @cfg.sip_profiles ?= @cfg.host_data?.sip_profiles ? {}
+      @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
+
+      debug 'Configuring SIP Profiles', @cfg.sip_profiles
+      null
 
     @include = ->
 
