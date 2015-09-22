@@ -1,8 +1,9 @@
-    @include = ->
+    seem = require 'seem'
+    @include = seem ->
       return unless @session.direction is 'egress'
       ccnq_username = @req.header 'CCNQ3-Registrant-Username'
 
-      @set
+      yield @set
         ccnq_direction: @session.direction
         ccnq_profile: @session.profile
         ccnq_from_e164: @source
@@ -17,8 +18,10 @@
         ccnq_username: ccnq_username
         ccnq_account: url.parse(@req.header 'p-charge-info').auth
 
-      @unset 'sip_h_p-charge-info'
+      yield @unset 'sip_h_p-charge-info'
 
-      @export
+      yield @export
         sip_wait_for_aleg_ack: true
         t38_passthru: true
+
+      return

@@ -47,3 +47,5 @@
         respond: (response) ->
           @action 'respond', response
       }
+
+      return

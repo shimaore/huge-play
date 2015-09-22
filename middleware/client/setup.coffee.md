@@ -16,3 +16,5 @@
         direction: @session.direction
         profile: @session.profile
         sip_profile: @session.sip_profile
+
+      return

@@ -83,3 +83,5 @@ First start with the same code as client-side.
         direction: @session.direction
         profile: @session.profile
         sip_profile: @session.sip_profile
+
+      return
