@@ -11,15 +11,17 @@ Config
 
 Create the proper profiles and ACLs
 
-      assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-
       @cfg.profiles = {}
       @cfg.acls = {}
 
-      @cfg.host_data = yield @cfg.prov
-        .get "host:#{@cfg.host}"
-        .catch (error) ->
-          debug "Host #{cfg.host}: #{error}"
+      @cfg.host_data =
+        if @cfg.host?
+          yield @cfg.prov
+            .get "host:#{@cfg.host}"
+            .catch (error) ->
+              debug "Host #{cfg.host}: #{error}"
+              {}
+        else
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
@@ -51,11 +53,14 @@ Server
 Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
     @server_pre = seem ->
-      assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = yield @cfg.prov
-        .get "host:#{@cfg.host}"
-        .catch (error) ->
-          debug "Host #{cfg.host}: #{error}"
+      @cfg.host_data =
+        if @cfg.host?
+          yield @cfg.prov
+            .get "host:#{@cfg.host}"
+            .catch (error) ->
+              debug "Host #{cfg.host}: #{error}"
+              {}
+        else
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
