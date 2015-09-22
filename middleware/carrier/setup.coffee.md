@@ -1,17 +1,18 @@
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
     debug = (require 'debug') @name
+    seem = require 'seem'
     assert = require 'assert'
 
 Config
 ======
 
-    @config = ->
+    @config = seem ->
 
 Create the proper profiles and ACLs
 
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = @cfg.prov.get "host:#{@cfg.host}"
+      @cfg.host_data = yield @cfg.prov.get "host:#{@cfg.host}"
       sip_profiles = @cfg.host_data.sip_profiles ? {}
 
       @cfg.profiles = {}
@@ -38,9 +39,9 @@ Server
 
 Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
-    @server_pre = ->
+    @server_pre = seem ->
       assert @cfg.host?, 'Missing cfg.host, cannot retrieve sip_profiles.'
-      @cfg.host_data = @cfg.prov.get "host:#{@cfg.host}"
+      @cfg.host_data = yield @cfg.prov.get "host:#{@cfg.host}"
       @cfg.sip_profiles = @cfg.host_data.sip_profiles ? {}
 
     @include = ->
