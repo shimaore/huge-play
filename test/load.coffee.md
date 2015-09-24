@@ -14,6 +14,7 @@
           'middleware/client/ingress/privacy.coffee.md'
           'middleware/client/ingress/france.coffee.md'
           'middleware/client/ingress/pre.coffee.md'
+          'middleware/client/ingress/send.coffee.md'
 
           'middleware/carrier/setup.coffee.md'
           'middleware/carrier/egress/pre.coffee.md'
