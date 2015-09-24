@@ -52,5 +52,10 @@ If these variables are provided then we will directly translate (instead of usin
         @destination = number
         @session.number = yield @cfg.prov.get "number:#{@destination}@#{@session.number_domain}"
 
+      if @session.e164_number.voicemail_main?
+        @session.direction = 'voicemail'
+        @session.destination = 'main'
+        @session.language = @session.e164_number.language
+
       debug 'OK'
       return
