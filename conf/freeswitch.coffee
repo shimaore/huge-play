@@ -109,7 +109,7 @@ module.exports = renderable (cfg) ->
             p.local_ip ?= 'auto'
             p.inbound_codec ?= 'PCMA'
             p.outbound_codec ?= 'PCMA'
-            p.acl ?= if cfg.acl_per_profile then name else 'default'
+            p.acl ?= 'default'
 
             q = {}
             q[k] = v for own k,v of p
@@ -118,12 +118,14 @@ module.exports = renderable (cfg) ->
 
             q.name = q.context = "#{name}-ingress"
             q.sip_port = p.ingress_sip_port ? p.sip_port
+            q.acl = q.name if cfg.acl_per_profile
             profile_module.call L, q
 
             # Egress profile (client-side) is at port 'sip_port+10000'.
 
             q.name = q.context = "#{name}-egress"
             q.sip_port = p.egress_sip_port ? 10000 + q.sip_port
+            q.acl = q.name if cfg.acl_per_profile
             profile_module.call L, q
 
       configuration name:'httapi.conf', ->
