@@ -1,4 +1,7 @@
     seem = require 'seem'
+    url = require 'url'
+    pkg = require '../../../package.json'
+    @name = "#{pkg.name}:middleware:carrier:egress:pre"
     @include = seem ->
       return unless @session.direction is 'egress'
       ccnq_username = @req.header 'CCNQ3-Registrant-Username'
