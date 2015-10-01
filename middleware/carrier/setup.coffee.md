@@ -33,7 +33,7 @@ Create the proper profiles and ACLs
       for own name,profile of @cfg.sip_profiles
         p =
           local_ip: profile.ingress_sip_ip
-          socket_port: @cfg.socket_port ? 5702
+          socket_port: @cfg.port ? 5702
         p[k] = v for own k,v of profile
         @cfg.profiles[name] = p
 
