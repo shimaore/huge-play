@@ -64,7 +64,7 @@ module.exports = renderable (o) ->
       param name:'rtp-timeout-sec', value:300
       param name:'rtp-hold-timeout-sec', value:1800
 
-      param name:'enable-soa', value:'true'
+      param name:'enable-soa', value:true
 
       # `true` is the `sbc-media.include` version of ccnq3
       # default is the `sbc-nomedia.include` version of ccnq3
