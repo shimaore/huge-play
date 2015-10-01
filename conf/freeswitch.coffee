@@ -109,6 +109,7 @@ module.exports = renderable (cfg) ->
             p.local_ip ?= 'auto'
             p.inbound_codec ?= 'PCMA'
             p.outbound_codec ?= 'PCMA'
+            p.acl ?= 'default'
 
             q = {}
             q[k] = v for own k,v of p

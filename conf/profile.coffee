@@ -16,7 +16,7 @@ module.exports = renderable (o) ->
       param name:'sip-port', value:o.sip_port
       param name:'bind-params', value:'transport=udp' # tcp
 
-      param name:'apply-inbound-acl', value:'default'
+      param name:'apply-inbound-acl', value:o.acl
       param name:'disable-transfer', value:true
       param name:'enable-3pcc', value:false
 
