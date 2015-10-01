@@ -19,7 +19,7 @@
         ccnq_extra: @req.header 'X-CCNQ3-Extra'
         ccnq_attrs: @req.header 'X-CCNQ3-Attrs'
         ccnq_username: ccnq_username
-        ccnq_account: url.parse(@req.header 'p-charge-info').auth
+        ccnq_account: url.parse(@req.header 'P-Charge-Info').auth
 
       yield @unset 'sip_h_p-charge-info'
 
