@@ -20,7 +20,7 @@
     "bumpy-lawyer": "^1.0.8",
     "debug": "^2.2.0",
     "nimble-direction": "^2.2.0",
-    "seem": "^1.0.0"
+    "seem": "^1.1.0"
   },
   "devDependencies": {
     "chai": "^3.2.0",
