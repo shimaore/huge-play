@@ -32,6 +32,7 @@ Now, we have two cases:
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 
       if @session.e164_number.fs_variables?
+        debug 'Using fs_variables'
         yield @set @session.e164_number.fs_variables
 
 Global number provides inbound routing
@@ -42,6 +43,7 @@ These are used e.g. for Centrex.
 If these variables are provided then we will directly translate (instead of using the national modules).
 
       if @session.e164_number.local_number?
+        debug 'Using local_number'
         assert @session.e164_number.dialplan?, "Missing dialplan for number #{@destination}"
         assert @session.e164_number.country?, "Missing country for number #{@destination}"
 
@@ -52,7 +54,8 @@ If these variables are provided then we will directly translate (instead of usin
         @destination = number
         @session.number = yield @cfg.prov.get "number:#{@destination}@#{@session.number_domain}"
 
-      if @session.e164_number.voicemail_main?
+      if @session.e164_number.voicemail_main
+        debug 'Using voicemail_main'
         @session.direction = 'voicemail'
         @session.destination = 'main'
         @session.language = @session.e164_number.language
