@@ -57,7 +57,7 @@ If these variables are provided then we will directly translate (instead of usin
       if @session.e164_number.voicemail_main
         debug 'Using voicemail_main'
         @session.direction = 'voicemail'
-        @session.destination = 'main'
+        @destination = 'main'
         @session.language = @session.e164_number.language
 
       debug 'OK'
