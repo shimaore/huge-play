@@ -30,11 +30,15 @@ One of the national translations should have mapped us to a different dialplan (
 
 Call rejection: reject anonymous caller
 
-      ###
       if @session.number.reject_anonymous
-        if is_privacy 'id'
-          return @respond '603 Decline (anonymous)'
-      ###
+        if @session.caller_privacy
+          # return @respond '603 Decline (anonymous)'
+          yield @action 'pre_answer'
+
+`provisioning` is a `nimble-direction` convention.
+
+          yield @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
+          return @action 'hangup'
 
       if @session.number.use_blacklist or @session.number.use_whitelist
         pid = @req.header 'P-Asserted-Identity'

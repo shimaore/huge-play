@@ -23,5 +23,7 @@ Privacy: id or other requested privacy
           effective_caller_id_number: 'anonymous'
           origination_privacy: 'screen+hide_name+hide_number'
 
+        @session.caller_privacy = true
+
       debug 'OK'
       return
