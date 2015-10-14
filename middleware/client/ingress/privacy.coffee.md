@@ -23,6 +23,9 @@ Privacy: id or other requested privacy
           effective_caller_id_number: 'anonymous'
           origination_privacy: 'screen+hide_name+hide_number'
 
+Source anonymous, either because of Privacy: id (above) or already set.
+
+      if @source is 'anonymous'
         @session.caller_privacy = true
 
       debug 'OK'
