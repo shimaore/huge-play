@@ -33,7 +33,7 @@ Call rejection: reject anonymous caller
       if @session.number.reject_anonymous
         if @session.caller_privacy
           # return @respond '603 Decline (anonymous)'
-          yield @action 'pre_answer'
+          yield @action 'answer'
 
 `provisioning` is a `nimble-direction` convention.
 
