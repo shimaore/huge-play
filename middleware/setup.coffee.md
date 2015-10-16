@@ -4,6 +4,9 @@
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
 
+    @web = ->
+      @cfg.versions[pkg.name] = pkg.version
+
     @config = seem ->
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
