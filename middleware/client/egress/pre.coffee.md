@@ -3,7 +3,7 @@ First-line handler for outbound calls
 
     seem = require 'seem'
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}/middleware/client/egress/pre"
+    @name = "#{pkg.name}:middleware:client:egress:pre"
     debug = (require 'debug') @name
 
     @include = seem ->
