@@ -6,7 +6,7 @@ module.exports = renderable (cfg) ->
   the_profiles = cfg.profiles ?
     sbc:
       sip_port: 5080
-      socket_port: 5721
+      socket_port: 5721 # Outbound-Socket port
   modules_to_load = [
     'mod_logfile'
     'mod_event_socket'
@@ -63,6 +63,7 @@ module.exports = renderable (cfg) ->
         settings ->
           param name:'nat-map', value:false
           param name:'listen-ip', value:'127.0.0.1'
+          # Inbound-Socket port
           socket_port = cfg.socket_port ? 5722
           param name:'listen-port', value: socket_port
           param name:'password', value:'ClueCon'
@@ -102,6 +103,7 @@ module.exports = renderable (cfg) ->
         profiles ->
           profile_module = cfg.profile_module ? require './profile'
           for name, p of the_profiles
+            # Note: p.local_ip is defaulted by huge-play:middleware:carrier:setup to p.ingress_sip_ip
             p.timer_t1 ?= 250
             p.timer_t4 ?= 5000
             p.timer_t2 ?= 4000
@@ -146,6 +148,7 @@ module.exports = renderable (cfg) ->
       for name, p of the_profiles
         for direction in ['ingress', 'egress']
           context name:"#{name}-#{direction}", ->
+            # Note: p.socket_port is defaulted by huge-play:middleware:carrier:setup to cfg.port ? 5702
             extension name:"socket", ->
               condition field:'destination_number', expression:'^.+$', ->
                 action application:'multiset', data:"direction=#{direction} profile=#{name}"
