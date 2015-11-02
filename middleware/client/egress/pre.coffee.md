@@ -55,22 +55,49 @@ Source (calling) number
         outbound_route: @session.outbound_route
         number_domain: @session.number_domain
 
-Upcoming changes
+Location
+--------
 
-      ###
-      if @session.endpoint.privacy
-        Privacy: id
-      if @session.number.privacy
-        Privacy: id
-      if @dession.endpoint.asserted_number
-        P-Asserted-Identity: <#{@session.endpoint_data.asserted_number}>@#{from_domain}
-      if @dession.number.asserted_number
-        P-Asserted-Identity: <#{@session.endpoint_data.asserted_number}>@#{from_domain}
-      ###
+This is needed for emergency call routing.
+
+      location = @session.number.location
+      location ?= @session.endpoint.location
+      location ?= ''
+      yield @set
+        'sip_h_X-CCNQ3-Location': location
+
+Privacy
+-------
+
+Enforce configurable privacy settings.
+
+      privacy = @session.number.privacy
+      privacy = @session.endpoint.privacy
+      if privacy
+        yield @action 'privacy', 'number'
+      else
+        yield @action 'privacy', 'none'
+
+Asserted-Number
+---------------
+
+Enforce configurable Caller-ID. (Used in particular for ported-in numbers.)
+
+      asserted = @session.number.asserted_number ? @session.endpoint.asserted_number
+      if asserted?
+        hostname = @cfg.hostname ? os.hostname()
+        yield @set "sip_h_P-Asserted-Identity: <#{asserted}>@#{hostname}"
+      else
+        yield @unset "sip_h_P-Asserted-Identity"
+
+Check from
+----------
+
+Optionally enforce that the calling number originates from the associated endpoint (useful e.g. to prevent invalid caller-id from static endpoints).
 
       if @session.endpoint.check_from
         if @session.number.endpoint isnt @session.endpoint_name
           debug 'From Username is not listed'
-          @respond '403 From Username is not listed'
+          return @respond '403 From Username is not listed'
 
       null

@@ -4,12 +4,17 @@
     @name = "#{pkg.name}:middleware:client:ingress:post"
     debug = (require 'debug') @name
     url = require 'url'
+
+Call-Handler
+============
+
     @include = seem ->
 
       return unless @session.direction is 'ingress'
 
       debug 'Ready',
         dialplan: @session.dialplan
+        destination: @destination
         number_domain: @session.number_domain
 
       assert @session.number_domain?, 'Missing number_domain'
@@ -52,39 +57,32 @@ Call rejection: reject anonymous caller
           unless @session.number.use_whitelist and list.whitelist
             return @repond '486 Decline (not whitelisted)' # was 603
 
+So far we have no reason to reject the call.
 
-      ###
-      FIXME
+      set_params.call this
 
-      dlg_timeout = @session.number.dialog_timer
-      fr_inv_timeout = @session.number.inv_timer
-      fr_timeout = @session.number.timer
+      {cfa,cfa_enabled,cfb,cfda,cfnr} = @session.number
 
-      {cfa,cfb,cfda,cfnr} = @session.number
+      if cfa? and cfa_enabled isnt false
+        @session.uris = [cfa]
+        return
 
-      if cfb or cfda
-        @action FIXME, '180 Simulated Ringing in case of forwarding'
+      if cfb? or cfda?
+        @action 'pre_answer', '180 Simulated Ringing in case of forwarding'
 
-      if cfa
-        append_to_reply 'Diversion: $ru;reason=unconditional'
-        append_to_reply 'Contact: #{cfa}'
-        FIXME: should call the cfa, instead
-        return @respond '302 Call Forward All'
+`set_params`
+============
 
-      / FIXME
+Non-call-handling-specific parameters (these are set on all calls independently of call treatment).
 
-      FIXME!!
+    set_params = seem ->
+      @session.endpoint_data = yield @cfg.prov.get("endpoint:#{@session.number_data.endpoint}").catch -> null
 
-      if (receive response for cfnr)
-        append_to_reply 'Diversion: $ru;reason=unavailable'
-        append_to_reply 'Contact: #{cfnr}'
-        return @respond '302 Not Registered'
+      dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
+      fr_inv_timeout = @session.number.inv_timer ? 90
+      fr_timeout = @session.number.timer ? 2 # Unused
 
-
-
-      # @session.endpoint_data = yield @cfg.prov.get "endpoint:#{@session.number_data.endpoint}"
-
-      ###
+      yield @action 'sched_hangup', "+#{dlg_timeout}"
 
       yield @set
 
@@ -102,13 +100,22 @@ Transfers execute in the context defined in ../conf/refer.
 
 Other SIP parameters
 
+[progress timeout = PDD](https://wiki.freeswitch.org/wiki/Channel_Variables#progress_timeout)
+
           progress_timeout:18
+
+[call timeout = useless, use originate timeout or leg timeout](https://wiki.freeswitch.org/wiki/Channel_Variables#call_timeout)
+
           call_timeout:300
+
+[originate timeout](https://wiki.freeswitch.org/wiki/Channel_Variables#originate_timeout)
+
+          originate_timeout:fr_inv_timeout
+
           sip_contact_user: @session.ccnq_from_e164
           effective_caller_id_number: @source
           sip_cid_type: 'pid'
           'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
-
 
 These should not be forwarded towards customers.
 
