@@ -315,132 +315,132 @@
         </input>
         <input pattern="^[aA]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/97.wav"/>
+        <action function="play-file" data="ascii/97.wav"/>
         </match>
         </input>
         <input pattern="^[bB]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/98.wav"/>
+        <action function="play-file" data="ascii/98.wav"/>
         </match>
         </input>
         <input pattern="^[cC]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/99.wav"/>
+        <action function="play-file" data="ascii/99.wav"/>
         </match>
         </input>
         <input pattern="^[dD]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/100.wav"/>
+        <action function="play-file" data="ascii/100.wav"/>
         </match>
         </input>
         <input pattern="^[eE]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/101.wav"/>
+        <action function="play-file" data="ascii/101.wav"/>
         </match>
         </input>
         <input pattern="^[fF]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/102.wav"/>
+        <action function="play-file" data="ascii/102.wav"/>
         </match>
         </input>
         <input pattern="^[gG]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/103.wav"/>
+        <action function="play-file" data="ascii/103.wav"/>
         </match>
         </input>
         <input pattern="^[hH]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/104.wav"/>
+        <action function="play-file" data="ascii/104.wav"/>
         </match>
         </input>
         <input pattern="^[iI]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/105.wav"/>
+        <action function="play-file" data="ascii/105.wav"/>
         </match>
         </input>
         <input pattern="^[jJ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/106.wav"/>
+        <action function="play-file" data="ascii/106.wav"/>
         </match>
         </input>
         <input pattern="^[kK]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/107.wav"/>
+        <action function="play-file" data="ascii/107.wav"/>
         </match>
         </input>
         <input pattern="^[lL]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/108.wav"/>
+        <action function="play-file" data="ascii/108.wav"/>
         </match>
         </input>
         <input pattern="^[mM]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/109.wav"/>
+        <action function="play-file" data="ascii/109.wav"/>
         </match>
         </input>
         <input pattern="^[nN]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/110.wav"/>
+        <action function="play-file" data="ascii/110.wav"/>
         </match>
         </input>
         <input pattern="^[oO]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/111.wav"/>
+        <action function="play-file" data="ascii/111.wav"/>
         </match>
         </input>
         <input pattern="^[pP]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/112.wav"/>
+        <action function="play-file" data="ascii/112.wav"/>
         </match>
         </input>
         <input pattern="^[qQ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/113.wav"/>
+        <action function="play-file" data="ascii/113.wav"/>
         </match>
         </input>
         <input pattern="^[rR]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/114.wav"/>
+        <action function="play-file" data="ascii/114.wav"/>
         </match>
         </input>
         <input pattern="^[sS]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/115.wav"/>
+        <action function="play-file" data="ascii/115.wav"/>
         </match>
         </input>
         <input pattern="^[tT]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/116.wav"/>
+        <action function="play-file" data="ascii/116.wav"/>
         </match>
         </input>
         <input pattern="^[uU]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/117.wav"/>
+        <action function="play-file" data="ascii/117.wav"/>
         </match>
         </input>
         <input pattern="^[vV]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/118.wav"/>
+        <action function="play-file" data="ascii/118.wav"/>
         </match>
         </input>
         <input pattern="^[wW]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/119.wav"/>
+        <action function="play-file" data="ascii/119.wav"/>
         </match>
         </input>
         <input pattern="^[xX]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/120.wav"/>
+        <action function="play-file" data="ascii/120.wav"/>
         </match>
         </input>
         <input pattern="^[yY]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/121.wav"/>
+        <action function="play-file" data="ascii/121.wav"/>
         </match>
         </input>
         <input pattern="^[zZ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/122.wav"/>
+        <action function="play-file" data="ascii/122.wav"/>
         </match>
         </input>
         </macro>
@@ -541,6 +541,11 @@
         <input pattern="^(million|thousand|hundred)$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/h-$1.wav"/>
+        </match>
+        </input>
+        <input pattern="^0+f?$" break_on_match="true">
+        <match>
+        <action function="play-file" data="digits/0.wav"/>
         </match>
         </input>
         <input pattern="^0+(.*)$" break_on_match="true">
@@ -702,7 +707,7 @@
         <action function="phrase" data="$1 point $2" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^0f?$" break_on_match="true">
+        <input pattern="^0+f?$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/0.wav"/>
         </match>
@@ -772,43 +777,43 @@
         <action function="play-file" data="digits/$1.wav"/>
         </match>
         </input>
-        <input pattern="^([234568])([2-9])" break_on_match="true">
+        <input pattern="^([234568])([2-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="digits/$2.wav"/>
         </match>
         </input>
-        <input pattern="^([234568])1f" break_on_match="true">
+        <input pattern="^([234568])1f$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="currency/and.wav"/>
         <action function="play-file" data="digits/1f.wav"/>
         </match>
         </input>
-        <input pattern="^(11|21|71|91)" break_on_match="true">
+        <input pattern="^(21|71|91)f?$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/$1.wav"/>
         </match>
         </input>
-        <input pattern="^([23456])1" break_on_match="true">
+        <input pattern="^([23456])1$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="digits/x1.wav"/>
         </match>
         </input>
-        <input pattern="^8(1.*)$" break_on_match="true">
+        <input pattern="^81$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/80.wav"/>
-        <action function="phrase" data="$1" phrase="say-number"/>
+        <action function="phrase" data="1" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^7([02-9])" break_on_match="true">
+        <input pattern="^7([02-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="60" phrase="say-number"/>
         <action function="phrase" data="1$1" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^9([0-9])" break_on_match="true">
+        <input pattern="^9([0-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="80" phrase="say-number"/>
         <action function="phrase" data="1$1" phrase="say-number"/>
@@ -925,7 +930,7 @@
         <action function="phrase" data="$1" phrase="say-currency"/>
         </match>
         </input>
-        <input pattern="^0(.*)$" break_on_match="true">
+        <input pattern="^0+(.+)$" break_on_match="true">
         <match>
         <action function="phrase" data="$1" phrase="say-number"/>
         </match>
@@ -1363,132 +1368,132 @@
         </input>
         <input pattern="^[aA]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/97.wav"/>
+        <action function="play-file" data="ascii/97.wav"/>
         </match>
         </input>
         <input pattern="^[bB]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/98.wav"/>
+        <action function="play-file" data="ascii/98.wav"/>
         </match>
         </input>
         <input pattern="^[cC]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/99.wav"/>
+        <action function="play-file" data="ascii/99.wav"/>
         </match>
         </input>
         <input pattern="^[dD]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/100.wav"/>
+        <action function="play-file" data="ascii/100.wav"/>
         </match>
         </input>
         <input pattern="^[eE]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/101.wav"/>
+        <action function="play-file" data="ascii/101.wav"/>
         </match>
         </input>
         <input pattern="^[fF]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/102.wav"/>
+        <action function="play-file" data="ascii/102.wav"/>
         </match>
         </input>
         <input pattern="^[gG]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/103.wav"/>
+        <action function="play-file" data="ascii/103.wav"/>
         </match>
         </input>
         <input pattern="^[hH]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/104.wav"/>
+        <action function="play-file" data="ascii/104.wav"/>
         </match>
         </input>
         <input pattern="^[iI]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/105.wav"/>
+        <action function="play-file" data="ascii/105.wav"/>
         </match>
         </input>
         <input pattern="^[jJ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/106.wav"/>
+        <action function="play-file" data="ascii/106.wav"/>
         </match>
         </input>
         <input pattern="^[kK]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/107.wav"/>
+        <action function="play-file" data="ascii/107.wav"/>
         </match>
         </input>
         <input pattern="^[lL]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/108.wav"/>
+        <action function="play-file" data="ascii/108.wav"/>
         </match>
         </input>
         <input pattern="^[mM]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/109.wav"/>
+        <action function="play-file" data="ascii/109.wav"/>
         </match>
         </input>
         <input pattern="^[nN]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/110.wav"/>
+        <action function="play-file" data="ascii/110.wav"/>
         </match>
         </input>
         <input pattern="^[oO]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/111.wav"/>
+        <action function="play-file" data="ascii/111.wav"/>
         </match>
         </input>
         <input pattern="^[pP]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/112.wav"/>
+        <action function="play-file" data="ascii/112.wav"/>
         </match>
         </input>
         <input pattern="^[qQ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/113.wav"/>
+        <action function="play-file" data="ascii/113.wav"/>
         </match>
         </input>
         <input pattern="^[rR]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/114.wav"/>
+        <action function="play-file" data="ascii/114.wav"/>
         </match>
         </input>
         <input pattern="^[sS]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/115.wav"/>
+        <action function="play-file" data="ascii/115.wav"/>
         </match>
         </input>
         <input pattern="^[tT]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/116.wav"/>
+        <action function="play-file" data="ascii/116.wav"/>
         </match>
         </input>
         <input pattern="^[uU]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/117.wav"/>
+        <action function="play-file" data="ascii/117.wav"/>
         </match>
         </input>
         <input pattern="^[vV]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/118.wav"/>
+        <action function="play-file" data="ascii/118.wav"/>
         </match>
         </input>
         <input pattern="^[wW]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/119.wav"/>
+        <action function="play-file" data="ascii/119.wav"/>
         </match>
         </input>
         <input pattern="^[xX]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/120.wav"/>
+        <action function="play-file" data="ascii/120.wav"/>
         </match>
         </input>
         <input pattern="^[yY]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/121.wav"/>
+        <action function="play-file" data="ascii/121.wav"/>
         </match>
         </input>
         <input pattern="^[zZ]$" break_on_match="true">
         <match>
-        <action function="play-file" data="phonetic-ascii/122.wav"/>
+        <action function="play-file" data="ascii/122.wav"/>
         </match>
         </input>
         </macro>
@@ -1589,6 +1594,11 @@
         <input pattern="^(million|thousand|hundred)$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/h-$1.wav"/>
+        </match>
+        </input>
+        <input pattern="^0+f?$" break_on_match="true">
+        <match>
+        <action function="play-file" data="digits/0.wav"/>
         </match>
         </input>
         <input pattern="^0+(.*)$" break_on_match="true">
@@ -1750,7 +1760,7 @@
         <action function="phrase" data="$1 point $2" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^0f?$" break_on_match="true">
+        <input pattern="^0+f?$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/0.wav"/>
         </match>
@@ -1820,43 +1830,43 @@
         <action function="play-file" data="digits/$1.wav"/>
         </match>
         </input>
-        <input pattern="^([234568])([2-9])" break_on_match="true">
+        <input pattern="^([234568])([2-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="digits/$2.wav"/>
         </match>
         </input>
-        <input pattern="^([234568])1f" break_on_match="true">
+        <input pattern="^([234568])1f$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="currency/and.wav"/>
         <action function="play-file" data="digits/1f.wav"/>
         </match>
         </input>
-        <input pattern="^(11|21|71|91)" break_on_match="true">
+        <input pattern="^(21|71|91)f?$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/$1.wav"/>
         </match>
         </input>
-        <input pattern="^([23456])1" break_on_match="true">
+        <input pattern="^([23456])1$" break_on_match="true">
         <match>
         <action function="phrase" data="$1_0" phrase="say-number"/>
         <action function="play-file" data="digits/x1.wav"/>
         </match>
         </input>
-        <input pattern="^8(1.*)$" break_on_match="true">
+        <input pattern="^81$" break_on_match="true">
         <match>
         <action function="play-file" data="digits/80.wav"/>
-        <action function="phrase" data="$1" phrase="say-number"/>
+        <action function="phrase" data="1" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^7([02-9])" break_on_match="true">
+        <input pattern="^7([02-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="60" phrase="say-number"/>
         <action function="phrase" data="1$1" phrase="say-number"/>
         </match>
         </input>
-        <input pattern="^9([0-9])" break_on_match="true">
+        <input pattern="^9([0-9])f?$" break_on_match="true">
         <match>
         <action function="phrase" data="80" phrase="say-number"/>
         <action function="phrase" data="1$1" phrase="say-number"/>
@@ -1973,7 +1983,7 @@
         <action function="phrase" data="$1" phrase="say-currency"/>
         </match>
         </input>
-        <input pattern="^0(.*)$" break_on_match="true">
+        <input pattern="^0+(.+)$" break_on_match="true">
         <match>
         <action function="phrase" data="$1" phrase="say-number"/>
         </match>
@@ -2376,5 +2386,8 @@
         </document>
 
       '''.replace /\n */g, '\n'
+
+      # (require 'fs').writeFileSync '/tmp/config', config, 'utf-8'
+      # (require 'fs').writeFileSync '/tmp/expected_config', expected_config, 'utf-8'
 
       config.should.equal expected_config
