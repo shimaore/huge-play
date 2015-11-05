@@ -76,6 +76,8 @@ So far we have no reason to reject the call.
 Non-call-handling-specific parameters (these are set on all calls independently of call treatment).
 
     set_params = seem ->
+      debug 'set_params'
+
       @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 
       dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
@@ -131,6 +133,8 @@ These should not be forwarded towards customers.
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
+        'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
+        'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
 
       debug 'OK'
       return
