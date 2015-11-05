@@ -59,7 +59,7 @@ Call rejection: reject anonymous caller
 
 So far we have no reason to reject the call.
 
-      set_params.call this
+      yield set_params.call this
 
       {cfa,cfa_enabled,cfb,cfda,cfnr} = @session.number
 
