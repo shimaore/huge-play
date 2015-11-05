@@ -76,7 +76,7 @@ So far we have no reason to reject the call.
 Non-call-handling-specific parameters (these are set on all calls independently of call treatment).
 
     set_params = seem ->
-      @session.endpoint_data = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
+      @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 
       dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
       fr_inv_timeout = @session.number.inv_timer ? 90

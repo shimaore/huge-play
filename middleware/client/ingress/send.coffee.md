@@ -85,11 +85,11 @@ OpenSIPS marker for not registered
 Try static routing on 604 without CFNR (or CFNR already attempted)
 
         else
-          data = @session.endpoint_data
-          if not data?
+          endpoint = @session.endpoint
+          if not endpoint?
             return @respond '500 Endpoint Error'
 
-          domain = data?.user_srv ? data?.user_ip
+          domain = endpoint?.user_srv ? endpoint?.user_ip
 
 This will set the RURI and the To field. Notice that the RURI is actually `sip_invite_req_uri`, while the To field is `sofia/.../<To-field>`
 
@@ -102,7 +102,7 @@ Alternatives for routing:
 - `;fs_path=`
 
           @session.parameters =
-            sip_network_destination: data.endpoint
+            sip_network_destination: endpoint.endpoint
           return send.call this
 
 Busy
