@@ -64,15 +64,49 @@ Post-attempt handling
 
 Retrieve the FreeSwitch Cause Code description, and the SIP error code.
 
-      cause = data?.variable_last_bridge_hangup_cause ? data?.variable_originate_disposition
-      code = data?.variable_sip_term_status
+### last bridge hangup cause
+
+For example: `NORMAL_CLEARING` (answer+bridge), `NORMAL_CALL_CLEARING` (bridge, call is over)
+
+      cause = data?.variable_last_bridge_hangup_cause
+
+Note: there is also `variable_bridge_hangup_cause`
+
+### originate disposition
+
+For example: `SUCCESS`
+
+      cause ?= data?.variable_originate_disposition
+
+Note: also `variable_endpoint_disposition` (`ANSWER`), `variable_DIALSTATUS` (`SUCCESS`)
+
+### last bridge proto-specific hangup cause
+
+For example: `sip:200` → `200`
+
+      code = data?.variable_last_bridge_proto_specific_hangup_cause?.match(/^sip:(\d+)$/)?[1]
+
+### sip term status
+
+For example: `200`
+
+      code ?= data?.variable_sip_term_status
+
       debug 'Outcome', {cause,code}
+
+Success
+-------
 
 No further processing in case of success.
 
-      if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS']
+      if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
         debug "Successful call when routing #{@destination} through #{sofia.join ','}"
         return
+
+Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).
+
+Not Registered
+--------------
 
 OpenSIPS marker for not registered
 
@@ -106,6 +140,7 @@ Alternatives for routing:
           return send.call this
 
 Busy
+----
 
       if code is '486' and not @session.tried_cfb and cfb = @session.number.cfb
         @session.tried_cfb = true
@@ -113,6 +148,7 @@ Busy
         return send.call this
 
 All other codes
+---------------
 
       debug "Call failed: #{cause}/#{code} when routing #{@destination} through #{sofia.join ','}"
 
