@@ -55,7 +55,7 @@ Call rejection: reject anonymous caller
           if @session.number.use_blacklist and list.blacklist
             return @respond '486 Decline (blacklisted)' # was 603
           unless @session.number.use_whitelist and list.whitelist
-            return @repond '486 Decline (not whitelisted)' # was 603
+            return @respond '486 Decline (not whitelisted)' # was 603
 
 So far we have no reason to reject the call.
 
