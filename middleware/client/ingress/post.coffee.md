@@ -84,6 +84,10 @@ Non-call-handling-specific parameters (these are set on all calls independently 
       fr_inv_timeout = @session.number.inv_timer ? 90
       fr_timeout = @session.number.timer ? 2 # Unused
 
+Maximal call duration
+
+Note: tough-rate uses `dialog_timeout` for this (which isn't on the wiki).
+
       yield @action 'sched_hangup', "+#{dlg_timeout}"
 
       yield @set
@@ -103,6 +107,7 @@ Transfers execute in the context defined in ../conf/refer.
 Other SIP parameters
 
 [progress timeout = PDD](https://wiki.freeswitch.org/wiki/Channel_Variables#progress_timeout)
+counts from the time the INVITE is placed until a progress indication (e.g. 180, 183) is received. Controls Post-Dial-Delay on this leg.
 
           progress_timeout:18
 
@@ -111,6 +116,7 @@ Other SIP parameters
           call_timeout:300
 
 [originate timeout](https://wiki.freeswitch.org/wiki/Channel_Variables#originate_timeout)
+Note: tough-rate uses `answer_timeout`, the wiki mentions `bridge_answer_timeout`.
 
           originate_timeout:fr_inv_timeout
 

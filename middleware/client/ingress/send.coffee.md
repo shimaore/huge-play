@@ -51,6 +51,7 @@ Send the call(s)
 
       yield @set
         continue_on_fail: true
+        hangup_after_bridge: false
 
       debug 'Bridging', {sofia}
 
