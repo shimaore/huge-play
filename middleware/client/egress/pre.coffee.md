@@ -5,6 +5,7 @@ First-line handler for outbound calls
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
     debug = (require 'debug') @name
+    os = require 'os'
 
     @include = seem ->
 
