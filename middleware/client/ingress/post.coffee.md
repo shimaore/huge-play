@@ -5,6 +5,10 @@
     debug = (require 'debug') @name
     url = require 'url'
 
+Use fr-ring for default ringback
+
+    default_ringback = '%(1500,3500,440)'
+
 Call-Handler
 ============
 
@@ -135,6 +139,12 @@ These should not be forwarded towards customers.
           'sip_h_X-CCNQ3-Registrant-Realm': null
           'sip_h_X-CCNQ3-Registrant-Target': null
           'sip_h_X-CCNQ3-Routing': null
+
+Ringbacks
+
+          'ringback': cfg.ringback ? default_ringback
+          'instant_ringback': false
+          'transfer_ringback': cfg.ringback ? default_ringback
 
       yield @export
         t38_passthru:true
