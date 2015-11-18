@@ -68,7 +68,7 @@ So far we have no reason to reject the call.
         return
 
       if cfb? or cfda?
-        @action 'pre_answer', '180 Simulated Ringing in case of forwarding'
+        @action 'ring_ready', '180 Simulated Ringing in case of forwarding'
 
 `set_params`
 ============
