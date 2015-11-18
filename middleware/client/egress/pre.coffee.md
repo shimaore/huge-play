@@ -76,7 +76,7 @@ Enforce configurable privacy settings.
       if privacy
         yield @action 'privacy', 'number'
       else
-        yield @action 'privacy', 'none'
+        yield @action 'privacy', 'no'
 
 Asserted-Number
 ---------------
