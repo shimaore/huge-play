@@ -142,9 +142,9 @@ These should not be forwarded towards customers.
 
 Ringbacks
 
-          'ringback': cfg.ringback ? default_ringback
+          'ringback': @cfg.ringback ? default_ringback
           'instant_ringback': false
-          'transfer_ringback': cfg.ringback ? default_ringback
+          'transfer_ringback': @cfg.ringback ? default_ringback
 
       yield @export
         t38_passthru:true
