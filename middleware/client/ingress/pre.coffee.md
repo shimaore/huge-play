@@ -56,6 +56,11 @@ Retrieve number data.
         @session.number = yield @cfg.prov
           .get "number:#{number}@#{number_domain}"
 
+Default the targets list to using `endpoint_via` if it is present.
+
+      if @session.number.endpoint_via?
+        @session.targets = [@session.number.endpoint_via]
+
 Retrieve number-domain data.
 FIXME: Use caching.
 
