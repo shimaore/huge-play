@@ -119,12 +119,6 @@ counts from the time the INVITE is placed until a progress indication (e.g. 180,
 
           call_timeout:300
 
-[originate timeout](https://wiki.freeswitch.org/wiki/Channel_Variables#originate_timeout)
-Note: tough-rate uses `answer_timeout`, the wiki mentions `bridge_answer_timeout`.
-
-          originate_timeout:fr_inv_timeout
-          bridge_answer_timeout:fr_inv_timeout
-
           sip_contact_user: @session.ccnq_from_e164
           effective_caller_id_number: @source
           sip_cid_type: 'pid'
@@ -152,6 +146,8 @@ Ringbacks
         sip_wait_for_aleg_ack:true
         'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
         'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
+        originate_timeout:fr_inv_timeout
+        bridge_answer_timeout:fr_inv_timeout
 
       debug 'OK'
       return
