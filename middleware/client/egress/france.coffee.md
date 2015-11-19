@@ -52,7 +52,7 @@ Verify that the caller-id follows the proper format
         @session.ccnq_from_e164 = new_source
 
       if @session.asserted?
-        new_asserted = translate_asserted @session.asserted
+        new_asserted = translate_source @session.asserted
         if new_asserted?
           @session.asserted = new_asserted
 
