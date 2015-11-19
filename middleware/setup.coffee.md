@@ -45,7 +45,7 @@
             else
               ctx.action 'export', "#{name}=#{value}"
           else
-            yield ctx.set k,v for own k,v of name
+            yield ctx.export k,v for own k,v of name
 
         respond: (response) ->
           ctx.action 'respond', response
