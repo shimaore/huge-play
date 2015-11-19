@@ -123,6 +123,7 @@ counts from the time the INVITE is placed until a progress indication (e.g. 180,
 Note: tough-rate uses `answer_timeout`, the wiki mentions `bridge_answer_timeout`.
 
           originate_timeout:fr_inv_timeout
+          bridge_answer_timeout:fr_inv_timeout
 
           sip_contact_user: @session.ccnq_from_e164
           effective_caller_id_number: @source
