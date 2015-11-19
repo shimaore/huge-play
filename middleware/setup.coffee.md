@@ -41,14 +41,14 @@
           return unless name?
           if typeof name is 'string'
             if value is null
-              @action 'export', name
+              ctx.action 'export', name
             else
-              @action 'export', "#{name}=#{value}"
+              ctx.action 'export', "#{name}=#{value}"
           else
             yield ctx.set k,v for own k,v of name
 
         respond: (response) ->
-          @action 'respond', response
+          ctx.action 'respond', response
       }
 
       return
