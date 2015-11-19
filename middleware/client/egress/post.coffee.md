@@ -48,10 +48,13 @@ SIP parameters
           call_timeout: 300
           effective_caller_id_number: @session.ccnq_from_e164
           sip_contact_user: @session.ccnq_from_e164
-          sip_cid: 'pid'
+          sip_cid_type: 'pid'
 
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack:true
+
+      if @session.asserted?
+        yield @set effective_caller_id_number: @session.asserted
 
       debug 'OK'

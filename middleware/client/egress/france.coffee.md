@@ -19,6 +19,23 @@ See http://www.arcep.fr/index.php?id=interactivenumeros
     @name = "#{pkg.name}:middleware:client:egress:france"
     debug = (require 'debug') @name
 
+    translate_source = (source) ->
+      switch
+
+From: national number
+
+        when $ = source.match /^(0|\+33)([123456789][0-9]{8})$/
+          return "33#{$[2]}"
+
+From: international number (why??)
+
+        when $ = source.match /^(00|\+)([2-9][0-9]*)$/
+          return $[2]
+
+        else
+          debug "Cannot translate source #{source}"
+          return null
+
     @include = ->
 
       return unless @session.direction is 'egress'
@@ -30,21 +47,14 @@ See http://www.arcep.fr/index.php?id=interactivenumeros
 Verify that the caller-id follows the proper format
 ---------------------------------------------------
 
-      switch
+      new_source = translate_source @source
+      if new_source?
+        @session.ccnq_from_e164 = new_source
 
-From: national number
-
-        when $ = @source.match /^(0|\+33)([123456789][0-9]{8})$/
-          @session.ccnq_from_e164 = "33#{$[2]}"
-
-From: international number (why??)
-
-        when $ = @source.match /^(00|\+)([2-9][0-9]*)$/
-          @session.ccnq_from_e164 = $[2]
-
-        else
-          debug 'Cannot translate source'
-          return
+      if @session.asserted?
+        new_asserted = translate_asserted @session.asserted
+        if new_asserted?
+          @session.asserted = new_asserted
 
 Verify that the called number follows the proper format
 -------------------------------------------------------

@@ -5,7 +5,6 @@ First-line handler for outbound calls
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
     debug = (require 'debug') @name
-    os = require 'os'
 
     @include = seem ->
 
@@ -84,12 +83,7 @@ Asserted-Number
 
 Enforce configurable Caller-ID. (Used in particular for ported-in numbers.)
 
-      asserted = @session.number.asserted_number ? @session.endpoint.asserted_number
-      if asserted?
-        hostname = @cfg.hostname ? os.hostname()
-        yield @set "sip_h_P-Asserted-Identity: <#{asserted}>@#{hostname}"
-      else
-        yield @unset "sip_h_P-Asserted-Identity"
+      @session.asserted = @session.number.asserted_number ? @session.endpoint.asserted_number
 
 Check from
 ----------
