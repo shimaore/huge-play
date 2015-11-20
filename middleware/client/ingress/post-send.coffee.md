@@ -9,6 +9,7 @@
 
       debug 'Ready'
 
-The only post-call action currently is to hangup the call.
+      if @session.call_failed
+        return @respond '486 Call Failed'
 
       @action 'hangup'

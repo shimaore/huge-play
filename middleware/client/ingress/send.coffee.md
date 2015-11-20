@@ -160,4 +160,6 @@ Use CFDA if present
         @session.uris = [cfda]
         return send.call this
 
-      @respond '486 Call Failed'
+      debug 'Call Failed'
+      @session.call_failed = true
+      return
