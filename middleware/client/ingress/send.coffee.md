@@ -111,24 +111,35 @@ Not Registered
 
 OpenSIPS marker for not registered
 
-      if code is '604'
-        if not @session.tried_cfnr and cfnr = @session.number.cfnr
+      if code is '604' and not @session.tried_cfnr
+        if @session.cfnr_voicemail
+          debug 'cfnr:voicemail'
+          @session.direction = 'voicemail'
+          return
+        if @session.cfnr_number?
+          debug 'cfnr:forward'
+          @session.direction = 'forward'
+          @session.destination = @session.cfnr_number
+          return
+        if @session.cfnr?
+          debug 'cfnr:fallback'
           @session.tried_cfnr = true
-          @session.uris = [cfnr]
+          @session.uris = [@session.cfnr]
           return send.call this
 
 Try static routing on 604 without CFNR (or CFNR already attempted)
 
-        else
-          endpoint = @session.endpoint
-          if not endpoint?
-            return @respond '500 Endpoint Error'
+      if code is '604'
+        endpoint = @session.endpoint
+        if not endpoint?
+          debug 'cfnr: no endpoint to fall back to'
+          return @respond '500 Endpoint Error'
 
-          domain = endpoint?.user_srv ? endpoint?.user_ip
+        domain = endpoint?.user_srv ? endpoint?.user_ip
 
 This will set the RURI and the To field. Notice that the RURI is actually `sip_invite_req_uri`, while the To field is `sofia/.../<To-field>`
 
-          @session.targets = [domain]
+        @session.targets = [domain]
 
 Alternatives for routing:
 - `sip_invite_req_uri`
@@ -136,17 +147,29 @@ Alternatives for routing:
 - `sip_network_destination`
 - `;fs_path=`
 
-          @session.parameters =
-            sip_network_destination: endpoint.endpoint
-          return send.call this
+        @session.parameters =
+          sip_network_destination: endpoint.endpoint
+        debug 'cfnr: fallback to endpoint'
+        return send.call this
 
 Busy
 ----
 
-      if code is '486' and not @session.tried_cfb and cfb = @session.number.cfb
-        @session.tried_cfb = true
-        @session.uris = [cfb]
-        return send.call this
+      if code is '486' and not @session.tried_cfb
+        if @session.cfb_voicemail
+          debug 'cfb: voicemail'
+          @session.direction = 'voicemail'
+          return
+        if @session.cfb_number?
+          debug 'cfb:number'
+          @session.direction = 'forward'
+          @session.destination = @session.cfb_number
+          return
+        if @session.cfb?
+          debug 'cfb: fallback'
+          @session.tried_cfb = true
+          @session.uris = [@session.cfb]
+          return send.call this
 
 All other codes
 ---------------
@@ -155,10 +178,21 @@ All other codes
 
 Use CFDA if present
 
-      if not @session.tried_cfda and cfda = @session.number.cfda
-        @session.tried_cfda = true
-        @session.uris = [cfda]
-        return send.call this
+      if not @session.tried_cfda
+        if @session.cfda_voicemail
+          debug 'cfda: voicemail'
+          @session.direction = 'voicemail'
+          return
+        if @session.cfda_number?
+          debug 'cfda:number'
+          @session.direction = 'forward'
+          @session.destination = @session.cfda_number
+          return
+        if @session.cfda?
+          debug 'cfda: fallback'
+          @session.tried_cfda = true
+          @session.uris = [@session.cfda]
+          return send.call this
 
       debug 'Call Failed'
       @session.call_failed = true

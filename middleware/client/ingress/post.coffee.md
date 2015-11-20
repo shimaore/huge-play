@@ -65,14 +65,42 @@ So far we have no reason to reject the call.
 
       yield set_params.call this
 
-      {cfa,cfa_enabled,cfb,cfda,cfnr} = @session.number
+`CF...` can be either configured as URIs (number.cfa etc. -- bypasses controls) or as plain numbers (will use the `forward` direction for access control).
 
-      if cfa? and cfa_enabled isnt false
-        @session.uris = [cfa]
+      @session.cf_active = false
+      for name in ['cfa','cfb','cfnr','cfda']
+        do (name) =>
+          return if @session.number["#{name}_enabled"] is false
+          v = @session["#{name}_voicemail"] = @session.number["#{name}_voicemail"]
+          n = @session["#{name}_number"]    = @session.number["#{name}_number"]
+          p = @session[name]                = @session.number[name]
+          @session.cf_active = @session.cf_active or v? or n? or p?
+
+Call Forward All
+----------------
+
+      if @session.cfa_voicemail
+        debug 'cfa:voicemail'
+        @session.direction = 'voicemail'
+        return
+      if @session.cfa_number?
+        debug 'cfa:forward'
+        @session.direction = 'forward'
+        @session.destination = @session.cfa_number
+        return
+      if @session.cfa?
+        debug 'cfa:fallback'
+        @session.uris = [@session.cfa]
         return
 
-      if cfb? or cfda?
+Ringback for other Call Forward
+-------------------------------
+
+      if @session.cf_active
+        debug 'cf_active'
         @action 'ring_ready', '180 Simulated Ringing in case of forwarding'
+
+      return
 
 `set_params`
 ============
