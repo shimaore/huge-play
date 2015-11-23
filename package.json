@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "5.0.0-0",
+  "version": "5.0.0-1",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "test": "mocha"
@@ -29,6 +29,6 @@
     "mocha": "^2.3.3"
   },
   "publishConfig": {
-    "tag":"development"
+    "tag": "development"
   }
 }
