@@ -9,6 +9,11 @@ Use fr-ring for default ringback
 
     default_ringback = '%(1500,3500,440)'
 
+Custom ringback requires that `well-groomed-feast` is included in the stack, not just that we `require` it here.
+
+    User = require 'well-groomed-feast/src/User'
+    Message = require 'well-groomed-feast/src/Message'
+
 Call-Handler
 ============
 
@@ -61,6 +66,17 @@ Call rejection: reject anonymous caller
           if @session.number.use_whitelist and not list.whitelist
             return @respond '486 Decline (not whitelisted)' # was 603
 
+      if @session.number.custom_ringback is true
+        if @session.number.user_database?
+          user_db_uri = @cfg.userdb_base_uri + '/' + @session.number.user_database
+          @session.User = new User this, @session.number._id, @session.number.user_database, user_db_uri
+
+        if @session.User?
+          yield @session.User.voicemail_settings true
+
+        if @session.User?.vm_settings?._attachments?["ringback.#{Message::format}"]
+          @session.ringback = @session.User.uri 'voicemail_settings', "ringback.#{Message::format}"
+
 So far we have no reason to reject the call.
 
       yield set_params.call this
@@ -96,7 +112,7 @@ Call Forward All
 Ringback for other Call Forward
 -------------------------------
 
-      if @session.cf_active
+      if @session.cf_active and not @session.number.custom_ringback
         debug 'cf_active'
         @action 'ring_ready', '180 Simulated Ringing in case of forwarding'
 
@@ -109,6 +125,9 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 
     set_params = seem ->
       debug 'set_params'
+
+      @session.ringback ?= @cfg.ringback
+      @session.ringback ?= default_ringback
 
       @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 
@@ -165,9 +184,9 @@ These should not be forwarded towards customers.
 
 Ringbacks
 
-          'ringback': @cfg.ringback ? default_ringback
+          'ringback': @session.ringback
           'instant_ringback': false
-          'transfer_ringback': @cfg.ringback ? default_ringback
+          'transfer_ringback': @session.ringback
 
       yield @export
         t38_passthru:true
