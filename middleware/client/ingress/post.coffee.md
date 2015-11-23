@@ -103,10 +103,17 @@ Call Forward All
 
 Ringback for other Call Forward
 -------------------------------
-
-      if @session.cf_active and not @session.number.custom_ringback
-        debug 'cf_active'
-        @action 'ring_ready', '180 Simulated Ringing in case of forwarding'
+      if @session.number.custom_ringack
+        if @cfg.answer_for_ringback
+          debug 'answer for ringback'
+          @action 'answer' # 200
+        else
+          debug 'pre_answer for ringback'
+          @action 'pre_answer' # 183
+      else
+        if @session.cf_active
+          debug 'cf_active'
+          @action 'ring_ready' # 180
 
       return
 
