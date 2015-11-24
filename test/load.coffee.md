@@ -25,3 +25,13 @@
           'middleware/carrier/ingress/send.coffee.md'
         ]
           require "../#{m}"
+          ctx =
+            cfg:
+              sip_profiles:{}
+            session:{}
+            call:
+              once: -> Promise.resolve null
+            req:
+              variable: -> null
+            data: {}
+          (require "../#{m}").include.call ctx, ctx
