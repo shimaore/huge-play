@@ -3,7 +3,7 @@
     @name = "#{pkg.name}:middleware:client:forward:basic"
     debug = (require 'debug') @name
 
-    @include = ->
+    @include = seem ->
 
       return unless @session.direction is 'forward'
 
