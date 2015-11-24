@@ -116,6 +116,11 @@ Ringback for other Call Forward
           debug 'cf_active'
           yield @action 'ring_ready' # 180
 
+Default the targets list to using `endpoint_via` if it is present.
+
+      if @session.number.endpoint_via?
+        @session.targets ?= [@session.number.endpoint_via]
+
       return
 
 `set_params`
