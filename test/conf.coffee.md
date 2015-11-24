@@ -29,7 +29,7 @@
         <section name="configuration">
         <configuration name="switch.conf">
         <settings>
-        <param name="switchname" value="freeswitch-server"/>
+        <param name="switchname" value="freeswitch-server@host.local"/>
         <param name="core-db-name" value="/dev/shm/freeswitch/core-server.db"/>
         <param name="rtp-start-port" value="49152"/>
         <param name="rtp-end-port" value="65534"/>
