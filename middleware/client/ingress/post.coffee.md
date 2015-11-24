@@ -87,6 +87,7 @@ So far we have no reason to reject the call.
 Call Forward All
 ----------------
 
+      @session.reason = 'unconditional' # RFC5806
       if @session.cfa_voicemail
         debug 'cfa:voicemail'
         @session.direction = 'voicemail'
@@ -100,6 +101,7 @@ Call Forward All
         debug 'cfa:fallback'
         @session.uris = [@session.cfa]
         return
+      @session.reason = null
 
 Ringback for other Call Forward
 -------------------------------

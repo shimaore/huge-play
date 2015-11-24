@@ -112,6 +112,7 @@ Not Registered
 OpenSIPS marker for not registered
 
       if code is '604' and not @session.tried_cfnr
+        @session.reason = 'unavailable' # RFC5806
         if @session.cfnr_voicemail
           debug 'cfnr:voicemail'
           @session.direction = 'voicemail'
@@ -156,6 +157,7 @@ Busy
 ----
 
       if code is '486' and not @session.tried_cfb
+        @session.reason = 'user-busy' # RFC5806
         if @session.cfb_voicemail
           debug 'cfb: voicemail'
           @session.direction = 'voicemail'
@@ -179,6 +181,7 @@ All other codes
 Use CFDA if present
 
       if not @session.tried_cfda
+        @session.reason = 'no-answer' # RFC5806
         if @session.cfda_voicemail
           debug 'cfda: voicemail'
           @session.direction = 'voicemail'
