@@ -20,7 +20,7 @@
 FIXME the original URI part should be the Request-URI per RFC5806
 
       yield @export
-        sip_h_Diversion: "<sip:#{@destination}@#{@cfg.host ? hostname()};reason=#{@session.reason}"
+        sip_h_Diversion: "<sip:#{@destination}@#{@cfg.host ? hostname()}>;reason=#{@session.reason}"
 
       debug 'OK'
       return
