@@ -72,7 +72,7 @@ Privacy
 Enforce configurable privacy settings.
 
       privacy = @session.number.privacy
-      privacy = @session.endpoint.privacy
+      privacy ?= @session.endpoint.privacy
       if privacy
         yield @action 'privacy', 'number'
       else
