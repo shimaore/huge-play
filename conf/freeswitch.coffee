@@ -1,4 +1,5 @@
 {renderable} = L = require 'acoustic-line'
+{hostname} = require 'os'
 
 module.exports = renderable (cfg) ->
   {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros} = L
@@ -36,7 +37,7 @@ module.exports = renderable (cfg) ->
     section name:'configuration', ->
       configuration name:'switch.conf', ->
         settings ->
-          param name:'switchname', value:"freeswitch-#{name}"
+          param name:'switchname', value:"freeswitch-#{name}@#{cfg.host ? hostname()}"
           param name:'core-db-name', value:"/dev/shm/freeswitch/core-#{name}.db"
           param name:'rtp-start-port', value:49152
           param name:'rtp-end-port', value:65534
