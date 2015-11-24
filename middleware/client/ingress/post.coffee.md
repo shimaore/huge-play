@@ -112,7 +112,7 @@ Ringback for other Call Forward
           debug 'pre_answer for ringback'
           yield @action 'pre_answer' # 183
       else
-        if @session.cf_active
+        if @session.cf_active or @cfg.ready_for_ringback
           debug 'cf_active'
           yield @action 'ring_ready' # 180
 
