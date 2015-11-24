@@ -12,7 +12,12 @@
       @session.outbound_route = @session.endpoint.outbound_route
       @session.direction = 'egress'
       @session.forwarding = true
+      if @cfg.mask_source_on_forward
+        @session.source = @source
+        @source = @destination
       @destination = @session.destination
+
+FIXME the original URI part should be the Request-URI per RFC5806
 
       yield @export
         sip_h_Diversion: "<sip:#{@destination}@#{@cfg.host ? hostname()};reason=#{@session.reason}"
