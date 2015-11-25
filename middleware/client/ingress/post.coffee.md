@@ -225,7 +225,7 @@ Ringbacks
 
 Music
 
-          'music_on_hold': @session.music
+          'hold_music': @session.music
 
       yield @export
         t38_passthru:true
