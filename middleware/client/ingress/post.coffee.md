@@ -69,6 +69,14 @@ Call rejection: reject anonymous caller
           'ringback.wav'
         ].join '/'
 
+      if typeof @session.number.custom_ringback is 'string'
+        @session.ringback = [
+          @cfg.userdb_base_uri
+          @session.number.user_database
+          'voicemail_settings'
+          @session.number.custom_ringback
+        ].join '/'
+
 So far we have no reason to reject the call.
 
       yield set_params.call this
