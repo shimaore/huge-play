@@ -86,7 +86,7 @@ module.exports = renderable (o) ->
       # Only enable proxy-media on a call-by-call-basis
       param name:'inbound-proxy-media', value:false
 
-      param name:'media-option', value:'bypass-media-after-att-xfer' # also: 'resume-media-on-hold'
+      param name:'media-option', value:'none'
 
       param name:'inbound-zrtp-passthru', value:false
       # disable-transcoding doesn't actuall disable the transcoding facility;
