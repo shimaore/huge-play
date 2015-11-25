@@ -8,6 +8,7 @@
 Use fr-ring for default ringback
 
     default_ringback = '%(1500,3500,440)'
+    default_music = 'tone_stream://%(300,10000,440);loops=-1'
 
 Call-Handler
 ============
@@ -77,6 +78,22 @@ Call rejection: reject anonymous caller
           @session.number.custom_ringback
         ].join '/'
 
+      if @session.number.custom_music is true
+        @session.music = [
+          @cfg.userdb_base_uri
+          @session.number.user_database
+          'voicemail_settings'
+          'music.wav'
+        ].join '/'
+
+      if typeof @session.number.custom_music is 'string'
+        @session.music = [
+          @cfg.userdb_base_uri
+          @session.number.user_database
+          'voicemail_settings'
+          @session.number.custom_music
+        ].join '/'
+
 So far we have no reason to reject the call.
 
       yield set_params.call this
@@ -144,6 +161,9 @@ Non-call-handling-specific parameters (these are set on all calls independently 
       @session.ringback ?= @cfg.ringback
       @session.ringback ?= default_ringback
 
+      @session.music ?= @cfg.music
+      @session.music ?= default_music
+
       @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 
       dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
@@ -202,6 +222,10 @@ Ringbacks
           'ringback': @session.ringback
           'instant_ringback': false
           'transfer_ringback': @session.ringback
+
+Music
+
+          'music_on_hold': @session.music
 
       yield @export
         t38_passthru:true
