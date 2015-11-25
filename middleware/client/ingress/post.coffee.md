@@ -219,9 +219,9 @@ These should not be forwarded towards customers.
 
 Ringbacks
 
-          ringback: @session.ringback
+          ringback: @session.ringback # Used for pre_answer
           instant_ringback: false
-          transfer_ringback: @session.ringback
+          transfer_ringback: @session.ringback # Used after answer
 
       yield @export
         t38_passthru:true
