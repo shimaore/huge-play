@@ -219,13 +219,9 @@ These should not be forwarded towards customers.
 
 Ringbacks
 
-          'ringback': @session.ringback
-          'instant_ringback': false
-          'transfer_ringback': @session.ringback
-
-Music
-
-          'hold_music': @session.music
+          ringback: @session.ringback
+          instant_ringback: false
+          transfer_ringback: @session.ringback
 
       yield @export
         t38_passthru:true
@@ -234,6 +230,10 @@ Music
         'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
         originate_timeout:fr_inv_timeout
         bridge_answer_timeout:fr_inv_timeout
+
+Music
+
+        hold_music: @session.music
 
       debug 'OK'
       return
