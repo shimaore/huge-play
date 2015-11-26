@@ -52,7 +52,7 @@ SIP parameters
 
       yield @export
         t38_passthru:true
-        sip_wait_for_aleg_ack:true
+        sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
 
       if @session.asserted?
         yield @set effective_caller_id_number: @session.asserted

@@ -136,7 +136,7 @@ Ringback for other Call Forward
           debug 'answer for ringback'
           yield @action 'answer' # 200
           yield @set sip_wait_for_aleg_ack:false
-          yield @export sip_wait_for_aleg_ack:false
+          @session.wait_for_aleg_ack = false
         else
           debug 'pre_answer for ringback'
           yield @action 'pre_answer' # 183
@@ -227,7 +227,7 @@ Ringbacks
 
       yield @export
         t38_passthru:true
-        sip_wait_for_aleg_ack:true
+        sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
         'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
         'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
         originate_timeout:fr_inv_timeout
