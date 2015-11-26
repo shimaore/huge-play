@@ -159,7 +159,7 @@ module.exports = renderable (cfg) ->
                 action application:'multiset', data:"direction=#{direction} profile=#{name}"
                 action application:'socket', data:"127.0.0.1:#{p.socket_port} async full"
 
-    sound_dir = cfg.sound_dir ? '/opt/freeswitch/sounds'
+    sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
     section 'phrases', ->
       macros ->
         for module in phrases_to_load
