@@ -136,6 +136,7 @@ Ringback for other Call Forward
           debug 'answer for ringback'
           yield @action 'answer' # 200
           yield @set sip_wait_for_aleg_ack:false
+          yield @export sip_wait_for_aleg_ack:false
         else
           debug 'pre_answer for ringback'
           yield @action 'pre_answer' # 183
