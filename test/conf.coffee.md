@@ -138,7 +138,7 @@
         <param name="inbound-bypass-media" value="true"/>
         <param name="inbound-late-negotiation" value="true"/>
         <param name="inbound-proxy-media" value="false"/>
-        <param name="media-option" value="bypass-media-after-att-xfer"/>
+        <param name="media-option" value="none"/>
         <param name="inbound-zrtp-passthru" value="false"/>
         <param name="disable-transcoding" value="true"/>
         <param name="use-rtp-timer" value="true"/>
@@ -204,7 +204,7 @@
         <param name="inbound-bypass-media" value="true"/>
         <param name="inbound-late-negotiation" value="true"/>
         <param name="inbound-proxy-media" value="false"/>
-        <param name="media-option" value="bypass-media-after-att-xfer"/>
+        <param name="media-option" value="none"/>
         <param name="inbound-zrtp-passthru" value="false"/>
         <param name="disable-transcoding" value="true"/>
         <param name="use-rtp-timer" value="true"/>
@@ -275,7 +275,7 @@
         </section>
         <section name="phrases">
         <macros>
-        <language name="fr" sound-path="/opt/freeswitch/sounds/fr/fr/sibylle">
+        <language name="fr" sound-path="/opt/freeswitch/share/freeswitch/sounds/fr/fr/sibylle">
         <macro name="say-single">
         <input pattern="^:$" break_on_match="true">
         <match>
@@ -1328,7 +1328,7 @@
         </input>
         </macro>
         </language>
-        <language name="fr-FR" sound-path="/opt/freeswitch/sounds/fr/fr/sibylle">
+        <language name="fr-FR" sound-path="/opt/freeswitch/share/freeswitch/sounds/fr/fr/sibylle">
         <macro name="say-single">
         <input pattern="^:$" break_on_match="true">
         <match>
