@@ -6,11 +6,10 @@
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
-        data = res.body
-        debug "CDR: Channel Hangup Complete", data
+        debug "CDR: Channel Hangup Complete", res
 
-        debug "CDR: Channel Hangup Complete", billmsec: data.variable_billmsec
-        data =
+        data = res.body
+        report =
           duration:       data.variable_mduration
           billable:       data.variable_billmsec
           progress:       data.variable_progressmsec
@@ -18,10 +17,11 @@
           wait:           data.variable_waitmsec
           progress_media: data.variable_progress_mediamsec
           flow_bill:      data.variable_flow_billmsec
+        debug "CDR: Channel Hangup Complete", report
 
 The `statistics` object is provided by `thinkable-ducks`.
 
-        for own k,v of data
+        for own k,v of report
           @statistics.add k, v
 
         @statistics.emit 'call',
@@ -29,6 +29,6 @@ The `statistics` object is provided by `thinkable-ducks`.
           call: @call.uuid
           source: @source
           destination: @destination
-          data: data
+          data: report
 
       return
