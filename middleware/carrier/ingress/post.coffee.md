@@ -17,5 +17,6 @@
       yield @export
         sip_wait_for_aleg_ack: true
         t38_passthru: true
+        sip_enable_soa: false
 
       return
