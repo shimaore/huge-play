@@ -5,7 +5,6 @@
           'middleware/cdr.coffee.md'
 
           'middleware/client/setup.coffee.md'
-          'middleware/client/media.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/france.coffee.md'
           'middleware/client/egress/pre.coffee.md'
