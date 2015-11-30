@@ -64,12 +64,11 @@ module.exports = renderable (o) ->
       param name:'rtp-timeout-sec', value:300
       param name:'rtp-hold-timeout-sec', value:1800
 
-      param name:'enable-soa', value:true
-
       # `true` is the `sbc-media.include` version of ccnq3
       # default is the `sbc-nomedia.include` version of ccnq3
       switch o.media
         when true
+          param name:'enable-soa', value:true
           param name:'inbound-bypass-media', value:false
           param name:'inbound-late-negotiation', value:false
           param name:'disable-rtp-auto-adjust', value:false
@@ -79,6 +78,7 @@ module.exports = renderable (o) ->
           param name:'suppress-cng', value:false
           param name:'vad', value:'none'
         else
+          param name:'enable-soa', value:false
           param name:'inbound-bypass-media', value:true
           # Enter the dialplan without the codec having been negotiated.
           param name:'inbound-late-negotiation', value:true
