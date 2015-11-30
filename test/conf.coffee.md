@@ -134,7 +134,7 @@
         <param name="ext-rtp-ip" value="auto"/>
         <param name="rtp-timeout-sec" value="300"/>
         <param name="rtp-hold-timeout-sec" value="1800"/>
-        <param name="enable-soa" value="true"/>
+        <param name="enable-soa" value="false"/>
         <param name="inbound-bypass-media" value="true"/>
         <param name="inbound-late-negotiation" value="true"/>
         <param name="inbound-proxy-media" value="false"/>
@@ -200,7 +200,7 @@
         <param name="ext-rtp-ip" value="auto"/>
         <param name="rtp-timeout-sec" value="300"/>
         <param name="rtp-hold-timeout-sec" value="1800"/>
-        <param name="enable-soa" value="true"/>
+        <param name="enable-soa" value="false"/>
         <param name="inbound-bypass-media" value="true"/>
         <param name="inbound-late-negotiation" value="true"/>
         <param name="inbound-proxy-media" value="false"/>
