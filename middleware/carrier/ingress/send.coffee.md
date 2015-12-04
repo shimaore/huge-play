@@ -1,24 +1,24 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:carrier:egress:send"
+    @name = "#{pkg.name}:middleware:carrier:ingress:send"
     debug = (require 'debug') @name
 
 Send a call out using carrier-side rules.
 
     @include = seem ->
 
-      return unless @session.direction is 'egress'
+      return unless @session.direction is 'ingress'
 
       debug 'Ready'
 
-      {egress_target} = @session.profile_data
+      {ingress_target} = @session.profile_data
 
       debug 'bridge',
         sip_profile: @session.sip_profile
         destination: @destination
-        egress_target: egress_target
+        ingress_target: ingress_target
 
-      res = yield @action 'bridge', "sofia/#{@session.sip_profile}/sip:#{@destination}@#{egress_target}"
+      res = yield @action 'bridge', "sofia/#{@session.sip_profile}/sip:#{@destination}@#{ingress_target}"
 
       data = res.body
       debug 'FreeSwitch response', res
@@ -27,6 +27,6 @@ Send a call out using carrier-side rules.
       debug 'Cause', cause
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS']
-        debug "Successful call when routing #{@destination} through #{egress_target}"
+        debug "Successful call when routing #{@destination} through #{ingress_target}"
       else
-        debug "Call failed: #{cause} when routing #{@destination} through #{egress_target}"
+        debug "Call failed: #{cause} when routing #{@destination} through #{ingress_target}"
