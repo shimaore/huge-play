@@ -42,6 +42,12 @@ Call rejection: reject anonymous caller
 
       if @session.number.reject_anonymous
         if @session.caller_privacy
+          if @session.number.reject_anonymous_to_voicemail
+            debug 'reject anonymous: send to voicemail'
+            @session.direction = 'voicemail'
+            return
+
+          debug 'reject anonymous'
           # return @respond '603 Decline (anonymous)'
           yield @action 'answer'
 
