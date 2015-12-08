@@ -110,7 +110,8 @@ Asserted-Number
 
 Enforce configurable Caller-ID. (Used in particular for ported-in numbers.)
 
-      @session.asserted = @session.number.asserted_number ? @session.endpoint.asserted_number
+      @session.asserted = @session.number.asserted_number
+      @session.asserted ?= @session.endpoint.asserted_number
 
 Check from
 ----------
