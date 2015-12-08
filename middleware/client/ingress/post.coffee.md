@@ -24,10 +24,15 @@ Call-Handler
 
       assert @session.number_domain?, 'Missing number_domain'
 
+Routing
+-------
+
 One of the national translations should have mapped us to a different dialplan (e.g. 'national').
 
       if @session.dialplan is 'e164'
         return @respond '484'
+
+Retrieve number data.
 
       dst_number = "#{@destination}@#{@session.number_domain}"
       @session.number = yield @cfg.prov.get "number:#{dst_number}"
@@ -69,7 +74,7 @@ Call rejection: reject anonymous caller
             return @respond '486 Decline (not whitelisted)' # was 603
 
       if @session.number.custom_ringback is true
-        @session.ringback = [
+        @session.ringback ?= [
           @cfg.userdb_base_uri
           @session.number.user_database
           'voicemail_settings'
@@ -77,7 +82,7 @@ Call rejection: reject anonymous caller
         ].join '/'
 
       if typeof @session.number.custom_ringback is 'string'
-        @session.ringback = [
+        @session.ringback ?= [
           @cfg.userdb_base_uri
           @session.number.user_database
           'voicemail_settings'
@@ -85,7 +90,7 @@ Call rejection: reject anonymous caller
         ].join '/'
 
       if @session.number.custom_music is true
-        @session.music = [
+        @session.music ?= [
           @cfg.userdb_base_uri
           @session.number.user_database
           'voicemail_settings'
@@ -93,7 +98,7 @@ Call rejection: reject anonymous caller
         ].join '/'
 
       if typeof @session.number.custom_music is 'string'
-        @session.music = [
+        @session.music ?= [
           @cfg.userdb_base_uri
           @session.number.user_database
           'voicemail_settings'
