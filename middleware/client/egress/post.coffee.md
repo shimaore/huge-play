@@ -6,6 +6,8 @@
     debug = (require 'debug') @name
     assert = require 'assert'
 
+    default_music = 'tone_stream://%(300,10000,440);loops=-1'
+
     @include = seem ->
       return unless @session.direction is 'egress'
 
@@ -32,6 +34,29 @@ The URL module parses the SIP username as `auth`.
         debug 'Invalid Charge-Info', pci
         return @respond '403 Invalid Charge-Info'
 
+Settings for calling number (see middleware/client/ingress/post.coffee.md):
+
+      if @session.number.custom_music is true
+        @session.music ?= [
+          @cfg.userdb_base_uri
+          @session.number.user_database
+          'voicemail_settings'
+          'music.wav'
+        ].join '/'
+
+      if typeof @session.number.custom_music is 'string'
+        @session.music ?= [
+          @cfg.userdb_base_uri
+          @session.number.user_database
+          'voicemail_settings'
+          @session.number.custom_music
+        ].join '/'
+
+      @session.music ?= @cfg.music
+      @session.music ?= default_music
+
+Set parameters
+
       yield @set
 
 These are injected so that they may eventually show up in CDRs.
@@ -53,6 +78,10 @@ SIP parameters
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
+
+Music
+
+        hold_music: @session.music
 
       if @session.asserted?
         yield @set effective_caller_id_number: @session.asserted
