@@ -69,8 +69,14 @@ Call rejection: reject anonymous caller
         list = yield @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
+            if @session.number.list_to_voicemail
+              @session.direction = 'voicemail'
+              return
             return @respond '486 Decline (blacklisted)' # was 603
           if @session.number.use_whitelist and not list.whitelist
+            if @session.number.list_to_voicemail
+              @session.direction = 'voicemail'
+              return
             return @respond '486 Decline (not whitelisted)' # was 603
 
       if @session.number.custom_ringback is true
