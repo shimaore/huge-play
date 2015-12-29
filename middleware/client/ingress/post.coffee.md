@@ -38,7 +38,11 @@ Retrieve number data.
 * doc.local_number.disabled (boolean) If true the record is not used.
 
       dst_number = "#{@destination}@#{@session.number_domain}"
-      @session.number = yield @cfg.prov.get "number:#{dst_number}"
+      @session.number = yield @cfg.prov.get("number:#{dst_number}").catch (error) -> {disabled:true,error}
+
+      if @session.number.error?
+        debug "Could not locate destination number #{dst_number}: #{error}"
+        return @respond '486 Not Found'
 
       debug "Got dst_number #{dst_number}", @session.number
 
