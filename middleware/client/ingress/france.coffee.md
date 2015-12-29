@@ -11,6 +11,9 @@
 Rewrite destination
 ===================
 
+* session.ccnq_to_e164 (string) The original destination number (in E.164-sans-plus format) before translation to a national number.
+* session.country (string) Two-letter name of the country in which a national number must be interpreted. Typically used when `session.dialplan` equals `national`.
+
       switch
 
         when $ = @destination.match /^33([1-9][0-9]+)$/
@@ -27,6 +30,8 @@ Otherwise let it be parsed by another module.
 
 Rewrite source
 ==============
+
+* session.ccnq_from_e164 (string) The original calling number (in E.164-sans-plus format) before translation to a national number.
 
       switch
 
@@ -52,6 +57,8 @@ from: anonymous
 
 Update the dialplan
 ===================
+
+* session.dialplan (string) The dialplan in which a number (source, destination) must be interpreted.
 
       @session.dialplan = 'national'
 

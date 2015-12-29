@@ -23,6 +23,9 @@ And I believe we need to use `[let_timeout=4]` or something like this to handle 
 
 `session.targets` might be a list of target domains (to be used with the current destination number)
 
+* session.targets (array of strings) Targets were to send inbound calls.
+* cfg.ingress_target (string) The target to use if no `session.targets` is present.
+
       targets = @session.targets ? [@cfg.ingress_target]
 
 `session.uris` might be a list of target URIs (to be used with the standard SIP profile)
