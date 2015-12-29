@@ -7,12 +7,18 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     @include = seem ->
       return unless @session.direction is 'ingress'
 
+Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
+
+      if @session.dialplan?
+        debug 'Dialplan already set, skipping'
+        return
+
       debug 'Ready'
 
 E.164
 -----
 
-All ingress calls come in as E.164 (with plus sign).
+All external ingress calls come in as E.164 (with plus sign).
 
       @session.dialplan = 'e164'
       @session.ccnq_from_e164 = @source
