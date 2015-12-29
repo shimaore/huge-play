@@ -41,7 +41,7 @@ Retrieve number data.
       @session.number = yield @cfg.prov.get("number:#{dst_number}").catch (error) -> {disabled:true,error}
 
       if @session.number.error?
-        debug "Could not locate destination number #{dst_number}: #{error}"
+        debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
         return @respond '486 Not Found'
 
       debug "Got dst_number #{dst_number}", @session.number
