@@ -2,7 +2,7 @@
 {hostname} = require 'os'
 
 module.exports = renderable (cfg) ->
-  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros} = L
+  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros,fifos} = L
   name = cfg.name ? 'server'
   the_profiles = cfg.profiles ?
     sbc:
@@ -19,6 +19,7 @@ module.exports = renderable (cfg) ->
     'mod_sndfile'
     'mod_tone_stream'
     'mod_httapi'
+    'mod_fifo'
   ]
   if cfg.cdr?.url?
     modules_to_load.push 'mod_json_cdr'
@@ -74,6 +75,7 @@ module.exports = renderable (cfg) ->
             list name:name, default:'deny', ->
               for cidr in cidrs
                 node type:'allow', cidr:cidr
+      configuration 'fifo.conf', ->
 
       if cfg.cdr?.url?
         configuration name:'json_cdr.conf', ->

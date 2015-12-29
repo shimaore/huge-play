@@ -51,6 +51,7 @@
         <load module="mod_sndfile"/>
         <load module="mod_tone_stream"/>
         <load module="mod_httapi"/>
+        <load module="mod_fifo"/>
         </modules>
         </configuration>
         <configuration name="logfile.conf">
@@ -85,6 +86,8 @@
         <node type="allow" cidr="127.0.0.0/8"/>
         </list>
         </network-lists>
+        </configuration>
+        <configuration name="fifo.conf">
         </configuration>
         <configuration name="sofia.conf">
         <global_settings>
