@@ -5,6 +5,7 @@
           'middleware/cdr.coffee.md'
 
           'middleware/client/setup.coffee.md'
+          'middleware/client/fifo.coffee.md'
           'middleware/client/egress/fifo.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/centrex-france.coffee.md'
