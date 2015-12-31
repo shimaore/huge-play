@@ -14,7 +14,7 @@ Now, we have two cases:
 - either the global-number record contains the information we need to do translation (except for the source, which is why this module needs to be inserted between the national translations, and the Centrex routing modules), and we use that information;
 - or it doesn't and we use a specific middleware to do the translation (based on the destination number, typically, to put that number in a specific `national` dialplan). The `france` module in the current directory illustrates this.
 
-* doc.global_number.local_number (string) The identifier of the local-number into which this global-number gets translated for inbound calls. (The identifier must have the format `<number>@<number-domain>` and an existing `number:<number>@<number-domain>` record.)
+* doc.global_number.local_number (string) The identifier of the local-number into which this global-number gets translated for inbound calls. (The identifier must have the format `<number>@<number-domain>` and a `number:<number>@<number-domain>` record must exist.)
 
       return unless @session.e164_number?.local_number?
 

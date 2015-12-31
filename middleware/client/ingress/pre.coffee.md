@@ -29,6 +29,8 @@ Global number
 
 We retrieve the *global-number* record based on the destination.
 
+* session.e164_number (object) The doc.global_number record for of the destination of an inbound call.
+
       @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_to_e164}"
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
@@ -36,6 +38,9 @@ The global number might contain additional FreeSwitch variables. Load these extr
       if @session.e164_number.fs_variables?
         debug 'Using fs_variables'
         yield @set @session.e164_number.fs_variables
+
+* doc.global_number.voicemail_main (boolean) If true, the number is the main number for access to voicemail (from an external number).
+* doc.global_number.language (string) Language-code to use for features, e.g. voicemail.
 
       if @session.e164_number.voicemail_main
         debug 'Using voicemail_main'
