@@ -40,6 +40,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
         debug "CDR: Linger: pausing"
         yield Promise.delay 4000
         debug "CDR: Linger: exit"
-        @call.exit()
+        yield @call.exit().catch (error) ->
+          debug "exit: #{error}"
 
       @call.linger()
