@@ -2,6 +2,7 @@
     @name = "#{pkg.name}:middleware:cdr"
     debug = (require 'debug') @name
     seem = require 'seem'
+    Promise = require 'bluebird'
 
     @include = ->
 
