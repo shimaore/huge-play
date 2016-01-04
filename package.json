@@ -18,6 +18,7 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.7.0",
+    "bluebird": "^3.1.1",
     "bumpy-lawyer": "^2.0.2",
     "debug": "^2.2.0",
     "nimble-direction": "^4.0.4",
