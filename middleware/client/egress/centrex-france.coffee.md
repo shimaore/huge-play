@@ -13,6 +13,7 @@
       switch
 
 Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
+Keep @session.dialplan.
 
         when @destination.match /^[1-5]\d{1,2}$/
           debug 'Internal call'
@@ -22,10 +23,11 @@ Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
 
 External call.
 For Centrex we use `asserted` as `egress calling number`, and only use it for external calls.
+Keep @session.direction and @session.country.
 
         when @destination[0] is @session.centrex_external_line_prefix and m = @destination.match /^\d(\d+)$/
           debug 'External call'
-          @dialplan = 'national'
+          @session.dialplan = 'national'
           @destination = m[1]
           @source = @session.asserted
           debug 'External call', {@source,@destination}
