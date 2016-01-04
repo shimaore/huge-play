@@ -234,7 +234,7 @@ Non-call-handling-specific parameters (these are set on all calls independently 
       @session.music ?= default_music
 
 * doc.local_number.endpoint (string) The name of the endpoint where calls for this number should be sent. A matching `endpoint:<endpoint>` record must exist.
-* doc.session.endpoint (object) The endpoint record for the inbound local-number's `endpoint`.
+* session.endpoint (object) Data from the called `doc.endpoint` (also known as `doc.dst_endpoint`) record for the local-number's `endpoint`, in an ingress call.
 
       @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 

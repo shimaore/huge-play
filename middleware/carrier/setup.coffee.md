@@ -4,6 +4,11 @@
     seem = require 'seem'
     assert = require 'assert'
 
+* doc.global_number Record with an identifier `number:<global-number>`. These records are used between the carrier SBCs and the client SBCs. They are one of the two types of `doc.number`.
+* doc.number If the identifier of a number does not contain a `@` character, it is a `doc.global_number`.
+* doc.global_number._id (required) `number:<global-number>`
+* doc.global_number.number (required) `<global-number>`, where the global-number has the standard format `<country-code><national-number>`. The format is identical to the E.164 format but the `+` sign at the start is omitted.
+
 Config
 ======
 

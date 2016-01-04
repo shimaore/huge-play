@@ -29,6 +29,10 @@ The dialplan and country (and other parameters) might also be available in the `
 
 * session.number_domain (string) The number-domain of the current destination.
 * session.number_domain_data (object) If present, the content of the `number_domain:<number-domain>` record for the current `session.number_domain`.
+* doc.number_domain (object) Record describing a number-domain.
+* doc.number_domain._id (required) `number_domain:<number-domain>`
+* doc.number_domain.type (required) `number_domain`
+* doc.number_domain.number_domain (required) `<number-domain>`
 
       [number,number_domain] = @session.e164_number.local_number.split '@'
       @destination = number
@@ -39,6 +43,9 @@ The dialplan and country (and other parameters) might also be available in the `
         .catch (error) =>
           debug "number_domain #{number_domain}: #{error}"
           {}
+
+* doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
+* doc.number_domain.country (optional) country used for ingress calls to this domain.
 
       @session.dialplan = @session.number_domain_data?.dialplan ? @session.e164_number.dialplan
       @session.country  = @session.number_domain_data?.country  ? @session.e164_number.country

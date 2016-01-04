@@ -2,6 +2,12 @@
     @name = "#{pkg.name}:middleware:client:setup"
     debug = (require 'debug') @name
 
+* doc.local_number Record with an identifier `number:<local-number>@<number-domain>`. These records are used on the client-side SBCs. They are one of the two types of `doc.number`.
+* doc.number If the identifier of a number contains a `@` character, it is a `doc.local_number`.
+* doc.local_number._id (required) `number:<local-number>@<number-domain>`
+* doc.local_number.type (required) `number`
+* doc.local_number.number (required) `<local-number>@<number-domain>`
+
     @include = ->
 
       @session.direction = @req.variable 'direction'

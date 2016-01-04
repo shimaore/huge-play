@@ -16,6 +16,12 @@
         call_timeout: 300
         t38_passthru: true
 
+* doc.CDR Call Detail Records (normally stored in one or multiple separate database).
+* doc.CDR.variables.ccnq_extra (string) Content of the hdr:X-CCNQ3-Extra header.
+* doc.CDR.variables.ccnq_attrs (string:JSON) Content of the hdr:X-CCNQ3-Attrs header.
+* doc.CDR.variables.ccnq_username (string) Username, content of the hdr:X-CCNQ3-Registrant-Username header (if present).
+* doc.CDR.variables.ccnq_account (string) Account, username part of the hdr:P-Charge-Info standard header.
+
         ccnq_extra: @req.header 'X-CCNQ3-Extra'
         ccnq_attrs: @req.header 'X-CCNQ3-Attrs'
         ccnq_username: ccnq_username

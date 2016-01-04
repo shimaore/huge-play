@@ -31,7 +31,7 @@ Check whether we are routing towards a FIFO.
 Move handling to `fifo` middleware.
 
 * session.direction (string) If `fifo`, then the call is handled by a number-domain FIFO. See session.fifo.
-* session.fifo (object) The element of doc.number_domain.fifo describing the current FIFO in use.
+* session.fifo (object) The element of doc.number_domain.fifos describing the current FIFO in use.
 
       @session.direction = 'fifo'
       @session.fifo = @session.number_domain_data.fifos[fifo_number]

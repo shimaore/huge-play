@@ -139,6 +139,11 @@ Try static routing on 604 without CFNR (or CFNR already attempted)
           debug 'cfnr: no endpoint to fall back to'
           return @respond '500 Endpoint Error'
 
+* session.endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. See doc.dst_endpoint.user_srv.
+* session.endpoint.user_ip (string) On ingress calls, used to route to a static endpoint. See doc.dst_endpoint.user_ip.
+* doc.dst_endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. If both `doc.dst_endpoint.user_ip` and `doc.dst_endpoint.user_srv` are present, `user_srv` is used and `user_ip` is ignored.
+* doc.dst_endpoint.user_ip (string) The IP address of an endpoint for a static endpoint. Normally equal to the `doc.src_endpoint.endpoint` value. On ingress calls, used to route to a static endpoint, if `doc.dst_endpoint.user_srv` is not present.
+
         domain = endpoint?.user_srv ? endpoint?.user_ip
 
 This will set the RURI and the To field. Notice that the RURI is actually `sip_invite_req_uri`, while the To field is `sofia/.../<To-field>`
