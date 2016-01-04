@@ -21,11 +21,14 @@ Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
           return
 
 External call.
+For Centrex we use `asserted` as `egress calling number`, and only use it for external calls.
 
         when @destination[0] is @session.centrex_external_line_prefix and m = @destination.match /^\d(\d+)$/
           debug 'External call'
           @dialplan = 'national'
           @destination = m[1]
+          @source = @session.asserted
+          debug 'External call', {@source,@destination}
           return
 
 Voicemail.
