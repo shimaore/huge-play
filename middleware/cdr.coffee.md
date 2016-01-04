@@ -1,6 +1,7 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:cdr"
     debug = (require 'debug') @name
+    seem = require 'seem'
 
     @include = ->
 
@@ -30,5 +31,15 @@ The `statistics` object is provided by `thinkable-ducks`.
           source: @source
           destination: @destination
           data: report
+
+Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
+
+      @call.once 'freeswitch_linger'
+      .then seem =>
+        debug "CDR: Linger: pausing"
+        yield Promise.delay 4000
+        debug "CDR: Linger: exit"
+        @call.exit()
+        @call.emit 'cleanup_linger'
 
       @call.linger()
