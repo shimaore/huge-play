@@ -22,7 +22,7 @@ Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
 
 External call.
 
-        when @destination[0] is @session.centrex_external_line_prefix and m = @destination.match /^\d+(\d+)$/
+        when @destination[0] is @session.centrex_external_line_prefix and m = @destination.match /^\d(\d+)$/
           debug 'External call'
           @dialplan = 'national'
           @destination = m[1]
