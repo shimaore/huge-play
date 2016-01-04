@@ -31,4 +31,4 @@ The `statistics` object is provided by `thinkable-ducks`.
           destination: @destination
           data: report
 
-      return
+      @call.linger()
