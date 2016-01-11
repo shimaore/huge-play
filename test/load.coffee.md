@@ -39,6 +39,7 @@
             session:{}
             call:
               once: -> Promise.resolve null
+              linger: -> Promise.resolve null
             req:
               variable: -> null
             data: {}
