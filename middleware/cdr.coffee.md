@@ -35,7 +35,7 @@ The `statistics` object is provided by `thinkable-ducks`.
 
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
-      @call.once 'freeswitch_linger'
+      @call.once 'autocleanup_linger'
       .then seem =>
         debug "CDR: Linger: pausing"
         yield Promise.delay 4000
