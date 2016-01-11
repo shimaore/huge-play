@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "8.0.0-5",
+  "version": "8.0.0",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "pretest": "npm install",
