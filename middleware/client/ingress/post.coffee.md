@@ -101,6 +101,8 @@ Call rejection: reject anonymous caller
 
 * doc.local_number.custom_ringback (boolean,string) If present, a custom ringback is played while the call is being presented to the destination user. The ringback file is an attachment located in `doc.voicemail_settings`; its name is the value of `custom_ringback`, or `ringback.wav` if `custom_ringback` is `true`. Default: plays system-wide `cfg.ringback`, or a code-assigned default ringback.
 
+      debug 'ringback', @session.ringback, @session.number.custom_ringback
+
       if @session.number.custom_ringback is true
         @session.ringback ?= [
           @cfg.userdb_base_uri

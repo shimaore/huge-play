@@ -17,7 +17,8 @@ Note: since we might also come here because we are routing an internal call, ski
       @session.centrex_external_line_prefix ?= '9'
       @source = "#{@session.centrex_external_line_prefix}#{@source}" if @source[0] is '0' and not @session.centrex_internal
 
-Also force a normal ringback and no muzak.
+Also force a normal ringback and no muzak on internal calls.
 
-      @session.ringback = @cfg.internal_ringback ? default_internal_ringback
-      @session.music = @cfg.internal_music ? default_internal_music
+      if @session.centrex_internal
+        @session.ringback = @cfg.internal_ringback ? default_internal_ringback
+        @session.music = @cfg.internal_music ? default_internal_music
