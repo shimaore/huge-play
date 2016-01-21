@@ -50,6 +50,10 @@ Retrieve number data.
         debug "Number #{dst_number} is disabled"
         return @respond '486 Administratively Forbidden' # was 403
 
+Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
+
+      @session.endpoint_name = @session.number.endpoint
+
 Call rejection: reject anonymous caller
 
 * doc.local_number.reject_anonymous (boolean) If true, rejects anonymous calls.
