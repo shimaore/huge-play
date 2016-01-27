@@ -71,7 +71,14 @@ Source (calling) number
 * session.number (object) Data from doc.number for the calling number in an egress call.
 
       src_number = "#{@source}@#{number_domain}"
-      @session.number = yield @cfg.prov.get "number:#{src_number}"
+      @session.number = yield @cfg.prov
+        .get "number:#{src_number}"
+
+On a static trunk, the number might not be present.
+
+        .catch (error) =>
+          debug "number:#{src_number}: #{error}"
+          {}
 
 Dialplan
 --------
