@@ -21,7 +21,7 @@
     "bluebird": "^3.2.0",
     "bumpy-lawyer": "^2.0.2",
     "debug": "^2.2.0",
-    "nimble-direction": "^4.0.5",
+    "nimble-direction": "^4.1.0",
     "seem": "^1.1.1"
   },
   "devDependencies": {
