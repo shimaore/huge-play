@@ -27,7 +27,7 @@ module.exports = renderable (cfg) ->
     modules_to_load = modules_to_load.concat cfg.modules
 
   phrases_to_load = [
-    # require 'bumpy-lawyer/en'
+    require 'bumpy-lawyer/en'
     require 'bumpy-lawyer/fr'
   ]
   if cfg.phrases?
