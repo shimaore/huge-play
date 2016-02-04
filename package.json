@@ -22,6 +22,7 @@
     "bumpy-lawyer": "^2.1.1",
     "debug": "^2.2.0",
     "nimble-direction": "^4.1.0",
+    "request": "^2.69.0",
     "seem": "^1.1.1"
   },
   "devDependencies": {

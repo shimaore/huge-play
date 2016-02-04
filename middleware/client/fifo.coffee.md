@@ -2,6 +2,8 @@
     @name = "#{pkg.name}:middleware:client:fifo"
     debug = (require 'debug') @name
     seem = require 'seem'
+    request = require 'request'
+    qs = require 'querystring'
 
     @description = '''
       Handles routing to a given FIFO queue.
@@ -9,6 +11,13 @@
     @include = seem ->
 
       return unless @session.direction is 'fifo'
+
+      fifo_uri = (id,name) ->
+        host = @cfg.web.host ? '127.0.0.1'
+        port = @cfg.web.port
+        id = qs.escape id
+        name = qs.escape name
+        "http://#{host}:#{port}/fifo/#{id}/#{name}"
 
       unless @session.fifo?
         debug 'Missing FIFO data'
@@ -50,13 +59,13 @@ Ready to send, answer the call.
 
       yield @action 'answer'
 
-* session.fifo.announce (string) Location of the FIFO announce.
-* session.fifo.music (string) Location of the FIFO music.
+* session.fifo.announce (string) Name of the FIFO announce file (attachment to the doc:number_domain document).
+* session.fifo.music (string) Name of the FIFO music file (attachment to the doc:number_domain document).
 
       if fifo.announce?
-        yield @action 'set', "fifo_announce=#{fifo.announce}"
+        yield @action 'set', "fifo_announce=#{@fifo_uri @session.number_domain, fifo.announce}"
       if fifo.music?
-        yield @action 'set', "fifo_music=#{fifo.music}"
+        yield @action 'set', "fifo_music=#{@fifo_uri @session.number_domain, fifo.music}"
 
       yield @action 'fifo', "#{fifo_name} in"
 
@@ -69,6 +78,27 @@ Ready to send, answer the call.
         return
 
       @action 'hangup'
+
+Announce/music download
+=======================
+
+This is modelled after the same code in `well-groomed-feast`.
+
+    @web = ->
+
+      @get '/fifo/:id/:name', ->
+        proxy = request.get
+          baseUrl: @cfg.provisioning
+          uri: "/#{@params.id}/#{@params.name}"
+          followRedirects: false
+          maxRedirects: 0
+
+        @request.pipe proxy
+        .on 'error', (error) =>
+          @next "Got #{error}"
+          return
+        proxy.pipe @response
+        return
 
 Backup notes
 ------------
