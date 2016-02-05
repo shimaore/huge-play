@@ -23,6 +23,7 @@ Check whether we are routing towards a FIFO.
 * doc.global_number.local_number To route to a FIFO, this field must contain `fifo-<fifo-number>@<number-domain>`. The fifo-number is typically between 0 and 9; it represents an index in doc.number_domain.fifos.
 * doc.number_domain.fifos (array) An array describing the FIFOs in this number-domain, indexed on the fifo-number. Typically the fifo-number is from 0 to 9. See session.fifo for a description of the contents.
 
+      debug "Testing for FIFO in #{@destination}"
       fifo_number = @destination.match(/^fifo-(\d+)$/)?[1]
       return unless fifo_number?
       fifo_number = parseInt fifo_number
@@ -33,6 +34,7 @@ Move handling to `fifo` middleware.
 * session.direction (string) If `fifo`, then the call is handled by a number-domain FIFO. See session.fifo.
 * session.fifo (object) The element of doc.number_domain.fifos describing the current FIFO in use.
 
+      debug "Using FIFO #{fifo_number}", @session.number_domain_data.fifos
       @session.direction = 'fifo'
       @session.fifo = @session.number_domain_data.fifos[fifo_number]
       @session.fifo.name ?= "#{fifo_number}"

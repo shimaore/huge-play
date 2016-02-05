@@ -12,12 +12,12 @@
 
       return unless @session.direction is 'fifo'
 
-      fifo_uri = (id,name) ->
+      fifo_uri = (id,name) =>
         host = @cfg.web.host ? '127.0.0.1'
         port = @cfg.web.port
         id = qs.escape id
         name = qs.escape name
-        "http://#{host}:#{port}/fifo/#{id}/#{name}"
+        "http://(nohead=true)#{host}:#{port}/fifo/#{id}/#{name}"
 
       unless @session.fifo?
         debug 'Missing FIFO data'
@@ -35,23 +35,28 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 FIXME: Replace with e.g. Redis instead of using cfg for this.
 
       @cfg.fifos ?= {}
-      if fifo.members? and not @cfg.fifos[fifo_name]?.loaded
-        @cfg.fifos[fifo_name] ?= {}
-        for member in @session.number.members
+      @cfg.fifos[fifo_name] ?= {}
+      if fifo.members? and not @cfg.fifos[fifo_name].loaded
+        for member in fifo.members
+          do (member) =>
 
 Members are on-system agents. We locate the matching local-number and build the dial-string from there.
 We only support `endpoint_via` and `cfg.ingress_target` for locating members.
 
-          member_data = yield @cfg.prov.get "number:#{member}@#{@session.number_domain}"
+            member_data = yield @cfg.prov
+              .get "number:#{member}@#{@session.number_domain}"
+              .catch (error) ->
+                debug "number:#{member}@#{@session.number_domain} : #{error.stack ? error}"
+                {}
 
 This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
 
-          target = member_data.endpoint_via ? @cfg.ingress_target
-          uri = "sip:#{member_data.number}@#{target}"
-          sofia = "sofia/#{@session.sip_profile}/#{uri}"
+            target = member_data.endpoint_via ? @cfg.ingress_target
+            uri = "sip:#{member_data.number}@#{target}"
+            sofia = "sofia/#{@session.sip_profile}/#{uri}"
 
-          debug "Adding member #{member} to #{fifo_name} as #{sofia}"
-          yield @api "fifo_member add #{fifo_name} #{sofia}"
+            debug "Adding member #{member} to #{fifo_name} as #{sofia}"
+            yield @call.api "fifo_member add #{fifo_name} #{sofia}"
 
         @cfg.fifos[fifo_name].loaded = true
 
@@ -62,10 +67,11 @@ Ready to send, answer the call.
 * session.fifo.announce (string) Name of the FIFO announce file (attachment to the doc:number_domain document).
 * session.fifo.music (string) Name of the FIFO music file (attachment to the doc:number_domain document).
 
+      id = "number_domain:#{@session.number_domain}"
       if fifo.announce?
-        yield @action 'set', "fifo_announce=#{@fifo_uri @session.number_domain, fifo.announce}"
+        yield @action 'set', "fifo_announce=#{fifo_uri id, fifo.announce}"
       if fifo.music?
-        yield @action 'set', "fifo_music=#{@fifo_uri @session.number_domain, fifo.music}"
+        yield @action 'set', "fifo_music=#{fifo_uri id, fifo.music}"
 
       yield @action 'fifo', "#{fifo_name} in"
 
@@ -89,9 +95,11 @@ This is modelled after the same code in `well-groomed-feast`.
       @get '/fifo/:id/:name', ->
         proxy = request.get
           baseUrl: @cfg.provisioning
-          uri: "/#{@params.id}/#{@params.name}"
+          uri: "#{@params.id}/#{@params.name}"
           followRedirects: false
           maxRedirects: 0
+
+        debug "Proxying #{@cfg.provisioning} #{@params.id}/#{@params.name}"
 
         @request.pipe proxy
         .on 'error', (error) =>

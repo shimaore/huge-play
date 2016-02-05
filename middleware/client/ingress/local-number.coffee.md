@@ -41,7 +41,7 @@ The dialplan and country (and other parameters) might also be available in the `
       @session.number_domain_data = yield @cfg.prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
-          debug "number_domain #{number_domain}: #{error}"
+          debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
