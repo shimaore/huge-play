@@ -1,17 +1,17 @@
-    describe 'France', ->
+    describe 'Switzerland', ->
       it 'should route', ->
-        m = require '../middleware/client/egress/national-FR'
+        m = require '../middleware/client/egress/national-CH'
 
         ctx =
           session:
             direction:'egress'
             dialplan:'national'
-            country:'fr'
+            country:'ch'
           source: '0123456789'
           destination: '0987654321'
 
         m.include.apply ctx
-        assert.deepEqual ctx.session.ccnq_from_e164, '33123456789'
-        assert.deepEqual ctx.session.ccnq_to_e164, '33987654321'
+        assert.deepEqual ctx.session.ccnq_from_e164, '41123456789'
+        assert.deepEqual ctx.session.ccnq_to_e164, '41987654321'
 
     assert = require 'assert'
