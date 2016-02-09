@@ -1,6 +1,7 @@
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:fifo"
     debug = (require 'debug') @name
+    Promise = require 'bluebird'
     seem = require 'seem'
     request = require 'request'
     qs = require 'querystring'
@@ -9,6 +10,37 @@
       Handles routing to a given FIFO queue.
     '''
     @include = seem ->
+
+Add-Member Function
+-------------------
+
+      add_member = seem (member) =>
+
+        debug "add_member #{member}@#{@session.number_domain}"
+
+Members are on-system agents. We locate the matching local-number and build the dial-string from there.
+We only support `endpoint_via` and `cfg.ingress_target` for locating members.
+
+        member_data = yield @cfg.prov
+          .get "number:#{member}@#{@session.number_domain}"
+          .catch (error) ->
+            debug "number:#{member}@#{@session.number_domain} : #{error.stack ? error}"
+            {}
+
+This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
+
+        target = member_data.endpoint_via ? @cfg.ingress_target
+        uri = "sip:#{member_data.number}@#{target}"
+        sofia = "sofia/#{@session.sip_profile}/#{uri}"
+
+        debug "Adding member #{member} to #{fifo_name} as #{sofia}"
+        yield @call.api "fifo_member add #{fifo_name} #{sofia}"
+
+
+FIFO handling
+=============
+
+      debug 'Starting'
 
       return unless @session.direction is 'fifo'
 
@@ -36,32 +68,16 @@ FIXME: Replace with e.g. Redis instead of using cfg for this.
 
       @cfg.fifos ?= {}
       @cfg.fifos[fifo_name] ?= {}
+      debug "FIFO status for #{fifo_name}", @cfg.fifos[fifo_name]
+
       if fifo.members? and not @cfg.fifos[fifo_name].loaded
-        for member in fifo.members
-          do (member) =>
-
-Members are on-system agents. We locate the matching local-number and build the dial-string from there.
-We only support `endpoint_via` and `cfg.ingress_target` for locating members.
-
-            member_data = yield @cfg.prov
-              .get "number:#{member}@#{@session.number_domain}"
-              .catch (error) ->
-                debug "number:#{member}@#{@session.number_domain} : #{error.stack ? error}"
-                {}
-
-This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
-
-            target = member_data.endpoint_via ? @cfg.ingress_target
-            uri = "sip:#{member_data.number}@#{target}"
-            sofia = "sofia/#{@session.sip_profile}/#{uri}"
-
-            debug "Adding member #{member} to #{fifo_name} as #{sofia}"
-            yield @call.api "fifo_member add #{fifo_name} #{sofia}"
-
+        debug 'Loading fifo members', fifo.members
+        yield Promise.all fifo.members.map add_member
         @cfg.fifos[fifo_name].loaded = true
 
 Ready to send, answer the call.
 
+      debug 'Answer'
       yield @action 'answer'
 
 * session.fifo.announce (string) Name of the FIFO announce file (attachment to the doc:number_domain document).
@@ -73,6 +89,7 @@ Ready to send, answer the call.
       if fifo.music?
         yield @action 'set', "fifo_music=#{fifo_uri id, fifo.music}"
 
+      debug 'Send to FIFO'
       yield @action 'fifo', "#{fifo_name} in"
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
@@ -83,7 +100,8 @@ Ready to send, answer the call.
         @destination = fifo.voicemail
         return
 
-      @action 'hangup'
+      debug 'Hangup'
+      yield @action 'hangup'
 
 Announce/music download
 =======================
