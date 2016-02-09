@@ -2,6 +2,7 @@
       it 'should load', ->
         for m in [
           'middleware/setup.coffee.md'
+          'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
 
           'middleware/client/setup.coffee.md'

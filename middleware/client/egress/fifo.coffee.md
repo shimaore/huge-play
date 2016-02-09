@@ -45,19 +45,6 @@ The destination matched.
 
       fifo.name ?= "#{fifo_number}"
 
-Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
-
-      fifo_name = "#{@session.number_domain}-#{fifo.name}"
-
-Locate FIFO member: this should look similar to what is done in client/fifo.
-
-      member_data = yield @cfg.prov.get "number:{@session.source}@#{@session.number_domain}"
-      target = member_data.endpoint_via ? @cfg.ingress_target
-      uri = "sip:#{member_data.number}@#{target}"
-      sofia = "sofia/#{@session.sip_profile}/#{uri}"
-
-      member_string = "#{fifo.name} {fifo_member_wait=nowait}#{sofia}"
-
       switch action
 
 Route to FIFO: this should look similar to what is done in client/ingress/fifo.
@@ -71,7 +58,7 @@ Route to FIFO: this should look similar to what is done in client/ingress/fifo.
         when ACTION_LOGIN
           debug 'FIFO: log in'
           yield @action 'answer'
-          yield @api "fifo_member add #{member_string}"
+          yield @fifo_add fifo, @source
           yield @action 'playback', 'ivr/ivr-you_are_now_logged_in.wav'
           yield @action 'hangup'
           return
@@ -79,7 +66,7 @@ Route to FIFO: this should look similar to what is done in client/ingress/fifo.
         when ACTION_LOGOUT
           debug 'FIFO: log out'
           yield @action 'answer'
-          yield @api "fifo_member del #{member_string}"
+          yield @fifo_del fifo, @source
           yield @action 'playback', 'ivr/ivr-you_are_now_logged_out.wav'
           yield @action 'hangup'
           return

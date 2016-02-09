@@ -11,32 +11,6 @@
     '''
     @include = seem ->
 
-Add-Member Function
--------------------
-
-      add_member = seem (member) =>
-
-        debug "add_member #{member}@#{@session.number_domain}"
-
-Members are on-system agents. We locate the matching local-number and build the dial-string from there.
-We only support `endpoint_via` and `cfg.ingress_target` for locating members.
-
-        member_data = yield @cfg.prov
-          .get "number:#{member}@#{@session.number_domain}"
-          .catch (error) ->
-            debug "number:#{member}@#{@session.number_domain} : #{error.stack ? error}"
-            {}
-
-This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
-
-        target = member_data.endpoint_via ? @cfg.ingress_target
-        uri = "sip:#{member_data.number}@#{target}"
-        sofia = "sofia/#{@session.sip_profile}/#{uri}"
-
-        debug "Adding member #{member} to #{fifo_name} as #{sofia}"
-        yield @call.api "fifo_member add #{fifo_name} #{sofia}"
-
-
 FIFO handling
 =============
 
@@ -62,7 +36,7 @@ FIFO handling
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 
-      fifo_name = "#{@session.number_domain}-#{fifo.name}"
+      fifo_name = @fifo_name fifo
 
 FIXME: Replace with e.g. Redis instead of using cfg for this.
 
@@ -72,7 +46,7 @@ FIXME: Replace with e.g. Redis instead of using cfg for this.
 
       if fifo.members? and not @cfg.fifos[fifo_name].loaded
         debug 'Loading fifo members', fifo.members
-        yield Promise.all fifo.members.map add_member
+        yield Promise.all fifo.members.map (n) => @fifo_add fifo, n
         @cfg.fifos[fifo_name].loaded = true
 
 Ready to send, answer the call.
