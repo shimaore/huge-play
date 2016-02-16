@@ -2,7 +2,7 @@
     url = require 'url'
 
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}/middleware/client/egress/post"
+    @name = "#{pkg.name}:middleware:client:egress:post"
     debug = (require 'debug') @name
     assert = require 'assert'
 

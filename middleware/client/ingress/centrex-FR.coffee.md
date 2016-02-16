@@ -1,5 +1,5 @@
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:client:ingress:centrex-france"
+    @name = "#{pkg.name}:middleware:client:ingress:centrex-FR"
     debug = (require 'debug') @name
 
     default_internal_ringback = '%(1500,3500,440)'

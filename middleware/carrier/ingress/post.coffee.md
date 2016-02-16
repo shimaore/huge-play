@@ -1,5 +1,5 @@
     pkg = require '../../../package'
-    @name = "#{pkg.name}/middleware/carrier/egress/post"
+    @name = "#{pkg.name}:middleware:carrier:ingress:post"
     seem = require 'seem'
     @include = seem ->
       return unless @session.direction is 'ingress'

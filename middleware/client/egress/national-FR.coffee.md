@@ -16,7 +16,7 @@ For example:
 See http://www.arcep.fr/index.php?id=interactivenumeros
 
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:client:egress:france"
+    @name = "#{pkg.name}:middleware:client:egress:national-FR"
     debug = (require 'debug') @name
 
     translate_source = (source) ->

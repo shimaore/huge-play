@@ -1,5 +1,5 @@
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:client:egress:centrex-france"
+    @name = "#{pkg.name}:middleware:client:egress:centrex-CH"
     debug = (require 'debug') @name
 
     @include = ->

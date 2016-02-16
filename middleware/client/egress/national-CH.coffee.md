@@ -1,5 +1,5 @@
     pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:client:egress:france"
+    @name = "#{pkg.name}:middleware:client:egress:national-CH"
     debug = (require 'debug') @name
 
     translate_source = (source) ->
