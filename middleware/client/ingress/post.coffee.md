@@ -4,11 +4,12 @@
     @name = "#{pkg.name}:middleware:client:ingress:post"
     debug = (require 'debug') @name
     url = require 'url'
+    tones = require '../tones'
 
 Use fr-ring for default ringback
 
-    default_ringback = '%(1500,3500,440)'
-    default_music = 'tone_stream://%(300,10000,440);loops=-1'
+    default_ringback = tones.fr.ringback
+    default_music = tones.loop tones.fr.waiting
 
 Call-Handler
 ============
@@ -232,6 +233,10 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 
     set_params = seem ->
       debug 'set_params'
+
+      if @session.country? and @session.country of tones
+        @session.ringback ?= tones[@session.country].ringback
+        @session.music ?= tones.loop tones[@session.country].waiting
 
       @session.ringback ?= @cfg.ringback
       @session.ringback ?= default_ringback

@@ -5,8 +5,9 @@
     @name = "#{pkg.name}:middleware:client:egress:post"
     debug = (require 'debug') @name
     assert = require 'assert'
+    tones = require '../tones'
 
-    default_music = 'tone_stream://%(300,10000,440);loops=-1'
+    default_music = tones.loop tones.fr.waiting
 
     @include = seem ->
       return unless @session.direction is 'egress'
@@ -51,6 +52,9 @@ Settings for calling number (see middleware/client/ingress/post.coffee.md):
           'voicemail_settings'
           @session.number.custom_music
         ].join '/'
+
+      if @session.country? and @session.country of tones
+        @session.music ?= tones.loop tones[@session.country].waiting
 
       @session.music ?= @cfg.music
       @session.music ?= default_music

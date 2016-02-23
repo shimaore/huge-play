@@ -1,9 +1,10 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:centrex-CH"
     debug = (require 'debug') @name
+    tones = require '../tones'
 
-    default_internal_ringback = '%(1500,3500,440)'
-    default_internal_music = 'tone_stream://%(300,10000,440);loops=-1'
+    default_internal_ringback = tones.ch.ringback
+    default_internal_music = tones.loop tones.ch.waiting
 
     @include = ->
 
