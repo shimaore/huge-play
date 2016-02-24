@@ -20,6 +20,7 @@ Call-Handler
 
       debug 'Ready',
         dialplan: @session.dialplan
+        country: @session.country
         destination: @destination
         number_domain: @session.number_domain
 
@@ -243,6 +244,10 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 
       @session.music ?= @cfg.music
       @session.music ?= default_music
+
+      debug 'set_params',
+        ringback: @session.ringback
+        music: @session.music
 
 * doc.local_number.endpoint (string) The name of the endpoint where calls for this number should be sent. A matching `endpoint:<endpoint>` record must exist.
 * session.endpoint (object) Data from the called `doc.endpoint` (also known as `doc.dst_endpoint`) record for the local-number's `endpoint`, in an ingress call.
