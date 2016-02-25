@@ -27,6 +27,7 @@
           'middleware/client/ingress/local-number.coffee.md'
           'middleware/client/ingress/post-send.coffee.md'
           'middleware/client/ingress/pre.coffee.md'
+          'middleware/client/ingress/flat-ornament.coffee.md'
           'middleware/client/ingress/send.coffee.md'
           'middleware/client/forward/basic.coffee.md'
           'middleware/client/forward/basic-post.coffee.md'
