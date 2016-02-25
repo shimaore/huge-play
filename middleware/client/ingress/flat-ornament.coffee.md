@@ -28,28 +28,39 @@ Normally conditions are listed first, while actions are listed last, but really 
 
 Applying `not` to an action probably won't do what you expect.
 
+Return true if a command returned `over`, indicating the remaining ornaments in the list should be skipped.
+
       execute = seem (ornament) =>
 
         for statement in ornament
           c = commands[statement.type]
 
-Terminate the statement if the command is invalid.
+Terminate the ornament and continue to the next one, if the command is invalid.
 
-          return unless c?
+          return false unless c?
 
-Otherwise terminate the statement if the command returns true (normal case) or false (if `not` is present).
+Evaluate based on the presence of `params[]` or `param`.
 
           switch
-            when ornament.params?
-              truth = yield c.apply this, ornament.params
-            when ornament.param?
-              truth = yield c.apply this, ornament.param
+            when statement.params?
+              truth = yield c.apply this, statement.params
+            when statement.param?
+              truth = yield c.call this, statement.param
             else
-              truth = yield c.apply this
+              truth = yield c.call this
+
+          if truth is 'over'
+            return true
 
           truth = not truth if statement.not
 
-          return unless truth
+Terminate the ornament and continue to the next one, if any condition or action returned false.
+
+          return false unless truth
+
+If no precondition / postcondition / action returned false, continue to the next ornament.
+
+        return false
 
 Commands
 ========
@@ -61,44 +72,39 @@ Commands
 Actions
 -------
 
-These actions are terminal for the statement and return `false`.
-(Use `not` to make them non-terminal, although that probably won't do what you expect.)
+These actions are terminal for the statement.
 
         accept: ->
           debug 'accept'
-          over = true
-          false
+          'over'
 
-        reject: seem ->
+        reject: seem =>
           debug 'reject'
           yield @respond '486 Decline'
-          false
+          'over'
 
-        announce: seem (message) ->
+        announce: seem (message) =>
           debug 'announce', message
-          over = true
           yield @action 'answer'
           yield @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
           yield @action 'hangup'
-          false
+          'over'
 
-        voicemail: ->
+        voicemail: =>
           debug 'voicemail'
-          over = true
           @session.direction = 'voicemail'
-          false
+          'over'
 
-        forward: (destination) ->
-          debug 'forward'
-          over = true
+        forward: (destination) =>
+          debug 'forward', destination
           @session.reason = 'unspecified'
           @session.direction = 'forward'
           @session.destination = destination
-          false
+          'over'
 
 Other actions must return `true`.
 
-        email: (recipient,template) ->
+        email: (recipient,template) =>
           debug 'email', recipient, template
           # FIXME TODO
           true
@@ -109,7 +115,7 @@ Preconditions
 
 These are best used after `post` is used but before `send` is used.
 
-        source: (source) ->
+        source: (source) =>
           debug 'source', source
           pattern source, @source
 
@@ -119,7 +125,7 @@ Then get some Date object up and running.
 
 Weekday condition
 
-        weekdays: (days...) ->
+        weekdays: (days...) =>
           debug 'weekdays', days...
           now = Moment()
           if @session.timezone?
@@ -128,7 +134,7 @@ Weekday condition
 
 Time condition
 
-        time: (start,end) ->
+        time: (start,end) =>
           debug 'time', start, end
           now = Moment()
           if @session.timezone?
@@ -146,11 +152,13 @@ start: '18:00', end: '08:00'
           else
             start <= now or now <= end
 
-        nighttime: ->
+        nighttime: =>
+          debug 'nighttime'
           # FIXME: check if the @source has nighttime activated
           false
 
-        anonymous: ->
+        anonymous: =>
+          debug 'anonymous'
           @session.caller_privacy
 
 Postconditions
@@ -159,18 +167,22 @@ Postconditions
 These really only apply after the call has gone through `send` (but probably before it goes through `post-send`.)
 They can be used to provide further call treatment, similar to the various `CF..` conditions.
 
-        busy: ->
+        busy: =>
+          debug 'busy'
           @session.reason is 'user-busy'
 
-        unavailable: ->
+        unavailable: =>
+          debug 'unavailable'
           @session.reason is 'unavailable'
 
-        'no-answer': ->
+        'no-answer': =>
+          debug 'no-anwer'
           @session.reason is 'no-answer'
 
 Notice: `failed` here means the call failed to be sent to the user *and* no other CF.. condition handled it (sending to voicemail using `cfnr_voicemail` is not considered a failure for example).
 
-        failed: ->
+        failed: =>
+          debug 'failed'
           @session.call_failed
 
 Pattern
@@ -187,12 +199,17 @@ The pattern's `not` field must
 
       pattern = (p,n) ->
 
-        debug 'invalid pattern', p unless p.match /^(\d|\?|\.\.)+$/
+        unless p.match /^(\d|\?|\.\.)+$/
+          debug 'invalid pattern', p
+          return false
 
-        p.replace /\.\./g, '\d*'
-        p.replace /\?/g, '\d'
+        p = p
+          .replace /\.\./g, '\\d*'
+          .replace /\?/g, '\\d'
 
         r = new RegExp "^#{p}$"
+
+        debug 'pattern', p, r
 
         n.match r
 
@@ -206,11 +223,12 @@ Processing
       debug 'Processing'
 
 The ornaments are simply an array of ornaments which are executed in the order of the array.
-
-      over = false
+If any ornament return `true`, skip the remaining ornaments in the list.
 
       for ornament in ornaments
+        debug 'ornament', ornament
+        over = yield do (ornament) => execute ornament
+        debug 'over', over
         return if over
-        yield do (ornament) => execute ornament
 
       return
