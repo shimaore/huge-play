@@ -10,12 +10,15 @@
       return unless @session.direction is 'ingress'
 
       ornaments = @session.number.ornaments
+      @session.timezone ?= @session.number.timezone
+
+* doc.local_number.timezone (string) Local timezone for doc.local_number.ornaments
 
       return unless ornaments?
 
       debug 'Processing'
 
-An ornament is a list of rules which are evaluated in order. Each rule consists of a preconditions and an action. If the precondition is met, the action is processed.
+The ornaments are simply an array of ornaments which are executed in the order of the array.
 
       over = false
 
@@ -26,11 +29,12 @@ An ornament is a list of rules which are evaluated in order. Each rule consists 
 Execute
 -------
 
-Each ornament is a list of statements, really.
+Each ornament is a list of statements which are executed in order.
 A statement consists of:
-- a `type`
-- optional `param` or `params[]`.
+- a `type` (the command to be executed);
+- optional `param` or `params[]` (parameters for the command);
 - optional `not` (to reverse the outcome).
+Execution continues as long as the outcome of a statement is true.
 
 Normally conditions are listed first, while actions are listed last, but really we don't care.
 
@@ -41,9 +45,12 @@ Applying `not` to an action probably won't do what you expect.
         for statement in ornament
           c = commands[statement.type]
 
-Fail the statement if the command is invalid.
+Terminate the statement if the command is invalid.
 
           return unless c?
+
+Otherwise terminate the statement if the command returns true (normal case) or false (if `not` is present).
+
           switch
             when ornament.params?
               truth = yield c.apply this, ornament.params
@@ -59,12 +66,15 @@ Fail the statement if the command is invalid.
 Commands
 ========
 
+* doc.local_number.ornaments: array of ornaments. Each ornament is a list of statements which are executed in order. Each statement contains three fields: `type`: the command to be executed; optional `param` or `params[]`; optional `not` to reverse the outcome of the statement. Valid types include Preconditions: `source(pattern)`: calling number matches pattern; `weekdays(days...)`: current weekday is one of the listed days; `time(start,end)`: current time is between start and end time, in HH:MM format; `anonymous`: caller requested privacy; Postconditions: `busy`, `unavailable`, `no-answer`, `failed`; Actions: `accept`: send call to customer; `reject`: reject call (no announcement); `announce(message)`: reject call with announcement; `voicemail`: send call to voicemail; `forward(destination)`: forward call to destination. Not implemented yet: `email(recipient,template)` and `nighttime`.
+
       commands =
 
 Actions
 -------
 
 These actions are terminal for the statement and return `false`.
+(Use `not` to make them non-terminal, although that probably won't do what you expect.)
 
         accept: ->
           debug 'accept'
