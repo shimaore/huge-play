@@ -9,22 +9,10 @@
 
       return unless @session.direction is 'ingress'
 
-      ornaments = @session.number.ornaments
-      @session.timezone ?= @session.number.timezone
-
 * doc.local_number.timezone (string) Local timezone for doc.local_number.ornaments
+* session.timezone (string) Local timezone, defaults to doc.local_number.timezone for ingress calls
 
-      return unless ornaments?
-
-      debug 'Processing'
-
-The ornaments are simply an array of ornaments which are executed in the order of the array.
-
-      over = false
-
-      for ornament in ornaments
-        return if over
-        yield do (ornament) => execute ornament
+      @session.timezone ?= @session.number.timezone
 
 Execute
 -------
@@ -207,3 +195,22 @@ The pattern's `not` field must
         r = new RegExp "^#{p}$"
 
         n.match r
+
+Processing
+==========
+
+      ornaments = @session.number.ornaments
+
+      return unless ornaments?
+
+      debug 'Processing'
+
+The ornaments are simply an array of ornaments which are executed in the order of the array.
+
+      over = false
+
+      for ornament in ornaments
+        return if over
+        yield do (ornament) => execute ornament
+
+      return
