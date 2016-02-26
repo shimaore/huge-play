@@ -130,7 +130,7 @@ Weekday condition
           now = Moment()
           if @session.timezone?
             now = now.tz @session.timezone
-          now.weekday() in days
+          now.day() in days
 
 Time condition
 
