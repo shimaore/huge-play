@@ -13,7 +13,7 @@ First-line handler for outbound calls
 Endpoint
 --------
 
-* session.endpoint_name (string) The name of the calling endpoint in an egress call.
+* session.endpoint_name (string) The name of the calling endpoint in an egress call, set from hdr.X-CCNQ3-Endpoint.
 
       @session.endpoint_name = @req.header 'X-CCNQ3-Endpoint'
       unless @session.endpoint_name?
@@ -115,8 +115,8 @@ Location
 This is needed for emergency call routing.
 
 * doc.local_number.location (string) Emergency call routing location.
-* doc.endpoint.location (string) Emergency call routing location (if no doc.local_number.location is provided).
-* hdr:X-CCNQ3-Location (string) Emergency call routing location (set on egress calls).
+* doc.src_endpoint.location (string) Emergency call routing location (if no doc.local_number.location is provided).
+* hdr.X-CCNQ3-Location (string) Emergency call routing location (set on egress calls from doc.local_number.location or doc.src_endpoint.location).
 
       location = @session.number.location
       location ?= @session.endpoint.location

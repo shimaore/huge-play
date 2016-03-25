@@ -51,6 +51,9 @@ This is a simplified version of the sofia-string building code found in middlewa
         uri = "sip:#{destination}@#{target}"
         sofia = "sofia/#{@session.sip_profile}/#{uri}"
 
+* hdr.X-CCNQ3-Endpoint Endpoint name, set when dialing FIFO members.
+* hdr.X-CCNQ3-Number-Domain Number domain name, set when dialing FIFO members.
+
         params = [
           'fifo_member_wait=nowait'
           "sip_h_X-CCNQ3-Endpoint=#{member_data.endpoint}"
