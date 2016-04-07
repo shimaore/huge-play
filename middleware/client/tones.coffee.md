@@ -22,14 +22,16 @@ Basically:
 Annex to ITU Operational Bulletin E.180-2010 -- Suisse (Confédération)
 ======================
 
-Tonalité d'occupation - 425 - 0.5 on 0.5 off
-Tonalité d'encombrement - 425 - 0.2 on 0.2 off
-Tonalité de numérotation - 425 - continu
-Tonalité de numérotation spéciale I - 425+340 - 1.1 on 1.1 off
-Tonalité de numérotation spéciale II - 425 - 0.5 on 0.05 off
-Tonalité de retour d'appel - 425 - 1.0 on 4.0 off
-Tonalité spéciale d'information - 950/1400/1800 - 3x0.333 on 1.0 off
-Tonalité d'appel en attente - 425 - 0.2 on 0.2 off 0.2 on 4.0 off
+[Annex to ITU OB E.180-2010](http://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.180-2010-PDF-F.pdf) indicates:
+
+- Tonalité d'occupation - 425 - 0.5 on 0.5 off
+- Tonalité d'encombrement - 425 - 0.2 on 0.2 off
+- Tonalité de numérotation - 425 - continu
+- Tonalité de numérotation spéciale I - 425+340 - 1.1 on 1.1 off
+- Tonalité de numérotation spéciale II - 425 - 0.5 on 0.05 off
+- Tonalité de retour d'appel - 425 - 1.0 on 4.0 off
+- Tonalité spéciale d'information - 950/1400/1800 - 3x0.333 on 1.0 off
+- Tonalité d'appel en attente - 425 - 0.2 on 0.2 off 0.2 on 4.0 off
 
 Note: The official reference would be Bakom's [RS 784.101.113/1.6](http://www.bakom.admin.ch/org/grundlagen/00563/00564/00666/index.html?lang=fr) which references [ETSI ES 201 970 V1.1.1 (2002-08)](http://www.etsi.org/deliver/etsi_es/201900_201999/201970/01.01.01_60/es_201970v010101p.pdf). Congestion tone esp. is actually 0.25s on / 0.25s off, while Call Waiting is 0.2/0.2/0.2/9.0.
 
