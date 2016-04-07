@@ -31,6 +31,8 @@ Tonalité de retour d'appel - 425 - 1.0 on 4.0 off
 Tonalité spéciale d'information - 950/1400/1800 - 3x0.333 on 1.0 off
 Tonalité d'appel en attente - 425 - 0.2 on 0.2 off 0.2 on 4.0 off
 
+Note: The official reference would be Bakom's [RS 784.101.113/1.6](http://www.bakom.admin.ch/org/grundlagen/00563/00564/00666/index.html?lang=fr) which references [ETSI ES 201 970 V1.1.1 (2002-08)](http://www.etsi.org/deliver/etsi_es/201900_201999/201970/01.01.01_60/es_201970v010101p.pdf). Congestion tone esp. is actually 0.25s on / 0.25s off, while Call Waiting is 0.2/0.2/0.2/9.0.
+
     @ch =
       ringback: '%(1000,4000,425)'
       waiting: '%(200,200,425);%(200,4000,425)'
