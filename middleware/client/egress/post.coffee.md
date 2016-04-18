@@ -18,12 +18,19 @@
         debug 'Missing e164 numbers'
         return @respond '484'
 
+* session.e164_number (object) The doc.global_number record for the source of an outbound call.
+
       @session.e164_number = yield @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
+
+* session.e164_number.fs_variables See doc.global_number.fs_variables
+* doc.global_number (object, optional) Additional FreeSwitch variables to be set on egress calls (for the calling number). These will show up in CDRs on the client side.
 
       if @session.e164_number.fs_variables?
         yield @set @session.e164_number.fs_variables
 
 The URL module parses the SIP username as `auth`.
+
+* hdr.P-Charge-Info Required for egress calls on the client side. A `403 No Charge-Info` SIP error is generated if it is not present. The username part is used to populate session.ccnq_account.
 
       pci = @req.header 'P-Charge-Info'
       unless pci?

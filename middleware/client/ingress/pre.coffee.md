@@ -35,11 +35,16 @@ We retrieve the *global-number* record based on the destination.
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 
+* session.e164_number.fs_variables See doc.global_number.fs_variables
+* doc.global_number (object, optional) Additional FreeSwitch variables to be set on ingress calls (for the called number). These will show up in CDRs on the client side.
+
       if @session.e164_number.fs_variables?
         debug 'Using fs_variables'
         yield @set @session.e164_number.fs_variables
 
+* session.e164_number.voicemail_main See doc.global_number.voicemail_main
 * doc.global_number.voicemail_main (boolean) If true, the number is the main number for access to voicemail (from an external number).
+* session.e164_number.language See doc.global_number.language
 * doc.global_number.language (string) Language-code to use for features, e.g. voicemail.
 
       if @session.e164_number.voicemail_main
