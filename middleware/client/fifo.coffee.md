@@ -46,7 +46,8 @@ FIXME: Replace with e.g. Redis instead of using cfg for this.
 
       if fifo.members? and not @cfg.fifos[fifo_name].loaded
         debug 'Loading fifo members', fifo.members
-        yield Promise.all fifo.members.map (n) => @fifo_add fifo, n
+        for n in fifo.members
+          yield @fifo_add fifo, n
         @cfg.fifos[fifo_name].loaded = true
 
 Ready to send, answer the call.
@@ -65,6 +66,7 @@ Ready to send, answer the call.
 
       debug 'Send to FIFO'
       yield @action 'fifo', "#{fifo_name} in"
+      debug 'Returned from FIFO'
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
 
