@@ -6,6 +6,10 @@
     request = require 'request'
     qs = require 'querystring'
 
+I'm having issues with FIFO and audio after the calls are connected.
+
+    fifo_works = false
+
     @description = '''
       Handles routing to a given FIFO queue.
     '''
@@ -64,8 +68,25 @@ Ready to send, answer the call.
       if fifo.music?
         yield @action 'set', "fifo_music=#{fifo_uri id, fifo.music}"
 
+FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
+
       debug 'Send to FIFO'
-      yield @action 'fifo', "#{fifo_name} in"
+      yield @action 'fifo', "#{fifo_name} in"   if fifo_works
+
+      unless fifo_works
+        if fifo.announce?
+          yield @set ringback: fifo_uri id, fifo.announce
+        if fifo.music?
+          yield @export hold_music: fifo_uri id, fifo.music
+        sofias = fifo.members.map (member,i) => @sofia_string member, [
+            t38_passthru: false
+            leg_timeout: 60
+            leg_delay_start: i*2
+            progress_timeout: 18
+            sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
+          ]
+        yield @action 'bridge', sofias.join ','
+
       debug 'Returned from FIFO'
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).

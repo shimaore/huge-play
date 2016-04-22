@@ -78,7 +78,7 @@ This is a simplified version of the sofia-string building code found in middlewa
             "sip_h_X-CCNQ3-Number-Domain=#{@session.number_domain}"
           ]
 
-          "{#{params.join ','}}#{sofia}"
+          "[#{params.join ','}]#{sofia}"
       }
 
       return
