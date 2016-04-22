@@ -86,6 +86,8 @@ module.exports = renderable (cfg) ->
               for cidr in cidrs
                 node type:'allow', cidr:cidr
       configuration 'fifo.conf', ->
+        settings ->
+          param 'delete-all-outbound-member-on-startup', true
 
       if cfg.cdr?.url?
         configuration name:'json_cdr.conf', ->

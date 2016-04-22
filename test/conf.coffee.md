@@ -88,6 +88,9 @@
         </network-lists>
         </configuration>
         <configuration name="fifo.conf">
+        <settings>
+        <param name="delete-all-outbound-member-on-startup" value="true"/>
+        </settings>
         </configuration>
         <configuration name="sofia.conf">
         <global_settings>
