@@ -49,6 +49,36 @@
 
         respond: (response) ->
           ctx.action 'respond', response
+
+        sofia_string: (number, extra_params = []) ->
+
+          id = "number:#{number}@#{@session.number_domain}"
+
+          number_data = yield @cfg.prov
+            .get id
+            .catch (error) ->
+              debug "#{id} #{error.stack ? error}"
+              {}
+
+          return '' unless number_data.number?
+
+This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
+
+          destination = number_data.number.split('@')[0]
+          target = number_data.endpoint_via ? @cfg.ingress_target
+          uri = "sip:#{destination}@#{target}"
+          sofia = "sofia/#{@session.sip_profile}/#{uri}"
+
+* hdr.X-CCNQ3-Endpoint Endpoint name, set when dialing numbers.
+* hdr.X-CCNQ3-Number-Domain Number domain name, set when dialing numbers.
+
+          params = [
+            extra_params...
+            "sip_h_X-CCNQ3-Endpoint=#{number_data.endpoint}"
+            "sip_h_X-CCNQ3-Number-Domain=#{@session.number_domain}"
+          ]
+
+          "{#{params.join ','}}#{sofia}"
       }
 
       return

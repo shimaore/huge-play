@@ -36,28 +36,7 @@ We only support `endpoint_via` and `cfg.ingress_target` for locating members.
 
         fifo_name = @fifo_name fifo
 
-Locate FIFO member
-
-        member_data = yield @cfg.prov
-          .get "number:#{member}@#{@session.number_domain}"
-          .catch (error) ->
-            debug "number:#{member}@#{@session.number_domain} : #{error.stack ? error}"
-            {}
-
-This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
-
-        destination = member_data.number.split('@')[0]
-        target = member_data.endpoint_via ? @cfg.ingress_target
-        uri = "sip:#{destination}@#{target}"
-        sofia = "sofia/#{@session.sip_profile}/#{uri}"
-
-* hdr.X-CCNQ3-Endpoint Endpoint name, set when dialing FIFO members.
-* hdr.X-CCNQ3-Number-Domain Number domain name, set when dialing FIFO members.
-
-        params = [
-          'fifo_member_wait=nowait'
-          "sip_h_X-CCNQ3-Endpoint=#{member_data.endpoint}"
-          "sip_h_X-CCNQ3-Number-Domain=#{@session.number_domain}"
+        fifo_sofia = @sofia_string member, [
+          'fifo_member_wait=nowait' # Hangup call when call hangs up
         ]
-
-        "#{fifo_name} {#{params.join ','}}#{sofia}"
+        "#{fifo_name} #{fifo_sofia}"
