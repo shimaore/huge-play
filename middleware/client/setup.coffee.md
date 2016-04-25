@@ -10,7 +10,17 @@
 
     @include = ->
 
-      context = @req.variable 'context' # otherwise @data['Caller-Context']
+For example, in `@data` we might get:
+
+```
+'Channel-Context': 'sbc-ingress',
+variable_sofia_profile_name: 'huge-play-sbc-ingress',
+variable_recovery_profile_name: 'huge-play-sbc-ingress',
+```
+
+The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in @session.sip_profile .
+
+      context = @data['Channel-Context']
       unless m = context.match /^(\S+)-(ingress|egress)$/
         debug 'Ignoring malformed context', context
         return

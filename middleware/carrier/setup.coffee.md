@@ -74,7 +74,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
 First start with the same code as client-side.
 
-      context = @req.variable 'context' # otherwise @data['Caller-Context']
+      context = @data['Channel-Context']
       unless m = context.match /^(\S+)-(ingress|egress)$/
         debug 'Ignoring malformed context', context
         return
