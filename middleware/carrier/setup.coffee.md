@@ -74,8 +74,13 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
 First start with the same code as client-side.
 
-      @session.direction = @req.variable 'direction'
-      @session.profile = @req.variable 'profile'
+      context = @req.variable 'context' # otherwise @data['Caller-Context']
+      unless m = context.match /^(\S+)-(ingress|egress)$/
+        debug 'Ignoring malformed context', context
+        return
+
+      @session.direction = m[2]
+      @session.profile = m[1]
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"

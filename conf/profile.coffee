@@ -23,7 +23,7 @@ module.exports = renderable (o) ->
       param name:'inbound-use-callid-as-uuid', value:true
       param name:'outbound-use-uuid-as-callid', value:false
 
-      param name:'dialplan', value:'XML'
+      param name:'dialplan', value:"inline:'socket:127.0.0.1:#{o.socket_port} async full'"
       param name:'context', value:o.context
       param name:'max-proceeding', value:3000
 

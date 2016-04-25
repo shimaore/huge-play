@@ -18,7 +18,6 @@ module.exports = renderable (cfg) ->
     'mod_commands'
     'mod_dptools'
     'mod_loopback'
-    'mod_dialplan_xml'
     'mod_sofia'
     'mod_sndfile'
     'mod_tone_stream'
@@ -184,22 +183,6 @@ module.exports = renderable (cfg) ->
               param 'enable-cacert-check', cfg.httapi_cacert_check ? true
               param 'enable-ssl-verifyhost', cfg.httpapi_verify_host ? true
               param 'timeout', cfg.httapi_timeout ? 120
-
-    section name:'dialplan', ->
-
-      for name, p of the_profiles
-        # cfg.profiles[].socket_port (integer) Port number for the localhost FreeSwitch event-socket server process. This process with receive the direction (`ingress` or `egress`) in the `direction` variable, and the cfg.profiles[] name in the `profile` variable.
-        for direction in ['ingress', 'egress']
-          context name:"#{name}-#{direction}", ->
-            # Note: p.socket_port is defaulted by huge-play:middleware:carrier:setup to cfg.port ? 5702
-            extension name:"socket", ->
-              condition field:'destination_number', expression:'^.+$', ->
-                action application:'multiset', data:"direction=#{direction} profile=#{name}"
-                action application:'socket', data:"127.0.0.1:#{p.socket_port} async full"
-            extension name:'refer', ->
-              condition field:'${sip_refer_to}', expression:'^.+$', ->
-                action application:'multiset', data:"direction=#{direction} profile=#{name}"
-                action application:'socket', data:"127.0.0.1:#{p.socket_port} async full"
 
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
