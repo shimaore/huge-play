@@ -50,7 +50,7 @@
         respond: (response) ->
           ctx.action 'respond', response
 
-        sofia_string: (number, extra_params = []) ->
+        sofia_string: seem (number, extra_params = []) ->
 
           id = "number:#{number}@#{@session.number_domain}"
 

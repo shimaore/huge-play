@@ -36,7 +36,7 @@ We only support `endpoint_via` and `cfg.ingress_target` for locating members.
 
         fifo_name = @fifo_name fifo
 
-        fifo_sofia = @sofia_string member, [
+        fifo_sofia = yield @sofia_string member, [
           'fifo_member_wait=nowait' # Hangup call when call hangs up
         ]
         "#{fifo_name} #{fifo_sofia}"
