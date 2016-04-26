@@ -100,6 +100,7 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         debug 'Send to voicemail'
         @session.direction = 'voicemail'
         @destination = fifo.voicemail
+        yield @validate_local_number()
         return
 
       debug 'Hangup'
