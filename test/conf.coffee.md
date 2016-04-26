@@ -108,7 +108,7 @@
         <param name="sip-port" value="5080"/>
         <param name="bind-params" value="transport=udp"/>
         <param name="apply-inbound-acl" value="default"/>
-        <param name="disable-transfer" value="false"/>
+        <param name="disable-transfer" value="true"/>
         <param name="enable-3pcc" value="false"/>
         <param name="inbound-use-callid-as-uuid" value="true"/>
         <param name="outbound-use-uuid-as-callid" value="false"/>
@@ -139,9 +139,15 @@
         <param name="ext-rtp-ip" value="auto"/>
         <param name="rtp-timeout-sec" value="300"/>
         <param name="rtp-hold-timeout-sec" value="1800"/>
-        <param name="enable-soa" value="false"/>
-        <param name="inbound-bypass-media" value="true"/>
-        <param name="inbound-late-negotiation" value="true"/>
+        <param name="enable-soa" value="true"/>
+        <param name="inbound-bypass-media" value="false"/>
+        <param name="inbound-late-negotiation" value="false"/>
+        <param name="disable-rtp-auto-adjust" value="false"/>
+        <param name="rtp-autoflush-during-bridge" value="true"/>
+        <param name="rtp-autofix-timing" value="false"/>
+        <param name="rtp-rewrite-timestamps" value="false"/>
+        <param name="suppress-cng" value="false"/>
+        <param name="vad" value="none"/>
         <param name="inbound-proxy-media" value="false"/>
         <param name="media-option" value="none"/>
         <param name="inbound-zrtp-passthru" value="false"/>
@@ -158,7 +164,8 @@
         <param name="rfc2833-pt" value="101"/>
         <param name="dtmf-duration" value="200"/>
         <param name="pass-rfc2833" value="true"/>
-        <param name="aggressive-nat-detection" value="false"/>
+        <param name="apply-nat-acl" value="nat.auto"/>
+        <param name="aggressive-nat-detection" value="true"/>
         <param name="stun-enabled" value="false"/>
         <param name="stun-auto-disable" value="true"/>
         </settings>
@@ -205,9 +212,15 @@
         <param name="ext-rtp-ip" value="auto"/>
         <param name="rtp-timeout-sec" value="300"/>
         <param name="rtp-hold-timeout-sec" value="1800"/>
-        <param name="enable-soa" value="false"/>
-        <param name="inbound-bypass-media" value="true"/>
-        <param name="inbound-late-negotiation" value="true"/>
+        <param name="enable-soa" value="true"/>
+        <param name="inbound-bypass-media" value="false"/>
+        <param name="inbound-late-negotiation" value="false"/>
+        <param name="disable-rtp-auto-adjust" value="false"/>
+        <param name="rtp-autoflush-during-bridge" value="true"/>
+        <param name="rtp-autofix-timing" value="false"/>
+        <param name="rtp-rewrite-timestamps" value="false"/>
+        <param name="suppress-cng" value="false"/>
+        <param name="vad" value="none"/>
         <param name="inbound-proxy-media" value="false"/>
         <param name="media-option" value="none"/>
         <param name="inbound-zrtp-passthru" value="false"/>
@@ -224,7 +237,8 @@
         <param name="rfc2833-pt" value="101"/>
         <param name="dtmf-duration" value="200"/>
         <param name="pass-rfc2833" value="true"/>
-        <param name="aggressive-nat-detection" value="false"/>
+        <param name="apply-nat-acl" value="nat.auto"/>
+        <param name="aggressive-nat-detection" value="true"/>
         <param name="stun-enabled" value="false"/>
         <param name="stun-auto-disable" value="true"/>
         </settings>

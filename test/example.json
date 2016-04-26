@@ -16,4 +16,12 @@
   , "host": "127.0.0.1"
   , "io": false
   }
+, "profiles": {
+    "sbc": {
+      "sip_port": 5080
+    , "socket_port": 5721
+    , "media": true
+    , "client": true
+    }
+  }
 }
