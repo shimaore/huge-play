@@ -53,6 +53,8 @@
 
         sofia_string: seem (number, extra_params = []) ->
 
+          debug 'sofia_string', number, extra_params
+
           id = "number:#{number}@#{@session.number_domain}"
 
           number_data = yield @cfg.prov

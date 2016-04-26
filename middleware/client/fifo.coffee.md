@@ -85,13 +85,13 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
 
         sofias = []
         for member,i in fifo.members
-          sofias.push yield @sofia_string member, [
+          sofias.push yield @sofia_string member, ["#{k}=#{v}" for own k,v of {
             t38_passthru: false
             leg_timeout: 60
             leg_delay_start: i*2
             progress_timeout: 18
             sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
-          ]
+          }]
         debug 'bridge', sofias
         yield @action 'bridge', sofias.join ','
 
