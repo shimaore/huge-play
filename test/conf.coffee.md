@@ -243,6 +243,138 @@
         <param name="stun-auto-disable" value="true"/>
         </settings>
         </profile>
+        <profile name="huge-play-voicemail-ingress">
+        <settings>
+        <param name="user-agent-string" value="huge-play-voicemail-ingress-5200"/>
+        <param name="username" value="huge-play-voicemail-ingress"/>
+        <param name="debug" value="2"/>
+        <param name="sip-trace" value="false"/>
+        <param name="sip-ip" value="auto"/>
+        <param name="ext-sip-ip" value="auto"/>
+        <param name="sip-port" value="5200"/>
+        <param name="bind-params" value="transport=udp"/>
+        <param name="apply-inbound-acl" value="default"/>
+        <param name="disable-transfer" value="true"/>
+        <param name="enable-3pcc" value="false"/>
+        <param name="inbound-use-callid-as-uuid" value="true"/>
+        <param name="outbound-use-uuid-as-callid" value="false"/>
+        <param name="dialplan" value="inline:&apos;socket:127.0.0.1:5721 async full&apos;"/>
+        <param name="context" value="voicemail-ingress"/>
+        <param name="max-proceeding" value="3000"/>
+        <param name="forward-unsolicited-mwi-notify" value="false"/>
+        <param name="sip-options-respond-503-on-busy" value="false"/>
+        <param name="timer-T1" value="250"/>
+        <param name="timer-T1X64" value="16000"/>
+        <param name="timer-T2" value="4000"/>
+        <param name="timer-T4" value="5000"/>
+        <param name="log-auth-failures" value="true"/>
+        <param name="accept-blind-auth" value="true"/>
+        <param name="auth-calls" value="false"/>
+        <param name="auth-all-packets" value="false"/>
+        <param name="nonce-ttl" value="60"/>
+        <param name="pass-callee-id" value="false"/>
+        <param name="caller-id-type" value="pid"/>
+        <param name="manage-presence" value="false"/>
+        <param name="manage-shared-appearance" value="false"/>
+        <param name="disable-register" value="true"/>
+        <param name="accept-blind-reg" value="false"/>
+        <param name="NDLB-received-in-nat-reg-contact" value="false"/>
+        <param name="all-reg-options-ping" value="false"/>
+        <param name="nat-options-ping" value="false"/>
+        <param name="rtp-ip" value="auto"/>
+        <param name="ext-rtp-ip" value="auto"/>
+        <param name="rtp-timeout-sec" value="300"/>
+        <param name="rtp-hold-timeout-sec" value="1800"/>
+        <param name="enable-soa" value="false"/>
+        <param name="inbound-bypass-media" value="true"/>
+        <param name="inbound-late-negotiation" value="true"/>
+        <param name="inbound-proxy-media" value="false"/>
+        <param name="media-option" value="none"/>
+        <param name="inbound-zrtp-passthru" value="false"/>
+        <param name="disable-transcoding" value="true"/>
+        <param name="use-rtp-timer" value="true"/>
+        <param name="rtp-timer-name" value="soft"/>
+        <param name="auto-jitterbuffer-msec" value="60"/>
+        <param name="auto-rtp-bugs" value="clear"/>
+        <param name="inbound-codec-prefs" value="PCMA"/>
+        <param name="outbound-codec-prefs" value="PCMA"/>
+        <param name="inbound-codec-negotiation" value="scrooge"/>
+        <param name="renegotiate-codec-on-reinvite" value="true"/>
+        <param name="dtmf-type" value="rfc2833"/>
+        <param name="rfc2833-pt" value="101"/>
+        <param name="dtmf-duration" value="200"/>
+        <param name="pass-rfc2833" value="true"/>
+        <param name="aggressive-nat-detection" value="false"/>
+        <param name="stun-enabled" value="false"/>
+        <param name="stun-auto-disable" value="true"/>
+        </settings>
+        </profile>
+        <profile name="huge-play-voicemail-egress">
+        <settings>
+        <param name="user-agent-string" value="huge-play-voicemail-egress-15200"/>
+        <param name="username" value="huge-play-voicemail-egress"/>
+        <param name="debug" value="2"/>
+        <param name="sip-trace" value="false"/>
+        <param name="sip-ip" value="auto"/>
+        <param name="ext-sip-ip" value="auto"/>
+        <param name="sip-port" value="15200"/>
+        <param name="bind-params" value="transport=udp"/>
+        <param name="apply-inbound-acl" value="default"/>
+        <param name="disable-transfer" value="true"/>
+        <param name="enable-3pcc" value="false"/>
+        <param name="inbound-use-callid-as-uuid" value="true"/>
+        <param name="outbound-use-uuid-as-callid" value="false"/>
+        <param name="dialplan" value="inline:&apos;socket:127.0.0.1:5721 async full&apos;"/>
+        <param name="context" value="voicemail-egress"/>
+        <param name="max-proceeding" value="3000"/>
+        <param name="forward-unsolicited-mwi-notify" value="false"/>
+        <param name="sip-options-respond-503-on-busy" value="false"/>
+        <param name="timer-T1" value="250"/>
+        <param name="timer-T1X64" value="16000"/>
+        <param name="timer-T2" value="4000"/>
+        <param name="timer-T4" value="5000"/>
+        <param name="log-auth-failures" value="true"/>
+        <param name="accept-blind-auth" value="true"/>
+        <param name="auth-calls" value="false"/>
+        <param name="auth-all-packets" value="false"/>
+        <param name="nonce-ttl" value="60"/>
+        <param name="pass-callee-id" value="false"/>
+        <param name="caller-id-type" value="pid"/>
+        <param name="manage-presence" value="false"/>
+        <param name="manage-shared-appearance" value="false"/>
+        <param name="disable-register" value="true"/>
+        <param name="accept-blind-reg" value="false"/>
+        <param name="NDLB-received-in-nat-reg-contact" value="false"/>
+        <param name="all-reg-options-ping" value="false"/>
+        <param name="nat-options-ping" value="false"/>
+        <param name="rtp-ip" value="auto"/>
+        <param name="ext-rtp-ip" value="auto"/>
+        <param name="rtp-timeout-sec" value="300"/>
+        <param name="rtp-hold-timeout-sec" value="1800"/>
+        <param name="enable-soa" value="false"/>
+        <param name="inbound-bypass-media" value="true"/>
+        <param name="inbound-late-negotiation" value="true"/>
+        <param name="inbound-proxy-media" value="false"/>
+        <param name="media-option" value="none"/>
+        <param name="inbound-zrtp-passthru" value="false"/>
+        <param name="disable-transcoding" value="true"/>
+        <param name="use-rtp-timer" value="true"/>
+        <param name="rtp-timer-name" value="soft"/>
+        <param name="auto-jitterbuffer-msec" value="60"/>
+        <param name="auto-rtp-bugs" value="clear"/>
+        <param name="inbound-codec-prefs" value="PCMA"/>
+        <param name="outbound-codec-prefs" value="PCMA"/>
+        <param name="inbound-codec-negotiation" value="scrooge"/>
+        <param name="renegotiate-codec-on-reinvite" value="true"/>
+        <param name="dtmf-type" value="rfc2833"/>
+        <param name="rfc2833-pt" value="101"/>
+        <param name="dtmf-duration" value="200"/>
+        <param name="pass-rfc2833" value="true"/>
+        <param name="aggressive-nat-detection" value="false"/>
+        <param name="stun-enabled" value="false"/>
+        <param name="stun-auto-disable" value="true"/>
+        </settings>
+        </profile>
         </profiles>
         </configuration>
         <configuration name="httapi.conf">

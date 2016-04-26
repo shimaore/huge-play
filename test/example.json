@@ -23,5 +23,9 @@
     , "media": true
     , "client": true
     }
+  , "voicemail": {
+      "sip_port": 5200
+    , "socket_port": 5721
+    }
   }
 }
