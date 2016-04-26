@@ -2,6 +2,7 @@
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:setup"
+    debug = (require 'debug') @name
     assert = require 'assert'
 
     @web = ->

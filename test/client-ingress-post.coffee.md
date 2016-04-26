@@ -4,6 +4,7 @@
 
     describe 'client-ingress-post', ->
       m = require '../middleware/client/ingress/post'
+      s = require '../middleware/setup'
 
       cfg =
         prov:
@@ -30,6 +31,7 @@
           action: -> Promise.resolve null
           set: -> Promise.resolve null
           export: -> Promise.resolve null
+        s.include.call ctx, ctx
         m.include
           .call ctx
           .then ->
