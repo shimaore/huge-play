@@ -82,7 +82,10 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
           yield @set ringback: fifo_uri id, fifo.announce
         if fifo.music?
           yield @export hold_music: fifo_uri id, fifo.music
-        sofias = fifo.members.map (member,i) => @sofia_string member, [
+
+        sofias = []
+        for member,i in fifo.members
+          sofias.push yield @sofia_string member, [
             t38_passthru: false
             leg_timeout: 60
             leg_delay_start: i*2
