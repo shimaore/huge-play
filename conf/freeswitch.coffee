@@ -150,6 +150,7 @@ module.exports = renderable (cfg) ->
             # cfg.profiles[].sip_port (integer) The SIP port for the ingress profile defaults to the profile's cfg.profiles[].ingress_sip_port or the cfg.profiles[].sip_port value. The SIP port for the egress profile defaults to the profile's cfg.profiles[].egress_sip_port, or 10000 plus the ingress SIP port.
             # cfg.profiles[].ingress_sip_port (integer) Ingress SIP port. (default: cfg.profiles[].sip_port )
             # cfg.profiles[].egress_sip_port (integer) Egress SIP port. (default: 10000 + the Ingress SIP port )
+            # cfg.profiles[].client (boolean) if true, transfers (REFER) are allowed on the egress (client-facing) profile. Default: false.
 
             # Ingress profile (carrier-side) is at port `sip_port`.
 
@@ -163,6 +164,7 @@ module.exports = renderable (cfg) ->
             q.name = q.context = "#{name}-egress"
             q.sip_port = p.egress_sip_port ? 10000 + q.sip_port
             q.acl = q.name if cfg.acl_per_profile
+            q.disable_transfer = q.client isnt true
             profile_module.call L, q
 
       configuration name:'httapi.conf', ->
