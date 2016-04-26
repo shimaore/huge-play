@@ -17,7 +17,7 @@ module.exports = renderable (o) ->
       param name:'bind-params', value:'transport=udp' # tcp
 
       param name:'apply-inbound-acl', value:o.acl
-      param name:'disable-transfer', value:false
+      param name:'disable-transfer', value:false  # FIXME this should only be allowed on the customer-facing side
       param name:'enable-3pcc', value:false
 
       param name:'inbound-use-callid-as-uuid', value:true
