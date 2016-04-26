@@ -49,5 +49,6 @@
               linger: -> Promise.resolve null
             req:
               variable: -> null
-            data: {}
+            data:
+              'Channel-Context': 'sbc-ingress'
           (require "../#{m}").include.call ctx, ctx

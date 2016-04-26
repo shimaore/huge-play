@@ -46,7 +46,6 @@
         <load module="mod_commands"/>
         <load module="mod_dptools"/>
         <load module="mod_loopback"/>
-        <load module="mod_dialplan_xml"/>
         <load module="mod_sofia"/>
         <load module="mod_sndfile"/>
         <load module="mod_tone_stream"/>
@@ -109,11 +108,11 @@
         <param name="sip-port" value="5080"/>
         <param name="bind-params" value="transport=udp"/>
         <param name="apply-inbound-acl" value="default"/>
-        <param name="disable-transfer" value="true"/>
+        <param name="disable-transfer" value="false"/>
         <param name="enable-3pcc" value="false"/>
         <param name="inbound-use-callid-as-uuid" value="true"/>
         <param name="outbound-use-uuid-as-callid" value="false"/>
-        <param name="dialplan" value="XML"/>
+        <param name="dialplan" value="inline:&apos;socket:127.0.0.1:5721 async full&apos;"/>
         <param name="context" value="sbc-ingress"/>
         <param name="max-proceeding" value="3000"/>
         <param name="forward-unsolicited-mwi-notify" value="false"/>
@@ -175,11 +174,11 @@
         <param name="sip-port" value="15080"/>
         <param name="bind-params" value="transport=udp"/>
         <param name="apply-inbound-acl" value="default"/>
-        <param name="disable-transfer" value="true"/>
+        <param name="disable-transfer" value="false"/>
         <param name="enable-3pcc" value="false"/>
         <param name="inbound-use-callid-as-uuid" value="true"/>
         <param name="outbound-use-uuid-as-callid" value="false"/>
-        <param name="dialplan" value="XML"/>
+        <param name="dialplan" value="inline:&apos;socket:127.0.0.1:5721 async full&apos;"/>
         <param name="context" value="sbc-egress"/>
         <param name="max-proceeding" value="3000"/>
         <param name="forward-unsolicited-mwi-notify" value="false"/>
@@ -248,36 +247,6 @@
         </profile>
         </profiles>
         </configuration>
-        </section>
-        <section name="dialplan">
-        <context name="sbc-ingress">
-        <extension name="socket">
-        <condition field="destination_number" expression="^.+$">
-        <action application="multiset" data="direction=ingress profile=sbc"/>
-        <action application="socket" data="127.0.0.1:5721 async full"/>
-        </condition>
-        </extension>
-        <extension name="refer">
-        <condition field="${sip_refer_to}" expression="^.+$">
-        <action application="multiset" data="direction=ingress profile=sbc"/>
-        <action application="socket" data="127.0.0.1:5721 async full"/>
-        </condition>
-        </extension>
-        </context>
-        <context name="sbc-egress">
-        <extension name="socket">
-        <condition field="destination_number" expression="^.+$">
-        <action application="multiset" data="direction=egress profile=sbc"/>
-        <action application="socket" data="127.0.0.1:5721 async full"/>
-        </condition>
-        </extension>
-        <extension name="refer">
-        <condition field="${sip_refer_to}" expression="^.+$">
-        <action application="multiset" data="direction=egress profile=sbc"/>
-        <action application="socket" data="127.0.0.1:5721 async full"/>
-        </condition>
-        </extension>
-        </context>
         </section>
         <section name="phrases">
         <macros>
