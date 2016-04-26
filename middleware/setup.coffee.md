@@ -79,6 +79,33 @@ This is a simplified version of the sofia-string building code found in middlewa
           ]
 
           "[#{params.join ','}]#{sofia}"
+
+        validate_local_number: seem ->
+
+Retrieve number data.
+
+* session.number (object) The record of the destination number interpreted as a local-number in `session.number_domain`.
+* doc.local_number.disabled (boolean) If true the record is not used.
+
+          dst_number = "#{@destination}@#{@session.number_domain}"
+          @session.number = yield @cfg.prov.get("number:#{dst_number}").catch (error) -> {disabled:true,error}
+
+          if @session.number.error?
+            debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
+            return @respond '486 Not Found'
+
+          debug "Got dst_number #{dst_number}", @session.number
+
+          if @session.number.disabled
+            debug "Number #{dst_number} is disabled"
+            return @respond '486 Administratively Forbidden' # was 403
+
+Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
+
+          @session.endpoint_name = @session.number.endpoint
+
+          dst_number
+
       }
 
       return
