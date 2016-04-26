@@ -74,6 +74,10 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
       yield @action 'fifo', "#{fifo_name} in"   if fifo_works
 
       unless fifo_works
+        yield @set
+          continue_on_fail: true
+          hangup_after_bridge: false
+
         if fifo.announce?
           yield @set ringback: fifo_uri id, fifo.announce
         if fifo.music?
@@ -85,6 +89,7 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
             progress_timeout: 18
             sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
           ]
+        debug 'bridge', sofias
         yield @action 'bridge', sofias.join ','
 
       debug 'Returned from FIFO'
