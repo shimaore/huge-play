@@ -58,6 +58,14 @@ Ready to send, answer the call.
 
       debug 'Answer'
       yield @action 'answer'
+      call_is_answered = true
+
+      @export
+        t38_passthru: false
+
+Basically if the pre_answer we should wait; once the call is answered we won't be getting any more ACK, though.
+
+        sip_wait_for_aleg_ack: not call_is_answered
 
 * session.fifo.announce (string) Name of the FIFO announce file (attachment to the doc:number_domain document).
 * session.fifo.music (string) Name of the FIFO music file (attachment to the doc:number_domain document).
@@ -90,12 +98,23 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
             leg_timeout: 60
             leg_delay_start: i*2
             progress_timeout: 18
-            sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
           }]
         debug 'bridge', sofias
-        yield @action 'bridge', sofias.join ','
+        res = yield @action 'bridge', sofias.join ','
 
       debug 'Returned from FIFO'
+
+      unless fifo_works
+        data = res.body
+        cause = data?.variable_last_bridge_hangup_cause
+        cause ?= data?.variable_originate_disposition
+
+        debug "FIFO returned with cause #{cause}"
+
+        if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
+          debug "Successful call when routing FIFO #{fifo_name} through #{sofias.join ','}"
+          yield @action 'hangup'
+          return
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
 
