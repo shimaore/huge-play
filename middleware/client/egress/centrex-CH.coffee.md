@@ -8,6 +8,8 @@
       return unless @session.dialplan is 'centrex'
       return unless @session.country is 'ch'
 
+      debug 'Start'
+
       @session.centrex_external_line_prefix = '9'
 
       switch

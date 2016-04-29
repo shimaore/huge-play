@@ -22,5 +22,11 @@ FIXME the original URI part should be the Request-URI per RFC5806
       yield @export
         sip_h_Diversion: "<sip:#{@destination}@#{@cfg.host ? hostname()}>;reason=#{@session.reason}"
 
-      debug 'OK'
+      debug 'OK',
+        'session.outbound_route': @session.outbound_route
+        'session.direction': @session.direction
+        'session.forwarding': @session.forwarding
+        'session.source': @session.source
+        'source': @source
+        'destination': @destination
       return
