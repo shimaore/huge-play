@@ -106,7 +106,21 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
       data = res.body
       debug 'Returned from FIFO', data
 
-      xfer = data.variable_att_xfer_callee_id_number
+Available parameters related to transfer are (in the case `bridge` is used):
+- `variable_transfer_source` (string)
+- `Caller-Transfer-Source` (string)
+- `variable_transfer_history` (string or array)
+
+Blind-transfer:
+- `variable_transfer_history`: `"1461931135:41606813-d6c0-4bf9-af49-b2017c23ab7c:bl_xfer:endless_playback:http://(nohead=true)127.0.0.1:5714/fifo/number_domain%3Atest.centrex.phone..."`
+
+Attended-transfer:
+- `variable_transfer_history`: `[ "1461928571:4edd3fa0-8725-41a4-9322-d1e6b636a913:att_xfer:10@test.centrex.phone../33643482771@178.250.209.67", "1461928571:017ae036-cfdb-4e35-9bd8-0686db3897a0:uuid_br:36093e6f-cc71-484e-8cc7-eb70d42c10be" ]`
+
+The first number in those strings is the timestamp in seconds.
+In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
+
+      xfer = data.variable_transfer_history
       if xfer?
         debug 'Call was transfered', xfer
         return
