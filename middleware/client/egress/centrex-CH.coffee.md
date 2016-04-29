@@ -31,7 +31,7 @@ Keep @session.direction and @session.country.
           debug 'External call'
           @session.dialplan = 'national'
           @destination = m[1]
-          @source = @session.asserted
+          @source = @session.asserted ? @session.number.asserted ? @source
           debug 'External call', {@source,@destination}
           return
 
