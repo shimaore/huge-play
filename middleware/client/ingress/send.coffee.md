@@ -156,7 +156,7 @@ Alternatives for routing:
 - `sip_network_destination`
 - `;fs_path=`
 
-        @session.parameters =
+        @session.sofia_parameters =
           sip_network_destination: endpoint.endpoint
         debug 'cfnr: fallback to endpoint'
         return send.call this
