@@ -79,9 +79,10 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
 
       debug 'Send to FIFO'
-      yield @action 'fifo', "#{fifo_name} in"   if fifo_works
+      if fifo_works
+        res = yield @action 'fifo', "#{fifo_name} in"
 
-      unless fifo_works
+      else
         yield @set
           continue_on_fail: true
           hangup_after_bridge: false
@@ -102,10 +103,15 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         debug 'bridge', sofias
         res = yield @action 'bridge', sofias.join ','
 
-      debug 'Returned from FIFO'
+      data = res.body
+      debug 'Returned from FIFO', data
+
+      xfer = data.variable_att_xfer_callee_id_number
+      if xfer?
+        debug 'Call was transfered', xfer
+        return
 
       unless fifo_works
-        data = res.body
         cause = data?.variable_last_bridge_hangup_cause
         cause ?= data?.variable_originate_disposition
 
