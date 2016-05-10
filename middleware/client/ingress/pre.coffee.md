@@ -53,5 +53,9 @@ The global number might contain additional FreeSwitch variables. Load these extr
         @destination = 'main'
         @session.language = @session.e164_number.language
 
+* doc.global_number.voicemail_number_domain (string) the number-domain for access to voicemail (from an external number).
+
+        @session.number_domain = @session.e164_number.voicemail_number_domain
+
       debug 'OK'
       return
