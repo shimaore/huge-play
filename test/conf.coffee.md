@@ -1151,6 +1151,22 @@
         <action function="phrase" data="$3 pronounced" phrase="say"/>
         </match>
         </input>
+        <input pattern="^([0-9#*]):([0-9#*]):([0-9#*]):([0-9#*])$" break_on_match="true">
+        <match>
+        <action function="play-file" data="voicemail/vm-listen_to_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$1 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-save_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$2 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-rerecord.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$3 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-to_forward.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$4 pronounced" phrase="say"/>
+        </match>
+        </input>
         </macro>
         <macro name="voicemail_record_urgent_check">
         <input pattern="^([0-9#*]):([0-9#*])$" break_on_match="true">
@@ -2130,6 +2146,22 @@
         <action function="play-file" data="voicemail/vm-rerecord.wav"/>
         <action function="play-file" data="voicemail/vm-press.wav"/>
         <action function="phrase" data="$3 pronounced" phrase="say"/>
+        </match>
+        </input>
+        <input pattern="^([0-9#*]):([0-9#*]):([0-9#*]):([0-9#*])$" break_on_match="true">
+        <match>
+        <action function="play-file" data="voicemail/vm-listen_to_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$1 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-save_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$2 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-rerecord.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$3 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-to_forward.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$4 pronounced" phrase="say"/>
         </match>
         </input>
         </macro>
@@ -3185,6 +3217,22 @@
         <action function="phrase" data="$3 pronounced" phrase="say"/>
         </match>
         </input>
+        <input pattern="^([0-9#*]):([0-9#*]):([0-9#*]):([0-9#*])$" break_on_match="true">
+        <match>
+        <action function="play-file" data="voicemail/vm-listen_to_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$1 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-save_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$2 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-rerecord.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$3 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-to_forward.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$4 pronounced" phrase="say"/>
+        </match>
+        </input>
         </macro>
         <macro name="voicemail_record_urgent_check">
         <input pattern="^([0-9#*]):([0-9#*])$" break_on_match="true">
@@ -4236,6 +4284,22 @@
         <action function="play-file" data="voicemail/vm-rerecord.wav"/>
         <action function="play-file" data="voicemail/vm-press.wav"/>
         <action function="phrase" data="$3 pronounced" phrase="say"/>
+        </match>
+        </input>
+        <input pattern="^([0-9#*]):([0-9#*]):([0-9#*]):([0-9#*])$" break_on_match="true">
+        <match>
+        <action function="play-file" data="voicemail/vm-listen_to_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$1 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-save_recording.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$2 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-rerecord.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$3 pronounced" phrase="say"/>
+        <action function="play-file" data="voicemail/vm-to_forward.wav"/>
+        <action function="play-file" data="voicemail/vm-press.wav"/>
+        <action function="phrase" data="$4 pronounced" phrase="say"/>
         </match>
         </input>
         </macro>
