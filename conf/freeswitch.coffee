@@ -142,6 +142,7 @@ module.exports = renderable (cfg) ->
             p.inbound_codec ?= 'PCMA'
             p.outbound_codec ?= 'PCMA'
             p.acl ?= 'default'
+            p.sip_trace ?= false
 
             q = {}
             q[k] = v for own k,v of p

@@ -8,7 +8,7 @@ module.exports = renderable (o) ->
       param name:'user-agent-string', value:"#{pkg.name}-#{o.name}-#{o.sip_port}"
       param name:'username', value:"#{pkg.name}-#{o.name}"
       param name:'debug', value:2
-      param name:'sip-trace', value:false
+      param name:'sip-trace', value:o.sip_trace
 
       # SIP
       param name:'sip-ip', value:o.local_ip
