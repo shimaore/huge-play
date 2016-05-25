@@ -18,6 +18,15 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.linger()
 
+The `statistics` object is provided by `thinkable-ducks`.
+
+      unless @statistics? and @report?
+        debug 'cdr: improper environment'
+        return
+
+      @statistics.add 'incoming-calls'
+      @report state: 'incoming-call'
+
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
         debug "CDR: Channel Hangup Complete", res
@@ -33,15 +42,9 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
           flow_bill:      data.variable_flow_billmsec
         debug "CDR: Channel Hangup Complete", report
 
-The `statistics` object is provided by `thinkable-ducks`.
-
         for own k,v of report
           @statistics.add k, v
 
-        @statistics.emit 'call',
-          state: 'end'
-          call: @call.uuid
-          source: @source
-          destination: @destination
-          data: report
+Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
+        @report state: 'end', data: report
