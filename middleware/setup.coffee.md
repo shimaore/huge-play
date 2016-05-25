@@ -86,6 +86,7 @@ We assume the room names match record IDs.
         respond: (response) ->
           @statistics?.add ['immediate-response',response]
           @report state: 'immediate-response', response: response
+          @session.first_response_was ?= response
 
           if @session.alternate_response?
             @session.alternate_response response
