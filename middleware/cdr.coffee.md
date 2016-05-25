@@ -48,3 +48,5 @@ The `statistics` object is provided by `thinkable-ducks`.
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
         @report state: 'end', data: report
+
+      return

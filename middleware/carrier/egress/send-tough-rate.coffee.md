@@ -16,3 +16,7 @@ Compatibility layer between `huge-play` and `tough-rate`: send out a `huge-play`
         egress_target: egress_target
 
       @sendto "sip:#{@destination}@#{egress_target}", @session.sip_profile
+
+Make sute this gets processed by tough-rate.
+
+      @session.direction = 'lcr'
