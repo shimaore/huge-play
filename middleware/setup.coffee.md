@@ -84,7 +84,13 @@ We assume the room names match record IDs.
             yield ctx.export k,v for own k,v of name
 
         respond: (response) ->
-          ctx.action 'respond', response
+          @statistics?.add ['immediate-response',response]
+          @report state: 'immediate-response', response: response
+
+          if @session.alternate_response?
+            @session.alternate_response response
+          else
+            ctx.action 'respond', response
 
         sofia_string: seem (number, extra_params = []) ->
 
