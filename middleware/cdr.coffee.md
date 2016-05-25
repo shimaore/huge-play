@@ -6,6 +6,18 @@
 
     @include = ->
 
+Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
+
+      @call.once 'cleanup_linger'
+      .then seem =>
+        debug "CDR: Linger: pausing"
+        yield Promise.delay 4000
+        debug "CDR: Linger: exit"
+        yield @call.exit().catch (error) ->
+          debug "exit: #{error}"
+
+      @call.linger()
+
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
         debug "CDR: Channel Hangup Complete", res
@@ -33,14 +45,3 @@ The `statistics` object is provided by `thinkable-ducks`.
           destination: @destination
           data: report
 
-Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
-
-      @call.once 'cleanup_linger'
-      .then seem =>
-        debug "CDR: Linger: pausing"
-        yield Promise.delay 4000
-        debug "CDR: Linger: exit"
-        yield @call.exit().catch (error) ->
-          debug "exit: #{error}"
-
-      @call.linger()
