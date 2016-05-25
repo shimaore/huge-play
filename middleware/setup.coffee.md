@@ -21,6 +21,41 @@
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
 
+`@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
+
+        _in: ->
+
+Add any endpoint- or number- specific dispatch room (this allows end-users to receive events for endpoints and numbers they are authorized to monitor).
+
+          _in = []
+          push_in = (room) ->
+            return if not room? or room in _in
+            _in.push room
+
+We assume the room names match record IDs.
+
+          push_in @session.endpoint?._id
+          push_in ['endpoint',@session.number?.endpoint].join ':'
+          push_in @session.number?._id
+          push_in @session.e164_number?._id
+
+          _in
+
+        report: (o) ->
+          unless @call? and @session? and @statistics?
+            debug 'report: improper environment'
+            return
+
+          o.call ?= @call.uuid
+          o.source ?= @source
+          o.destination ?= @destination
+          o.direction ?= @session.direction
+          o.dialplan ?= @session.dialplan
+          o.country ?= @session.country
+          o.number_domain ?= @session.number_domain
+          o._in ?= @_in()
+          @statistics?.emit 'call', o
+
         set: seem (name,value) ->
           return unless name?
           if typeof name is 'string'
