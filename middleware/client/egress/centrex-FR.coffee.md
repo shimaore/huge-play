@@ -37,7 +37,7 @@ Keep @session.direction and @session.country.
 
 Voicemail.
 
-        when @destination is '*86'
+        when @destination in ['*86','786']
           debug 'Voicemail'
           @session.direction = 'voicemail'
           @destination = 'inbox'
