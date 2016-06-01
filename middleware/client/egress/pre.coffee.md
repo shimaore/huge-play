@@ -128,6 +128,7 @@ This is needed for emergency call routing.
       location ?= ''
       yield @set
         'sip_h_X-CCNQ3-Location': location
+      @session.emergency_location = location
 
 Privacy
 -------
