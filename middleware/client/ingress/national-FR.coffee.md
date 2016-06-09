@@ -37,6 +37,11 @@ Rewrite source
 
 from: national number
 
+ARCEP, décision 2012-0856 au VI.1
+
+        when $ = @source.match /^3389/
+          @respond '484'
+
         when $ = @source.match /^33([0-9]+)$/
           @session.ccnq_from_e164 = @source
           @source = "0#{$[1]}"
