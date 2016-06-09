@@ -76,11 +76,11 @@ decision ARCEP 06-0535 + 00-0536
 
 mobiles-guadeloupe
 
-        { match: /^(0|\+33)(690.*)$/, now: ($) -> "590#{$[2]}" }
+        { match: /^(0|\+33)(69[01].*)$/, now: ($) -> "590#{$[2]}" }
 
 mobiles-reunion
 
-        { match: /^(0|\+33)(692.*)$/, now: ($) -> "262#{$[2]}" }
+        { match: /^(0|\+33)(69[23].*)$/, now: ($) -> "262#{$[2]}" }
 
 mobiles-guyane
 
@@ -88,7 +88,7 @@ mobiles-guyane
 
 mobiles-martinique
 
-        { match: /^(0|\+33)(696.*)$/, now: ($) -> "596#{$[2]}" }
+        { match: /^(0|\+33)(69[67].*)$/, now: ($) -> "596#{$[2]}" }
 
 other, fixes
 fixes-guadeloupe
@@ -115,19 +115,19 @@ fixes-stpierre
 ARCEP 04-0847
 nongeo-guadeloupe
 
-        { match: /^(0|\+33)(876[01].*)$/, now: ($) -> "590#{$[2]}" }
+        { match: /^(0|\+33)(876[01].*|976[018])$/, now: ($) -> "590#{$[2]}" }
 
 nongeo-reunion
 
-        { match: /^(0|\+33)(876[23].*)$/, now: ($) -> "262#{$2}" }
+        { match: /^(0|\+33)(876[23].*|976[239])$/, now: ($) -> "262#{$2}" }
 
 nongeo-guyane
 
-        { match: /^(0|\+33)(876[4].*)$/, now: ($) -> "594#{$[2]}" }
+        { match: /^(0|\+33)(876[4].*|976[45])$/, now: ($) -> "594#{$[2]}" }
 
 nongeo-martinique
 
-        { match: /^(0|\+33)(876[67].*)$/, now: ($) -> "596#{$[2]}" }
+        { match: /^(0|\+33)(876[67].*|976[67])$/, now: ($) -> "596#{$[2]}" }
 
 geographic, non-geographic, mobile, or service
 
