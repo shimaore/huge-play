@@ -236,6 +236,10 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 
       @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
 
+      @set
+        ccnq_endpoint: @session.number.endpoint
+        ccnq_endpoint_json: JSON.stringify @session.endpoint
+
 * doc.local_number.dialog_timer (number) Maximum duration of a call for this local-number.
 * doc.local_number.inv_timer (number) Maximum progress duration for this local-number. Typically this is the duration before the call is sent to voicemail.
 

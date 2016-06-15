@@ -28,6 +28,10 @@ Endpoint
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
 
+      @set
+        ccnq_endpoint: @session.endpoint_name
+        ccnq_endpoint_json: JSON.stringify @session.endpoint
+
 Outbound-route
 --------------
 
