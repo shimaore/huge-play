@@ -1,6 +1,5 @@
     describe 'Modules', ->
-      it 'should load', ->
-        for m in [
+      list = [
           'middleware/setup.coffee.md'
           'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
@@ -39,10 +38,13 @@
           'middleware/carrier/ingress/post.coffee.md'
           'middleware/carrier/ingress/send.coffee.md'
         ]
-          require "../#{m}"
+
+      unit = (m) ->
+        it "should load #{m}", ->
           ctx =
             cfg:
               sip_profiles:{}
+              prefix_admin: ''
             session:{}
             call:
               once: -> Promise.resolve null
@@ -51,4 +53,9 @@
               variable: -> null
             data:
               'Channel-Context': 'sbc-ingress'
-          (require "../#{m}").include.call ctx, ctx
+          M = require "../#{m}"
+          M.server_pre?.call ctx, ctx
+          M.include.call ctx, ctx
+
+      for m in list
+        unit m
