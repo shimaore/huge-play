@@ -68,6 +68,8 @@ Settings for calling number (see middleware/client/ingress/post.coffee.md):
 
 Set parameters
 
+      @session.cdr_direction = @session.direction
+
       yield @set
 
 These are injected so that they may eventually show up in CDRs.

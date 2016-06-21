@@ -6,6 +6,8 @@
       return unless @session.direction is 'egress'
       ccnq_username = @req.header 'CCNQ3-Registrant-Username'
 
+      @session.cdr_direction = @session.direction
+
       yield @set
         ccnq_direction: @session.direction
         ccnq_profile: @session.profile

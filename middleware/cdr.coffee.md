@@ -29,10 +29,13 @@ The `statistics` object is provided by `thinkable-ducks`.
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
-        debug "CDR: Channel Hangup Complete", res
+        debug "Channel Hangup Complete", res
+
+* session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
         data = res.body
         report =
+          direction:      @session.cdr_direction
           duration:       data.variable_mduration
           billable:       data.variable_billmsec
           progress:       data.variable_progressmsec

@@ -253,6 +253,8 @@ Note: tough-rate uses `dialog_timeout` for this (which isn't on the wiki).
 
       yield @action 'sched_hangup', "+#{dlg_timeout}"
 
+      @session.cdr_direction = @session.direction
+
       yield @set
 
 These are injected so that they may eventually show up in CDRs.

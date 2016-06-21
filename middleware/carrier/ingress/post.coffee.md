@@ -4,6 +4,8 @@
     @include = seem ->
       return unless @session.direction is 'ingress'
 
+      @session.cdr_direction = @session.direction
+
       yield @set
         ccnq_direction: @session.direction
         ccnq_profile: @session.profile
