@@ -1,3 +1,4 @@
+    seem = require 'seem'
     describe 'Modules', ->
       list = [
           'middleware/setup.coffee.md'
@@ -40,7 +41,7 @@
         ]
 
       unit = (m) ->
-        it "should load #{m}", ->
+        it "should load #{m}", seem ->
           ctx =
             cfg:
               sip_profiles:{}
@@ -54,8 +55,8 @@
             data:
               'Channel-Context': 'sbc-ingress'
           M = require "../#{m}"
-          M.server_pre?.call ctx, ctx
-          M.include.call ctx, ctx
+          yield M.server_pre?.call ctx, ctx
+          yield M.include.call ctx, ctx
 
       for m in list
         unit m
