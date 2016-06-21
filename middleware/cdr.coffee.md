@@ -45,6 +45,9 @@ The `statistics` object is provided by `thinkable-ducks`.
           flow_bill:      data.variable_flow_billmsec
         debug "CDR: Channel Hangup Complete", report
 
+        @session.cdr_report = report
+        @call.emit 'cdr_report', report
+
         for own k,v of report
           @statistics.add k, v
 
