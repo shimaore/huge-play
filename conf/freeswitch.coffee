@@ -170,7 +170,7 @@ module.exports = renderable (cfg) ->
             profile_module.call L, q
 
       configuration name:'httapi.conf', ->
-        settings ->
+        settings -> ''
         profiles ->
           # In mod_httapi.c/fetch_cache_data(), the profile_name might be set as a parameter, a setting, or defaults to `default`.
           profile name:'default', ->
