@@ -39,8 +39,10 @@ from: national number
 
 ARCEP, décision 2012-0856 au VI.1
 
-        when $ = @source.match /^3389/
+        when $ = @source.match /^3389|^089/
+          debug 'Calling number is blocked per ARCEP 05-1085 2.b.1.iii page 14'
           @respond '484'
+          @session.direction = 'trash'
 
         when $ = @source.match /^33([0-9]+)$/
           @session.ccnq_from_e164 = @source
