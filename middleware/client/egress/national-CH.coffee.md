@@ -50,7 +50,7 @@ geographic, non-geographic, mobile, or service
 
 special services
 
-        { match: /^(1[0-9]{2,5})$/, now: ($) -> "410#{$[1]}" }
+        { match: /^(1[0-9]{2,5})$/, now: ($) -> "41_#{$[1]}" }
 
 international call
 
