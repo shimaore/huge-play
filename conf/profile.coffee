@@ -102,7 +102,12 @@ module.exports = renderable (o) ->
       # Codec
       param name:'inbound-codec-prefs', value:o.inbound_codec
       param name:'outbound-codec-prefs', value:o.outbound_codec
-      param name:'inbound-codec-negotiation', value:'scrooge'
+      ###
+        `scrooge` means to stick to our ptime
+        `greedy` does everything `scrooge` does, but does not
+          enforce ptime
+      ###
+      param name:'inbound-codec-negotiation', value:o.inbound_codec_negotiation
       param name:'renegotiate-codec-on-reinvite', value:true
 
       # DTMF

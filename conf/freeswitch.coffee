@@ -136,10 +136,12 @@ module.exports = renderable (cfg) ->
             # cfg.profiles[].local_ip (string) local binding IP for SIP for FreeSwitch. Defaults to `auto`, except for huge-play's carrier configuration where it defaults to cfg.profiles[].ingress_sip_ip
             p.local_ip ?= 'auto'
 
-            # cfg.profiles[].inbound_codec (string) inbound codec list (default: `PCMA`)
-            # cfg.profiles[].outbound_codec (string) outbound codec list (default: `PCMA`)
+            # cfg.profiles[].inbound_codec (string) inbound codec list. Default: `PCMA`.
+            # cfg.profiles[].inbound_codec_negotiation (string) inbound codec negotiation (one of `scrooge`, `greedy`, `generous`). Default: `scrooge`.
+            # cfg.profiles[].outbound_codec (string) outbound codec list. Default: `PCMA`.
             # cfg.profiles[].acl (string) SIP port ACL name (default: `default`) If cfg.profiles[].acl_per_profile is set, the name default to the profile's `<name>-ingress` or `<name>-egress` name, instead.
             p.inbound_codec ?= 'PCMA'
+            p.inbound_codec_negotiation ?= 'scrooge'
             p.outbound_codec ?= 'PCMA'
             p.acl ?= 'default'
             p.sip_trace ?= false
