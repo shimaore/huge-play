@@ -35,7 +35,6 @@
           'middleware/carrier/setup.coffee.md'
           'middleware/carrier/egress/pre.coffee.md'
           'middleware/carrier/egress/send.coffee.md'
-          'middleware/carrier/egress/send-tough-rate.coffee.md'
           'middleware/carrier/ingress/post.coffee.md'
           'middleware/carrier/ingress/send.coffee.md'
         ]
