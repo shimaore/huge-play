@@ -164,10 +164,6 @@ This is modelled after the same code in `well-groomed-feast`.
 
         debug "Proxying #{@cfg.provisioning} #{@params.id}/#{@params.name}"
 
-        @request.pipe proxy
-        .on 'error', (error) =>
-          @next "Got #{error}"
-          return
         proxy.pipe @response
         return
 
