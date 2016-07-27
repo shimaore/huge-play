@@ -49,7 +49,11 @@ The `statistics` object is provided by `thinkable-ducks`.
         @call.emit 'cdr_report', report
 
         for own k,v of report
-          @statistics.add k, v
+          switch k
+            when 'direction'
+              @statistics.add "direction-#{v}", report.billable
+            else
+              @statistics.add k, v
 
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
