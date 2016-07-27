@@ -3,7 +3,8 @@
     debug = (require 'debug') @name
     Promise = require 'bluebird'
     seem = require 'seem'
-    request = require 'request'
+    request = require 'superagent'
+    Prefix = require 'superagent-prefix'
     qs = require 'querystring'
 
 I'm having issues with FIFO and audio after the calls are connected.
@@ -155,12 +156,13 @@ This is modelled after the same code in `well-groomed-feast`.
 
     @web = ->
 
+      prov_prefix = Prefix @cfg.provisioning
+
       @get '/fifo/:id/:name', ->
-        proxy = request.get
-          baseUrl: @cfg.provisioning
-          uri: "#{@params.id}/#{@params.name}"
-          followRedirects: false
-          maxRedirects: 0
+        proxy = request
+          .use prov_prefix
+          .get "#{@params.id}/#{@params.name}"
+          .redirects 0
 
         debug "Proxying #{@cfg.provisioning} #{@params.id}/#{@params.name}"
 
