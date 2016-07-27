@@ -23,7 +23,7 @@
     "cuddly": "^1.1.5",
     "debug": "^2.2.0",
     "moment": "^2.14.1",
-    "moment-timezone": "^0.5.4",
+    "moment-timezone": "^0.5.5",
     "nimble-direction": "^4.2.1",
     "request": "^2.72.0",
     "seem": "^2.0.0"
