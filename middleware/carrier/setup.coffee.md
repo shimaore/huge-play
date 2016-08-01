@@ -25,7 +25,7 @@ Create the proper profiles and ACLs
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) ->
-              debug "Host #{cfg.host}: #{error}"
+              debug "Host #{@cfg.host}: #{error}"
               {}
         else
           debug 'No cfg.host'
@@ -59,7 +59,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) ->
-              debug "Host #{cfg.host}: #{error}"
+              debug "Host #{@cfg.host}: #{error}"
               {}
         else
           debug 'No cfg.host'
