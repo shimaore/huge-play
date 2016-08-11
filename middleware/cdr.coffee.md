@@ -43,7 +43,6 @@ The `statistics` object is provided by `thinkable-ducks`.
           wait:           data.variable_waitmsec
           progress_media: data.variable_progress_mediamsec
           flow_bill:      data.variable_flow_billmsec
-        debug "CDR: Channel Hangup Complete", report
 
         @session.cdr_report = report
         @call.emit 'cdr_report', report
@@ -58,5 +57,6 @@ The `statistics` object is provided by `thinkable-ducks`.
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
         @report state: 'end', data: report
+        debug "CDR: Channel Hangup Complete", report
 
       return
