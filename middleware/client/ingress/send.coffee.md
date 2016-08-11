@@ -64,6 +64,8 @@ Post-attempt handling
 ---------------------
 
       data = res.body
+      @session.bridge_data ?= []
+      @session.bridge_data.push data
       debug 'FreeSwitch response', res
 
 Retrieve the FreeSwitch Cause Code description, and the SIP error code.

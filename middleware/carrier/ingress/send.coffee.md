@@ -21,6 +21,8 @@ Send a call out using carrier-side rules.
       res = yield @action 'bridge', "sofia/#{@session.sip_profile}/sip:#{@destination}@#{ingress_target}"
 
       data = res.body
+      @session.bridge_data ?= []
+      @session.bridge_data.push data
       debug 'FreeSwitch response', res
 
       cause = data?.variable_last_bridge_hangup_cause ? data?.variable_originate_disposition

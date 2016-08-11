@@ -105,6 +105,8 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         res = yield @action 'bridge', sofias.join ','
 
       data = res.body
+      @session.bridge_data ?= []
+      @session.bridge_data.push data
       debug 'Returned from FIFO', data
 
 Available parameters related to transfer are (in the case `bridge` is used):
