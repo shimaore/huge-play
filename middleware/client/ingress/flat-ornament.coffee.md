@@ -170,7 +170,7 @@ The pattern's `not` field must
 Processing
 ==========
 
-      run.call this, @session.number.ornaments, commands
+      yield run.call this, @session.number.ornaments, commands
       return
 
 The ornaments are simply an array of ornaments which are executed in the order of the array.

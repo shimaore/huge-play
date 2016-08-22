@@ -41,3 +41,4 @@
             ctx.session.should.have.property 'cfda', 'sip:387@example.net'
             done()
           .catch done
+        null
