@@ -6,12 +6,11 @@ national dialing plan do interfere with national prefixes.
 (For example, 112 and 3615 are prefixes for geographic numbers.)
 
 On the other hand, in order to be routable all output numbers must
-contain digits. However digit 0 cannot be used as the first digit
-for a national number, so we use it to prefix special numbers.
+contain digits. We use `_` (underscore) to prefix special numbers.
 
 For example:
-* 3615 (french national dialing plan) is mapped to 3303615 (international numbering plan)
-* 112 (french national dialing plan) is mapped to 330112 (international numbering plan)
+* 3615 (french national dialing plan) is mapped to 33_3615 (international numbering plan)
+* 112 (french national dialing plan) is mapped to 33_112 (international numbering plan)
 
 See http://www.arcep.fr/index.php?id=interactivenumeros
 
@@ -64,7 +63,9 @@ decision ARCEP 06-0720
 
       patterns = [
 
-fixes mayotte
+ARCEP 06-0720
+
+fixes mayotte, réunion, territoires océan indien
 
         { match: /^(0|\+33)(26[29].*)$/, now: ($) -> "262#{$[2]}" }
 
