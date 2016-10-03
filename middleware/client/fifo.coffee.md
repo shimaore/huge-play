@@ -8,6 +8,7 @@
     qs = require 'querystring'
 
 I'm having issues with FIFO and audio after the calls are connected.
+TBD: We'll be using some shared state (like Redis) with handlers on ingress/egress.
 
     fifo_works = false
 
