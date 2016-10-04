@@ -24,6 +24,7 @@
           'middleware/client/ingress/centrex-CH.coffee.md'
           'middleware/client/ingress/national-FR.coffee.md'
           'middleware/client/ingress/national-CH.coffee.md'
+          'middleware/client/ingress/load-number.coffee.md'
           'middleware/client/ingress/local-number.coffee.md'
           'middleware/client/ingress/post-send.coffee.md'
           'middleware/client/ingress/pre.coffee.md'
