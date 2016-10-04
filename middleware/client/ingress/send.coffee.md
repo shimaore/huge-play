@@ -2,6 +2,7 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
     debug = (require 'debug') @name
+    cuddly = (require 'cuddly') @name
 
     @include = ->
 
@@ -117,7 +118,7 @@ Not Registered
 OpenSIPS marker for not registered
 
       if code is '604'
-        yield @cuddly.csr 'not-registered',
+        yield cuddly.csr 'not-registered',
           destination: @destination
           enpoint: @session.endpoint
           tried_cfnr: @session.tried_cfnr
