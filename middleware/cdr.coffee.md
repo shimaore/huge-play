@@ -36,6 +36,8 @@ The `statistics` object is provided by `thinkable-ducks`.
         data = res.body
         report =
           direction:      @session.cdr_direction
+          emergency:      @session.destination_emergency
+          onnet:          @session.destination_onnet
           duration:       data.variable_mduration
           billable:       data.variable_billmsec
           progress:       data.variable_progressmsec
