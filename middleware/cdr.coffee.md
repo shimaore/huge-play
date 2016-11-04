@@ -53,6 +53,10 @@ The `statistics` object is provided by `thinkable-ducks`.
           switch k
             when 'direction'
               @statistics.add "direction-#{v}", report.billable
+            when 'emergency'
+              @statistics.add "emergency" if v
+            when 'onnet'
+              @statistics.add "onnet" if v
             else
               @statistics.add k, v
 
