@@ -21,6 +21,7 @@ Keep @session.dialplan.
           debug 'Internal call'
           @session.direction = 'ingress'
           @session.centrex_internal = true
+          @session.sip_profile = @session.sip_profile_client
           return
 
 External call.

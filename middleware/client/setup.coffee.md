@@ -28,10 +28,12 @@ The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the
       @session.direction = m[2]
       @session.profile = m[1]
       @session.sip_profile = @req.variable 'sip_profile'
+      @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
+      @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
       if @session.direction is 'ingress'
-        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
+        @session.sip_profile ?= @session.sip_profile_client
       if @session.direction is 'egress'
-        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
+        @session.sip_profile ?= @session.sip_profile_carrier
 
       debug 'Ready',
         direction: @session.direction
