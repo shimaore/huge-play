@@ -13,7 +13,7 @@ A typical document will contain at least:
 
 Other fields are specified for each individual document type.
 
-This project uses especially the following extenions:
+This project uses especially the following extensions:
 
 - `country`: short (two-letter) country name
 - `dialplan`: `e164` (global numbers), `national` (ingress and egress, requires country), `centrex` (egress only, requires country)
@@ -38,7 +38,7 @@ Numbers might be global numbers (used to route between domain) or local numbers 
 
 The `_id` for numbers may contain:
 - `number:<global-number>` where global-number is country-code + national number;
-- `number:<local-number>@<number-domain>` whre local-number is the number as presented and used by the customer.
+- `number:<local-number>@<number-domain>` where local-number is the number as presented and used by the customer.
 
 Number-domain
 -------------
