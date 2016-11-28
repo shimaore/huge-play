@@ -3,13 +3,15 @@
     @name = "#{pkg.name}:middleware:client:ingress:post-send"
     debug = (require 'debug') @name
 
-    @include = ->
+    @include = seem ->
 
       return unless @session.direction is 'ingress'
 
       debug 'Ready'
 
       if @session.call_failed
-        return @respond '486 Call Failed'
+        debug 'Call Failed'
+        yield @respond '486 Call Failed'
+        return
 
-      @action 'hangup'
+Do not hangup here. If the call was transfered this might cause it to disconnect.

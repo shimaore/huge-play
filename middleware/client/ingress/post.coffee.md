@@ -9,7 +9,10 @@
 Use fr-ring for default ringback
 
     default_ringback = tones.fr.ringback
-    default_music = tones.loop tones.fr.waiting
+
+See https://freeswitch.org/jira/browse/FS-9776
+
+    default_music = 'silence'
 
 Call-Handler
 ============
@@ -219,7 +222,8 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 
       if @session.country? and @session.country of tones
         @session.ringback ?= tones[@session.country].ringback
-        @session.music ?= tones.loop tones[@session.country].waiting
+        if @cfg.use_country_tones_for_music
+          @session.music ?= tones.loop tones[@session.country].waiting
 
       @session.ringback ?= @cfg.ringback
       @session.ringback ?= default_ringback
@@ -267,7 +271,7 @@ These are injected so that they may eventually show up in CDRs.
           ccnq_from_e164: @session.ccnq_from_e164
           ccnq_to_e164: @session.ccnq_to_e164
 
-Transfers execute in the context defined in ../conf/refer.
+Transfers execute in the context 'refer'.
 
           force_transfer_context: 'refer'
 
