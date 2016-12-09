@@ -130,7 +130,11 @@ Call rejection: reject anonymous caller
 
 So far we have no reason to reject the call.
 
-      yield set_params.call this
+      yield set_params
+        .call this
+        .catch (error) ->
+          debug "set_params: #{error.stack ? error}"
+          Promise.reject error
 
 `CF...` can be either configured as URIs (number.cfa etc. -- bypasses controls) or as plain numbers (will use the `forward` direction for access control).
 
@@ -166,6 +170,8 @@ Call Forward All
 
 * session.reason (string) The RFC5806 `reason` field for call forwarding.
 
+      debug 'CFA?'
+
       @session.reason = 'unconditional' # RFC5806
       if @session.cfa_voicemail
         debug 'cfa:voicemail'
@@ -191,6 +197,8 @@ Ringback for other Call Forward
 * session.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 * doc.local_number.ring_ready (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 
+      debug 'Ringback'
+
       if @session.number.custom_ringback
         if @cfg.answer_for_ringback or @session.answer_for_ringback
           debug 'answer for ringback'
@@ -212,6 +220,7 @@ Default the targets list to using `endpoint_via` if it is present.
       if @session.number.endpoint_via?
         @session.targets ?= [@session.number.endpoint_via]
 
+      debug 'Done.'
       return
 
 `set_params`
@@ -240,8 +249,13 @@ Non-call-handling-specific parameters (these are set on all calls independently 
 * doc.local_number.endpoint (string) The name of the endpoint where calls for this number should be sent. A matching `endpoint:<endpoint>` record must exist.
 * session.endpoint (object) Data from the called `doc.endpoint` (also known as `doc.dst_endpoint`) record for the local-number's `endpoint`, in an ingress call.
 
-      @session.endpoint = yield @cfg.prov.get("endpoint:#{@session.number.endpoint}").catch -> null
+      @session.endpoint = yield @cfg.prov
+        .get  "endpoint:#{@session.number.endpoint}"
+        .catch (error) ->
+          debug "set_params get endpoint: #{error.stack ? error}"
+          null
 
+      debug 'set endpoint', @session.endpoint
       @set
         ccnq_endpoint: @session.number.endpoint
         ccnq_endpoint_json: JSON.stringify @session.endpoint
@@ -257,10 +271,12 @@ Maximal call duration
 
 Note: tough-rate uses `dialog_timeout` for this (which isn't on the wiki).
 
+      debug 'schedule hangup'
       yield @action 'sched_hangup', "+#{dlg_timeout}"
 
       @session.cdr_direction = @session.direction
 
+      debug 'set parameters'
       yield @set
 
 These are injected so that they may eventually show up in CDRs.
@@ -317,6 +333,7 @@ Codec negotiation with late-neg:
 * hdr.X-CCNQ3-Number-Domain Set on inbound calls to the number-domain of the local-number.
 * hdr.X-CCNQ3-Endpoint Set on inbound calls to the endpoint of the local-number.
 
+      debug 'export parameters'
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
@@ -329,5 +346,5 @@ Music
 
         hold_music: @session.music
 
-      debug 'OK'
+      debug 'set_params: done.'
       return
