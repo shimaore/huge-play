@@ -186,11 +186,13 @@ Ringback for other Call Forward
 -------------------------------
 
 * cfg.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
+* session.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
 * cfg.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
+* session.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 * doc.local_number.ring_ready (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 
       if @session.number.custom_ringback
-        if @cfg.answer_for_ringback
+        if @cfg.answer_for_ringback or @session.answer_for_ringback
           debug 'answer for ringback'
           yield @action 'answer' # 200
           yield @set sip_wait_for_aleg_ack:false
@@ -199,7 +201,7 @@ Ringback for other Call Forward
           debug 'pre_answer for ringback'
           yield @action 'pre_answer' # 183
       else
-        if @session.cf_active or @cfg.ready_for_ringback or @session.number.ring_ready
+        if @session.cf_active or @cfg.ready_for_ringback or @session.ready_for_ringback or @session.number.ring_ready
           debug 'cf_active'
           yield @action 'ring_ready' # 180
 
