@@ -308,6 +308,10 @@ Ringbacks
           instant_ringback: false
           transfer_ringback: @session.ringback # Used after answer
 
+Codec negotiation with late-neg:
+
+          inherit_codec: @session.inherit_codec ? true
+
 * hdr.X-CCNQ3-Number-Domain Set on inbound calls to the number-domain of the local-number.
 * hdr.X-CCNQ3-Endpoint Set on inbound calls to the endpoint of the local-number.
 

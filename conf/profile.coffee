@@ -70,7 +70,8 @@ module.exports = renderable (o) ->
         when true
           param name:'enable-soa', value:true
           param name:'inbound-bypass-media', value:false
-          param name:'inbound-late-negotiation', value:false
+          # Enter the dialplan without the codec having been negotiated.
+          param name:'inbound-late-negotiation', value:true
           param name:'disable-rtp-auto-adjust', value:false
           param name:'rtp-autoflush-during-bridge', value:true
           param name:'rtp-autofix-timing', value:false
@@ -91,6 +92,7 @@ module.exports = renderable (o) ->
       param name:'inbound-zrtp-passthru', value:false
       # disable-transcoding doesn't actuall disable the transcoding facility;
       # "This parameter just changes the outbound codec to match the one negotiated on the inbound leg so that no transcoding will be required."
+      # Also it (documentation says) only applies to early-negotiation.
       param name:'disable-transcoding', value:true
 
       param name:'use-rtp-timer', value:true
@@ -100,6 +102,7 @@ module.exports = renderable (o) ->
       param name:'auto-rtp-bugs', value:'clear'
 
       # Codec
+      # inbound-codec-prefs is used with early negotiation
       param name:'inbound-codec-prefs', value:o.inbound_codec
       param name:'outbound-codec-prefs', value:o.outbound_codec
       ###

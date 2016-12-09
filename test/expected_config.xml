@@ -115,7 +115,7 @@
 <param name="rtp-hold-timeout-sec" value="1800"/>
 <param name="enable-soa" value="true"/>
 <param name="inbound-bypass-media" value="false"/>
-<param name="inbound-late-negotiation" value="false"/>
+<param name="inbound-late-negotiation" value="true"/>
 <param name="disable-rtp-auto-adjust" value="false"/>
 <param name="rtp-autoflush-during-bridge" value="true"/>
 <param name="rtp-autofix-timing" value="false"/>
@@ -188,7 +188,7 @@
 <param name="rtp-hold-timeout-sec" value="1800"/>
 <param name="enable-soa" value="true"/>
 <param name="inbound-bypass-media" value="false"/>
-<param name="inbound-late-negotiation" value="false"/>
+<param name="inbound-late-negotiation" value="true"/>
 <param name="disable-rtp-auto-adjust" value="false"/>
 <param name="rtp-autoflush-during-bridge" value="true"/>
 <param name="rtp-autofix-timing" value="false"/>
