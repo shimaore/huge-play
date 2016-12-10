@@ -111,6 +111,11 @@ Country
       @session.country ?= @session.endpoint.country
       @session.country ?= @session.number_domain_data.country
 
+Contrarily to established practices, our code uses lowercase country names.
+
+      if @session.country?
+        @session.country = @session.country.toLowerCase()
+
       debug 'Ready',
         endpoint_name: @session.endpoint_name
         outbound_route: @session.outbound_route

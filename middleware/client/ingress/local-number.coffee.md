@@ -49,3 +49,5 @@ The dialplan and country (and other parameters) might also be available in the `
 
       @session.dialplan = @session.number_domain_data?.dialplan ? @session.e164_number.dialplan
       @session.country  = @session.number_domain_data?.country  ? @session.e164_number.country
+      if @session.country?
+        @session.country = @session.country.toLowerCase()
