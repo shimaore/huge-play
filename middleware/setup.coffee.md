@@ -41,6 +41,8 @@ We assume the room names match record IDs.
 
           _in
 
+Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends the notification out via socket.io.
+
         report: (o) ->
           unless @call? and @session? and @statistics?
             debug 'report: improper environment'
