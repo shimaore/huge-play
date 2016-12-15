@@ -2,7 +2,7 @@
 {hostname} = require 'os'
 
 module.exports = renderable (cfg) ->
-  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,context,extension,condition,action,macros,fifos} = L
+  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,macros} = L
 
   # cfg.name (string) Internal name for the FreeSwitch instance
   name = cfg.name ? 'server'
