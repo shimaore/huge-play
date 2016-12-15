@@ -33,11 +33,10 @@
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
-        _in: ->
+        _in: (_in = [])->
 
 Add any endpoint- or number- specific dispatch room (this allows end-users to receive events for endpoints and numbers they are authorized to monitor).
 
-          _in = []
           push_in = (room) ->
             return if not room? or room in _in
             _in.push room
