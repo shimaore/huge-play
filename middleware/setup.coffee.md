@@ -16,6 +16,16 @@
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
+    @notify = ->
+
+      @cfg.statistics.on 'reference', (data) =>
+        @socket.emit 'reference', data
+
+      @cfg.statistics.on 'call', (data) =>
+        @socket.emit 'call',
+          host: @cfg.host
+          data: data
+
     @include = (ctx) ->
 
       ctx[k] = v for own k,v of {
