@@ -33,14 +33,15 @@ The URL module parses the SIP username as `auth`.
 * hdr.P-Charge-Info Required for egress calls on the client side. A `403 No Charge-Info` SIP error is generated if it is not present. The username part is used to populate session.ccnq_account.
 
       pci = @req.header 'P-Charge-Info'
-      unless pci?
-        debug 'No Charge-Info'
-        return @respond '403 No Charge-Info'
 
-      @session.ccnq_account = (url.parse pci).auth
+      if pci?
+        @session.ccnq_account = (url.parse pci).auth
+      else
+        @session.ccnq_account = @session.reference_data.account ? null
+
       unless @session.ccnq_account?
         debug 'Invalid Charge-Info', pci
-        return @respond '403 Invalid Charge-Info'
+        return @respond '403 Missing Charge-Info'
 
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 

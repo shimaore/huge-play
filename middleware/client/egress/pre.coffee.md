@@ -17,6 +17,11 @@ Endpoint
 * session.endpoint_name (string) The name of the calling endpoint in an egress call, set from hdr.X-CCNQ3-Endpoint.
 
       @session.endpoint_name = @req.header 'X-CCNQ3-Endpoint'
+
+Endpoint might be provided in the reference data for example for an `originate` call (in exultant-songs).
+
+      @session.endpoint_name ?= @session.reference_data.endpoint
+
       unless @session.endpoint_name?
         debug 'Missing endpoint_name'
         cuddly.dev 'Missing endpoint_name', @call.data

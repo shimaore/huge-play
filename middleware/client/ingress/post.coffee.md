@@ -289,10 +289,6 @@ These are injected so that they may eventually show up in CDRs.
           ccnq_from_e164: @session.ccnq_from_e164
           ccnq_to_e164: @session.ccnq_to_e164
 
-Transfers execute in the context 'refer'.
-
-          force_transfer_context: 'refer'
-
 Other SIP parameters
 
 [progress timeout = PDD](https://wiki.freeswitch.org/wiki/Channel_Variables#progress_timeout)

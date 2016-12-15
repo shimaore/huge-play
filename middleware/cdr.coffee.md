@@ -49,6 +49,10 @@ The `statistics` object is provided by `thinkable-ducks`.
         @session.cdr_report = report
         @call.emit 'cdr_report', report
 
+        @session.call_reference_data.end_time = new Date() .toJSON()
+        @session.call_reference_data.report = report
+        yield @save_ref()
+
         for own k,v of report
           switch k
             when 'direction'

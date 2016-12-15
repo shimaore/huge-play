@@ -58,6 +58,14 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
           o._in ?= @_in()
           @statistics?.emit 'call', o
 
+        save_ref: seem ->
+          data = @session.reference_data
+          @cfg.statistics.emit 'reference', data
+          yield @cfg.update_session_reference_data data
+
+        get_ref: seem ->
+          @session.reference_data ?= @cfg.get_session_reference_data @session.reference
+
         set: seem (name,value) ->
           return unless name?
           if typeof name is 'string'
