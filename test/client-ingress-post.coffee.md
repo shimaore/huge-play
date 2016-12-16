@@ -28,6 +28,7 @@
           session:
             direction: 'ingress'
             number_domain: 'some'
+            reference_data: {}
           action: -> Promise.resolve null
           set: -> Promise.resolve null
           export: -> Promise.resolve null

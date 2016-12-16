@@ -53,7 +53,7 @@ We assume the room names match record IDs.
 Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends the notification out via socket.io.
 
         report: (o) ->
-          unless @call? and @session? and @statistics?
+          unless @call? and @session?
             debug 'report: improper environment'
             return
 
@@ -69,11 +69,13 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
 
         save_ref: seem ->
           data = @session.reference_data
-          @cfg.statistics.emit 'reference', data
-          yield @cfg.update_session_reference_data data
+          @statistics?.emit 'reference', data
+          if @cfg.update_session_reference_data?
+            yield @cfg.update_session_reference_data data
 
         get_ref: seem ->
-          @session.reference_data ?= @cfg.get_session_reference_data @session.reference
+          if @cfg.get_session_reference_data?
+            @session.reference_data ?= @cfg.get_session_reference_data @session.reference
 
         set: seem (name,value) ->
           return unless name?
