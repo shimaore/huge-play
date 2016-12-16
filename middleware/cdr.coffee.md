@@ -18,8 +18,6 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.linger()
 
-The `statistics` object is provided by `thinkable-ducks`.
-
       unless @statistics? and @report?
         debug 'cdr: improper environment'
         return

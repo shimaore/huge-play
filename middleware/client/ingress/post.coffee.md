@@ -220,6 +220,10 @@ Default the targets list to using `endpoint_via` if it is present.
       if @session.number.endpoint_via?
         @session.targets ?= [@session.number.endpoint_via]
 
+      @session.reference_data._in ?= []
+      @_in @session.reference_data._in
+      yield @save_ref()
+
       debug 'Done.'
       return
 
