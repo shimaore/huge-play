@@ -1,3 +1,4 @@
+    seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:client:setup"
     debug = (require 'debug') @name
@@ -10,7 +11,7 @@
 * doc.local_number.type (required) `number`
 * doc.local_number.number (required) `<local-number>@<number-domain>`
 
-    @include = ->
+    @include = seem ->
 
 For example, in `@data` we might get:
 
