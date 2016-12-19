@@ -72,10 +72,16 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
           @statistics?.emit 'reference', data
           if @cfg.update_session_reference_data?
             yield @cfg.update_session_reference_data data
+          else
+            debug 'Missing @cfg.update_session_reference_data, not saving'
 
         get_ref: seem ->
           if @cfg.get_session_reference_data?
-            @session.reference_data ?= @cfg.get_session_reference_data @session.reference
+            debug 'Loading reference_data', @session.reference
+            @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
+          else
+            debug 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            @session.reference_data ?= {}
 
         set: seem (name,value) ->
           return unless name?

@@ -52,8 +52,13 @@
               linger: -> Promise.resolve null
             req:
               variable: -> null
+              header: -> null
             data:
               'Channel-Context': 'sbc-ingress'
+            get_ref: -> @session.reference_data = {}
+            save_ref: ->
+            set: ->
+            export: ->
           M = require "../#{m}"
           yield M.server_pre?.call ctx, ctx
           yield M.include.call ctx, ctx

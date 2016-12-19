@@ -64,7 +64,7 @@ In case of a transfer, the session identifier is included in the context.
       if @session.direction is 'egress'
         @session.sip_profile ?= @session.sip_profile_carrier
 
-      reference_context = [ @session.sip_profile_client, session_reference ].join '-'
+      reference_context = [ @session.sip_profile_client, @session.reference ].join '-'
       yield @set
         session_reference: @session.reference
         force_transfer_context: ['transfer', @session.reference].join '-'
@@ -76,6 +76,6 @@ In case of a transfer, the session identifier is included in the context.
         direction: @session.direction
         profile: @session.profile
         sip_profile: @session.sip_profile
-        reference: reference
+        reference: @session.reference
 
       return
