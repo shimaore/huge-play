@@ -24,7 +24,7 @@ variable_recovery_profile_name: 'huge-play-sbc-ingress',
 The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in  @session.sip_profile .
 
       @session.context ?= @data['Channel-Context']
-      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer)(?:-(\S+))$/
+      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer)(?:-(\S+))?$/
         debug 'Ignoring malformed context', @session.context
         return
 
