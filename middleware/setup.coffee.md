@@ -87,28 +87,31 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
           return unless name?
           if typeof name is 'string'
             if value is null
-              ctx.action 'unset', name
+              yield ctx.action 'unset', name
             else
-              ctx.action 'set', "#{name}=#{value}"
+              yield ctx.action 'set', "#{name}=#{value}"
           else
             yield ctx.set k,v for own k,v of name
+          return
 
         unset: seem (name) ->
           return unless name?
           if typeof name is 'string'
-              ctx.action 'unset', name
+              yield ctx.action 'unset', name
           else
             yield ctx.unset k for k in name
+          return
 
         export: seem (name,value) ->
           return unless name?
           if typeof name is 'string'
             if value is null
-              ctx.action 'export', name
+              yield ctx.action 'export', name
             else
-              ctx.action 'export', "#{name}=#{value}"
+              yield ctx.action 'export', "#{name}=#{value}"
           else
             yield ctx.export k,v for own k,v of name
+          return
 
         respond: (response) ->
           @statistics?.add ['immediate-response',response]
