@@ -85,32 +85,38 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
 
         set: seem (name,value) ->
           return unless name?
+
           if typeof name is 'string'
-            if value is null
-              yield ctx.action 'unset', name
-            else
-              yield ctx.action 'set', "#{name}=#{value}"
-          else
-            yield ctx.set k,v for own k,v of name
+            yield @res.set name, value
+            return
+
+          for own k,v of name
+            yield @res.set k, v
+
           return
 
         unset: seem (name) ->
           return unless name?
+
           if typeof name is 'string'
-              yield ctx.action 'unset', name
-          else
-            yield ctx.unset k for k in name
+            yield @res.set name, null
+            return
+
+          for k in name
+            yield @res.set k, null
+
           return
 
         export: seem (name,value) ->
           return unless name?
+
           if typeof name is 'string'
-            if value is null
-              yield ctx.action 'export', name
-            else
-              yield ctx.action 'export', "#{name}=#{value}"
-          else
-            yield ctx.export k,v for own k,v of name
+            yield @res.export name, value
+            return
+
+          for own k,v of name
+            yield @res.export k, v
+
           return
 
         respond: (response) ->
