@@ -43,7 +43,7 @@
     "validate-commit-msg": "^2.8.2"
   },
   "peerDependencies": {
-    "useful-wind": "^7.3.0"
+    "useful-wind": "^7.3.1"
   },
   "config": {
     "ghooks": {
