@@ -30,8 +30,9 @@
             number_domain: 'some'
             reference_data: {}
           action: -> Promise.resolve null
-          set: -> Promise.resolve null
-          export: -> Promise.resolve null
+          res:
+            set: -> Promise.resolve null
+            export: -> Promise.resolve null
         s.include.call ctx, ctx
         m.include
           .call ctx
