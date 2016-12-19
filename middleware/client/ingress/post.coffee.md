@@ -130,11 +130,7 @@ Call rejection: reject anonymous caller
 
 So far we have no reason to reject the call.
 
-      yield set_params
-        .call this
-        .catch (error) ->
-          debug "set_params: #{error.stack ? error}"
-          Promise.reject error
+      yield set_params.call this
 
 `CF...` can be either configured as URIs (number.cfa etc. -- bypasses controls) or as plain numbers (will use the `forward` direction for access control).
 
