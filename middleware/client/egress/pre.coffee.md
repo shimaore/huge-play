@@ -182,4 +182,11 @@ Optionally enforce that the calling number originates from the associated endpoi
           debug 'From Username is not listed'
           return @respond '403 From Username is not listed'
 
+ICE
+---
+
+For backward-compatibility we currently ignore ICE proposals.
+
+      yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
+
       null
