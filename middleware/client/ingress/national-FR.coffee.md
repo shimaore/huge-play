@@ -6,7 +6,9 @@
       return unless @session.direction is 'ingress'
       return unless @session.dialplan is 'e164'
 
-      debug 'Ready'
+      debug 'Ready',
+        destination: @destination
+        source: @source
 
 Rewrite destination
 ===================
@@ -41,8 +43,8 @@ ARCEP, décision 2012-0856 au VI.1
 
         when $ = @source.match /^3389|^089/
           debug 'Calling number is blocked per ARCEP 05-1085 2.b.1.iii page 14'
-          @respond '484'
           @session.direction = 'trash'
+          return @respond '484'
 
         when $ = @source.match /^33([0-9]+)$/
           @session.ccnq_from_e164 = @source
@@ -60,6 +62,7 @@ from: anonymous
           debug 'Source is anonymous'
 
         else
+          debug 'Invalid source', @source
           return @respond '484 Invalid source'
 
 Update the dialplan

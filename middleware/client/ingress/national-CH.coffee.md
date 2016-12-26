@@ -6,7 +6,9 @@
       return unless @session.direction is 'ingress'
       return unless @session.dialplan is 'e164'
 
-      debug 'Ready'
+      debug 'Ready',
+        destination: @destination
+        source: @source
 
 Rewrite destination
 ===================
@@ -55,6 +57,7 @@ from: anonymous
           debug 'Source is anonymous'
 
         else
+          debug 'Invalid source', @source
           return @respond '484 Invalid source'
 
 Update the dialplan
