@@ -26,7 +26,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       @report state: 'incoming-call'
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
-      .then (res) =>
+      .then seem (res) =>
         debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
