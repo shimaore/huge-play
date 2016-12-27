@@ -19,7 +19,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       @call.linger()
 
       unless @statistics? and @report?
-        debug 'cdr: improper environment'
+        debug 'Error: Improper environment'
         return
 
       @statistics.add 'incoming-calls'
@@ -27,7 +27,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
-        debug "Channel Hangup Complete", res
+        debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
@@ -67,4 +67,5 @@ Dispatch the event, once using the normal dispatch path (goes to admin), and the
         @report state: 'end', data: report
         debug "CDR: Channel Hangup Complete", report
 
+      debug 'Ready'
       return
