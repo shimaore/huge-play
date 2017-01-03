@@ -111,6 +111,21 @@ start: '18:00', end: '08:00'
           # FIXME: check if the @source has nighttime activated
           false
 
+Calendars
+
+        in_calendars: (calendars) =>
+          debug 'calendars', calendars
+          now = Moment()
+          if @session.timezone?
+            now = now.tz @session.timezone
+          now = now.format 'YYYY-MM-DD'
+
+          for calendar in calendars
+            dates = session.number_domain_data?.calendars?[calendar]
+            if dates? and now in dates
+              return true
+          false
+
         anonymous: =>
           debug 'anonymous'
           @session.caller_privacy
