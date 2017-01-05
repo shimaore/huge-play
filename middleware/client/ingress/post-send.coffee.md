@@ -9,6 +9,12 @@
 
       debug 'Ready'
 
+Make sure the call isn't processed any further.
+
+      delete @session.direction
+
+Rewrite error response code.
+
       if @session.call_failed
         debug 'Call Failed'
         yield @respond '486 Call Failed'
