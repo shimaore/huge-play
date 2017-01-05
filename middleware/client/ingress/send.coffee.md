@@ -97,7 +97,7 @@ OpenSIPS marker for not registered
       if code is '604'
         yield cuddly.csr 'not-registered',
           destination: @destination
-          enpoint: @session.endpoint
+          enpoint: @session.endpoint_name
           tried_cfnr: @session.tried_cfnr
 
       if code is '604' and not @session.tried_cfnr

@@ -238,24 +238,6 @@ Note the different alternatives for routing:
         { parameters, to_uri }
       ]
 
-### CFNR fallback route (for static endpoints etc.)
-
-OpenSIPS normally takes care of contacting endpoints using either registration or static endpoints data.
-This is a last-ditch effort to try to contact a static endpoint directly, bypassing OpenSIPS, in case OpenSIPS reports the endpoint is unreachable.
-
-* session.fallback_destinations On ingress, client-side calls, used if the original session.initial_destinations route-set failed.
-
-* doc.dst_endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. If both `doc.dst_endpoint.user_ip` and `doc.dst_endpoint.user_srv` are present, `user_srv` is used and `user_ip` is ignored.
-* doc.dst_endpoint.user_ip (string) The IP address of an endpoint for a static endpoint. Normally equal to the `doc.src_endpoint.endpoint` value. On ingress calls, used to route to a static endpoint, if `doc.dst_endpoint.user_srv` is not present.
-
-      domain = @session.endpoint.user_srv ? @session.endpoint.user_ip
-      if domain?
-        parameters = ["sip_network_destination=#{@session.endpoint_name}"]
-        to_uri = "sip:#{@destination}@#{domain}"
-        @session.fallback_destinations = [
-          { parameters, to_uri }
-        ]
-
 ### Build the set of `_in` targets for notifications of the reference data.
 
       @session.reference_data._in ?= []
@@ -288,19 +270,8 @@ Non-call-handling-specific parameters (these are set on all calls independently 
         ringback: @session.ringback
         music: @session.music
 
-* doc.local_number.endpoint (string) The name of the endpoint where calls for this number should be sent. A matching `endpoint:<endpoint>` record must exist.
-* session.endpoint (object) Data from the called `doc.endpoint` (also known as `doc.dst_endpoint`) record for the local-number's `endpoint`, in an ingress call.
-
-      @session.endpoint = yield @cfg.prov
-        .get  "endpoint:#{@session.number.endpoint}"
-        .catch (error) ->
-          debug "set_params get endpoint: #{error.stack ? error}"
-          null
-
-      debug 'set endpoint', @session.endpoint
       @set
-        ccnq_endpoint: @session.number.endpoint
-        ccnq_endpoint_json: JSON.stringify @session.endpoint
+        ccnq_endpoint: @session.endpoint_name
 
 * doc.local_number.dialog_timer (number) Maximum duration of a call for this local-number.
 * doc.local_number.inv_timer (number) Maximum progress duration for this local-number. Typically this is the duration before the call is sent to voicemail.
@@ -350,7 +321,7 @@ counts from the time the INVITE is placed until a progress indication (e.g. 180,
 These should not be forwarded towards customers.
 
           'sip_h_X-CCNQ3-Attrs': null
-          'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
+          'sip_h_X-CCNQ3-Endpoint': @session.endpoint_name
           'sip_h_X-CCNQ3-Extra': null
           'sip_h_X-CCNQ3-Location': null
           'sip_h_X-CCNQ3-Registrant-Password': null
@@ -376,7 +347,7 @@ Codec negotiation with late-neg:
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
         'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
-        'sip_h_X-CCNQ3-Endpoint': @session.number.endpoint
+        'sip_h_X-CCNQ3-Endpoint': @session.endpoint_name
         originate_timeout:fr_inv_timeout
         bridge_answer_timeout:fr_inv_timeout
 
