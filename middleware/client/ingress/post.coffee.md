@@ -53,6 +53,7 @@ Call rejection: reject anonymous caller
           if @session.number.reject_anonymous_to_voicemail
             debug 'reject anonymous: send to voicemail'
             @session.direction = 'voicemail'
+            # @destination unchanged
             return
 
           debug 'reject anonymous'
@@ -82,11 +83,13 @@ Call rejection: reject anonymous caller
           if @session.number.use_blacklist and list.blacklist
             if @session.number.list_to_voicemail
               @session.direction = 'voicemail'
+              # @destination unchanged
               return
             return @respond '486 Decline (blacklisted)' # was 603
           if @session.number.use_whitelist and not list.whitelist
             if @session.number.list_to_voicemail
               @session.direction = 'voicemail'
+              # @destination unchanged
               return
             return @respond '486 Decline (not whitelisted)' # was 603
 
@@ -161,6 +164,10 @@ So far we have no reason to reject the call.
           p = @session[name]                = @session.number[name]
           @session.cf_active = @session.cf_active or v? or n? or p?
 
+Make sure we get the messages even if the call is forwarded.
+
+          @session["#{name}_voicemail_number"] = @destination
+
 Call Forward All
 ----------------
 
@@ -172,6 +179,7 @@ Call Forward All
       if @session.cfa_voicemail
         debug 'cfa:voicemail'
         @session.direction = 'voicemail'
+        @destination = @session.cfa_voicemail_number
         return
       if @session.cfa_number?
         debug 'cfa:forward'

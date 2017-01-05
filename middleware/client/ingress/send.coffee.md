@@ -105,6 +105,7 @@ OpenSIPS marker for not registered
         if @session.cfnr_voicemail
           debug 'cfnr:voicemail'
           @session.direction = 'voicemail'
+          @destination = @session.cfnr_voicemail_number
           return
         if @session.cfnr_number?
           debug 'cfnr:forward'
@@ -138,6 +139,7 @@ Busy
         if @session.cfb_voicemail
           debug 'cfb: voicemail'
           @session.direction = 'voicemail'
+          @destination = @session.cfb_voicemail_number
           return
         if @session.cfb_number?
           debug 'cfb:number'
@@ -161,6 +163,7 @@ Use CFDA if present
         if @session.cfda_voicemail
           debug 'cfda: voicemail'
           @session.direction = 'voicemail'
+          @destination = @session.cfda_voicemail_number
           return
         if @session.cfda_number?
           debug 'cfda:number'
