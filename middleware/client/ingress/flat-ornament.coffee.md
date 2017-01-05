@@ -106,6 +106,8 @@ start: '18:00', end: '08:00'
           else
             start <= now or now <= end
 
+Nightime flag
+
         nighttime: =>
           debug 'nighttime'
           # FIXME: check if the @source has nighttime activated
