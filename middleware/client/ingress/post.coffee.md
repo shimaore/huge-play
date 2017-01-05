@@ -221,10 +221,10 @@ Build the destination FreeSwitch dialstring
 -------------------------------------------
 
 Note the different alternatives for routing:
-- To URI: `sofia/.../<To-URI>`
+- To URI: `sofia/.../<To-URI>` (and RURI if the RURI is not specified)
 - RURI: `sip_invite_req_uri`
-- Route header: `sip_route_uri`
-- Network destination: `sip_network_destination`
+- Route header: `sip_route_uri` = `sip:<domain-name>`
+- Network destination: `sip_network_ip`, 'sip_network_port'
 - `;fs_path=`
 
 ### Standard destination
@@ -240,7 +240,10 @@ Note the different alternatives for routing:
 * doc.local_number.endpoint_via (string:domain) If present, inbound calls are sent to the specified server instead of the endpoint's.
 
       if @session.number.endpoint_via?
-        parameters.push "sip_network_destination=#{@session.number.endpoint_via}"
+        ## A proper way to do it:
+        # parameters.push "sip_route_uri=sip:#{@session.number.endpoint_via}"
+        ## How we've been doing it:
+        to_uri = "sip:#{@destination}@#{@session.number.endpoint_via}"
 
       @session.initial_destinations ?= [
         { parameters, to_uri }
