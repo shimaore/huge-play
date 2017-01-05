@@ -6,6 +6,7 @@
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
+      return if @session.forwarding is true
 
       debug 'Matching', @destination
 

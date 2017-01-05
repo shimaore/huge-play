@@ -6,6 +6,7 @@
     @include = seem ->
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'centrex'
+      return if @session.forwarding is true
 
       unless @session.number_domain
         debug 'No number domain'

@@ -10,6 +10,7 @@
     @include = seem ->
 
       return unless @session.direction is 'ingress'
+      return if @session.forwarding is true
 
 * doc.local_number.timezone (string) Local timezone for doc.local_number.ornaments
 * session.timezone (string) Local timezone, defaults to doc.local_number.timezone for ingress calls
