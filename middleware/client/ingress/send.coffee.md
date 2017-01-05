@@ -10,45 +10,21 @@
 
       debug 'Ready'
 
-      send.call this
+* session.initial_destinations (array) On ingress, client-side calls, list of target routes for `mod_sofia`, each route consisting of an object containing a `to_uri` URI (to be used with the standard SIP profile defined in session.sip_profile ) and an optional `parameters` array of per-leg parameter strings.
+
+      send.call this, @session.initial_destinations
 
 send
 ====
 
 Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
-    @send = send = seem ->
+    @send = send = seem (destinations) ->
 
-TODO: use gateways. set `ping` on the sip_profile, and dial using sofia/gateway/primary/sip:...|sofia/gateway/secondary/sip:...
-And I believe we need to use `[let_timeout=4]` or something like this to handle failover properly. (Or maybe not, maybe this is handled directly by sofia-sip using the Tx timers, since I don't think that 100 is brought back up to FreeSwitch, so FreeSwitch probably doesn't have a say in it.)
-
-`session.targets` might be a list of target domains (to be used with the current destination number)
-
-* session.targets (array of strings) Targets were to send inbound calls.
-* cfg.ingress_target (string) The target to use if no `session.targets` is present.
-
-      targets = @session.targets ? [@cfg.ingress_target]
-
-`session.uris` might be a list of target URIs (to be used with the standard SIP profile)
-
-      uris = @session.uris ? targets.map (e) => "sip:#{@destination}@#{e}"
-
-`session.sofia_parameters` are optional (dialstring-global) parameters for sofia.
-
-      parameters = @session.sofia_parameters ? ''
-
-`session.sofia` might be a complete `bridge` command parameter set
-
-      sofia = @session.sofia ? uris.map (e) => "{#{parameters}}sofia/#{@session.sip_profile}/#{e}"
+      sofia = destinations.map ({ parameters = [], to_uri }) =>
+        "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
       debug 'send', sofia
-
-Clear fields so that we can safely retry.
-
-      @session.targets = null
-      @session.uris = null
-      @session.sofia_parameters = null
-      @session.sofia = null
 
 Send the call(s)
 ----------------
@@ -57,7 +33,7 @@ Send the call(s)
         continue_on_fail: true
         hangup_after_bridge: false
 
-      debug 'Bridging', {sofia}
+      debug 'Bridging', sofia
 
       res = yield @action 'bridge', sofia.join ','
 
@@ -138,40 +114,21 @@ OpenSIPS marker for not registered
         if @session.cfnr?
           debug 'cfnr:fallback'
           @session.tried_cfnr = true
-          @session.uris = [@session.cfnr]
-          return send.call this
+          return send.call this, [ to_uri: @session.cfnr ]
 
 Try static routing on 604 without CFNR (or CFNR already attempted)
 
       if code is '604'
-        endpoint = @session.endpoint
-        if not endpoint?
-          debug 'cfnr: no endpoint to fall back to'
-          return @respond '500 Endpoint Error'
+        unless @session.fallback_destinations?
+          debug 'cfnr: no fallback'
+          return @respond '500 No Fallback'
+        if @session.tried_fallback
+          debug 'cfnr: already attempted fallback'
+          return @respond '500 Fallback Failed'
 
-* session.endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. See doc.dst_endpoint.user_srv.
-* session.endpoint.user_ip (string) On ingress calls, used to route to a static endpoint. See doc.dst_endpoint.user_ip.
-* doc.dst_endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. If both `doc.dst_endpoint.user_ip` and `doc.dst_endpoint.user_srv` are present, `user_srv` is used and `user_ip` is ignored.
-* doc.dst_endpoint.user_ip (string) The IP address of an endpoint for a static endpoint. Normally equal to the `doc.src_endpoint.endpoint` value. On ingress calls, used to route to a static endpoint, if `doc.dst_endpoint.user_srv` is not present.
-
-        domain = endpoint.user_srv ? endpoint.user_ip
-        if not domain?
-          debug 'cfnr: no endpoint.user_srv nor endpoint.user_ip to fall back to'
-          return @respond '500 Endpoint Error'
-
-This will set the RURI and the To field. Notice that the RURI is actually `sip_invite_req_uri`, while the To field is `sofia/.../<To-field>`
-
-        @session.targets = [domain]
-
-Alternatives for routing:
-- `sip_invite_req_uri`
-- `sip_route_uri`
-- `sip_network_destination`
-- `;fs_path=`
-
-        @session.sofia_parameters = "sip_network_destination=#{endpoint.endpoint}"
-        debug 'cfnr: fallback to endpoint'
-        return send.call this
+        debug 'cfnr: fallback on 604'
+        @session.tried_fallback = true
+        return send.call this, @session.fallback_destinations
 
 Busy
 ----
@@ -190,8 +147,7 @@ Busy
         if @session.cfb?
           debug 'cfb: fallback'
           @session.tried_cfb = true
-          @session.uris = [@session.cfb]
-          return send.call this
+          return send.call this, [ to_uri: @session.cfb ]
 
 All other codes
 ---------------
@@ -214,8 +170,7 @@ Use CFDA if present
         if @session.cfda?
           debug 'cfda: fallback'
           @session.tried_cfda = true
-          @session.uris = [@session.cfda]
-          return send.call this
+          return send.call this, [ to_uri: @session.cfda ]
 
       debug 'Call Failed'
       @session.call_failed = true

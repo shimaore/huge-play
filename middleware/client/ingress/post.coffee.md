@@ -180,7 +180,7 @@ Call Forward All
         return
       if @session.cfa?
         debug 'cfa:fallback'
-        @session.uris = [@session.cfa]
+        @session.initial_destinations = [ to_uri: @session.cfa ]
         return
       @session.reason = null
 
@@ -209,12 +209,54 @@ Ringback for other Call Forward
           debug 'cf_active'
           yield @action 'ring_ready' # 180
 
-Default the targets list to using `endpoint_via` if it is present.
+Build the destination FreeSwitch dialstring
+-------------------------------------------
 
-* doc.local_number.endpoint_via (string:domain) If present, inbound calls are sent to the specified domain. (See `session.targets`.)
+Note the different alternatives for routing:
+- To URI: `sofia/.../<To-URI>`
+- RURI: `sip_invite_req_uri`
+- Route header: `sip_route_uri`
+- Network destination: `sip_network_destination`
+- `;fs_path=`
+
+### Standard destination
+
+      parameters = []
+      to_uri = "sip:#{@session.endpoint_name}" # set by validate_local_number()
+
+* cfg.ingress_target (string:domain) Inbound domain for static endpoint: inbound calls are sent to the specified domain if the endpoint's name does not contain `@`.
+
+      unless to_uri.match /@/
+        to_uri = "sip:#{@destination}@#{@cfg.ingress_target}"
+
+* doc.local_number.endpoint_via (string:domain) If present, inbound calls are sent to the specified server instead of the endpoint's.
 
       if @session.number.endpoint_via?
-        @session.targets ?= [@session.number.endpoint_via]
+        parameters.push "sip_network_destination=#{@session.number.endpoint_via}"
+
+      @session.initial_destinations ?= [
+        { parameters, to_uri }
+      ]
+
+### CFNR fallback route (for static endpoints etc.)
+
+OpenSIPS normally takes care of contacting endpoints using either registration or static endpoints data.
+This is a last-ditch effort to try to contact a static endpoint directly, bypassing OpenSIPS, in case OpenSIPS reports the endpoint is unreachable.
+
+* session.fallback_destinations On ingress, client-side calls, used if the original session.initial_destinations route-set failed.
+
+* doc.dst_endpoint.user_srv (string) On ingress calls, used to route to a static endpoint. If both `doc.dst_endpoint.user_ip` and `doc.dst_endpoint.user_srv` are present, `user_srv` is used and `user_ip` is ignored.
+* doc.dst_endpoint.user_ip (string) The IP address of an endpoint for a static endpoint. Normally equal to the `doc.src_endpoint.endpoint` value. On ingress calls, used to route to a static endpoint, if `doc.dst_endpoint.user_srv` is not present.
+
+      domain = @session.endpoint.user_srv ? @session.endpoint.user_ip
+      if domain?
+        parameters = ["sip_network_destination=#{@session.endpoint_name}"]
+        to_uri = "sip:#{@destination}@#{domain}"
+        @session.fallback_destinations = [
+          { parameters, to_uri }
+        ]
+
+### Build the set of `_in` targets for notifications of the reference data.
 
       @session.reference_data._in ?= []
       @_in @session.reference_data._in

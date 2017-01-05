@@ -143,12 +143,19 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
 
           return '' unless number_data.number?
 
-This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
+This is a simplified version of the sofia-target (session.initial_destinations) building code found in middleware:client:ingress:post.
 
           destination = number_data.number.split('@')[0]
-          target = number_data.endpoint_via ? @cfg.ingress_target
-          uri = "sip:#{destination}@#{target}"
-          sofia = "sofia/#{@session.sip_profile}/#{uri}"
+
+          to_uri = "sip:#{number_data.endpoint}"
+
+          unless to_uri.match /@/
+            to_uri = "sip:#{destination}@#{@cfg.ingress_target}"
+
+          if number_data.endpoint_via?
+            extra_params.push "sip_network_destination=#{number_data.endpoint_via}"
+
+This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
 
 * hdr.X-CCNQ3-Endpoint Endpoint name, set when dialing numbers.
 * hdr.X-CCNQ3-Number-Domain Number domain name, set when dialing numbers.
@@ -159,7 +166,7 @@ This is a simplified version of the sofia-string building code found in middlewa
             "sip_h_X-CCNQ3-Number-Domain=#{@session.number_domain}"
           ]
 
-          "[#{params.join ','}]#{sofia}"
+          "[#{params.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
         validate_local_number: seem ->
 
