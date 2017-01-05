@@ -8,7 +8,8 @@
 
       return unless @session.direction is 'forward'
 
-      debug 'Ready'
+      debug 'forwarding for', @session.endpoint_name
+      @session.endpoint ?= yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
       @session.outbound_route = @session.endpoint.outbound_route
       @session.direction = 'egress'
       @session.forwarding = true
