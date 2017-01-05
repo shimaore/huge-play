@@ -117,13 +117,17 @@ Calendars
 
         in_calendars: (calendars) =>
           debug 'calendars', calendars
+
+          domain_calendars = @session.number_domain_data?.calendars
+          return unless domain_calendars?
+
           now = Moment()
           if @session.timezone?
             now = now.tz @session.timezone
           now = now.format 'YYYY-MM-DD'
 
-          for calendar in calendars
-            dates = session.number_domain_data?.calendars?[calendar]
+          for calendar in calendars when domain_calendars[calendar]?
+            {dates} = domain_calendars[calendar]
             if dates? and now in dates
               return true
           false
