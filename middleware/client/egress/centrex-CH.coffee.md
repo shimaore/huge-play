@@ -17,7 +17,7 @@
 Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
 Keep @session.dialplan.
 
-        when @destination.match /^[1-5]\d{1,2}$/
+        when @destination.match /^[1-6]\d+$/
           debug 'Internal call'
           @session.direction = 'ingress'
           @session.centrex_internal = true
@@ -38,7 +38,7 @@ Keep @session.direction and @session.country.
 
 Voicemail.
 
-        when @destination in ['*86','786']
+        when @destination in ['vm','voicemail','*86','786']
           debug 'Voicemail'
           @session.direction = 'voicemail'
           @destination = 'inbox'
