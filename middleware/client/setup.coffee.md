@@ -73,6 +73,7 @@ In case of a transfer, the session identifier is included in the context.
 
       debug 'Ready',
         direction: @session.direction
+        destination: @destination
         profile: @session.profile
         sip_profile: @session.sip_profile
         reference: @session.reference
