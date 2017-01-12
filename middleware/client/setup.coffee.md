@@ -23,7 +23,13 @@ variable_recovery_profile_name: 'huge-play-sbc-ingress',
 
 The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in  @session.sip_profile .
 
+The channel-context is set (for calls originating from sofia-sip) by the `context` parameter of the Sofia instance that carries the A leg.
+For calls originating internally, module `exultant-songs` will use the `origination_context` variable.
+We load it first because otherwise the `Channel-Context` value (`default`) set by originate will take precedence.
+
+      @session.context ?= @req.variable 'origination_context'
       @session.context ?= @data['Channel-Context']
+
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer)(?:-(\S+))?$/
         debug 'Ignoring malformed context', @session.context
         return
@@ -38,6 +44,7 @@ The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.
+In case of a call from `exultant-songs`, the session identifier is in variable `session_reference`.
 
       @session.reference ?= @req.variable 'session_reference'
       @session.reference ?= @req.header 'X-CCNQ-Reference'
@@ -55,6 +62,17 @@ In case of a transfer, the session identifier is included in the context.
       @session.reference_data.calls.push @session.call_reference_data
 
       yield @save_ref()
+
+Force the destination for `exultant-songs` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
+
+      if @session.reference_data.destination?
+        @destination = @session.reference_data.destination
+        @session.reference_data.destination = null
+
+Also, do not wait for an ACK, since we're calling out (to the "caller") when using exultant-songs.
+
+        @session.wait_for_aleg_ack = false      # in huge-play
+        @session.sip_wait_for_aleg_ack = false  # in tough-rate
 
       @session.sip_profile = @req.variable 'sip_profile'
       @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
