@@ -54,6 +54,6 @@
     }
   },
   "publishConfig": {
-    "tag": "dev"
+    "tag": "latest"
   }
 }
