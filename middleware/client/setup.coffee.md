@@ -74,6 +74,8 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
         @session.wait_for_aleg_ack = false      # in huge-play
         @session.sip_wait_for_aleg_ack = false  # in tough-rate
 
+        yield @action 'ring_ready'
+
       @session.sip_profile = @req.variable 'sip_profile'
       @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
       @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
