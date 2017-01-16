@@ -5,6 +5,11 @@
     debug = (require 'debug') @name
     assert = require 'assert'
 
+    Redis = require 'Redis'
+    Bluebird = require 'Promise'
+    Bluebird.promisifyAll Redis.RedisClient.prototype
+    Bluebird.promisifyAll Redis.Multi.prototype
+
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
 
@@ -194,6 +199,7 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           dst_number
 
+        redis: if @cfg.redis? then Redis.createClient @cfg.redis else null
       }
 
       return
