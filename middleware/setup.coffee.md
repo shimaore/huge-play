@@ -4,8 +4,8 @@
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
 
-    Redis = require 'Redis'
-    Bluebird = require 'Promise'
+    Redis = require 'redis'
+    Bluebird = require 'bluebird'
     Bluebird.promisifyAll Redis.RedisClient.prototype
     Bluebird.promisifyAll Redis.Multi.prototype
 
