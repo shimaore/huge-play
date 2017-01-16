@@ -6,6 +6,10 @@
 
       return unless @session.direction is 'conf'
 
+      unless @cfg.host?
+        @debug.dev 'Missing cfg.host'
+        return
+
       unless @session.conf?
         @debug.dev 'Missing conference data'
         return
@@ -36,7 +40,7 @@ Conference is local (assuming FreeSwitch is co-hosted, which is our standard ass
 
 Validate passcode if any.
 
-        yield @action 'conference', "#{conf_name}+#{conf.passcode}+flags{}"
+        yield @action 'conference', "#{conf_name}+#{@session.conf.pin ? ''}+flags{}"
 
 Conference is remote.
 
