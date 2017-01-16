@@ -53,6 +53,10 @@ Move handling to `fifo` middleware.
 * session.fifo (object) The element of doc.number_domain.fifos describing the current FIFO in use.
 
       item = items[number]
+      unless item?
+        @debug.csr "Number domain has no data #{number} for #{type}."
+        return
+
       item.name ?= "#{number}"
       @session.direction = type
       @session[type] = item

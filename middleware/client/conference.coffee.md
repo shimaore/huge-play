@@ -4,13 +4,13 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'conference'
+      return unless @session.direction is 'conf'
 
       unless @session.conf?
         @debug.dev 'Missing conference data'
         return
 
-      conf_name = @conf_name conf
+      conf_name = @conf_name @session.conf
 
 Use redis to retrieve the server on which this conference is hosted.
 
