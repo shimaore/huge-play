@@ -2,7 +2,7 @@
 {hostname} = require 'os'
 
 module.exports = renderable (cfg) ->
-  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,macros} = L
+  {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,macros,callerControls,group,control} = L
 
   # cfg.name (string) Internal name for the FreeSwitch instance
   name = cfg.name ? 'server'
@@ -190,6 +190,31 @@ module.exports = renderable (cfg) ->
               param 'enable-cacert-check', cfg.httapi_cacert_check ? true
               param 'enable-ssl-verifyhost', cfg.httpapi_verify_host ? true
               param 'timeout', cfg.httapi_timeout ? 120
+
+      configuration name:'conference.conf', ->
+        callerControls ->
+          group name:'default', ->
+            control action:'mute', digits:0
+            control action:'deaf mute', digits:'*'
+            control action:'energy up', digits:'9'
+            control action:'energy equ', digits:'8'
+            control action:'energy dn', digits:'7'
+            control action:'vol talk up', digits:'3'
+            control action:'vol talk zero', digits:'2'
+            control action:'vol talk dn', digits:'1'
+            control action:'vol listen up', digits:'6'
+            control action:'vol listen zero', digits:'5'
+            control action:'vol listen dn', digits:'4'
+            control action:'hangup', digits:'#'
+
+        profiles ->
+          profile name:'default', ->
+            param 'rate', 16000
+            param 'interval', 20
+            param 'enter-sound', 'tone_stream://%(200,0,500,600,700)'
+            param 'exit-sound', 'tone_stream://%(500,0,300,200,100,50,25)'
+            param 'pin-sound', 'conference/conf-pin.wav'
+            param 'bad-pin-sound', 'conference/conf-bad-pin.wav'
 
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'

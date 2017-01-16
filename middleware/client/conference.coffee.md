@@ -40,6 +40,7 @@ Conference is local (assuming FreeSwitch is co-hosted, which is our standard ass
 
 Validate passcode if any.
 
+        yield @action 'answer'
         yield @action 'conference', "#{conf_name}+#{@session.conf.pin ? ''}+flags{}"
 
 Conference is remote.
