@@ -2,7 +2,7 @@
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:setup"
-    debug = (require 'debug') @name
+    cuddly = (require 'cuddly') @name
     assert = require 'assert'
 
     @web = ->
@@ -54,7 +54,7 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
 
         report: (o) ->
           unless @call? and @session?
-            debug 'report: improper environment'
+            cuddly.dev 'report: improper environment'
             return
 
           o.call ?= @call.uuid
@@ -73,14 +73,16 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
           if @cfg.update_session_reference_data?
             yield @cfg.update_session_reference_data data
           else
-            debug 'Missing @cfg.update_session_reference_data, not saving'
+            cuddly.dev 'Missing @cfg.update_session_reference_data, not saving'
+            @debug 'Missing @cfg.update_session_reference_data, not saving'
 
         get_ref: seem ->
           if @cfg.get_session_reference_data?
-            debug 'Loading reference_data', @session.reference
+            @debug 'Loading reference_data', @session.reference
             @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
           else
-            debug 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            cuddly.dev 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            @debug 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
             @session.reference_data ?= {}
 
         set: seem (name,value) ->
@@ -131,14 +133,15 @@ Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends
 
         sofia_string: seem (number, extra_params = []) ->
 
-          debug 'sofia_string', number, extra_params
+          @debug 'sofia_string', number, extra_params
 
           id = "number:#{number}@#{@session.number_domain}"
 
           number_data = yield @cfg.prov
             .get id
             .catch (error) ->
-              debug "#{id} #{error.stack ? error}"
+              cuddly.ops "#{id} #{error.stack ? error}"
+              @debug "#{id} #{error.stack ? error}"
               {}
 
           return '' unless number_data.number?
@@ -179,13 +182,14 @@ Retrieve number data.
           @session.number = yield @cfg.prov.get("number:#{dst_number}").catch (error) -> {disabled:true,error}
 
           if @session.number.error?
-            debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
+            cuddly.ops "Could not locate destination number #{dst_number}: #{@session.number.error}"
+            @debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
             return @respond '486 Not Found'
 
-          debug "Got dst_number #{dst_number}", @session.number
+          @debug "Got dst_number #{dst_number}", @session.number
 
           if @session.number.disabled
-            debug "Number #{dst_number} is disabled"
+            @debug "Number #{dst_number} is disabled"
             return @respond '486 Administratively Forbidden' # was 403
 
 Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
