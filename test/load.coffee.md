@@ -1,6 +1,7 @@
     seem = require 'seem'
     describe 'Modules', ->
       list = [
+          'middleware/logger.coffee.md'
           'middleware/setup.coffee.md'
           'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
