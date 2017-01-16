@@ -194,6 +194,10 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           dst_number
 
+        debug: (args...) ->
+          @session.debug ?= []
+          now = new Date().toJSON()
+          @session.debug.push [now, args...]
       }
 
       return
