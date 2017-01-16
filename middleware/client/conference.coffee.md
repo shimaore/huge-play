@@ -14,15 +14,21 @@
 
 Use redis to retrieve the server on which this conference is hosted.
 
-      key = "conf server #{conf_name}"
+      server = @cfg.host
 
-      server = yield @redis
-        .get
+Set if not exists, [setnx](https://redis.io/commands/setnx)
+(Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
+
+      key = "conference server for #{conf_name}"
+
+      existing = yield @redis
+        .setnxAsync key, server
         .catch -> null
 
-      unless server?
-        server = @cfg.host
-        yield @redis.set key, server
+      if existing
+        server = yield @redis
+          .getAsync key
+          .catch -> null
 
 Conference is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
@@ -31,7 +37,6 @@ Conference is local (assuming FreeSwitch is co-hosted, which is our standard ass
 Validate passcode if any.
 
         yield @action 'conference', "#{conf_name}+#{conf.passcode}+flags{}"
-
 
 Conference is remote.
 
