@@ -5,6 +5,7 @@
 
     IO = require 'socket.io-client'
     os = require 'os'
+    uuidV4 = require 'uuid/v4'
 
     @server_pre = ->
       url = @cfg.cuddly_url ?= process.env.CUDDLY_URL
@@ -21,18 +22,35 @@ Same semantics as in `cuddly`.
 Logging features
 ----------------
 
+    host = process.env.CUDDLY_HOST ? os.hostname()
+
     @include = ->
 
-      host = process.env.CUDDLY_HOST ? os.hostname()
+### Build identifier
+
+This allows to cross-reference logs and CDRs.
+
+      now = new Date().toJSON()
+      uuid = uuidV4()
+
+      @session.logger_stamp = now
+      @session.logger_host = host
+      @session.logger_uuid = uuid
+      id = [host,now,uuid].join '-'
+      @session._id = id
+
+### Build debug
+
+      @session.debug ?= []
 
       make_debug = (e) =>
         (text,args...) =>
-          now = new Date().toJSON()
           name = @__middleware_name
 
           data =
             stamp: now
             host: host
+            session: id
             application: name
             event: e
             error: text
@@ -40,12 +58,11 @@ Logging features
 
 Save in session for later storage via astonishing-competition.
 
-          @session.debug ?= []
           @session.debug.push data
 
 Debug
 
-          (Debug "#{name}:#{e}") text, args...
+          (Debug "#{name}:#{e}") "#{now} #{host} #{id} #{text}", args...
 
 Report via cuddly
 
