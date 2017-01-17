@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "16.1.2",
+  "version": "16.1.4",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublish": "coffee -M -c middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
@@ -20,7 +20,7 @@
   "dependencies": {
     "acoustic-line": "^1.9.0",
     "bluebird": "^3.4.7",
-    "bumpy-lawyer": "^2.2.1",
+    "bumpy-lawyer": "^2.3.0",
     "cuddly": "^1.1.5",
     "debug": "^2.6.0",
     "flat-ornament": "^1.1.0",

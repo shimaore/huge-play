@@ -213,8 +213,8 @@ module.exports = renderable (cfg) ->
             param 'interval', 20
             param 'enter-sound', 'tone_stream://%(200,0,500,600,700)'
             param 'exit-sound', 'tone_stream://%(500,0,300,200,100,50,25)'
-            param 'pin-sound', 'conference/conf-pin.wav'
-            param 'bad-pin-sound', 'conference/conf-bad-pin.wav'
+            param 'pin-sound', 'phrase:conference_pin'
+            param 'bad-pin-sound', 'phrase:conference_bad_pin'
 
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'

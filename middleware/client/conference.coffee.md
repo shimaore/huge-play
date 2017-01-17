@@ -40,7 +40,12 @@ Conference is local (assuming FreeSwitch is co-hosted, which is our standard ass
 
 Validate passcode if any.
 
+        language = @session.conf.language
+        language ?= @session.language
+        language ?= @cfg.announcement_language
+
         yield @action 'answer'
+        yield @set language: language
         yield @action 'conference', "#{conf_name}+#{@session.conf.pin ? ''}+flags{}"
 
 Conference is remote.
