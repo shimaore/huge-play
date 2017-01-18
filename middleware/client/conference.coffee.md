@@ -46,7 +46,54 @@ Validate passcode if any.
 
         yield @action 'answer'
         yield @set language: language
-        yield @action 'conference', "#{conf_name}+#{@session.conf.pin ? ''}+flags{}"
+
+FIXME: Canonalize from the code already present in well-groomed-feast/middleware/setup
+
+        play_and_get_digits = =>
+          @action 'play_and_get_digits', [
+            1 # min
+            8 # max
+            3 # tries
+            3000 # timeout
+            '#' # terminators
+            'phrase:conference:pin' # file
+            'phrase:conference:bad_pin' # invalid_file
+            'pin'
+          ].join ' '
+
+        get_conf_pin = seem =>
+          {body} = yield play_and_get_digits()
+          body.pin
+
+        authenticated = seem =>
+          pin = @session.conf.pin
+          if not pin?
+            return true
+          pin is yield get_conf_pin()
+
+        if authenticated()
+
+          namefile = "/tmp/#{@call.logger_uuid}-name.wav"
+          yield @action 'playback', 'phrase:voicemail_record_name'
+          yield @action 'record', "#{namefile} 2"
+
+          play_in_conference = (what) =>
+            @api [
+              'none' # group or call UUID
+              'conference' # [conference API commands](https://freeswitch.org/confluence/display/FREESWITCH/mod_conference#mod_conference-APIReference)
+              conf_name
+              'play'
+              what
+            ].join ' '
+
+          announce = =>
+            play_in_conference "phrase:conference:has_joined:#{namefile}"
+
+          setTimeout announce, 1000
+
+Log into the conference
+
+          yield @action 'conference', "#{conf_name}++flags{}"
 
 Conference is remote.
 
