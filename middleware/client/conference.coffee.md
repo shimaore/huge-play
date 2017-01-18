@@ -100,7 +100,7 @@ FIXME: Canonalize from the code already present in well-groomed-feast/middleware
 
           announce = =>
             @debug 'announce'
-            play_in_conference namefile
+            play_in_conference "conference:has_joined:#{namefile}"
             .catch (error) =>
               @debug "error: #{error.stack ? error}"
 
