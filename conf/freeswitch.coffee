@@ -194,18 +194,9 @@ module.exports = renderable (cfg) ->
       configuration name:'conference.conf', ->
         callerControls ->
           group name:'default', ->
-            control action:'mute', digits:0
-            control action:'deaf mute', digits:'*'
-            control action:'energy up', digits:'9'
-            control action:'energy equ', digits:'8'
-            control action:'energy dn', digits:'7'
-            control action:'vol talk up', digits:'3'
-            control action:'vol talk zero', digits:'2'
-            control action:'vol talk dn', digits:'1'
-            control action:'vol listen up', digits:'6'
-            control action:'vol listen zero', digits:'5'
-            control action:'vol listen dn', digits:'4'
-            control action:'hangup', digits:'#'
+            control action:'mute', digits:'1'
+            control action:'deaf mute', digits:'2'
+            control action:'hangup', digits:'3'
 
         profiles ->
           profile name:'default', ->
@@ -213,8 +204,9 @@ module.exports = renderable (cfg) ->
             param 'interval', 20
             param 'enter-sound', 'tone_stream://%(200,0,500,600,700)'
             param 'exit-sound', 'tone_stream://%(500,0,300,200,100,50,25)'
-            param 'pin-sound', 'phrase:conference_pin'
-            param 'bad-pin-sound', 'phrase:conference_bad_pin'
+            param 'sound-prefix', 'phrase:'
+            param 'pin-sound', 'conference:pin'
+            param 'bad-pin-sound', 'conference:bad_pin'
 
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
