@@ -1,6 +1,6 @@
     Debug = require 'debug'
     pkg = require '../package.json'
-    @name = "#{pkg}:middleware:logger"
+    @name = "#{pkg.name}:middleware:logger"
     debug = Debug @name
 
     IO = require 'socket.io-client'
