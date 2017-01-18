@@ -78,7 +78,7 @@ FIXME: Canonalize from the code already present in well-groomed-feast/middleware
           yield @action 'record', "#{namefile} 2"
 
           play_in_conference = (what) =>
-            @api [
+            @call.api [
               'none' # group or call UUID
               'conference' # [conference API commands](https://freeswitch.org/confluence/display/FREESWITCH/mod_conference#mod_conference-APIReference)
               conf_name
