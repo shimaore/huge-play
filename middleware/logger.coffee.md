@@ -52,9 +52,7 @@ Report via cuddly
 
           if @cfg.cuddly_io? and e in events
 
-            @cfg.cuddly_io
-              .emit "report_#{e}", data
-              .catch -> yes
+            @cfg.cuddly_io.emit "report_#{e}", data
 
           return
 
@@ -115,9 +113,7 @@ Report via cuddly
 
           if @cfg.cuddly_io? and e in events
 
-            @cfg.cuddly_io
-              .emit "report_#{e}", data
-              .catch -> yes
+            @cfg.cuddly_io.emit "report_#{e}", data
 
           return
 
