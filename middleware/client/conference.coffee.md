@@ -86,9 +86,18 @@ FIXME: Canonalize from the code already present in well-groomed-feast/middleware
         if yield authenticated()
 
           namefile = "/tmp/#{@session.logger_uuid}-name.wav"
+
+This uses `playback`, but `@action 'phrase', 'voicemail_record_name'` (separator is `,` for parameters) should work as well.
+
           yield @action 'playback', 'phrase:voicemail_record_name'
           @debug 'record'
           yield @action 'record', "#{namefile} 2"
+
+Play in conference
+------------------
+
+The thing, really, is that conference uses `switch_core_file` and parses for `say:` only, while `playback` (in `mod_dptools`) uses `switch_ivr_play_file`, which parses `phrase:`, `say:` etc.
+Really we should just barge on the channel if we need anything more complex than playing files, tone-streams, etc.
 
           play_in_conference = (what) =>
             @call.api [
@@ -98,9 +107,10 @@ FIXME: Canonalize from the code already present in well-groomed-feast/middleware
               what
             ].join ' '
 
-          announce = =>
+          announce = seem =>
             @debug 'announce'
-            play_in_conference "conference:has_joined:#{namefile}"
+            yield play_in_conference 'tone_stream://%(200,0,500,600,700)'
+            yield play_in_conference namefile
             .catch (error) =>
               @debug "error: #{error.stack ? error}"
 
@@ -110,6 +120,8 @@ Log into the conference
 
           @debug 'conference'
           yield @action 'conference', "#{conf_name}++flags{}"
+          yield play_in_conference 'tone_stream://%(500,0,300,200,100,50,25)'
+          yield play_in_conference namefile
 
 Conference is remote.
 
