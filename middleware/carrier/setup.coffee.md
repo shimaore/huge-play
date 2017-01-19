@@ -75,7 +75,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 First start with the same code as client-side.
 
       context = @data['Channel-Context']
-      unless m = context.match /^(\S+)-(ingress|egress)$/
+      unless m = context.match /^(\S+)-(ingress|egress|handled)$/
         debug 'Ignoring malformed context', context
         return
 
@@ -84,8 +84,13 @@ First start with the same code as client-side.
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
-      if @session.direction is 'egress'
+      else
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
+
+      @session.handled_transfer_context = [
+        @session.profile
+        'handled'
+      ].join '-'
 
       @session.profile_data = @cfg.sip_profiles[@session.profile]
 

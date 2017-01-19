@@ -30,17 +30,13 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
       @session.context ?= @req.variable 'origination_context'
       @session.context ?= @data['Channel-Context']
 
-      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer)(?:-(\S+))?$/
+      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         debug 'Ignoring malformed context', @session.context
         return
 
       @session.profile = m[1]
       @session.direction = m[2]
       @session.reference ?= m[3]
-
-      if @session.direction is 'transfer'
-        @session.direction = 'egress'
-        @session.transfer = true
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.
@@ -81,18 +77,42 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
       @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
       if @session.direction is 'ingress'
         @session.sip_profile ?= @session.sip_profile_client
-      if @session.direction is 'egress'
+      else
         @session.sip_profile ?= @session.sip_profile_carrier
+
+The default transfer context assumes the call is coming from a customer (egress call) and the customer is transfering the call.
+
+      @session.default_transfer_context = [
+        @session.sip_profile
+        'transfer'
+        @session.reference
+      ].join '-'
+
+      if @session.direction is 'transfer'
+        @session.direction = 'egress'
+        @session.transfer = true
+
+The handled transfer context assumes the call is coming from a (presumably trusted) server; for now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
+
+      @session.handled_transfer_context = [
+        @session.sip_profile
+        'handled'
+        @session.reference
+      ].join '-'
+
+      if @session.direction is 'handled'
+        @session.direction = 'handled'
+        @session.transfer = true
 
 * session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
 
-      p = @cfg.profiles[@session.sip_profile]
+      p = @cfg.profiles?[@session.sip_profile]
       if p?
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
 
       yield @set
         session_reference: @session.reference
-        force_transfer_context: ['transfer', @session.reference].join '-'
+        force_transfer_context: @session.default_transfer_context
         'sip_h_X-CCNQ-Reference': @session.reference
       yield @export
         session_reference: @session.reference

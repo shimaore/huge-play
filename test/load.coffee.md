@@ -5,6 +5,7 @@
           'middleware/setup.coffee.md'
           'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
+          'middleware/handled.coffee.md'
 
           'middleware/client/setup.coffee.md'
           'middleware/client/fifo.coffee.md'
