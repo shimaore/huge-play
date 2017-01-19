@@ -79,16 +79,19 @@ First start with the same code as client-side.
         debug 'Ignoring malformed context', context
         return
 
-      @session.direction = m[2]
       @session.profile = m[1]
+      @session.direction = m[2]
+
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
+        @session.sip_context ?= "#{@session.profile}-egress"
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
       else
+        @session.sip_context ?= "#{@session.profile}-ingress"
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
 
       @session.handled_transfer_context = [
-        @session.profile
+        @session.sip_context
         'handled'
       ].join '-'
 
