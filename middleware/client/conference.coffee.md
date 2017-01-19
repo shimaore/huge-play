@@ -133,4 +133,4 @@ Conference is remote.
 
       else
 
-        yield @action 'deflect', "#{@destination}@#{server}"
+        yield @action 'deflect', "sip:localconf-#{conf_name}@#{server}"
