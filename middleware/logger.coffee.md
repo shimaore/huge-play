@@ -7,7 +7,20 @@
     os = require 'os'
     uuidV4 = require 'uuid/v4'
 
+Same semantics as in `cuddly`.
+
+    events = ['dev','ops','csr']
+
+    host = process.env.CUDDLY_HOST ? os.hostname()
+
+Server-pre
+==========
+
+
     @server_pre = ->
+
+Connect to cuddly server
+
       url = @cfg.cuddly_url ?= process.env.CUDDLY_URL
       if not url?
         debug 'Missing `cfg.cuddly_url` and CUDDLY_URL'
@@ -15,14 +28,48 @@
 
       @cfg.cuddly_io = IO url
 
-Same semantics as in `cuddly`.
+Insert `@debug` in server-pre.
 
-    events = ['dev','ops','csr']
+      now = new Date().toJSON()
 
-Logging features
-----------------
+      make_debug = (e) =>
+        (text,args...) =>
+          name = @__middleware_name
 
-    host = process.env.CUDDLY_HOST ? os.hostname()
+          data =
+            stamp: now
+            host: host
+            application: name
+            event: e
+            error: text
+            data: args
+
+Debug
+
+          (Debug "#{name}:#{e}") "#{now} #{host} #{text}", args...
+
+Report via cuddly
+
+          if @cfg.cuddly_io? and e in events
+
+            @cfg.cuddly_io
+              .emit "report_#{e}", data
+              .catch -> yes
+
+          return
+
+Register for `trace` as `@debug`,
+
+      @debug = make_debug 'trace'
+
+and inject `@debug.dev`, `@debug.ops`, `@debug.csr`.
+
+      events.forEach (e) =>
+        @debug[e] = make_debug e
+      return
+
+Per-call Logging features
+=========================
 
     @include = ->
 
