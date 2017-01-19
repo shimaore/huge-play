@@ -84,6 +84,12 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
       if @session.direction is 'egress'
         @session.sip_profile ?= @session.sip_profile_carrier
 
+* session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
+
+      p = @cfg.profiles[@session.sip_profile]
+      if p?
+        @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
+
       yield @set
         session_reference: @session.reference
         force_transfer_context: ['transfer', @session.reference].join '-'

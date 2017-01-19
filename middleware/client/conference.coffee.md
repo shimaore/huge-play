@@ -22,7 +22,7 @@
 
 Use redis to retrieve the server on which this conference is hosted.
 
-      server = @cfg.host
+      server = @session.local_server
 
 Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
@@ -45,7 +45,7 @@ Set if not exists, [setnx](https://redis.io/commands/setnx)
 
 Conference is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
-      if server is @cfg.host
+      if server is @session.local_server
 
 Validate passcode if any.
 

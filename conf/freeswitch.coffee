@@ -161,7 +161,8 @@ module.exports = renderable (cfg) ->
             q.name = q.context = "#{name}-ingress"
             q.sip_port = p.ingress_sip_port ? p.sip_port
             q.acl = q.name if cfg.acl_per_profile
-            q.disable_transfer = true
+            # Transfers must be allowed carrier-side so that e.g. we can redirect to the proper conference server
+            q.disable_transfer = q.client isnt true
             profile_module.call L, q
 
             # Egress profile (client-side) is at port 'sip_port+10000'.
