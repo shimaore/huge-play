@@ -29,14 +29,19 @@ Set if not exists, [setnx](https://redis.io/commands/setnx)
 
       key = "conference server for #{conf_name}"
 
-      existing = yield @redis
+      first_time = yield @redis
         .setnxAsync key, server
-        .catch -> null
+        .catch (error) ->
+          @debug.ops "error #{error.stack ? error}"
+          null
 
-      if existing
+      if not first_time
         server = yield @redis
           .getAsync key
-          .catch -> null
+          .catch (error) ->
+            @debug.ops "error #{error.stack ? error}"
+            null
+        # FIXME what should we do if we can't retrieve the server name?
 
 Conference is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
@@ -113,6 +118,7 @@ Really we should just barge on the channel if we need anything more complex than
             yield play_in_conference namefile
             .catch (error) =>
               @debug "error: #{error.stack ? error}"
+            # FIXME unlink namefile
 
           setTimeout announce, 1000
 
