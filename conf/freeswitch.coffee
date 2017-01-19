@@ -170,7 +170,7 @@ module.exports = renderable (cfg) ->
             q.name = q.context = "#{name}-egress"
             q.sip_port = p.egress_sip_port ? 10000 + q.sip_port
             q.acl = q.name if cfg.acl_per_profile
-            q.disable_transfer = q.client isnt true
+            q.disable_transfer = false
             profile_module.call L, q
 
       configuration name:'httapi.conf', ->

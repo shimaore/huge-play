@@ -83,7 +83,7 @@
 <param name="sip-port" value="5080"/>
 <param name="bind-params" value="transport=udp"/>
 <param name="apply-inbound-acl" value="default"/>
-<param name="disable-transfer" value="true"/>
+<param name="disable-transfer" value="false"/>
 <param name="enable-3pcc" value="false"/>
 <param name="inbound-use-callid-as-uuid" value="true"/>
 <param name="outbound-use-uuid-as-callid" value="false"/>
@@ -295,7 +295,7 @@
 <param name="sip-port" value="15200"/>
 <param name="bind-params" value="transport=udp"/>
 <param name="apply-inbound-acl" value="default"/>
-<param name="disable-transfer" value="true"/>
+<param name="disable-transfer" value="false"/>
 <param name="enable-3pcc" value="false"/>
 <param name="inbound-use-callid-as-uuid" value="true"/>
 <param name="outbound-use-uuid-as-callid" value="false"/>
