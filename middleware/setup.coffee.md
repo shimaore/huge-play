@@ -20,6 +20,16 @@
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
+      if @cfg.redis?
+        @cfg.redis_client = redis = Redis.createClient @cfg.redis
+        redis?.on 'error', (error) =>
+          @debug "redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
+        redis.on 'ready', => @debug "redis: ready"
+        redis.on 'connect', => @debug "redis: connect"
+        redis.on 'reconnecting', => @debug "redis: reconnecting"
+        redis.on 'end', => @debug "redis: end"
+        redis.on 'warning', => @debug "redis: warning"
+
     @notify = ->
 
       @cfg.statistics.on 'reference', (data) =>
@@ -199,15 +209,8 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           dst_number
 
-        redis: if @cfg.redis? then Redis.createClient(@cfg.redis) else null
-      }
+        redis: @cfg.redis_client
 
-      ctx.redis?.on 'error', (error) =>
-        @debug.ops "redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
-      ctx.redis?.on 'ready', => @debug "redis: ready"
-      ctx.redis?.on 'connect', => @debug "redis: connect"
-      ctx.redis?.on 'reconnecting', => @debug "redis: reconnecting"
-      ctx.redis?.on 'end', => @debug "redis: end"
-      ctx.redis?.on 'warning', => @debug "redis: warning"
+      }
 
       return
