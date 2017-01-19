@@ -199,7 +199,15 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           dst_number
 
-        redis: if @cfg.redis? then Redis.createClient @cfg.redis else null
+        redis: if @cfg.redis? then Redis.createClient(@cfg.redis) else null
       }
+
+      ctx.redis?.on 'error', (error) =>
+        @debug.ops "redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
+      ctx.redis?.on 'ready', => @debug "redis: ready"
+      ctx.redis?.on 'connect', => @debug "redis: connect"
+      ctx.redis?.on 'reconnecting', => @debug "redis: reconnecting"
+      ctx.redis?.on 'end', => @debug "redis: end"
+      ctx.redis?.on 'warning', => @debug "redis: warning"
 
       return
