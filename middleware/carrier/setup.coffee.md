@@ -84,14 +84,12 @@ First start with the same code as client-side.
 
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
-        @session.sip_context ?= "#{@session.profile}-egress"
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
       else
-        @session.sip_context ?= "#{@session.profile}-ingress"
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
 
       @session.handled_transfer_context = [
-        @session.sip_context
+        @session.profile
         'handled'
       ].join '-'
 
