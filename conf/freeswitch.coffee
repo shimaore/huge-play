@@ -16,7 +16,6 @@ module.exports = renderable (cfg) ->
     'mod_logfile'
     'mod_event_socket'
     'mod_commands'
-    'mod_conference'
     'mod_dptools'
     'mod_loopback'
     'mod_sofia'
