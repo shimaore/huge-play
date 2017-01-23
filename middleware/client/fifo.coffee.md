@@ -10,8 +10,6 @@
 I'm having issues with FIFO and audio after the calls are connected.
 TBD: We'll be using some shared state (like Redis) with handlers on ingress/egress.
 
-    fifo_works = false
-
     @description = '''
       Handles routing to a given FIFO queue.
     '''
@@ -81,29 +79,25 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
 
       debug 'Send to FIFO'
-      if fifo_works
-        res = yield @action 'fifo', "#{fifo_name} in"
+      yield @set
+        continue_on_fail: true
+        hangup_after_bridge: false
 
-      else
-        yield @set
-          continue_on_fail: true
-          hangup_after_bridge: false
+      if fifo.announce?
+        yield @set ringback: fifo_uri id, fifo.announce
+      if fifo.music?
+        yield @export hold_music: fifo_uri id, fifo.music
 
-        if fifo.announce?
-          yield @set ringback: fifo_uri id, fifo.announce
-        if fifo.music?
-          yield @export hold_music: fifo_uri id, fifo.music
-
-        sofias = []
-        for member,i in fifo.members
-          sofias.push yield @sofia_string member, ["#{k}=#{v}" for own k,v of {
-            t38_passthru: false
-            leg_timeout: 60
-            leg_delay_start: i*2
-            progress_timeout: 18
-          }]
-        debug 'bridge', sofias
-        res = yield @action 'bridge', sofias.join ','
+      sofias = []
+      for member,i in fifo.members
+        sofias.push yield @sofia_string member, ["#{k}=#{v}" for own k,v of {
+          t38_passthru: false
+          leg_timeout: 60
+          leg_delay_start: i*2
+          progress_timeout: 18
+        }]
+      debug 'bridge', sofias
+      res = yield @action 'bridge', sofias.join ','
 
       data = res.body
       @session.bridge_data ?= []
@@ -129,16 +123,15 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         debug 'Call was transfered', xfer
         return
 
-      unless fifo_works
-        cause = data?.variable_last_bridge_hangup_cause
-        cause ?= data?.variable_originate_disposition
+      cause = data?.variable_last_bridge_hangup_cause
+      cause ?= data?.variable_originate_disposition
 
-        debug "FIFO returned with cause #{cause}"
+      debug "FIFO returned with cause #{cause}"
 
-        if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
-          debug "Successful call when routing FIFO #{fifo_name} through #{sofias.join ','}"
-          yield @action 'hangup'
-          return
+      if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
+        debug "Successful call when routing FIFO #{fifo_name} through #{sofias.join ','}"
+        yield @action 'hangup'
+        return
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
 

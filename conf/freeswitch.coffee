@@ -23,7 +23,6 @@ module.exports = renderable (cfg) ->
     'mod_sndfile'
     'mod_tone_stream'
     'mod_httapi'
-    'mod_fifo'
   ]
   # cfg.cdr.url (URL) where to push FreeSwitch CDRs
   if cfg.cdr?.url?
