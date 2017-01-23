@@ -36,6 +36,12 @@ Keep @session.direction and @session.country.
           debug 'External call', {@source,@destination}
           return
 
+        when @destination[0] is '+'
+          @session.dialplan = 'national'
+          @source = @session.asserted ? @session.number.asserted ? @source
+          debug 'External call', {@source,@destination}
+          return
+
 Voicemail.
 
         when @destination in ['vm','voicemail','*86','786']
