@@ -207,7 +207,8 @@ module.exports = renderable (cfg) ->
 
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
-    section 'phrases', ->
-      macros ->
-        for module in phrases_to_load
-          (module.include sound_dir) cfg
+    if process.env.WITH_SOUNDS is 'true' or not process.env.WITH_SOUNDS?
+      section 'phrases', ->
+        macros ->
+          for module in phrases_to_load
+            (module.include sound_dir) cfg
