@@ -1,6 +1,8 @@
     @name = 'huge-play:middleware:handled'
     @include = ->
       return unless @session.direction is 'handled'
-      d = "sofia/#{@session.sip_profile}/#{@req.variable 'sip_refer_to'}"
+      refer_to = @req.variable 'sip_refer_to'
+        .replace /^<(.+)>$/, '$1'
+      d = "sofia/#{@session.sip_profile}/#{refer_to}"
       @debug.csr 'transfering call to', d
       @action 'bridge', d
