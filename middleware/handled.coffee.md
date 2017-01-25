@@ -14,7 +14,10 @@
       return unless @session.direction is 'handled'
       refer_to = clean_uri @req.variable 'sip_refer_to'
       d = "sofia/#{@session.sip_profile}/#{refer_to}"
-      # FIXME include in `reference` data
+      if @session.reference_data?
+        @session.reference_data.call_state = 'handled'
+        yield @save_ref()
+
       @debug.csr 'transfering call to', d
       res = yield @action 'bridge', d
       @debug.csr 'call transfered', res
