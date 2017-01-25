@@ -61,6 +61,12 @@
             save_ref: ->
             set: ->
             export: ->
+            debug: do ->
+              debug = ->
+              debug.csr = ->
+              debug.dev = ->
+              debug.ops = ->
+              debug
           M = require "../#{m}"
           yield M.server_pre?.call ctx, ctx
           yield M.include.call ctx, ctx

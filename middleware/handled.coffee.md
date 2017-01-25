@@ -18,6 +18,6 @@
         @session.reference_data.call_state = 'handled'
         yield @save_ref()
 
-      @debug.csr 'transfering call to', d
+      @debug 'transfering call to', d
       res = yield @action 'bridge', d
-      @debug.csr 'call transfered', res
+      @debug 'call transfered', res

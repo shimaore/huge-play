@@ -1,7 +1,6 @@
     seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:client:setup"
-    debug = (require 'debug') @name
 
     uuidV4 = require 'uuid/v4'
 
@@ -31,7 +30,7 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
       @session.context ?= @data['Channel-Context']
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
-        debug 'Ignoring malformed context', @session.context
+        @debug.dev 'Ignoring malformed context', @session.context
         return
 
       @session.profile = m[1]
@@ -46,7 +45,7 @@ In case of a call from `exultant-songs`, the session identifier is in variable `
       @session.reference ?= @req.header 'X-CCNQ-Reference'
       unless @session.reference?
         @session.reference = uuidV4()
-        debug 'Assigned new session.reference', @session.reference
+        @debug 'Assigned new session.reference', @session.reference
 
       yield @get_ref()
       @session.reference_data.call_state = 'routing'
@@ -119,7 +118,7 @@ The handled transfer context assumes the call is coming from a (presumably trust
       yield @export
         session_reference: @session.reference
 
-      debug 'Ready',
+      @debug 'Ready',
         direction: @session.direction
         destination: @destination
         profile: @session.profile

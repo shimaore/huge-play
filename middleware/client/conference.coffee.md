@@ -53,6 +53,8 @@ Conference is local (assuming FreeSwitch is co-hosted, which is our standard ass
 
       if server is @session.local_server
 
+        @debug 'Conference is local'
+
 Validate passcode if any.
 
         language = @session.conf.language
@@ -139,4 +141,10 @@ Conference is remote.
 
       else
 
-        yield @action 'deflect', "sip:localconf-#{conf_name}@#{server}"
+        uri = "sip:localconf-#{conf_name}@#{server}"
+
+        @debug 'Conference is remote', uri
+
+        res = yield @action 'deflect', uri
+
+        @debug 'Remote conference returned', uri, res
