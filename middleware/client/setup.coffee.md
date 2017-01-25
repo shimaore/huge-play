@@ -106,9 +106,11 @@ The handled transfer context assumes the call is coming from a (presumably trust
 
 * session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
 
-      p = @cfg.profiles?[@session.sip_profile]
+      p = @cfg.profiles?[@session.profile]
       if p?
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
+      else
+        @debug.dev 'Missing profile', @session.sip_profile
 
       yield @set
         session_reference: @session.reference
