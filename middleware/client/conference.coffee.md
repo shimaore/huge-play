@@ -18,6 +18,10 @@
         @debug.dev 'Missing conference data'
         return
 
+      unless @redis?
+        @debug.dev 'Missing redis'
+        return
+
       conf_name = @conf_name @session.conf
 
 Use redis to retrieve the server on which this conference is hosted.
@@ -44,6 +48,8 @@ Set if not exists, [setnx](https://redis.io/commands/setnx)
         # FIXME what should we do if we can't retrieve the server name?
 
 Conference is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
+
+      @debug 'Checking for local conference', server, @session.local_server
 
       if server is @session.local_server
 
