@@ -29,6 +29,8 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
       debug 'endpoint', @session.endpoint_name
 
+      yield @unset 'sip_h_X-CCNQ3-Endpoint'
+
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
