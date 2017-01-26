@@ -117,9 +117,9 @@ Report via cuddly
 
           return
 
-Register for `trace` as `@debug`,
+Register for `debug` as `@debug`,
 
-      @debug = make_debug 'trace'
+      @debug = make_debug 'debug'
 
 and inject `@debug.dev`, `@debug.ops`, `@debug.csr`.
 
