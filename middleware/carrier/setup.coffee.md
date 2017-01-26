@@ -127,7 +127,6 @@ The handled transfer context assumes the transfer request is coming from a (pres
 
       yield @set
         session_reference: @session.reference
-        force_transfer_context: @session.default_transfer_context
         'sip_h_X-CCNQ-Reference': @session.reference
       yield @export
         session_reference: @session.reference
