@@ -1,6 +1,5 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:cdr"
-    debug = (require 'debug') @name
     seem = require 'seem'
     Promise = require 'bluebird'
 
@@ -10,16 +9,16 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.once 'cleanup_linger'
       .then seem =>
-        debug "CDR: Linger: pausing"
+        @debug "CDR: Linger: pausing"
         yield Promise.delay 4000
-        debug "CDR: Linger: exit"
-        yield @call.exit().catch (error) ->
-          debug "exit: #{error}"
+        @debug "CDR: Linger: exit"
+        yield @call.exit().catch (error) =>
+          @debug.dev "exit: #{error}"
 
       @call.linger()
 
       unless @statistics? and @report?
-        debug 'Error: Improper environment'
+        @debug.dev 'Error: Improper environment'
         return
 
       @statistics.add 'incoming-calls'
@@ -27,7 +26,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem (res) =>
-        debug "Channel Hangup Complete"
+        @debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
@@ -68,7 +67,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
         @report state: 'end', data: report
-        debug "CDR: Channel Hangup Complete", report
+        @debug "CDR: Channel Hangup Complete", report
 
-      debug 'Ready'
+      @debug 'Ready'
       return
