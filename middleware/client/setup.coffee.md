@@ -52,6 +52,7 @@ In case of a call from `exultant-songs`, the session identifier is in variable `
 
       @session.call_reference_data =
         uuid: @call.uuid
+        session: @session._id
         start_time: new Date() .toJSON()
       @session.reference_data.calls ?= []
       @session.reference_data.calls.push @session.call_reference_data
