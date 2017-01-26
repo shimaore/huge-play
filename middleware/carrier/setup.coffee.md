@@ -123,6 +123,9 @@ The handled transfer context assumes the transfer request is coming from a (pres
         @session.reference
       ].join '-'
 
+Note that carrier-side the fields are called `sip_profiles` and are stored in the database.
+The FreeSwitch configuration uses the `profiles` field, which defaults to using port 5080.
+
       @session.profile_data = @cfg.sip_profiles[@session.profile]
 
       yield @set

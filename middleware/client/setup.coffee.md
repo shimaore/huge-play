@@ -108,6 +108,8 @@ The handled transfer context assumes the transfer request is coming from a (pres
 
 * session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
 
+Note that client-side the fields are called `profiles` and are stored in the JSON configuration.
+
       p = @cfg.profiles?[@session.profile]
       if p?
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
