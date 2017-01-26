@@ -118,6 +118,7 @@ The handled transfer context assumes the call is coming from a (presumably trust
         'sip_h_X-CCNQ-Reference': @session.reference
       yield @export
         session_reference: @session.reference
+        'sip_h_X-CCNQ-Reference': @session.reference
 
       @debug 'Ready',
         direction: @session.direction
