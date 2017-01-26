@@ -14,9 +14,14 @@
       return unless @session.direction is 'handled'
       refer_to = clean_uri @req.variable 'sip_refer_to'
       d = "sofia/#{@session.sip_profile}/#{refer_to}"
+
       if @session.reference_data?
         @session.reference_data.call_state = 'handled'
         yield @save_ref()
+      else
+        @debug.dev 'Missing reference data when handling to', d
+        yield @respond '500', 'Missing reference'
+        return
 
       @debug 'transfering call to', d
       res = yield @action 'bridge', d

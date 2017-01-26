@@ -72,6 +72,8 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
 
         yield @action 'ring_ready'
 
+Define the (sofia-sip) SIP profiles used to send calls out.
+
       @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
       @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
 
@@ -80,7 +82,7 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
       else
         @session.sip_profile ?= @session.sip_profile_carrier
 
-The default transfer context assumes the call is coming from a customer (egress call) and the customer is transfering the call.
+The default transfer context assumes the transfer request is coming from a customer (egress call) and the customer is transfering the call.
 
       @session.default_transfer_context = [
         @session.profile
@@ -92,7 +94,7 @@ The default transfer context assumes the call is coming from a customer (egress 
         @session.direction = 'egress'
         @session.transfer = true
 
-The handled transfer context assumes the call is coming from a (presumably trusted) server; for now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
+The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler. For now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
 
       @session.handled_transfer_context = [
         @session.profile
