@@ -31,7 +31,7 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Ignoring malformed context', @session.context
-        return
+        return @respond '500 Malformed context'
 
       @session.profile = m[1]
       @session.direction = m[2]
