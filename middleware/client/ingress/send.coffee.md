@@ -81,6 +81,11 @@ For example: `200`
 
       debug 'Outcome', {cause,code}
 
+### For transfers, we also get state information.
+
+- `variable_transfer_disposition: 'replaced'`
+- `variable_endpoint_disposition: 'ATTENDED_TRANSFER'`
+
 Success
 -------
 

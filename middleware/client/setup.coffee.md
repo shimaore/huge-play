@@ -82,6 +82,8 @@ Define the (sofia-sip) SIP profiles used to send calls out.
       else
         @session.sip_profile ?= @session.sip_profile_carrier
 
+      @session.transfer = false
+
 The default transfer context assumes the transfer request is coming from a customer (egress call) and the customer is transfering the call.
 
       @session.default_transfer_context = [
@@ -114,7 +116,7 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
       if p?
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
       else
-        @debug.dev 'Missing profile', @session.sip_profile
+        @debug.dev 'Missing profile', @session.profile
 
       yield @set
         session_reference: @session.reference
@@ -125,10 +127,18 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
         'sip_h_X-CCNQ-Reference': @session.reference
 
       @debug 'Ready',
+        reference: @session.reference
+        call: @call.uuid
+        session: @session._id
+        context: @session.context
         direction: @session.direction
         destination: @destination
+        source: @source
+        transfer: @session.transfer
         profile: @session.profile
         sip_profile: @session.sip_profile
-        reference: @session.reference
+        default_transfer_context: @session.default_transfer_context
+        wait_for_aleg_ack: @session.wait_for_aleg_ack ? null
+        local_server: @session.local_server ? null
 
       return
