@@ -56,19 +56,21 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
     @server_pre = seem ->
       @cfg.host_data =
         if @cfg.host?
-          @debug "Retrieving data for #{@cfg.host}"
+          debug "Retrieving data for #{@cfg.host}"
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
-              @debug.ops "Host #{@cfg.host}: #{error}"
+              # @debug.ops "Host #{@cfg.host}: #{error}"
+              debug "Host #{@cfg.host}: #{error}"
               {}
         else
-          @debug.dev 'No cfg.host'
+          # @debug.dev 'No cfg.host'
+          debug 'No cfg.host'
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
 
-      @debug 'Configuring SIP Profiles', @cfg.sip_profiles
+      debug 'Configuring SIP Profiles', @cfg.sip_profiles
       null
 
     @include = ->
