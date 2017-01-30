@@ -1,6 +1,7 @@
     seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
+    debug = (require 'debug') @name
 
     uuidV4 = require 'uuid/v4'
 
@@ -21,7 +22,7 @@ Create the proper profiles and ACLs
 
       @cfg.host_data =
         if @cfg.host?
-          @debug "Retrieving data for #{@cfg.host}"
+          debug "Retrieving data for #{@cfg.host}"
           yield @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
@@ -33,7 +34,7 @@ Create the proper profiles and ACLs
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
 
-      @debug 'Configuring SIP Profiles', @cfg.sip_profiles
+      debug 'Configuring SIP Profiles', @cfg.sip_profiles
 
       for own name,profile of @cfg.sip_profiles
         p =
