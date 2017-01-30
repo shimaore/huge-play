@@ -12,12 +12,14 @@
         fifo_add: seem (fifo,member) ->
           str = yield member_string fifo, member
           debug "Adding member #{member} to #{fifo.name} as #{str}"
-          yield @call.api "fifo_member add #{str}"
+          # FIXME TBD
+          new Promise()
 
         fifo_del: seem (fifo,member) ->
           str = yield member_string fifo, member
           debug "Removing member #{member} from #{fifo.name} as #{str}"
-          yield @call.api "fifo_member del #{str}"
+          # FIXME TBD
+          new Promise()
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 

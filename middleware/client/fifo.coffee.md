@@ -71,10 +71,6 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 * session.fifo.music (string) Name of the FIFO music file (attachment to the doc:number_domain document).
 
       id = "number_domain:#{@session.number_domain}"
-      if fifo.announce?
-        yield @action 'set', "fifo_announce=#{fifo_uri id, fifo.announce}"
-      if fifo.music?
-        yield @action 'set', "fifo_music=#{fifo_uri id, fifo.music}"
 
 FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
 
