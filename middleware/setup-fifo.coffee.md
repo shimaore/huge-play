@@ -13,13 +13,13 @@
           str = yield member_string fifo, member
           debug "Adding member #{member} to #{fifo.name} as #{str}"
           # FIXME TBD
-          new Promise()
+          Promise.resolve yes
 
         fifo_del: seem (fifo,member) ->
           str = yield member_string fifo, member
           debug "Removing member #{member} from #{fifo.name} as #{str}"
           # FIXME TBD
-          new Promise()
+          Promise.resolve yes
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 
