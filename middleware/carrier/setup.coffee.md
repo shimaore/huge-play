@@ -73,7 +73,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
       debug 'Configuring SIP Profiles', @cfg.sip_profiles
       null
 
-    @include = ->
+    @include = seem ->
 
 First start with the same code as client-side.
 
