@@ -191,17 +191,21 @@ Retrieve number data.
 * doc.local_number.disabled (boolean) If true the record is not used.
 
           dst_number = "#{@destination}@#{@session.number_domain}"
-          @session.number = yield @cfg.prov.get("number:#{dst_number}").catch (error) -> {disabled:true,error}
+          @session.number = yield @cfg.prov
+            .get "number:#{dst_number}"
+            .catch (error) -> {disabled:true,error}
 
           if @session.number.error?
             @debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
-            return @respond '486 Not Found'
+            yield @respond '486 Not Found'
+            return
 
-          @debug "Got dst_number #{dst_number}", @session.number
+          @debug "validate_local_number: Got dst_number #{dst_number}", @session.number
 
           if @session.number.disabled
             @debug "Number #{dst_number} is disabled"
-            return @respond '486 Administratively Forbidden' # was 403
+            yield @respond '486 Administratively Forbidden' # was 403
+            return
 
 Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
 
