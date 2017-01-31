@@ -285,7 +285,7 @@ Non-call-handling-specific parameters (these are set on all calls independently 
         ringback: @session.ringback
         music: @session.music
 
-      @set
+      yield @set
         ccnq_endpoint: @session.endpoint_name
 
 * doc.local_number.dialog_timer (number) Maximum duration of a call for this local-number.
