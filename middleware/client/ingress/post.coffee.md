@@ -41,6 +41,10 @@ Retrieve number data.
 
       dst_number = yield @validate_local_number()
 
+      unless dst_number?
+        @debug 'Number not found'
+        return
+
 Call rejection: reject anonymous caller
 
 * doc.local_number.reject_anonymous (boolean) If true, rejects anonymous calls.
