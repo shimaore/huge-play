@@ -18,6 +18,9 @@ module.exports = renderable (o) ->
 
       param name:'apply-inbound-acl', value:o.acl
       param name:'disable-transfer', value:o.disable_transfer
+      # Proxy Refer means that instead of mod_sofia handling the REFER,
+      # a `deflect` event is created (same as when the `deflect` application is used).
+      param name:'proxy-refer', value:o.proxy_refer ? false
       param name:'enable-3pcc', value:false
 
       param name:'inbound-use-callid-as-uuid', value:true
