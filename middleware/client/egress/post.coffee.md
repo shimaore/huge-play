@@ -93,6 +93,9 @@ Codec negotiation with late-neg:
 
           inherit_codec: @session.inherit_codec ? true
 
+      if @session.ringback?
+        yield @set ringback: @session.ringback
+
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
