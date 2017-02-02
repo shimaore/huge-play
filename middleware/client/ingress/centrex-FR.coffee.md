@@ -4,10 +4,7 @@
     tones = require '../tones'
 
     default_internal_ringback = tones.fr.ringback
-
-See https://freeswitch.org/jira/browse/FS-9776
-
-    default_internal_music = 'silence'
+    default_internal_music = tones.loop tones.fr.waiting
 
     @include = ->
 

@@ -19,7 +19,7 @@
       return unless number?
 
 The `localconf` type is used by other servers to transfer calls for conferences which are served on this server. (See [`../conference`](../conference.coffee.md).)
-In this case the part after
+In this case the conference name is the number-domain and the conference name.
 
       if type is 'localconf' and not @session.number_domain_data?
         conf_name = number
