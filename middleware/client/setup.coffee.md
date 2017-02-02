@@ -113,6 +113,7 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
       p = @cfg.profiles?[@session.profile]
       if p?
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
+        @session.client_server = "#{@cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
       else
         @debug.dev 'Missing profile', @session.profile
 
