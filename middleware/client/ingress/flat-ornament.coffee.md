@@ -2,6 +2,7 @@
     debug = (require 'debug') @name
     Promise = require 'bluebird'
     Moment = require 'moment-timezone'
+    Holidays = require 'date-holidays'
 
     seem = require 'seem'
 
@@ -126,12 +127,31 @@ Calendars
           now = Moment()
           if @session.timezone?
             now = now.tz @session.timezone
+          now_date = new Date now
           now = now.format 'YYYY-MM-DD'
 
           for calendar in calendars when domain_calendars[calendar]?
-            {dates} = domain_calendars[calendar]
-            if dates? and now in dates
-              return true
+            switch
+
+              when m = calendar.match /^_holidays_(.*)$/
+                hd = new Holidays()
+                hd.init.apply hd, m[1].split '_'
+                res = hd.isHoliday now_date
+                if res?.type is 'public'
+                  return true
+
+              when calendar is '_holidays'
+                if @session.country
+                  hd = new Holidays @session.country.toUpperCase()
+                  res = hd.isHoliday now_date
+                  if res?.type is 'public'
+                    return true
+
+              else
+                if calendar of domain_calendars
+                  {dates} = domain_calendars[calendar]
+                  if dates? and now in dates
+                    return true
           false
 
         anonymous: =>
