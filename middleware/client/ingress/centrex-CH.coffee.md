@@ -1,3 +1,4 @@
+    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:centrex-CH"
     debug = (require 'debug') @name
@@ -6,7 +7,7 @@
     default_internal_ringback = tones.ch.ringback
     default_internal_music = tones.loop tones.ch.waiting
 
-    @include = ->
+    @include = seem ->
 
       return unless @session.direction is 'ingress'
       return unless @session.dialplan is 'centrex'
@@ -16,6 +17,8 @@ Add the outside line prefix so that the call can be placed directly.
 Note: since we might also come here because we are routing an internal call, skip if the source doesn't need translation.
 
       @session.centrex_external_line_prefix ?= '9'
+
+      yield @export sip_invite_domain: @session.number_domain
 
       if not @session.centrex_internal
         if @session.ccnq_from_e164?
