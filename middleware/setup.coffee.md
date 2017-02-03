@@ -211,6 +211,11 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           @session.endpoint_name = @session.number.endpoint
 
+Set the account so that if we redirect to an external number the egress module can find it.
+
+          @session.reference_data.account = @session.number.account
+          yield @save_ref()
+
           dst_number
 
         redis: @cfg.redis_client

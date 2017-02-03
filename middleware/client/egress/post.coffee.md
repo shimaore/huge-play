@@ -43,6 +43,9 @@ The URL module parses the SIP username as `auth`.
         debug 'Invalid Charge-Info', pci
         return @respond '403 Missing Charge-Info'
 
+      @session.reference_data.account = @session.ccnq_account
+      yield @save_ref()
+
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 
       if @session.number.custom_music is true
