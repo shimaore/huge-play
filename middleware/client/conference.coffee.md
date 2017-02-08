@@ -54,6 +54,7 @@ Validate passcode if any.
 
       yield @action 'answer'
       yield @set {language}
+      yield sleep 2000
 
 FIXME: Canonalize from the code already present in well-groomed-feast/middleware/setup
 
