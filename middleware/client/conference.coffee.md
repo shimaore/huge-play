@@ -114,8 +114,7 @@ Really we should just barge on the channel if we need anything more complex than
 
         announce = seem =>
           @debug 'announce'
-          yield play_in_conference 'tone_stream://%(200,0,500,600,700)'
-          # yield play_in_conference 'tone_stream://%(500,0,300,200,100,50,25)'
+          yield play_in_conference 'tone_stream://%(125,0,300);%(125,0,450);%(125,0,600)'
           yield play_in_conference namefile
           .catch (error) =>
             @debug "error: #{error.stack ? error}"
