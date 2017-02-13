@@ -21,11 +21,10 @@ Config, Server-pre
 Connect to cuddly server
 
       url = @cfg.cuddly_url ?= process.env.CUDDLY_URL
-      if not url?
-        debug 'Missing `cfg.cuddly_url` and CUDDLY_URL'
-        return
-
-      @cfg.cuddly_io = IO url
+      if url?
+        @cfg.cuddly_io = IO url
+      else
+        debug 'Missing both `cfg.cuddly_url` and CUDDLY_URL'
 
 Insert `@debug`.
 
