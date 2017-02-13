@@ -13,11 +13,10 @@ Same semantics as in `cuddly`.
 
     host = process.env.CUDDLY_HOST ? os.hostname()
 
-Server-pre
-==========
+Config, Server-pre
+==================
 
-
-    @server_pre = ->
+    non_call_logger = ->
 
 Connect to cuddly server
 
@@ -28,7 +27,7 @@ Connect to cuddly server
 
       @cfg.cuddly_io = IO url
 
-Insert `@debug` in server-pre.
+Insert `@debug`.
 
       now = new Date().toJSON()
 
@@ -65,6 +64,11 @@ and inject `@debug.dev`, `@debug.ops`, `@debug.csr`.
       events.forEach (e) =>
         @debug[e] = make_debug e
       return
+
+    @config = non_call_logger
+    @server_pre = non_call_logger
+    @web = non_call_logger
+    @notify = non_call_logger
 
 Per-call Logging features
 =========================
