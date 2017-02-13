@@ -12,11 +12,10 @@
 
 * session.initial_destinations (array) On ingress, client-side calls, list of target routes for `mod_sofia`, each route consisting of an object containing a `to_uri` URI (to be used with the standard SIP profile defined in session.sip_profile ) and an optional `parameters` array of per-leg parameter strings.
 
-      if not @session.initial_destinations?
-        @debug.dev 'Missing session.initial_destinations'
-        return @respond '500 No initial destinations'
+There might no `initial_destinations` if the call was rejected in ornaments, reject-anonymous, etc.
 
-      send.call this, @session.initial_destinations
+      if @session.initial_destinations?.length > 0
+        send.call this, @session.initial_destinations
 
 send
 ====
