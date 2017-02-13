@@ -11,7 +11,7 @@ I'm having issues with FIFO and audio after the calls are connected.
 TBD: We'll be using some shared state (like Redis) with handlers on ingress/egress.
 
     @description = '''
-      Handles routing to a given FIFO queue.
+      Handles routing to a given ~~FIFO queue~~ACD~~hunt-group.
     '''
     @include = seem ->
 
@@ -33,7 +33,6 @@ FIFO handling
         debug 'Missing FIFO data'
         return
 
-* session.fifo.members (array) (required) List of members, i.e. local-numbers in the FIFO's number-domain. The members are dialed without regards to their CFA, .. settings.
 * session.fifo.name (string) (optional) The name of the FIFO. Defaults to the FIFO index in the doc.number_domain.fifos array. It is interpreted within a given number-domain, so different number-domains might have the same FIFO name.
 
       fifo = @session.fifo
@@ -85,12 +84,35 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         yield @export hold_music: fifo_uri id, fifo.music
 
       sofias = []
+
+* session.fifo.members (array) (required) List of static members for this hunt-group/ACD/FIFO.
+* session.fifo.members[].recipient (string) (required) Local-number in the FIFO's number-domain. The recipients are dialed without regards to their CFA, .. settings.
+* session.fifo.members[].delay (integer) Number of seconds to wait before trying to call this recipient, in seconds. Zero or `null` means 'call immediately'. Default: 0.
+* session.fifo.members[].progress_timeout (integer) Number of seconds before declaring a recipient unreachable (unable to ring the phone). Default: the progress-timeout of the FIFO.
+* session.fifo.members[].timeout (integer) Number of seconds before declaring a recipient unreachable (did not answer), in seconds. Zero means 'wait indefinitely'. Default: the timeout of the FIFO.
+* session.fifo.timeout (integer) Default number of seconds before declaring a recipient unreachable (how long to let the recipient's phone ring). Default: zero, meaning 'wait indefinitely'.
+* session.fifo.progress_timeout (integer) Default number of seconds before declaring a recipient unreachable (unable to ring the phone). Default: 4.
+
+      fifo_timeout = fifo.timeout ? 0
+      fifo_progress_timeout = fifo.progress_timeout ? 4
       for member,i in fifo.members
-        sofias.push yield @sofia_string member, ["#{k}=#{v}" for own k,v of {
+        # Backward-compatible
+        if 'string' is typeof member
+          recipient = member
+          leg_delay_start = i*5
+          leg_progress_timeout = 4
+          leg_timeout = 60
+        else
+          recipient = member.recipient
+          leg_delay_start = member.delay ? 0
+          leg_progress_timeout = member.progress_timeout ? fifo.progress_timeout
+          leg_timeout = member.timeout ? fifo_timeout
+
+        sofias.push yield @sofia_string recipient, ["#{k}=#{v}" for own k,v of {
           t38_passthru: false
-          leg_timeout: 60
-          leg_delay_start: i*2
-          progress_timeout: 18
+          leg_delay_start
+          leg_progress_timeout
+          leg_timeout
         }]
       debug 'bridge', sofias
       res = yield @action 'bridge', sofias.join ','
