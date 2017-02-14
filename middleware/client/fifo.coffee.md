@@ -91,7 +91,7 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         else
           recipient = member.recipient
           leg_delay_start = member.delay ? 0
-          leg_progress_timeout = member.progress_timeout ? fifo.progress_timeout
+          leg_progress_timeout = member.progress_timeout ? fifo_progress_timeout
           leg_timeout = member.timeout ? fifo_timeout
 
         sofias.push yield @sofia_string recipient, ["#{k}=#{v}" for own k,v of {
