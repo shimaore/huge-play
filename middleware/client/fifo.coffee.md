@@ -1,7 +1,6 @@
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:fifo"
     debug = (require 'debug') @name
-    Promise = require 'bluebird'
     seem = require 'seem'
     request = require 'request'
     qs = require 'querystring'

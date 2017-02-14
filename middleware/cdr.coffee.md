@@ -1,7 +1,7 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:cdr"
     seem = require 'seem'
-    Promise = require 'bluebird'
+    Bluebird = require 'bluebird'
 
     @include = ->
 
@@ -10,7 +10,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       @call.once 'cleanup_linger'
       .then seem =>
         @debug "CDR: Linger: pausing"
-        yield Promise.delay 4000
+        yield Bluebird.delay 4000
         @debug "CDR: Linger: exit"
         yield @call.exit().catch (error) =>
           @debug.dev "exit: #{error}"

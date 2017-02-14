@@ -1,6 +1,5 @@
     @name = 'flat-ornament'
     debug = (require 'debug') @name
-    Promise = require 'bluebird'
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
 
