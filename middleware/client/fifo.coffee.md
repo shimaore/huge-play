@@ -41,18 +41,6 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 
       fifo_name = @fifo_name fifo
 
-FIXME: Replace with e.g. Redis instead of using cfg for this.
-
-      @cfg.fifos ?= {}
-      @cfg.fifos[fifo_name] ?= {}
-      debug "FIFO status for #{fifo_name}", @cfg.fifos[fifo_name]
-
-      if fifo.members? and not @cfg.fifos[fifo_name].loaded
-        debug 'Loading fifo members', fifo.members
-        for n in fifo.members
-          yield @fifo_add fifo, n
-        @cfg.fifos[fifo_name].loaded = true
-
 Ready to send, answer the call.
 
       debug 'Answer'
