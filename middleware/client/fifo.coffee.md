@@ -162,8 +162,8 @@ This is modelled after the same code in `well-groomed-feast`.
 
       @get '/fifo/:id/:name', ->
         proxy = request
-          .use prov_prefix
           .get "#{@params.id}/#{@params.name}"
+          .use prov_prefix
           .redirects 0
 
         debug "Proxying #{@cfg.provisioning} #{@params.id}/#{@params.name}"
