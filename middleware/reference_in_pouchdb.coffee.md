@@ -5,7 +5,6 @@ FIXME: use redis instead.
     PouchDB = require 'pouchdb'
     uuidV4 = require 'uuid/v4'
     @name = 'huge-play:middleware:reference_in_pouchdb'
-    debug = (require 'debug') @name
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -16,11 +15,11 @@ FIXME: use redis instead.
 * cfg.session.db (URI) database used to store automated / complete call records (call-center oriented).
 
       unless @cfg.session?.db?
-        debug 'Missing cfg.session.db, not starting.'
+        @debug.dev 'Missing cfg.session.db, not starting.'
         return
 
       if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
-        debug 'Another module provided the functions, not starting.'
+        @debug.dev 'Another module provided the functions, not starting.'
         return
 
 * cfg.session.db (URI) The PouchDB URI of the database used to store call reference data. See session.reference_data, session.reference.
@@ -33,14 +32,14 @@ FIXME: use redis instead.
           .get id
           .catch -> _id:id
 
-      @cfg.update_session_reference_data = save_data = seem (data,tries = 3) ->
+      @cfg.update_session_reference_data = save_data = seem (data,tries = 3) =>
         prev = yield get_data data._id
         for own k,v of data when k[0] isnt '_'
           prev[k] = v
         {rev} = yield db
           .put prev
-          .catch seem (error) ->
-            debug "error: #{error.stack ? error}"
+          .catch seem (error) =>
+            @debug "error: #{error.stack ? error}"
             if tries-- > 0
               yield sleep 173
               yield save_data data, tries
@@ -48,6 +47,6 @@ FIXME: use redis instead.
         data._rev = rev
         return
 
-      debug 'Ready.'
+      @debug 'Ready.'
 
     @include = ->

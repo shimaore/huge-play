@@ -4,7 +4,6 @@ FIXME: use some common logging system instead.
     seem = require 'seem'
     PouchDB = require 'pouchdb'
     @name = 'huge-play:middleware:trace_in_pouchdb'
-    debug = (require 'debug') @name
     moment = require 'moment-timezone'
 
     sleep = (timeout) ->
@@ -26,13 +25,13 @@ FIXME: use some common logging system instead.
       @cfg.TRACE_DB_PREFIX = 'trace'
 
       if @cfg.update_trace_data?
-        debug 'Another module provided the function, not starting.'
+        @debug.dev 'Another module provided the function, not starting.'
         return
 
       trace_period = null
       db = null
 
-      @cfg.update_trace_data = save_data = seem (data,tries = 3) ->
+      @cfg.update_trace_data = save_data = seem (data,tries = 3) =>
         new_trace_period = new Date().toJSON()[0..6]
 
         if trace_period isnt new_trace_period
@@ -46,8 +45,8 @@ FIXME: use some common logging system instead.
           prev[k] = v
         {rev} = yield db
           .put prev
-          .catch seem (error) ->
-            debug "error: #{error.stack ? error}"
+          .catch seem (error) =>
+            @debug "error: #{error.stack ? error}"
             if tries-- > 0
               yield sleep 173
               yield save_data data, tries
@@ -55,6 +54,6 @@ FIXME: use some common logging system instead.
         data._rev = rev
         return
 
-      debug 'Ready.'
+      @debug 'Ready.'
 
     @include = ->
