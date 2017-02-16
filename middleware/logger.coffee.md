@@ -87,6 +87,8 @@ This allows to cross-reference logs and CDRs.
       id = [host,now,uuid].join '-'
       @session._id = id
 
+* session._id (string) A unique identifier for this session/call.
+
 ### Build debug
 
       @session.debug ?= []

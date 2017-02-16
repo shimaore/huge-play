@@ -22,6 +22,10 @@ variable_recovery_profile_name: 'huge-play-sbc-ingress',
 
 The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in  @session.sip_profile .
 
+Session Context
+---------------
+
+* session.context (string) The original Sofia Context for this (ingress, client-side) call.
 The channel-context is set (for calls originating from sofia-sip) by the `context` parameter of the Sofia instance that carries the A leg.
 For calls originating internally, module `exultant-songs` will use the `origination_context` variable.
 We load it first because otherwise the `Channel-Context` value (`default`) set by originate will take precedence.
@@ -36,6 +40,13 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
       @session.profile = m[1]
       @session.direction = m[2]
       @session.reference ?= m[3]
+
+Session Reference
+-----------------
+
+* session.reference (string) Identifies a (client-side) call spanning multiple FreeSwitch servers.
+* hdr.X-CCNQ-Reference (string) The session.reference for a client-side call.
+* session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.
