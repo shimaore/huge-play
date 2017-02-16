@@ -28,6 +28,7 @@
     "moment": "^2.17.1",
     "moment-timezone": "^0.5.11",
     "nimble-direction": "^6.1.1",
+    "pouchdb": "^6.1.1",
     "redis": "^2.6.5",
     "request": "^2.79.0",
     "seem": "^2.0.0",

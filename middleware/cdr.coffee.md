@@ -67,6 +67,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
         @report state: 'end', data: report
+        @save_trace()
         @debug "CDR: Channel Hangup Complete", report
 
       @debug 'Ready'

@@ -98,6 +98,9 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
             @debug.csr 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
             @session.reference_data ?= {}
 
+        save_trace: seem ->
+          @cfg.update_trace_data? @session
+
         set: seem (name,value) ->
           return unless name?
 
