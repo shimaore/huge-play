@@ -40,7 +40,9 @@ FIXME: use some common logging system instead.
           db?.close()
           db = new PouchDB "#{base}/#{trace_database}"
 
-        prev = yield get_data data._id
+        prev = yield db
+          .get data._id
+          .catch -> _id: data._id
         for own k,v of data when k[0] isnt '_' and typeof v isnt 'function'
           prev[k] = v
         {rev} = yield db
