@@ -22,6 +22,10 @@ Send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remo
 
         res = yield @action 'redirect', uri
         @debug 'Redirection returned', uri, res
+
+Make sure there is no further processing.
+
+        @session.direction = 'transfered'
         return
 
 Centrex Handling

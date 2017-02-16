@@ -22,6 +22,10 @@ Send a REFER to the carrier-side SBC.
 
         res = yield @action 'deflect', uri
         @debug 'Redirection returned', uri, res
+
+Make sure there is no further processing.
+
+        @session.direction = 'transfered'
         return
 
 Centrex Handling
