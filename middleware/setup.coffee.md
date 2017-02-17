@@ -146,6 +146,10 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           @report state: 'immediate-response', response: response
           @session.first_response_was ?= response
 
+Prevent extraneous processing of this call.
+
+          @direction 'responded'
+
           if @session.alternate_response?
             @session.alternate_response response
           else
