@@ -11,6 +11,8 @@
         prov:
           get: (id) ->
             return Promise.resolve docs[id]
+        statistics:
+          emit: ->
 
       docs =
         'number:1234@some':

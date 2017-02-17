@@ -48,7 +48,7 @@
     "useful-wind": "^7.4.0"
   },
   "optionalDependencies": {
-    "tough-rate": "^17.3"
+    "tough-rate": "^18"
   },
   "config": {
     "ghooks": {

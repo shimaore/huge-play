@@ -32,10 +32,16 @@
 
     @notify = ->
 
-      @cfg.statistics.on 'reference', (data) =>
+      @on 'reference', (data) =>
+
+The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
+
         @socket.emit 'reference', data
 
-      @cfg.statistics.on 'call', (data) =>
+      @on 'call', (data) =>
+
+The `call` event is pre-registered (in spicy-action) on the `calls` bus.
+
         @socket.emit 'call',
           host: @cfg.host
           data: data
@@ -44,6 +50,12 @@
 
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
+
+        on: (event,handler) ->
+          @cfg.statistics.on event, handler
+
+        emit: (event,data) ->
+          @cfg.statistics.emit event, data
 
         direction: (direction) ->
           @session.direction = direction
@@ -84,11 +96,11 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
           o._in ?= @_in()
-          @statistics?.emit 'call', o
+          @emit 'report', o
 
         save_ref: seem ->
           data = @session.reference_data
-          @statistics?.emit 'reference', data
+          @emit 'reference', data
           if @cfg.update_session_reference_data?
             yield @cfg.update_session_reference_data data
           else

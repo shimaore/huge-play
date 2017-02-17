@@ -45,33 +45,40 @@
         ]
 
       unit = (m) ->
+        L = require '../middleware/logger.coffee.md'
+        S = require '../middleware/setup.coffee.md'
         it "should load #{m}", seem ->
           ctx =
             cfg:
-              sip_profiles:{}
               prefix_admin: ''
-            session:{}
-            call:
+
+          M = require "../#{m}"
+          yield L.server_pre.call ctx, ctx
+          yield S.server_pre.call ctx, ctx
+          yield M.server_pre?.call ctx, ctx
+
+          call_ctx =
+            cfg: ctx.cfg # useful-wind/router
+            session:{} # useful-wind/router
+            call: # useful-wind/router + esl
               once: -> Promise.resolve null
+              emit: ->
               linger: -> Promise.resolve null
-            req:
+            req: # useful-wind/router
               variable: -> null
               header: -> null
-            data:
+            res: # useful-wind/router
+              set: -> Promise.resolve null
+              export: -> Promise.resolve null
+            data: # useful-wind/router
               'Channel-Context': 'sbc-ingress'
-            get_ref: -> @session.reference_data = {}
-            save_ref: ->
-            set: ->
-            export: ->
-            debug: do ->
-              debug = ->
-              debug.csr = ->
-              debug.dev = ->
-              debug.ops = ->
-              debug
-          M = require "../#{m}"
-          yield M.server_pre?.call ctx, ctx
-          yield M.include.call ctx, ctx
+          call_ctx.cfg.statistics ?=  # thinkable-ducks/server
+            emit: ->
+            add: ->
+
+          yield L.include.call call_ctx, call_ctx
+          yield S.include.call call_ctx, call_ctx
+          yield M.include.call call_ctx, call_ctx
 
       for m in list
         unit m
