@@ -9,9 +9,6 @@
     Bluebird.promisifyAll Redis.RedisClient.prototype
     Bluebird.promisifyAll Redis.Multi.prototype
 
-    @web = ->
-      @cfg.versions[pkg.name] = pkg.version
-
     @config = seem ->
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
@@ -29,6 +26,9 @@
         redis.on 'reconnecting', => @debug "redis: reconnecting"
         redis.on 'end', => @debug "redis: end"
         redis.on 'warning', => @debug "redis: warning"
+
+    @web = ->
+      @cfg.versions[pkg.name] = pkg.version
 
     @notify = ->
 
