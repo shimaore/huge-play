@@ -141,8 +141,8 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       if fifo.voicemail?
         debug 'Send to voicemail'
-        @session.direction = 'voicemail'
         @destination = fifo.voicemail
+        @direction 'voicemail'
         yield @validate_local_number()
         return
 

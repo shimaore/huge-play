@@ -11,12 +11,12 @@
       debug 'forwarding on behalf of', @session.endpoint_name
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
       @session.outbound_route = @session.endpoint.outbound_route
-      @session.direction = 'egress'
       @session.forwarding = true
       if @cfg.mask_source_on_forward
         @session.source = @source
         @source = @destination
       @destination = @session.destination
+      @direction 'egress'
 
 FIXME the original URI part should be the Request-URI per RFC5806
 

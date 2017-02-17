@@ -48,14 +48,14 @@ These actions are terminal for the statement.
 
         voicemail: =>
           debug 'voicemail'
-          @session.direction = 'voicemail'
+          @direction 'voicemail'
           'over'
 
         forward: (destination) =>
           debug 'forward', destination
           @session.reason = 'unspecified'
-          @session.direction = 'forward'
           @session.destination = destination
+          @direction 'forward'
           'over'
 
 Other actions must return `true`.

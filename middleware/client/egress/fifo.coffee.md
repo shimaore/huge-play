@@ -52,8 +52,8 @@ Route to FIFO: this should look similar to what is done in client/ingress/fifo.
 
         when ACTION_ROUTE
           debug 'FIFO: call'
-          @session.direction = 'fifo'
           @session.fifo = fifo
+          @direction 'fifo'
           return
 
         when ACTION_LOGIN

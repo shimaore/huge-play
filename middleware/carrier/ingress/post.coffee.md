@@ -21,5 +21,5 @@
         t38_passthru: true
         sip_enable_soa: false
 
-      @session.direction = 'lcr'
+      @direction 'lcr'
       return

@@ -19,9 +19,9 @@ Keep @session.dialplan.
 
         when @destination.match /^[1-6]\d+$/
           debug 'Internal call'
-          @session.direction = 'ingress'
           @session.centrex_internal = true
           @session.sip_profile = @session.sip_profile_client
+          @direction 'ingress'
           return
 
 External call.
@@ -46,6 +46,6 @@ Voicemail.
 
         when @destination in ['vm','voicemail','*86','786']
           debug 'Voicemail'
-          @session.direction = 'voicemail'
           @destination = 'inbox'
+          @direction 'voicemail'
           return

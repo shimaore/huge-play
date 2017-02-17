@@ -45,6 +45,10 @@
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
 
+        direction: (direction) ->
+          @session.direction = direction
+          @call.emit 'direction', direction
+
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
         _in: (_in = [])->

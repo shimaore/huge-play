@@ -38,7 +38,7 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
         return @respond '500 Malformed context'
 
       @session.profile = m[1]
-      @session.direction = m[2]
+      @direction m[2]
       @session.reference ?= m[3]
 
 Session Reference
@@ -105,8 +105,8 @@ The default transfer context assumes the transfer request is coming from a custo
       ].join '-'
 
       if @session.direction is 'transfer'
-        @session.direction = 'egress'
         @session.transfer = true
+        @direction 'egress'
 
 The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler. For now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
 
@@ -117,8 +117,8 @@ The handled transfer context assumes the transfer request is coming from a (pres
       ].join '-'
 
       if @session.direction is 'handled'
-        @session.direction = 'handled'
         @session.transfer = true
+        @direction 'handled'
 
 * session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
 

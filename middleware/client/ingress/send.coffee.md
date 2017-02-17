@@ -112,13 +112,13 @@ OpenSIPS marker for not registered
         @session.reason = 'unavailable' # RFC5806
         if @session.cfnr_voicemail
           debug 'cfnr:voicemail'
-          @session.direction = 'voicemail'
           @destination = @session.cfnr_voicemail_number
+          @direction 'voicemail'
           return
         if @session.cfnr_number?
           debug 'cfnr:forward'
-          @session.direction = 'forward'
           @session.destination = @session.cfnr_number
+          @direction 'forward'
           return
         if @session.cfnr?
           debug 'cfnr:fallback'
@@ -146,13 +146,13 @@ Busy
         @session.reason = 'user-busy' # RFC5806
         if @session.cfb_voicemail
           debug 'cfb: voicemail'
-          @session.direction = 'voicemail'
           @destination = @session.cfb_voicemail_number
+          @direction 'voicemail'
           return
         if @session.cfb_number?
           debug 'cfb:number'
-          @session.direction = 'forward'
           @session.destination = @session.cfb_number
+          @direction 'forward'
           return
         if @session.cfb?
           debug 'cfb: fallback'
@@ -170,13 +170,13 @@ Use CFDA if present
         @session.reason = 'no-answer' # RFC5806
         if @session.cfda_voicemail
           debug 'cfda: voicemail'
-          @session.direction = 'voicemail'
           @destination = @session.cfda_voicemail_number
+          @direction 'voicemail'
           return
         if @session.cfda_number?
           debug 'cfda:number'
-          @session.direction = 'forward'
           @session.destination = @session.cfda_number
+          @direction 'forward'
           return
         if @session.cfda?
           debug 'cfda: fallback'

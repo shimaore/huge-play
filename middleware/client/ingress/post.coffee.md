@@ -56,8 +56,8 @@ Call rejection: reject anonymous caller
         if @session.caller_privacy
           if @session.number.reject_anonymous_to_voicemail
             debug 'reject anonymous: send to voicemail'
-            @session.direction = 'voicemail'
             # @destination unchanged
+            @direction 'voicemail'
             return
 
           debug 'reject anonymous'
@@ -86,14 +86,14 @@ Call rejection: reject anonymous caller
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
             if @session.number.list_to_voicemail
-              @session.direction = 'voicemail'
               # @destination unchanged
+              @direction 'voicemail'
               return
             return @respond '486 Decline (blacklisted)' # was 603
           if @session.number.use_whitelist and not list.whitelist
             if @session.number.list_to_voicemail
-              @session.direction = 'voicemail'
               # @destination unchanged
+              @direction 'voicemail'
               return
             return @respond '486 Decline (not whitelisted)' # was 603
 
@@ -182,13 +182,13 @@ Call Forward All
       @session.reason = 'unconditional' # RFC5806
       if @session.cfa_voicemail
         debug 'cfa:voicemail'
-        @session.direction = 'voicemail'
         @destination = @session.cfa_voicemail_number
+        @direction 'voicemail'
         return
       if @session.cfa_number?
         debug 'cfa:forward'
-        @session.direction = 'forward'
         @session.destination = @session.cfa_number
+        @direction 'forward'
         return
       if @session.cfa?
         debug 'cfa:fallback'

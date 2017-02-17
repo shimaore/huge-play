@@ -43,7 +43,7 @@ ARCEP, décision 2012-0856 au VI.1
 
         when $ = @source.match /^3389|^089/
           debug 'Calling number is blocked per ARCEP 05-1085 2.b.1.iii page 14'
-          @session.direction = 'trash'
+          @direction 'trash'
           return @respond '484'
 
         when $ = @source.match /^33([0-9]+)$/

@@ -25,7 +25,7 @@ Send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remo
 
 Make sure there is no further processing.
 
-        @session.direction = 'transfered'
+        @direction 'transfered'
         return
 
 Centrex Handling

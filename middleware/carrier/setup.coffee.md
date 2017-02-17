@@ -83,12 +83,12 @@ First start with the same code as client-side.
         return
 
       @session.profile = m[1]
-      @session.direction = m[2]
+      @direction m[2]
       @session.reference ?= m[3]
 
       if @session.direction is 'handled'
-        @session.direction = 'handled'
         @session.transfer = true
+        @direction 'handled'
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.

@@ -81,7 +81,7 @@ Move handling to `fifo` middleware.
         return
 
       item.name ?= "#{number}"
-      @session.direction = type
       @session[type] = item
+      @direction type
 
       @debug "Using #{type} #{number}", item
