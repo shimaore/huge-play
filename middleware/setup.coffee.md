@@ -32,6 +32,9 @@
 
     @notify = ->
 
+      @on = (event,handler) ->
+        @cfg.statistics.on event, handler
+
       @on 'reference', (data) =>
 
 The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
