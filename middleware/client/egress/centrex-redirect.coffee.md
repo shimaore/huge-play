@@ -18,9 +18,17 @@ Transfer Workaround
         uri = "sip:#{@destination}@#{server}"
         @debug 'Handling is remote', uri
 
-Send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remote server.
+Send a REFER to a call which is already answered. (Typically, coming from `exultant-songs`.)
 
-        res = yield @action 'redirect', uri
+        if @data['Answer-State'] is 'answered'
+          res = yield @action 'deflect', uri
+
+For an unanswered call (the default/normal behavior for a call coming from a phone),
+send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remote server.
+
+        else
+          res = yield @action 'redirect', uri
+
         @debug 'Redirection returned', uri, res
 
 Make sure there is no further processing.
