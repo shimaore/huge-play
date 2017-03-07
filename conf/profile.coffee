@@ -116,7 +116,8 @@ module.exports = renderable (o) ->
       # DTMF
       param name:'dtmf-type', value:'rfc2833'
       param name:'rfc2833-pt', value:101
-      param name:'dtmf-duration', value:200
+      # FIXME: Duration out of bounds, using default of 2000!
+      param name:'dtmf-duration', value:2000
       param name:'pass-rfc2833', value:true
 
       # NAT
