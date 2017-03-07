@@ -2,7 +2,7 @@ Register the database we use to store traces.
 FIXME: use some common logging system instead.
 
     seem = require 'seem'
-    PouchDB = require 'pouchdb'
+    PouchDB = require 'shimaore-pouchdb'
     @name = 'huge-play:middleware:trace_in_pouchdb'
     moment = require 'moment-timezone'
 
