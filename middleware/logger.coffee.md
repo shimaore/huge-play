@@ -72,13 +72,15 @@ and inject `@debug.dev`, `@debug.ops`, `@debug.csr`.
 Per-call Logging features
 =========================
 
+    Now = -> new Date().toJSON()
+
     @include = ->
 
 ### Build identifier
 
 This allows to cross-reference logs and CDRs.
 
-      now = new Date().toJSON()
+      now = Now()
       uuid = uuidV4()
 
       @session.logger_stamp = now
@@ -95,10 +97,13 @@ This allows to cross-reference logs and CDRs.
 
       make_debug = (e) =>
         (text,args...) =>
+
+FIXME This does not work in callbacks.
+
           name = @__middleware_name
 
           data =
-            stamp: now
+            stamp: Now()
             host: host
             session: id
             application: name
