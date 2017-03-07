@@ -1,6 +1,5 @@
     seem = require 'seem'
-    pkg = require '../../../package.json'
-    @name = "#{pkg.name}:middleware:client:egress:post-send"
+    @name = "huge-play:middleware:client:egress:post-send"
     debug = (require 'debug') @name
 
     @include = ->
