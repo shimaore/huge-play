@@ -49,6 +49,15 @@ The `call` event is pre-registered (in spicy-action) on the `calls` bus.
           host: @cfg.host
           data: data
 
+Standard events: `add`.
+
+      if @cfg.notify_statistics
+        @on 'add', (data) =>
+          @socket.emit 'statistics:add',
+            host: cfg.host
+            key: data.key
+            value: data.value.toJSON()
+
     @include = (ctx) ->
 
       ctx[k] = v for own k,v of {

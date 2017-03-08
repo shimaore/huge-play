@@ -93,7 +93,9 @@ This allows to cross-reference logs and CDRs.
 
 ### Build debug
 
-      @session.debug ?= []
+FIXME: This just leads to high memory usage.
+
+      # @session.debug ?= []
 
       make_debug = (e) =>
         (text,args...) =>
@@ -108,12 +110,12 @@ FIXME This does not work in callbacks.
             session: id
             application: name
             event: e
-            error: text
+            msg: text
             data: args
 
 Save in session for later storage via astonishing-competition.
 
-          @session.debug.push data
+          @session.debug?.push data
 
 Debug
 
