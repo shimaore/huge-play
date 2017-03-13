@@ -21,7 +21,7 @@ Transfer Workaround
 Send a REFER to a call which is already answered. (Typically, coming from `exultant-songs`.)
 
         if @data['Answer-State'] is 'answered'
-          res = yield @action 'deflect', uri
+          res = yield @action 'deflect', "sip:#{@destination}@#{@session.number_domain}?Via=#{server}"
 
 For an unanswered call (the default/normal behavior for a call coming from a phone),
 send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remote server.
