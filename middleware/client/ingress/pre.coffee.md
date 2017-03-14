@@ -7,6 +7,8 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     @include = seem ->
       return unless @session.direction is 'ingress'
 
+      @session.reference_data.call_state.push 'ingress'
+
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
       if @session.dialplan?

@@ -9,6 +9,8 @@ First-line handler for outbound calls
 
       return unless @session.direction is 'egress'
 
+      @session.reference_data.call_state.push 'egress'
+
 Endpoint
 --------
 

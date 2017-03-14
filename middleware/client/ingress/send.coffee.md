@@ -90,7 +90,7 @@ No further processing in case of success.
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
-        @session.reference_data.call_state = 'success'
+        @session.reference_data.call_state.push 'answered'
         return
 
 Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).

@@ -99,7 +99,7 @@ Otherwise, since the call is coming from a carrier we force the creation of a ne
         @debug 'Assigned new session.reference', @session.reference
 
       yield @get_ref()
-      @session.reference_data.call_state = 'routing'
+      @session.reference_data.call_state = ['routing']
 
       @session.call_reference_data =
         uuid: @call.uuid

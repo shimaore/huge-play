@@ -59,7 +59,7 @@ In case of a call from `exultant-songs`, the session identifier is in variable `
         @debug 'Assigned new session.reference', @session.reference
 
       yield @get_ref()
-      @session.reference_data.call_state = 'routing'
+      @session.reference_data.call_state = ['routing']
 
 * session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.
