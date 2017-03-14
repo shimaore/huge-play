@@ -10,6 +10,14 @@
 
       ctx[k] = v for own k,v of {
 
+Login
+
+        fifo_add: (fifo,source) ->
+
+Logout
+
+        fifo_del: (fifo,source) ->
+
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 
         fifo_name: (fifo) ->
