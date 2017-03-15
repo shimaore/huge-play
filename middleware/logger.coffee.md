@@ -117,10 +117,6 @@ Save in session for later storage via astonishing-competition.
 
           @session.debug?.push data
 
-Debug
-
-          (Debug "#{name}:#{e}") "#{now} #{host} #{id} #{text}", args...
-
 Report via cuddly
 
           if @cfg.cuddly_io? and e in events
