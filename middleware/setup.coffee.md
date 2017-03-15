@@ -1,6 +1,7 @@
     seem = require 'seem'
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
+    EventEmitter = require 'events'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
 
@@ -32,16 +33,13 @@
 
     @notify = ->
 
-      @on = (event,handler) ->
-        @cfg.statistics.on event, handler
-
-      @on 'reference', (data) =>
+      @cfg.statistics.on 'reference', (data) =>
 
 The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
 
         @socket.emit 'reference', data
 
-      @once 'report', (data) =>
+      @cfg.statistics.on 'report', (data) =>
 
 The `call` event is pre-registered (in spicy-action) on the `calls` bus.
 
@@ -52,7 +50,7 @@ The `call` event is pre-registered (in spicy-action) on the `calls` bus.
 Standard events: `add`.
 
       if @cfg.notify_statistics
-        @on 'add', (data) =>
+        @cfg.statistics.on 'add', (data) =>
           @socket.emit 'statistics:add',
             host: cfg.host
             key: data.key
@@ -62,12 +60,6 @@ Standard events: `add`.
 
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
-
-        on: (event,handler) ->
-          @cfg.statistics.on event, handler
-
-        emit: (event,data) ->
-          @cfg.statistics.emit event, data
 
         direction: (direction) ->
           @session.direction = direction
@@ -108,11 +100,12 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
           o._in ?= @_in()
-          @emit 'report', o
+          @call.emit 'report', o
+          @cfg.statistics.emit 'report', o
 
         save_ref: seem ->
           data = @session.reference_data
-          @emit 'reference', data
+          @cfg.statistics.emit 'reference', data
           if @cfg.update_session_reference_data?
             yield @cfg.update_session_reference_data data
           else
