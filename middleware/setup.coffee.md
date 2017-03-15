@@ -41,7 +41,7 @@ The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
 
         @socket.emit 'reference', data
 
-      @on 'report', (data) =>
+      @once 'report', (data) =>
 
 The `call` event is pre-registered (in spicy-action) on the `calls` bus.
 
