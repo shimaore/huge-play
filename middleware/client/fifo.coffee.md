@@ -62,7 +62,6 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
       debug 'Send to FIFO'
       yield @set
         continue_on_fail: true
-        hangup_after_bridge: false
 
       if fifo.announce?
         yield @set ringback: fifo_uri id, fifo.announce

@@ -21,5 +21,6 @@
         t38_passthru: true
         sip_enable_soa: false
 
+      @session.skip_lcr_hangup = true
       @direction 'lcr'
       return
