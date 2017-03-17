@@ -105,10 +105,6 @@ The `reference` is used to track a given call through various systems and associ
 In case of a transfer, the session identifier is included in the context.
 Otherwise, since the call is coming from a carrier we force the creation of a new context.
 
-      unless @session.reference?
-        @session.reference = uuidV4()
-        @debug 'Assigned new session.reference', @session.reference
-
       yield @get_ref()
       @session.reference_data.call_state = ['routing']
 

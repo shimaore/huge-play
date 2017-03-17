@@ -57,9 +57,6 @@ In case of a call from `exultant-songs`, the session identifier is in variable `
 
       @session.reference ?= @req.variable 'session_reference'
       @session.reference ?= @req.header 'X-CCNQ-Reference'
-      unless @session.reference?
-        @session.reference = uuidV4()
-        @debug 'Assigned new session.reference', @session.reference
 
       yield @get_ref()
       @session.reference_data.call_state = ['routing']

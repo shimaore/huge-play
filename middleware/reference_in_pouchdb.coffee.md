@@ -14,20 +14,44 @@ FIXME: use redis instead.
 
 * cfg.session.db (URI) database used to store automated / complete call records (call-center oriented).
 
-      unless @cfg.session?.db?
-        @debug.dev 'Missing cfg.session.db, not starting.'
+      unless @cfg.session?.base?
+        @debug.dev 'Missing cfg.session.base, not starting.'
         return
 
       if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
         @debug.dev 'Another module provided the functions, not starting.'
         return
 
+      RemotePouchDB = PouchDB.defaults prefix: @cfg.session.base
+
 * cfg.session.db (URI) The PouchDB URI of the database used to store call reference data. See session.reference_data, session.reference.
 
-      db = new PouchDB @cfg.session.db
+      current_db_name = null
+      current_db = null
+
+      get_db = (database) ->
+        if current_db_name is database
+          current_db
+        else
+          current_db?.close()
+          current_db_name = database
+          current_db = new RemotePouchDB current_db_name
+
+      name_for_id = (id) ->
+        period = id[0...7]
+        database = "reference-#{period}"
 
       @cfg.get_session_reference_data = get_data = (id) ->
-        id ?= new uuidV4()
+
+        unless id?
+          uuid = new uuidV4()
+          period = @cfg.period_of null
+          id = "#{period}-#{uuid}"
+          @debug 'Assigned new session reference', id
+
+        database = name_for_id id
+
+        db = get_db database
         db
           .get id
           .catch -> _id:id
@@ -36,6 +60,9 @@ FIXME: use redis instead.
         prev = yield get_data data._id
         for own k,v of data when k[0] isnt '_'
           prev[k] = v
+
+        database = name_for_id data._id
+        db = get_db database
         {rev} = yield db
           .put prev
           .catch seem (error) =>
