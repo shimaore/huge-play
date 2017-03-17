@@ -77,29 +77,39 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
 First start with the same code as client-side.
 
-      context = @data['Channel-Context']
-      unless m = context.match /^(\S+)-(ingress|egress|handled)(?:-(\S+))?$/
-        @debug.dev 'Ignoring malformed context', context
-        return
+Session Context
+---------------
+
+* session.context (string) The original Sofia Context for this (ingress) call.
+
+The channel-context is set (for calls originating from sofia-sip) by the `context` parameter of the Sofia instance that carries the A leg.
+
+      @session.context ?= @data['Channel-Context']
+
+      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
+        @debug.dev 'Malformed context', @session.context
+        return @respond '500 Malformed context'
 
       @session.profile = m[1]
       @direction m[2]
       @session.reference ?= m[3]
 
-      if @session.direction is 'handled'
-        @session.transfer = true
-        @direction 'handled'
+Session Reference
+-----------------
+
+* session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
+* hdr.X-CCNQ-Reference (string) The session.reference for a client-side call.
+* session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.
 Otherwise, since the call is coming from a carrier we force the creation of a new context.
 
-      unless @session.reference?
-        @session.reference = uuidV4()
-        @debug 'Assigned new session.reference', @session.reference
-
       yield @get_ref()
       @session.reference_data.call_state = ['routing']
+
+* session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
+The end-time is set in `cdr.coffee.md`, along with the `report` field.
 
       @session.call_reference_data =
         uuid: @call.uuid
@@ -110,6 +120,9 @@ Otherwise, since the call is coming from a carrier we force the creation of a ne
 
       yield @save_ref()
 
+SIP Profile
+-----------
+
 Define the (sofia-sip) SIP profiles used to send calls out.
 
       @session.sip_profile = @req.variable 'sip_profile'
@@ -118,13 +131,23 @@ Define the (sofia-sip) SIP profiles used to send calls out.
       else
         @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
 
+      @session.transfer = false
+
 The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler.
+For now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
 
       @session.handled_transfer_context = [
         @session.profile
         'handled'
         @session.reference
       ].join '-'
+
+      if @session.direction is 'handled'
+        @session.transfer = true
+        @direction 'handled'
+
+SIP Profile Data
+----------------
 
 Note that carrier-side the fields are called `sip_profiles` and are stored in the database.
 The FreeSwitch configuration uses the `profiles` field, which defaults to using port 5080.
@@ -139,10 +162,15 @@ The FreeSwitch configuration uses the `profiles` field, which defaults to using 
         'sip_h_X-CCNQ-Reference': @session.reference
 
       @debug 'Ready',
+        reference: @session.reference
+        call: @call.uuid
+        session: @session._id
+        context: @session.context
         direction: @session.direction
         destination: @destination
+        source: @source
+        transfer: @session.transfer
         profile: @session.profile
         sip_profile: @session.sip_profile
-        reference: @session.reference
 
       return

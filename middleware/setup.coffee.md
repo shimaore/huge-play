@@ -2,6 +2,7 @@
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
     EventEmitter = require 'events'
+    moment = require 'moment-timezone'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
 
@@ -37,6 +38,11 @@
         local_redis.on 'reconnecting', => @debug "local redis: reconnecting"
         local_redis.on 'end', => @debug "local redis: end"
         local_redis.on 'warning', => @debug "local redis: warning"
+
+      @cfg.period_of ?= (stamp = new Date(),timezone = 'UTC') ->
+        moment
+        .tz stamp, timezone
+        .format 'YYYY-MM'
 
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
@@ -125,8 +131,9 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           if @cfg.get_session_reference_data?
             @debug 'Loading reference_data', @session.reference
             @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
+            @session.reference ?= @session.reference_data._id
           else
-            @debug.csr 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            @debug.dev 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
             @session.reference_data ?= {}
 
         save_trace: ->
