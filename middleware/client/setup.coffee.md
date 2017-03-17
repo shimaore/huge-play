@@ -25,16 +25,19 @@ The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the
 Session Context
 ---------------
 
-* session.context (string) The original Sofia Context for this (ingress, client-side) call.
-The channel-context is set (for calls originating from sofia-sip) by the `context` parameter of the Sofia instance that carries the A leg.
+* session.context (string) The original Sofia Context for this (ingress) call.
+
 For calls originating internally, module `exultant-songs` will use the `origination_context` variable.
 We load it first because otherwise the `Channel-Context` value (`default`) set by originate will take precedence.
 
       @session.context ?= @req.variable 'origination_context'
+
+The channel-context is set (for calls originating from sofia-sip) by the `context` parameter of the Sofia instance that carries the A leg.
+
       @session.context ?= @data['Channel-Context']
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
-        @debug.dev 'Ignoring malformed context', @session.context
+        @debug.dev 'Malformed context', @session.context
         return @respond '500 Malformed context'
 
       @session.profile = m[1]
@@ -44,7 +47,7 @@ We load it first because otherwise the `Channel-Context` value (`default`) set b
 Session Reference
 -----------------
 
-* session.reference (string) Identifies a (client-side) call spanning multiple FreeSwitch servers.
+* session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
 * hdr.X-CCNQ-Reference (string) The session.reference for a client-side call.
 * session.reference_data (object) Data associated with the session.reference
 
@@ -73,6 +76,9 @@ The end-time is set in `cdr.coffee.md`, along with the `report` field.
 
       yield @save_ref()
 
+Click-to-dial (`place-call`)
+----------------------------
+
 Force the destination for `exultant-songs` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
 
       if @session.reference_data.destination?
@@ -83,6 +89,9 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
 
         @session.wait_for_aleg_ack = false      # in huge-play
         @session.sip_wait_for_aleg_ack = false  # in tough-rate
+
+SIP Profile
+-----------
 
 Define the (sofia-sip) SIP profiles used to send calls out.
 
@@ -108,7 +117,8 @@ The default transfer context assumes the transfer request is coming from a custo
         @session.transfer = true
         @direction 'egress'
 
-The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler. For now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
+The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler.
+For now this should only happen when a customer calls a global number that points to a conference, and the server that handled the request isn't the one serving the conference.
 
       @session.handled_transfer_context = [
         @session.profile
@@ -120,9 +130,12 @@ The handled transfer context assumes the transfer request is coming from a (pres
         @session.transfer = true
         @direction 'handled'
 
-* session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us
+SIP Profile Data
+----------------
 
 Note that client-side the fields are called `profiles` and are stored in the JSON configuration.
+
+* session.local_server (string, host:port) URI domain-part usable for REFER, etc. so that other servers might redirect calls to us (client-side only).
 
       p = @cfg.profiles?[@session.profile]
       if p?
