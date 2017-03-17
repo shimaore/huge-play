@@ -22,6 +22,9 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
     @send = send = seem (destinations) ->
 
+      intercept_key = "inbound_call:#{@destination}@#{@session.number_domain}"
+      yield @redis.setAsync intercept_key, @call.uuid
+
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
@@ -37,6 +40,8 @@ Send the call(s)
       @debug 'Bridging', sofia
 
       res = yield @action 'bridge', sofia.join ','
+
+      yield @redis.delAsync intercept_key
 
 Post-attempt handling
 ---------------------
