@@ -20,13 +20,23 @@
 
       if @cfg.redis?
         @cfg.redis_client = redis = Redis.createClient @cfg.redis
-        redis?.on 'error', (error) =>
+        redis.on 'error', (error) =>
           @debug "redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
         redis.on 'ready', => @debug "redis: ready"
         redis.on 'connect', => @debug "redis: connect"
         redis.on 'reconnecting', => @debug "redis: reconnecting"
         redis.on 'end', => @debug "redis: end"
         redis.on 'warning', => @debug "redis: warning"
+
+      if @cfg.local_redis?
+        @cfg.local_redis_client = local_redis = Redis.createClient @cfg.local_redis
+        local_redis.on 'error', (error) =>
+          @debug "local redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
+        local_redis.on 'ready', => @debug "local redis: ready"
+        local_redis.on 'connect', => @debug "local redis: connect"
+        local_redis.on 'reconnecting', => @debug "local redis: reconnecting"
+        local_redis.on 'end', => @debug "local redis: end"
+        local_redis.on 'warning', => @debug "local redis: warning"
 
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
@@ -247,6 +257,7 @@ Set the account so that if we redirect to an external number the egress module c
           dst_number
 
         redis: @cfg.redis_client
+        local_redis: @cfg.local_redis_client
 
         is_remote: seem (name,local_server) ->
 
