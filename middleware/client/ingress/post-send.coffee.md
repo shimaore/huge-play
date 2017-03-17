@@ -19,4 +19,13 @@ Rewrite error response code.
         yield @respond '486 Call Failed'
         return
 
-Do not hangup here. If the call was transfered this might cause it to disconnect.
+      if @session.was_transferred
+        debug 'Was Transferred'
+        return
+
+      if @session.was_picked
+        debug 'Was Picked'
+        return
+
+      debug 'Hangup'
+      yield @action 'hangup'

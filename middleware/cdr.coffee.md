@@ -69,6 +69,8 @@ Dispatch the event, once using the normal dispatch path (goes to admin), and the
         @report state: 'end', data: report
         yield @save_trace()
         @debug "CDR: Channel Hangup Complete", report
+      .catch (error) =>
+        @debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
 
       @debug 'Ready'
       return

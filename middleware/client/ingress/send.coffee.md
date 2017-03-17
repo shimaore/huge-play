@@ -35,7 +35,6 @@ Send the call(s)
 
       yield @set
         continue_on_fail: true
-        hangup_after_bridge: false
 
       @debug 'Bridging', sofia
 
@@ -63,7 +62,7 @@ Note: there is also `variable_bridge_hangup_cause`
 
 ### originate disposition
 
-For example: `SUCCESS`
+For example: `SUCCESS`, `ORIGINATOR_CANCEL`.
 
       cause ?= data?.variable_originate_disposition
 
@@ -88,14 +87,28 @@ For example: `200`
 - `variable_transfer_disposition: 'replaced'`
 - `variable_endpoint_disposition: 'ATTENDED_TRANSFER'`
 
+      @session.was_connected = cause in ['NORMAL_CALL_CLEARING', 'NORMAL_CLEARING', 'SUCCESS']
+      @session.was_transferred = data.variable_transfer_history?
+      @session.was_picked = cause in ['PICKED_OFF']
+
 Success
 -------
 
 No further processing in case of success.
 
-      if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
+      if @session.was_connected
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
         @session.reference_data.call_state.push 'answered'
+        return
+
+      if @session.was_picked
+        @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
+        @session.reference_data.call_state.push 'picked'
+        return
+
+      if @session.was_transferred
+        @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
+        @session.reference_data.call_state.push 'transferred'
         return
 
 Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).
