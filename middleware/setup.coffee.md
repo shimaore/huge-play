@@ -45,6 +45,11 @@
         .tz stamp, timezone
         .format 'YYYY-MM'
 
+      @cfg.reference_id ?= =>
+        uuid = uuidV4()
+        period = @cfg.period_of null
+        id = "#{period}-#{uuid}"
+
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
 
@@ -129,13 +134,13 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
             @debug.dev 'Missing @cfg.update_session_reference_data, not saving'
 
         get_ref: seem ->
+          @session.reference ?= @cfg.reference_id()
           if @cfg.get_session_reference_data?
             @debug 'Loading reference_data', @session.reference
             @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
           else
+            @session.reference_data ?= _id: @session.reference
             @debug.dev 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
-            @session.reference_data ?= _id: new uuidV4()
-          @session.reference ?= @session.reference_data._id
 
         save_trace: ->
           @cfg.update_trace_data? @session

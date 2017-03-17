@@ -42,13 +42,6 @@ FIXME: use redis instead.
         database = "reference-#{period}"
 
       @cfg.get_session_reference_data = get_data = (id) ->
-
-        unless id?
-          uuid = new uuidV4()
-          period = @cfg.period_of null
-          id = "#{period}-#{uuid}"
-          @debug 'Assigned new session reference', id
-
         database = name_for_id id
 
         db = get_db database
@@ -57,12 +50,17 @@ FIXME: use redis instead.
           .catch -> _id:id
 
       @cfg.update_session_reference_data = save_data = seem (data,tries = 3) =>
-        prev = yield get_data data._id
+        id = data._id
+        database = name_for_id id
+
+        db = get_db database
+        prev = yield db
+          .get id
+          .catch -> _id:id
+
         for own k,v of data when k[0] isnt '_'
           prev[k] = v
 
-        database = name_for_id data._id
-        db = get_db database
         {rev} = yield db
           .put prev
           .catch seem (error) =>
