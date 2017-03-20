@@ -23,9 +23,10 @@ FIXME: use redis instead.
 
       base += '/' unless base.match /\/$/
 
-* cfg.REFERENCE_DB_PREFIX (string) database-name prefix for references. Default: `reference`.
+* cfg.REFERENCE_DB_PREFIX (string) database-name prefix for references. Current value: `reference`.
+(Name is fixed because it also appears in `spicy-action/public_proxy`.)
 
-      db_prefix = @cfg.REFERENCE_DB_PREFIX ?= 'reference'
+      db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
       if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
         @debug.dev 'Another module provided the functions, not starting.'

@@ -22,9 +22,10 @@ FIXME: use some common logging system instead.
 
       base += '/' unless base.match /\/$/
 
-* cfg.TRACE_DB_PREFIX (string) database-name prefix for traces. Default: `trace`.
+* cfg.TRACE_DB_PREFIX (string) database-name prefix for traces. Current value: `trace`.
+(Name is fixed because it also appears in `spicy-action/public_proxy`.)
 
-      db_prefix = @cfg.TRACE_DB_PREFIX ?= 'trace'
+      db_prefix = @cfg.TRACE_DB_PREFIX = 'trace'
 
       if @cfg.update_trace_data?
         @debug.dev 'Another module provided the function, not starting.'
