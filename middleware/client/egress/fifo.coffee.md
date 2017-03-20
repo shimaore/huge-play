@@ -20,6 +20,7 @@ The destination matched.
 
       ACTION_FIFO_ROUTE = '810'
       ACTION_FIFO_LOGIN = '811'
+      ACTION_FIFO_VOICEMAIL = '817'
       ACTION_FIFO_LOGOUT = '819'
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
@@ -103,6 +104,18 @@ The destination matched.
           yield @action 'playback', 'ivr/ivr-you_are_now_logged_out.wav'
           yield @action 'hangup'
           return
+
+        when ACTION_FIFO_VOICEMAIL
+          @debug 'FIFO: voicemail'
+          fifo = get 'fifos'
+          unless fifo.user_database?
+            yield @action 'hangup'
+            return
+          @destination = 'inbox'
+          @source = 'user-database'
+          @session.voicemail_user_database = fifo.user_database
+          @session.voicemail_user_id = fifo.name
+          @direction 'voicemail'
 
         else
           @debug 'Unknown action', action

@@ -137,12 +137,21 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         return
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
+* session.fifo.user_database (string) If present, the call is redirected to this voicemail box if the FIFO failed (for example because no agents are available). Default: use session.fifo.voicemail if present.
 
       if fifo.voicemail?
         debug 'Send to voicemail'
         @destination = fifo.voicemail
         @direction 'voicemail'
         yield @validate_local_number()
+        return
+
+      if fifo.user_database?
+        debug 'Send to voicemail (user-database)'
+        @destination = 'user-database'
+        @session.voicemail_user_database = fifo.user_database
+        @session.voicemail_user_id = fifo_name
+        @direction 'voicemail'
         return
 
       debug 'Hangup'
