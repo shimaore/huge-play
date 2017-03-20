@@ -29,7 +29,7 @@ Conference is remote
 
         server = is_remote
 
-        uri = "sip:localconf-#{conf_name}@#{server}"
+        uri = "sip:localconf-#{conf_name}@#{server};xref={@session.reference}"
 
         @debug 'Conference is remote', uri
 

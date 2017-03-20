@@ -15,13 +15,14 @@ Transfer Workaround
       if is_remote
         server = is_remote.split('/')[1]
 
-        uri = "sip:#{@destination}@#{server}"
+        uri = "sip:#{@destination}@#{server};xref=#{@session.reference}"
         @debug 'Handling is remote', uri
 
 Send a REFER to a call which is already answered. (Typically, coming from `exultant-songs`.)
 
         if @data['Answer-State'] is 'answered'
-          res = yield @action 'deflect', "sip:#{@destination}@#{@session.number_domain}?Via=#{server}"
+          uri = "sip:#{@destination}@#{@session.number_domain};xref=#{@session.reference}?Via=#{server}"
+          res = yield @action 'deflect', uri
 
 For an unanswered call (the default/normal behavior for a call coming from a phone),
 send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remote server.

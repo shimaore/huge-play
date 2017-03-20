@@ -15,7 +15,7 @@ Transfer Workaround
       if is_remote
         server = is_remote.split('/')[0]
 
-        uri = "sip:#{@session.ccnq_to_e164}@#{server}"
+        uri = "sip:#{@session.ccnq_to_e164}@#{server};xref=#{@session.reference}"
         @debug 'Handling is remote', uri
 
 Send a REFER to the carrier-side SBC.
