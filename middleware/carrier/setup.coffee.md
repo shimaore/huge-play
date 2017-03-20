@@ -98,7 +98,6 @@ Session Reference
 -----------------
 
 * session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
-* hdr.X-CCNQ-Reference (string) The session.reference for a client-side call.
 * session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
@@ -154,12 +153,24 @@ The FreeSwitch configuration uses the `profiles` field, which defaults to using 
 
       @session.profile_data = @cfg.sip_profiles[@session.profile]
 
+      sip_params = "xref=#{@session.reference}"
+
       yield @set
         session_reference: @session.reference
-        'sip_h_X-CCNQ-Reference': @session.reference
       yield @export
         session_reference: @session.reference
-        'sip_h_X-CCNQ-Reference': @session.reference
+
+Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is from `thinkable-ducks/server`.
+
+        sip_redirect_profile: @session.profile
+        sip_redirect_context: @session.default_transfer_context
+        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{cfg.port} async full'"
+        sip_redirect_contact_params: sip_params
+
+        sip_invite_params: sip_params
+        sip_invite_to_params: sip_params
+        sip_invite_contact_params: sip_params
+        sip_invite_from_params: sip_params
 
       @debug 'Ready',
         reference: @session.reference

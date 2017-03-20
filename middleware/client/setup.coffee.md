@@ -48,15 +48,25 @@ Session Reference
 -----------------
 
 * session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
-* hdr.X-CCNQ-Reference (string) The session.reference for a client-side call.
 * session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
-In case of a transfer, the session identifier is included in the context.
+In case of a transfer, the session identifier might be included in the context.
 In case of a call from `exultant-songs`, the session identifier is in variable `session_reference`.
 
       @session.reference ?= @req.variable 'session_reference'
-      @session.reference ?= @req.header 'X-CCNQ-Reference'
+
+In all other cases, look (very hard) for a `xref` parameter.
+
+      reference_in = (name) ->
+        if m = @req.variable(name).match /xref=([\w-]+)/
+          @session.reference ?= m[1]
+
+      reference_in 'sip_from_params'
+      reference_in 'sip_to_params'
+      reference_in 'sip_req_params'
+      reference_in 'sip_contact_params'
+      reference_in 'sip_referred_by_params'
 
       yield @get_ref()
       @session.reference_data.call_state = ['routing']
@@ -141,13 +151,26 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
       else
         @debug.dev 'Missing profile', @session.profile
 
+      sip_params = "xref=#{@session.reference}"
+
       yield @set
         session_reference: @session.reference
         force_transfer_context: @session.default_transfer_context
-        'sip_h_X-CCNQ-Reference': @session.reference
+
       yield @export
         session_reference: @session.reference
-        'sip_h_X-CCNQ-Reference': @session.reference
+
+Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is from `thinkable-ducks/server`.
+
+        sip_redirect_profile: @session.profile
+        sip_redirect_context: @session.default_transfer_context
+        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{cfg.port} async full'"
+        sip_redirect_contact_params: sip_params
+
+        sip_invite_params: sip_params
+        sip_invite_to_params: sip_params
+        sip_invite_contact_params: sip_params
+        sip_invite_from_params: sip_params
 
       @debug 'Ready',
         reference: @session.reference
