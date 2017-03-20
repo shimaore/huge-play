@@ -13,13 +13,15 @@ FIXME: use redis instead.
 
     @server_pre = ->
 
-* cfg.session.base (URI) base URI for databases that store automated / complete call records (call-center oriented).
+* cfg.session.base (URI) base URI for databases that store automated / complete call records (call-center oriented). Default: cfg.data.url
 
       base = @cfg.session?.base ? @cfg.data?.url
 
       unless base
         @debug.dev 'No cfg.session.base nor cfg.data.url, references will not be saved.'
         return
+
+      base += '/' unless base.match /\/$/
 
 * cfg.REFERENCE_DB_PREFIX (string) database-name prefix for references. Default: `reference`.
 

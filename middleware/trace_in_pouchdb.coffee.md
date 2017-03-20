@@ -20,6 +20,8 @@ FIXME: use some common logging system instead.
         @debug.dev 'No cfg.trace.url nor cfg.data.url, traces will not be saved.'
         return
 
+      base += '/' unless base.match /\/$/
+
 * cfg.TRACE_DB_PREFIX (string) database-name prefix for traces. Default: `trace`.
 
       db_prefix = @cfg.TRACE_DB_PREFIX ?= 'trace'
