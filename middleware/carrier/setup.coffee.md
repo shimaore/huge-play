@@ -164,7 +164,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
 
         sip_redirect_profile: @session.profile
         sip_redirect_context: @session.default_transfer_context
-        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{cfg.port} async full'"
+        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
         sip_redirect_contact_params: sip_params
 
         sip_invite_params: sip_params
