@@ -1,10 +1,10 @@
 Register the database we use to store traces.
 FIXME: use some common logging system instead.
 
+    @name = 'huge-play:middleware:trace_in_pouchdb'
+
     seem = require 'seem'
     PouchDB = require 'shimaore-pouchdb'
-    @name = 'huge-play:middleware:trace_in_pouchdb'
-    moment = require 'moment-timezone'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -22,29 +22,44 @@ FIXME: use some common logging system instead.
 
 * cfg.TRACE_DB_PREFIX (string) database-name prefix for traces. Default: `trace`.
 
-      @cfg.TRACE_DB_PREFIX = 'trace'
+      db_prefix = @cfg.TRACE_DB_PREFIX ?= 'trace'
 
       if @cfg.update_trace_data?
         @debug.dev 'Another module provided the function, not starting.'
         return
 
-      trace_period = null
-      db = null
+      RemotePouchDB = PouchDB.defaults prefix: base
+
+      current_db_name = null
+      current_db = null
+
+      get_db = (database) ->
+        if current_db_name is database
+          current_db
+        else
+          current_db?.close()
+          current_db_name = database
+          current_db = new RemotePouchDB current_db_name
+
+      name_for_id = (id) ->
+        period = id[0...7]
+        database = [db_prefix,period].join '-'
+
+Update
+------
 
       @cfg.update_trace_data = save_data = seem (data,tries = 3) =>
-        new_trace_period = new Date().toJSON()[0..6]
+        id = data._id
+        database = name_for_id data.logger_stamp
 
-        if trace_period isnt new_trace_period
-          trace_period = new_trace_period
-          trace_database = [@cfg.TRACE_DB_PREFIX,trace_period].join '-'
-          db?.close()
-          db = new PouchDB "#{base}/#{trace_database}"
-
+        db = get_db database
         prev = yield db
-          .get data._id
-          .catch -> _id: data._id
+          .get id
+          .catch -> _id:id
+
         for own k,v of data when k[0] isnt '_' and typeof v isnt 'function'
           prev[k] = v
+
         {rev} = yield db
           .put prev
           .catch seem (error) =>

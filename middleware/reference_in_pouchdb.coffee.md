@@ -1,10 +1,11 @@
 Register the database we use to store session state.
 FIXME: use redis instead.
 
-    seem = require 'seem'
-    PouchDB = require 'pouchdb'
-    uuidV4 = require 'uuid/v4'
     @name = 'huge-play:middleware:reference_in_pouchdb'
+
+    seem = require 'seem'
+    PouchDB = require 'shimaore-pouchdb'
+    uuidV4 = require 'uuid/v4'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -12,19 +13,23 @@ FIXME: use redis instead.
 
     @server_pre = ->
 
-* cfg.session.db (URI) database used to store automated / complete call records (call-center oriented).
+* cfg.session.base (URI) base URI for databases that store automated / complete call records (call-center oriented).
 
-      unless @cfg.session?.base?
-        @debug.dev 'Missing cfg.session.base, not starting.'
+      base = @cfg.session?.base ? @cfg.data?.url
+
+      unless base
+        @debug.dev 'No cfg.session.base nor cfg.data.url, references will not be saved.'
         return
+
+* cfg.REFERENCE_DB_PREFIX (string) database-name prefix for references. Default: `reference`.
+
+      db_prefix = @cfg.REFERENCE_DB_PREFIX ?= 'reference'
 
       if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
         @debug.dev 'Another module provided the functions, not starting.'
         return
 
-      RemotePouchDB = PouchDB.defaults prefix: @cfg.session.base
-
-* cfg.session.db (URI) The PouchDB URI of the database used to store call reference data. See session.reference_data, session.reference.
+      RemotePouchDB = PouchDB.defaults prefix: base
 
       current_db_name = null
       current_db = null
@@ -39,7 +44,10 @@ FIXME: use redis instead.
 
       name_for_id = (id) ->
         period = id[0...7]
-        database = "reference-#{period}"
+        database = [db_prefix,period].join '-'
+
+Get
+---
 
       @cfg.get_session_reference_data = get_data = (id) ->
         database = name_for_id id
@@ -48,6 +56,9 @@ FIXME: use redis instead.
         db
           .get id
           .catch -> _id:id
+
+Update
+------
 
       @cfg.update_session_reference_data = save_data = seem (data,tries = 3) =>
         id = data._id
@@ -58,7 +69,7 @@ FIXME: use redis instead.
           .get id
           .catch -> _id:id
 
-        for own k,v of data when k[0] isnt '_'
+        for own k,v of data when k[0] isnt '_' and typeof v isnt 'function'
           prev[k] = v
 
         {rev} = yield db
