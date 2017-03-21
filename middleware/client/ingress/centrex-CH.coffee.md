@@ -20,7 +20,9 @@ Note: since we might also come here because we are routing an internal call, ski
 
       yield @export sip_invite_domain: @session.number_domain
 
-      if not @session.centrex_internal
+      if @session.centrex_internal
+        yield @export alert_info: 'centrex-internal'
+      else
         if @session.ccnq_from_e164?
           @source = "+#{@session.ccnq_from_e164}"
         else
