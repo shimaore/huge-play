@@ -19,6 +19,7 @@ Keep @session.dialplan.
 
         when @destination.match /^[1-6]\d+$/
           debug 'Internal call'
+          yield @action 'privacy', 'no'
           @session.centrex_internal = true
           @session.sip_profile = @session.sip_profile_client
           @direction 'ingress'
