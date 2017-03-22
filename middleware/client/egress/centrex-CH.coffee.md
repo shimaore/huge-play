@@ -23,6 +23,7 @@ Keep @session.dialplan.
           @session.centrex_internal = true
           @session.sip_profile = @session.sip_profile_client
           @direction 'ingress'
+          @session.cdr_direction = 'centrex-internal'
           return
 
 External call.
