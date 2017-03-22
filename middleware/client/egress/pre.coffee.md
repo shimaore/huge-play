@@ -9,7 +9,7 @@ First-line handler for outbound calls
 
       return unless @session.direction is 'egress'
 
-      @session.reference_data.call_state.push 'egress'
+      @tag 'egress'
 
 Endpoint
 --------
@@ -33,6 +33,7 @@ Endpoint might be provided in the reference data for example for an `originate` 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
+      @tag @session.endpoint._id
 
       @set
         ccnq_endpoint: @session.endpoint_name
@@ -76,6 +77,7 @@ The `number_domain` field is required, but the number-domain record is optional.
           {}
 
       @debug 'number_domain', number_domain
+      @tag @session.number_domain_data._id
 
 Source (calling) number
 -----------------------
@@ -91,6 +93,8 @@ On a static trunk, the number might not be present.
         .catch (error) =>
           @debug.ops "number:#{src_number}: #{error}"
           {}
+
+      @tag @session.number._id
 
 Dialplan
 --------

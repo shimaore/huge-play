@@ -86,6 +86,7 @@ Standard events: `add`.
         direction: (direction) ->
           @session.direction = direction
           @call.emit 'direction', direction
+          @tag "direction:#{direction}"
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
@@ -189,6 +190,7 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
 Prevent extraneous processing of this call.
 
           @direction 'responded'
+          @tag "response:#{response}"
 
           if @session.alternate_response?
             @session.alternate_response response
@@ -245,9 +247,11 @@ Retrieve number data.
           @session.number = yield @cfg.prov
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
+          @tag @session.number._id
 
           if @session.number.error?
             @debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
+            @tag 'invalid-local-number'
             yield @respond '486 Not Found'
             return
 
@@ -255,6 +259,7 @@ Retrieve number data.
 
           if @session.number.disabled
             @debug "Number #{dst_number} is disabled"
+            @tag 'disabled-local-number'
             yield @respond '486 Administratively Forbidden' # was 403
             return
 

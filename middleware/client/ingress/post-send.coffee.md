@@ -28,4 +28,5 @@ Rewrite error response code.
         return
 
       debug 'Hangup'
+      @tag 'hangup'
       yield @action 'hangup'

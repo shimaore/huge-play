@@ -105,7 +105,7 @@ In case of a transfer, the session identifier is included in the context.
 Otherwise, since the call is coming from a carrier we force the creation of a new context.
 
       yield @get_ref()
-      @session.reference_data.call_state = ['routing']
+      @tag 'carrier-side'
 
 * session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.
