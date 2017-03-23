@@ -72,6 +72,12 @@ Update
           .get id
           .catch -> _id:id
 
+Merge tags (but keep them ordered)
+
+        tags = new Set doc.tags
+        for tag in data.tags when not tags.has tag
+          doc.tags.push tag
+
 Merge calls (but keep them ordered)
 Note: we use the parameter `call` and completely ignore the values in `data.calls`.
 

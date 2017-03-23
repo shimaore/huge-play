@@ -273,6 +273,11 @@ Set the account so that if we redirect to an external number the egress module c
         redis: @cfg.redis_client
         local_redis: @cfg.local_redis_client
 
+        tag: (tag) ->
+          @session.reference_data?.tags?= []
+          if tag?
+            @session.reference_data?.tags.push tag
+
         is_remote: seem (name,local_server) ->
 
           unless @redis?
