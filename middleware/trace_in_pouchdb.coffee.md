@@ -66,7 +66,7 @@ Update
         {rev} = yield db
           .put prev
           .catch seem (error) =>
-            @debug "error: #{error.stack ? error}"
+            @debug "trace error: #{error.stack}", error
             if tries-- > 0
               yield sleep 173
               yield save_data data, tries

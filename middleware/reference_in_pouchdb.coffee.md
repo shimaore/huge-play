@@ -110,7 +110,7 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "error: #{error.stack ? error}"
+          @debug "reference error: #{error.stack}", error
           if tries-- > 0
             yield sleep 173
             yield save_data data, call, tries
