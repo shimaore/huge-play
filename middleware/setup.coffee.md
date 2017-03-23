@@ -126,10 +126,11 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           @cfg.statistics.emit 'report', o
 
         save_ref: seem ->
-          data = @session.reference_data
-          @cfg.statistics.emit 'reference', data
           if @cfg.update_session_reference_data?
-            yield @cfg.update_session_reference_data data
+            data = @session.reference_data
+            data = yield @cfg.update_session_reference_data data, @session.call_reference_data
+            @cfg.statistics.emit 'reference', data
+            @session.reference_data = data
           else
             @debug.dev 'Missing @cfg.update_session_reference_data, not saving'
 
