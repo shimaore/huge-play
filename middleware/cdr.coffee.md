@@ -28,6 +28,10 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       .then seem (res) =>
         @debug "Channel Hangup Complete"
 
+Invalidate our local copy of `@session.reference_data`.
+
+        yield @get_ref()
+
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
         data = res.body
@@ -46,12 +50,11 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
         @session.cdr_report = report
         @call.emit 'cdr_report', report
 
-`call_reference` might not be initialized (e.g. because of malformed context, or because we're running carrier-side)
+Update the (existing) call reference data
 
-        if @session.call_reference?
-          @session.call_reference_data.end_time = new Date() .toJSON()
-          @session.call_reference_data.report = report
-          yield @save_ref()
+        @session.call_reference_data.end_time = new Date() .toJSON()
+        @session.call_reference_data.report = report
+        yield @save_ref()
 
         for own k,v of report
           switch k
