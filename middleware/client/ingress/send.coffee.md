@@ -98,17 +98,17 @@ No further processing in case of success.
 
       if @session.was_connected
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
-        @session.reference_data.call_state.push 'answered'
+        @tag 'answered'
         return
 
       if @session.was_picked
         @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
-        @session.reference_data.call_state.push 'picked'
+        @tag 'picked'
         return
 
       if @session.was_transferred
         @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
-        @session.reference_data.call_state.push 'transferred'
+        @tag 'transferred'
         return
 
 Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).
@@ -201,4 +201,5 @@ Use CFDA if present
 
       @debug 'Call Failed'
       @session.call_failed = true
+      @tag 'failed'
       return

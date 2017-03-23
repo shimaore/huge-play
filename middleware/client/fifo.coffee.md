@@ -39,6 +39,8 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 
       fifo_name = @fifo_name fifo
 
+      @tag "fifo:#{fifo_name}"
+
 Ready to send, answer the call.
 
       debug 'Answer'
