@@ -44,6 +44,7 @@ We won't be able to route if there is no number-domain data.
       unless @session.number_domain_data?
         @debug.dev 'Missing number_domain_data'
         return
+      @tag @session.number_domain_data._id
 
 * doc.global_number.local_number To route to a FIFO, this field must contain `fifo-<fifo-number>@<number-domain>`. The fifo-number is typically between 0 and 9; it represents an index in doc.number_domain.fifos.
 * doc.number_domain.fifos (array) An array describing the FIFOs in this number-domain, indexed on the fifo-number. Typically the fifo-number is from 0 to 9. See session.fifo for a description of the contents.
@@ -76,6 +77,7 @@ Move handling to `fifo` middleware.
         return
 
       item = items[number]
+      @tag "#{type} number #{number}"
       unless item?
         @debug.csr "Number domain has no data #{number} for #{type}."
         return

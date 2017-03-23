@@ -69,7 +69,7 @@ In all other cases, look (very hard) for a `xref` parameter.
       reference_in 'sip_referred_by_params'
 
       yield @get_ref()
-      @session.reference_data.call_state = ['routing']
+      @tag 'client-side'
 
 * session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.

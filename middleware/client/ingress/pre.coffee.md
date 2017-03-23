@@ -7,7 +7,7 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     @include = seem ->
       return unless @session.direction is 'ingress'
 
-      @session.reference_data.call_state.push 'ingress'
+      @tag 'ingress'
 
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
@@ -34,6 +34,7 @@ We retrieve the *global-number* record based on the destination.
 * session.e164_number (object) The doc.global_number record for of the destination of an inbound call.
 
       @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_to_e164}"
+      @tag @session.e164_number._id
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 

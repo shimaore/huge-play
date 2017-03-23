@@ -1,6 +1,5 @@
     seem = require 'seem'
     @name = "huge-play:middleware:client:ingress:post-send"
-    debug = (require 'debug') @name
 
     @include = seem ->
 
@@ -14,18 +13,20 @@ Make sure the call isn't processed any further.
 
 Rewrite error response code.
 
-      if @session.call_failed
-        debug 'Call Failed'
-        yield @respond '486 Call Failed'
-        return
+      switch
+        when @session.call_failed
+          @debug 'Call Failed'
+          yield @respond '486 Call Failed'
 
-      if @session.was_transferred
-        debug 'Was Transferred'
-        return
+        when @session.was_transferred
+          @debug 'Was Transferred'
 
-      if @session.was_picked
-        debug 'Was Picked'
-        return
+        when @session.was_picked
+          @debug 'Was Picked'
 
-      debug 'Hangup'
-      yield @action 'hangup'
+        else
+          @debug 'Hangup'
+          @tag 'hangup'
+          yield @action 'hangup'
+
+      yield @save_ref()

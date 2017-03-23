@@ -44,6 +44,8 @@ Build the destination FreeSwitch dialstring
         { parameters, to_uri }
       ]
 
+      @tag 'post-forward'
+
 ### Build the set of `_in` targets for notifications of the reference data.
 
       @session.reference_data._in ?= []

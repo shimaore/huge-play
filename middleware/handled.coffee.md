@@ -16,7 +16,7 @@
       d = "sofia/#{@session.sip_profile}/#{refer_to}"
 
       if @session.reference_data?
-        @session.reference_data.call_state.push 'handled'
+        @tag 'handled'
         yield @save_ref()
       else
         @debug.dev 'Missing reference data when handling to', d

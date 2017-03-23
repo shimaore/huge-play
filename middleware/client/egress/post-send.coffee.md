@@ -1,8 +1,7 @@
     seem = require 'seem'
     @name = "huge-play:middleware:client:egress:post-send"
-    debug = (require 'debug') @name
 
-    @include = ->
+    @include = seem ->
 
       return unless @session.direction is 'egress'
 
@@ -14,4 +13,8 @@ Make sure the call isn't processed any further.
 
 The only post-call action currently is to hangup the call.
 
-      @action 'hangup'
+      @debug 'Hangup'
+      @tag 'hangup'
+      yield @action 'hangup'
+
+      yield @save_ref()
