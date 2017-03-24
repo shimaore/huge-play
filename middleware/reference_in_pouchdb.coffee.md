@@ -82,11 +82,11 @@ Merge tags (but keep them ordered)
 Merge calls (but keep them ordered)
 Note: we use the parameter `call` and completely ignore the values in `data.calls`.
 
-        doc.calls ?= []
-        for c, i in doc.calls when c.session is call.session
-          doc.calls[i] = call
-          call = null
-        if call?
+        do (call) ->
+          doc.calls ?= []
+          for c, i in doc.calls when c.session is call.session
+            doc.calls[i] = call
+            return
           doc.calls.push call
 
 Known fields are:
