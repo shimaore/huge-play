@@ -25,4 +25,4 @@
 
       @debug 'transfering call to', d
       res = yield @action 'bridge', d
-      @debug 'call transfered', res
+      @debug 'call transferred', res

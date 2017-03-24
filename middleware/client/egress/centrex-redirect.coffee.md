@@ -34,7 +34,7 @@ send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remo
 
 Make sure there is no further processing.
 
-        @direction 'transfered'
+        @direction 'transferred'
         return
 
 Centrex Handling

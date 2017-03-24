@@ -125,7 +125,7 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       xfer = data.variable_transfer_history
       if xfer?
-        debug 'Call was transfered', xfer
+        debug 'Call was transferred', xfer
         return
 
       cause = data?.variable_last_bridge_hangup_cause

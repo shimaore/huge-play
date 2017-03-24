@@ -25,7 +25,7 @@ Send a REFER to the carrier-side SBC.
 
 Make sure there is no further processing.
 
-        @direction 'transfered'
+        @direction 'transferred'
         return
 
 Centrex Handling
