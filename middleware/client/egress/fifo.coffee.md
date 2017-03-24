@@ -50,7 +50,7 @@ The destination matched.
         item.name ?= "#{number}"
         item
 
-      route = (name,type) ->
+      route = (name,type) =>
         item = get name
         return unless item?
         @session[type] = item
