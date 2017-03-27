@@ -1,4 +1,6 @@
     seem = require 'seem'
+    describe 'Normal modules', ->
+      require '../middleware/client/commands'
     describe 'Modules', ->
       list = [
           'middleware/logger.coffee.md'
@@ -11,6 +13,7 @@
 
           'middleware/client/setup.coffee.md'
           'middleware/client/fifo.coffee.md'
+          'middleware/client/ornaments.coffee.md'
           'middleware/client/egress/fifo.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/centrex-FR.coffee.md'
