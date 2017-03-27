@@ -2,7 +2,6 @@
     @name = "#{pkg.name}:middleware:client:fifo"
     debug = (require 'debug') @name
     seem = require 'seem'
-    request = require 'request'
     qs = require 'querystring'
 
 I'm having issues with FIFO and audio after the calls are connected.
@@ -11,6 +10,19 @@ TBD: We'll be using some shared state (like Redis) with handlers on ingress/egre
     @description = '''
       Handles routing to a given ~~FIFO queue~~ACD~~hunt-group.
     '''
+
+Announce/music download
+=======================
+
+This is modelled after the same code in `well-groomed-feast`.
+
+    @web = ->
+
+      @get '/fifo/:id/:name', ->
+        id = qs.escape @params.id
+        name = qs.escape @params.name
+        @proxy_get @cfg.provisioning, "#{id}/#{name}"
+
     @include = seem ->
 
 FIFO handling
@@ -21,11 +33,9 @@ FIFO handling
       return unless @session.direction is 'fifo'
 
       fifo_uri = (id,name) =>
-        host = @cfg.web.host ? '127.0.0.1'
-        port = @cfg.web.port
         id = qs.escape id
         name = qs.escape name
-        "http://(nohead=true)#{host}:#{port}/fifo/#{id}/#{name}"
+        @prompt.uri "/fifo/#{id}/#{name}"
 
       unless @session.fifo?
         debug 'Missing FIFO data'
@@ -158,25 +168,6 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       debug 'Hangup'
       yield @action 'hangup'
-
-Announce/music download
-=======================
-
-This is modelled after the same code in `well-groomed-feast`.
-
-    @web = ->
-
-      @get '/fifo/:id/:name', ->
-        proxy = request.get
-          baseUrl: @cfg.provisioning
-          uri: "#{@params.id}/#{@params.name}"
-          followRedirects: false
-          maxRedirects: 0
-
-        debug "Proxying #{@cfg.provisioning} #{@params.id}/#{@params.name}"
-
-        proxy.pipe @response
-        return
 
 Backup notes
 ------------
