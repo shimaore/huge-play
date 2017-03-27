@@ -60,7 +60,7 @@ When we receive a new digit, if the maximum length is reached we do not wait for
 
           set_timers()
 
-       return
+        return
 
       @call.on 'DTMF', (res) =>
         dtmf_buffer ?= ''
@@ -74,15 +74,15 @@ When we receive a new digit, if the maximum length is reached we do not wait for
 Public API
 ----------
 
-      @dtmf = {
+      @dtmf =
 
 `@dtmf.clear`: resets all fields. If the buffer was not empty, returns the content of the buffer.
 
-        clear
+        clear: clear
 
 `@dtmf.expect min, max, inter_digit, final`: Returns a Promise that will resolve once at least `min` (default: 1) and at most `max` (default: 16) digits have been received, with an inter-digit timeout of `inter_digit` (in ms, default: 3000) and a final timeout `final` (in ms, default: 7000). Note that the total waiting time is `inter_digit+final`.
 
-        expect
+        expect: expect
 
 `@dtmf.playback`: execute a playback command in FreeSwitch, unless a digit has already been entered.
 
@@ -95,7 +95,6 @@ Public API
         phrase: seem (phrase) =>
           return if present()
           @action 'phrase', phrase
-      }
 
 Typical pattern is:
 ```
@@ -108,5 +107,5 @@ switch await choice
   when '2'
 ```
 
+      null
 
-      return

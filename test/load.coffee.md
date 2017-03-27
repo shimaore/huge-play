@@ -8,6 +8,8 @@
           'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
           'middleware/handled.coffee.md'
+          'middleware/dtmf.coffee.md'
+          'middleware/prompt.coffee.md'
           'middleware/reference_in_pouchdb.coffee.md'
           'middleware/trace_in_pouchdb.coffee.md'
 
@@ -65,6 +67,7 @@
             session:{} # useful-wind/router
             call: # useful-wind/router + esl
               once: -> Promise.resolve null
+              on: ->
               emit: ->
               linger: -> Promise.resolve null
             req: # useful-wind/router
