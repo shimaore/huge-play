@@ -1,9 +1,7 @@
     pkg = require '../package.json'
-    @name = "#{pkg.name}:middleware:setup"
+    @name = "#{pkg.name}:middleware:prompt"
     debug = (require 'debug') @name
 
-    nimble = require 'nimble-direction'
-    assert = require 'assert'
     request = require 'request'
     qs = require 'querystring'
     seem = require 'seem'
@@ -24,30 +22,27 @@ Record using the given file or uri.
 
 https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_record
 
-      prompt.record = (file,time_limit = 300) ->
+      prompt.record = seem (file,time_limit = 300) =>
         debug 'record', {file,time_limit}
         silence_thresh = 20
         silence_hits = 3
-        ctx.action 'set', 'playback_terminators=any'
-        .then ->
-          ctx.action 'gentones', '%(500,0,800)'
-        .then ->
-          ctx.action 'record', [
+        yield @action 'set', 'playback_terminators=any'
+        yield @action 'gentones', '%(500,0,800)'
+        {body} = yield @action 'record', [
             file
             time_limit
             silence_thresh
             silence_hits
           ].join ' '
-        .then ({body}) ->
 
 The documentation says:
 - record_ms
 - record_samples
 - playback_terminator_used
 
-          duration = body.variable_record_seconds
-          debug 'record', {duration}
-          duration
+        duration = body.variable_record_seconds
+        debug 'record', {duration}
+        duration
 
 `play_and_get_digits`
 =====================
@@ -66,9 +61,9 @@ Required options:
 
 https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_play_and_get_digits
 
-      prompt.play_and_get_digits = (o) ->
+      prompt.play_and_get_digits = (o) =>
         debug 'play_and_get_digits', o
-        ctx.action 'play_and_get_digits', [
+        @action 'play_and_get_digits', [
           o.min
           o.max
           o.tries ? 1
@@ -88,7 +83,7 @@ https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_play_and_get_digits
 Play a file and optionnally record a single digit.
 Promise resolves into the selected digit or `null`.
 
-      prompt.play = (file,o={}) ->
+      prompt.play = seem (file,o={}) ->
         o.file = file
         o.min ?= 1
         o.max ?= 1
@@ -96,11 +91,10 @@ Promise resolves into the selected digit or `null`.
         o.var_name ?= 'choice'
         o.regexp ?= '\\d'
         o.digit_timeout ?= 1000
-        ctx.play_and_get_digits o
-        .then ({body}) ->
-          name = "variable_#{o.var_name}"
-          debug "Got #{body[name]} for #{name}"
-          body[name] ? null
+        {body} = yield prompt.play_and_get_digits o
+        name = "variable_#{o.var_name}"
+        debug "Got #{body[name]} for #{name}"
+        body[name] ? null
 
 `get_choice`
 ========
@@ -111,7 +105,7 @@ Promise resolves into the selected digit or `null`.
       prompt.get_choice = (file,o={}) ->
         o.timeout ?= 15000
         o.digit_timeout ?= 3000
-        ctx.play file, o
+        prompt.play file, o
 
 `get_number`
 ============
@@ -127,7 +121,7 @@ Promise resolves into the number or `null`.
         o.var_name ?= 'number'
         o.regexp ?= '\\d+'
         o.digit_timeout ?= 3000
-        ctx.get_choice o.file, o
+        prompt.get_choice o.file, o
 
 `get_pin`
 =========
@@ -140,7 +134,7 @@ Promise resolves into the PIN or `null`.
         o.min ?= 4
         o.max ?= 16
         o.var_name ?= 'pin'
-        ctx.get_number o
+        prompt.get_number o
 
 `get_new_pin`
 =============
@@ -151,23 +145,23 @@ Promise resolves into the new PIN or `null`.
       prompt.get_new_pin = (o={}) ->
         o.var_name ?= 'new_pin'
         o.invalid_file = 'silence_stream://250'
-        ctx.get_pin o
+        prompt.get_pin o
 
-      prompt.goodbye = seem ->
+      prompt.goodbye = seem =>
         debug 'goodbye'
-        yield ctx.action 'phrase', 'voicemail_goodbye'
-        yield ctx.action 'hangup'
+        yield prompt.phrase 'voicemail_goodbye'
+        yield @action 'hangup'
         debug 'goodbye done'
 
-      prompt.error = (id) ->
+      prompt.phrase = seem (phrase) =>
+        debug 'phrase'
+        yield @action 'phrase', phrase
+
+      prompt.error = seem (id) ->
         debug 'error', {id}
-        Promise.resolve true
-        .then ->
-          ctx.action 'phrase', "spell,#{id}" if id?
-        .then ->
-          ctx.goodbye()
-        .then ->
-          Promise.reject new Error "error #{id}"
+        yield prompt.phrase "spell,#{id}" if id?
+        yield prompt.goodbye()
+        Promise.reject new Error "error #{id}"
 
 `uri`
 -----
@@ -191,8 +185,6 @@ Provide a URI to access the web services (attachment upload/download) defined be
 
 Attachment upload/download
 ==========================
-
-    request = require 'request'
 
     @web = ->
 
