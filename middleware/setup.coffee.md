@@ -284,6 +284,9 @@ Set the account so that if we redirect to an external number the egress module c
           if tag?
             @session.reference_data?.tags.push tag
 
+        has_tag: (tag) ->
+          @session.reference_data?.tags? and tag in @session.reference_data.tags
+
         is_remote: seem (name,local_server) ->
 
           unless @redis?
