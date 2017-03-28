@@ -58,8 +58,6 @@ When we receive a new digit, if the maximum length is reached we do not wait for
 
           set_timers()
 
-        return
-
       @call.on 'DTMF', (res) =>
         dtmf_buffer ?= ''
         dtmf_buffer += res.body['DTMF-Digit']
