@@ -45,7 +45,6 @@ Otherwise wait a little longer. If the user does not enter any new digit in the 
             , inter_digit
 
           @call.on 'dtmf_buffer', ->
-            debug "dtmf_buffer = `#{dtmf_buffer}`"
             clear_timers()
 
 When we receive a new digit, if the maximum length is reached we do not wait for another digit.
