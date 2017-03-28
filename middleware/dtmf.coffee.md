@@ -1,9 +1,7 @@
     @name = 'huge-play:middleware:dtmf'
     seem = require 'seem'
 
-    @include = seem ->
-
-      yield @set playback_terminators: '1234567890#*'
+    @include = ->
 
       inter_digit_timer = null
       final_timer = null
@@ -88,13 +86,15 @@ Public API
 
         playback: seem (url) =>
           return if present()
-          @action 'playback', url
+          yield @set playback_terminators: '1234567890#*'
+          yield @action 'playback', url
 
 `@dtmf.phrase`: execute a phrase command in FreeSwitch, unless a digit has already been entered.
 
         phrase: seem (phrase) =>
           return if present()
-          @action 'phrase', phrase
+          yield @set playback_terminators: '1234567890#*'
+          yield @action 'phrase', phrase
 
 Typical pattern is:
 ```
