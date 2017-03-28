@@ -176,14 +176,14 @@ Note that since FreeSwitch has trouble with query parameters (`Invalid file form
         domain = qs.escape domain
         db = qs.escape db
         id = qs.escape id
-        rev = qs.escape rev
+        rev = qs.escape rev ? 'no-rev'
         file = qs.escape file
         path = "/#{domain}/#{db}/#{id}/#{rev}/#{file}"
 
         if simple
-          "http://#{host}:#{port}#{path}"
+          "http://(cache=false)#{host}:#{port}#{path}"
         else
-          "http://(nohead=true)#{host}:#{port}#{path}"
+          "http://(cache=false,nohead=true)#{host}:#{port}#{path}"
 
       @prompt = prompt
       return
