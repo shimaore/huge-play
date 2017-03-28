@@ -11,18 +11,6 @@ TBD: We'll be using some shared state (like Redis) with handlers on ingress/egre
       Handles routing to a given ~~FIFO queue~~ACD~~hunt-group.
     '''
 
-Announce/music download
-=======================
-
-This is modelled after the same code in `well-groomed-feast`.
-
-    @web = ->
-
-      @get '/fifo/:id/:name', ->
-        id = qs.escape @params.id
-        name = qs.escape @params.name
-        @proxy_get @cfg.provisioning, "#{id}/#{name}"
-
     @include = seem ->
 
 FIFO handling
@@ -35,7 +23,7 @@ FIFO handling
       fifo_uri = (id,name) =>
         id = qs.escape id
         name = qs.escape name
-        @prompt.uri "/fifo/#{id}/#{name}"
+        @prompt.uri "/prov/prov/#{id}/#{name}"
 
       unless @session.fifo?
         debug 'Missing FIFO data'

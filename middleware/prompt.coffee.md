@@ -167,18 +167,23 @@ Promise resolves into the new PIN or `null`.
 -----
 
 Provide a URI to access the web services (attachment upload/download) defined below.
+Note that since FreeSwitch has trouble with query parameters (`Invalid file format [wav?rev=…]`) the revision number has to be provided as part of the path.
 
-      prompt.uri = (path,rev,simple) ->
-        host = ctx.cfg.web.host ? '127.0.0.1'
-        port = ctx.cfg.web.port
-        if rev?
-          rev = qs.escape rev
-          "http://#{host}:#{port}#{path}?rev=#{rev}"
+      prompt.uri = (domain,db,id,file,rev,simple) =>
+        host = @cfg.web.host ? '127.0.0.1'
+        port = @cfg.web.port
+
+        domain = qs.escape domain
+        db = qs.escape db
+        id = qs.escape id
+        rev = qs.escape rev
+        file = qs.escape file
+        path = "/#{domain}/#{db}/#{id}/#{rev}/#{file}"
+
+        if simple
+          "http://#{host}:#{port}#{path}"
         else
-          if simple
-            "http://#{host}:#{port}#{path}"
-          else
-            "http://(nohead=true)#{host}:#{port}#{path}"
+          "http://(nohead=true)#{host}:#{port}#{path}"
 
       @prompt = prompt
       return
@@ -188,7 +193,35 @@ Attachment upload/download
 
     @web = ->
 
-      @proxy_get = (base,uri) ->
+      cfg = @cfg
+
+      @translators = translators =
+
+A translator for user databases.
+
+        'user-db': (db,id,file) =>
+          db = qs.escape db
+          id = qs.escape id
+          file = qs.escape file
+          base: cfg.userdb_base_uri
+          uri: "/#{db}/#{id}/#{file}"
+
+A translator for the local provisioning database (the `db` database name is ignored).
+
+        'prov': (db,id,file) =>
+          id = qs.escape id
+          file = qs.escape file
+          base: cfg.provisioning
+          uri: "#{id}/#{file}"
+
+      @get '/:domain/:db/:id/:rev/:file', ->
+        translator = translators[@params.domain]
+        unless translator?
+          @next 'Invalid domain'
+          return
+
+        {base,uri} = translator @params.db, @params.id, @params.file
+
         proxy = request.get
           baseUrl: base
           uri: uri
@@ -203,12 +236,19 @@ Attachment upload/download
         proxy.pipe @response
         return
 
-      @proxy_put = (base,uri,rev) ->
+      @put '/:domain/:db/:id/:rev/:file', ->
+        translator = translators[@params.domain]
+        unless translator?
+          @next 'Invalid domain'
+          return
+
+        {base,uri} = translator @params.db, @params.id, @params.file
+
         proxy = request.put
           baseUrl: base
           uri: uri
           qs:
-            rev: rev
+            rev: @params.rev
           followRedirects: false
           maxRedirects: 0
           timeout: 120
