@@ -1,5 +1,6 @@
     @name = 'huge-play:middleware:dtmf'
     seem = require 'seem'
+    debug = (require 'debug') @name
 
     @include = ->
 
@@ -17,33 +18,50 @@
       dtmf_buffer = ''
 
       clear = ->
+        debug 'clear'
         clear_timers()
         r = dtmf_buffer
         dtmf_buffer = ''
         r
 
       expect = (min_length, max_length = 16, inter_digit = 3*1000, timeout = 7*1000) =>
+        debug 'expect'
         clear()
         clear_timers()
 
         new Promise (resolve) =>
 
+If we already collected enough digits, simply return them.
+
+          if dtmf_buffer.length >= max_length
+            resolve clear()
+            return
+
+Otherwise we'll have to wait a little bit longer.
+
           set_timers = ->
             clear_timers()
-            inter_digit_timer = setTimeout ->
 
-If we waited and the user did not enter a new digit, stop waiting if we already collected enough digits.
+First we wait for the inter-digit timeout.
+
+            inter_digit_timer = setTimeout ->
+              debug 'inter-digit timer expired'
+
+If we waited and the user did not enter a new digit, stop waiting if we already collected the minimum number of digits we needed.
 
               if dtmf_buffer.length >= min_length
                 resolve clear()
                 return
 
-Otherwise wait a little longer. If the user does not enter any new digit in the period, return what we have so far.
+Otherwise wait a little longer. If the user does not enter any new digit in the period, return what we have so far (including, possibly, an empty buffer).
 
-              setTimeout ->
+              final_timer = setTimeout ->
+                debug 'final timer expired'
                 resolve clear()
               , timeout
             , inter_digit
+
+We start handling new digits arrival.
 
           @call.on 'dtmf_buffer', ->
             clear_timers()
@@ -53,6 +71,8 @@ When we receive a new digit, if the maximum length is reached we do not wait for
             if dtmf_buffer.length >= max_length
               resolve clear()
               return
+
+However if we aren't done just yet, simply re-set the timers.
 
             set_timers()
 
@@ -96,11 +116,12 @@ Public API
 
 Typical pattern is:
 ```
-# expect between one and two digits
-choice = @dtmf.expect 1, 2
+# start menu, clear DTMF buffer
+@dtmf.clear()
 # choice is a Promise that will get resolve once the criteria are met
 await @dtmf.playback prompt_file
-switch await choice
+# expect between one and two digits
+switch await @dtmf.expect 1, 2
   when '1'
   when '2'
 ```
