@@ -36,6 +36,7 @@ If we waited and the user did not enter a new digit, stop waiting if we already 
 
               if dtmf_buffer.length >= min_length
                 resolve clear()
+                return
 
 Otherwise wait a little longer. If the user does not enter any new digit in the period, return what we have so far.
 
