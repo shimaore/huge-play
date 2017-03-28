@@ -25,8 +25,7 @@
         r
 
       expect = (min_length, max_length = 16, inter_digit = 3*1000, timeout = 7*1000) =>
-        debug 'expect'
-        clear()
+        debug 'expect', min_length, max_length
         clear_timers()
 
         new Promise (resolve) =>
