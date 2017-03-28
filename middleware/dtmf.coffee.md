@@ -4,63 +4,57 @@
 
     @include = ->
 
-      inter_digit_timer = null
-      final_timer = null
+      timer = null
 
-      clear_timers = ->
-        if inter_digit_timer?
-          clearTimeout inter_digit_timer
-        inter_digit_timer = null
-        if final_timer?
-          clearTimeout final_timer
-        final_timer = null
+      clear_timer = ->
+        if timer?
+          clearTimeout timer
+        timer = null
 
       dtmf_buffer = ''
 
       clear = ->
         debug 'clear'
-        clear_timers()
+        clear_timer()
         r = dtmf_buffer
         dtmf_buffer = ''
         r
 
-      expect = (min_length, max_length = 16, inter_digit = 3*1000, timeout = 7*1000) =>
+      expect = (min_length, max_length = 16, inter_digit = 3*1000, final = 7*1000) =>
         debug 'expect', min_length, max_length
-        clear_timers()
+        clear_timer()
 
         new Promise (resolve) =>
 
 If we already collected enough digits, simply return them.
 
           if dtmf_buffer.length >= max_length
-            clear_timers()
             resolve clear()
             return
 
 Otherwise we'll have to wait a little bit longer.
 
-          set_timers = ->
-            clear_timers()
+          set_timer = ->
+            clear_timer()
 
 First we wait for the inter-digit timeout.
 
-            inter_digit_timer = setTimeout ->
+            timer = setTimeout ->
               debug 'inter-digit timer expired'
+              clear_timer()
 
 If we waited and the user did not enter a new digit, stop waiting if we already collected the minimum number of digits we needed.
 
               if dtmf_buffer.length >= min_length
-                clear_timers()
                 resolve clear()
                 return
 
 Otherwise wait a little longer. If the user does not enter any new digit in the period, return what we have so far (including, possibly, an empty buffer).
 
-              final_timer = setTimeout ->
+              timer = setTimeout ->
                 debug 'final timer expired'
-                clear_timers()
                 resolve clear()
-              , timeout
+              , final
 
               return
 
@@ -70,7 +64,8 @@ Otherwise wait a little longer. If the user does not enter any new digit in the 
 We start handling new digits arrival.
 
           @call.on 'dtmf_buffer', ->
-            clear_timers()
+            debug 'dtmf_buffer'
+            clear_timer()
 
 When we receive a new digit, if the maximum length is reached we do not wait for another digit.
 
@@ -80,9 +75,9 @@ When we receive a new digit, if the maximum length is reached we do not wait for
 
 However if we aren't done just yet, simply re-set the timers.
 
-            set_timers()
+            set_timer()
 
-          set_timers()
+          set_timer()
           return
 
       @call.on 'DTMF', (res) =>
