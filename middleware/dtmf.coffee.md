@@ -13,8 +13,6 @@
         timer = null
 
       clear_handler = =>
-        if handler?
-          @call.removeListener 'dtmf_buffer', handler
         handler = null
 
       dtmf_buffer = ''
@@ -62,8 +60,6 @@ When we receive a new digit, if the maximum length is reached we do not wait for
               resolve clear()
               return
 
-          @call.on 'dtmf_buffer', handler
-
 Otherwise we'll have to wait a little bit longer.
 
           set_timer = ->
@@ -103,7 +99,7 @@ However if we aren't done just yet, simply re-set the timers.
       @call.on 'DTMF', (res) =>
         dtmf_buffer ?= ''
         dtmf_buffer += res.body['DTMF-Digit']
-        @call.emit 'dtmf_buffer', dtmf_buffer
+        handler? dtmf_buffer
         return
 
       present = ->
