@@ -8,11 +8,13 @@
       handler = null
 
       clear_timer = ->
+        debug 'clear_timer'
         if timer?
           clearTimeout timer
         timer = null
 
       clear_handler = =>
+        debug 'clear_handler'
         handler = null
 
       dtmf_buffer = ''
@@ -25,15 +27,18 @@
         dtmf_buffer = ''
         r
 
-      expect = (min_length, max_length = 16, inter_digit = 3*1000, final = 7*1000) =>
+      expect = (min_length, max_length = 16, inter_digit = 3*1000, final = inter_digit) =>
         debug 'expect', min_length, max_length
         clear_timer()
 
         new Promise (resolve) =>
 
-Note: this doesn't deal with cases where the user is dialing very fast and there could be multiple `#` in the buffer before we get here.
+Clean any post-`#` digits that might be present before we start our timers.
 
-          dtmf_buffer.replace /#$/, ''
+          if m = dtmf_buffer.match /^([^#]*)#/
+            clear()
+            resolve m[1]
+            return
 
 If we already collected enough digits, simply return them.
 
@@ -41,28 +46,10 @@ If we already collected enough digits, simply return them.
             resolve clear()
             return
 
-We start handling new digits arrival.
-
-          handler = ->
-            clear_timer()
-
-Use `#` as a terminator
-
-            if dtmf_buffer.match /#$/
-              resolve clear()
-              return
-
-            dtmf_buffer.replace /#$/, ''
-
-When we receive a new digit, if the maximum length is reached we do not wait for another digit.
-
-            if dtmf_buffer.length >= max_length
-              resolve clear()
-              return
-
 Otherwise we'll have to wait a little bit longer.
 
           set_timer = ->
+            debug 'set timer'
             clear_timer()
 
 First we wait for the inter-digit timeout.
@@ -88,6 +75,25 @@ Otherwise wait a little longer. If the user does not enter any new digit in the 
 
             , inter_digit
             return
+
+We start handling new digits arrival.
+
+          handler = ->
+            debug 'handler', dtmf_buffer
+            clear_timer()
+
+Use `#` as a terminator
+
+            if m = dtmf_buffer.match /^([^#]*)#/
+              clear()
+              resolve m[1]
+              return
+
+When we receive a new digit, if the maximum length is reached we do not wait for another digit.
+
+            if dtmf_buffer.length >= max_length
+              resolve clear()
+              return
 
 However if we aren't done just yet, simply re-set the timers.
 
