@@ -2,6 +2,8 @@
     @name = "#{pkg.name}:middleware:cdr"
     seem = require 'seem'
     Bluebird = require 'bluebird'
+    Moment = require 'moment-timezone'
+
 
     @include = ->
 
@@ -54,6 +56,14 @@ Update the (existing) call reference data
 
         @session.call_reference_data.end_time = new Date() .toJSON()
         @session.call_reference_data.report = report
+        if @session.timezone?
+          @session.call_reference_data.timezone = @session.timezone
+          @session.call_reference_data.tz_start_time = Moment @session.call_reference_data.start_time
+            .tz @session.timezone
+            .format()
+          @session.call_reference_data.tz_end_time = Moment @session.call_reference_data.end_time
+            .tz @session.timezone
+            .format()
         yield @save_ref()
 
         for own k,v of report
