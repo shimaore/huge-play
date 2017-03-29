@@ -14,7 +14,7 @@
 
       clear_handler = ->
         if handler?
-          @call.removeListener handler
+          @call.removeListener 'dtmf_buffer', handler
         handler = null
 
       dtmf_buffer = ''
