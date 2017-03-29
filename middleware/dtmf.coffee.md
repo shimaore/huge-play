@@ -12,7 +12,7 @@
           clearTimeout timer
         timer = null
 
-      clear_handler = ->
+      clear_handler = =>
         if handler?
           @call.removeListener 'dtmf_buffer', handler
         handler = null
