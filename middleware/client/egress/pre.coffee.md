@@ -34,6 +34,8 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
       @tag @session.endpoint._id
+      if @session.endpoint.timezone?
+        @session.timezone ?= @session.endpoint.timezone
 
       @set
         ccnq_endpoint: @session.endpoint_name
@@ -78,6 +80,8 @@ The `number_domain` field is required, but the number-domain record is optional.
 
       @debug 'number_domain', number_domain
       @tag @session.number_domain_data._id
+      if @session.number_domain_data.timezone?
+        @session.timezone ?= @session.number_domain_data.timezone
 
 Source (calling) number
 -----------------------
@@ -95,6 +99,8 @@ On a static trunk, the number might not be present.
           {}
 
       @tag @session.number._id
+      if @session.number.timezone?
+        @session.timezone ?= @session.number.timezone
 
 Dialplan
 --------

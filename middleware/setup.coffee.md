@@ -249,6 +249,8 @@ Retrieve number data.
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
           @tag @session.number._id
+          if @session.number.timezone?
+            @session.timezone ?= @session.number.timezone
 
           if @session.number.error?
             @debug "Could not locate destination number #{dst_number}: #{@session.number.error}"

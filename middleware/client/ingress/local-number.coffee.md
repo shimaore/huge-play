@@ -49,6 +49,7 @@ The dialplan and country (and other parameters) might also be available in the `
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
 * doc.number_domain.country (optional) country used for ingress calls to this domain.
 
+      @session.timezone = @session.number_domain_data?.timezone ? @session.e164_number.timezone
       @session.dialplan = @session.number_domain_data?.dialplan ? @session.e164_number.dialplan
       @session.country  = @session.number_domain_data?.country  ? @session.e164_number.country
       if @session.country?

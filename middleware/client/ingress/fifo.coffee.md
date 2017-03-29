@@ -38,6 +38,10 @@ In this case the conference name is the number-domain and the conference name.
           .catch (error) =>
             @debug.dev "number_domain #{number_domain}: #{error}"
             null
+        @tag @session.number_domain_data._id
+
+        if @session.number_domain_data?.timezone?
+          @session.timezone ?= @session.number_domain_data?.timezone
 
 We won't be able to route if there is no number-domain data.
 
