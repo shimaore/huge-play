@@ -2,10 +2,6 @@
     @name = "#{pkg.name}:middleware:client:conference"
     seem = require 'seem'
 
-    sleep = (timeout) ->
-      new Promise (resolve) ->
-        setTimeout resolve, timeout
-
     @include = seem ->
 
       return unless @session.direction is 'conf'
@@ -54,28 +50,15 @@ Validate passcode if any.
 
       yield @action 'answer'
       yield @set {language}
-      yield sleep 2000
+      yield @sleep 2000
 
-FIXME: Canonalize from the code already present in well-groomed-feast/middleware/setup
-
-      play_and_get_digits = =>
-        @action 'play_and_get_digits', [
-          1 # min
-          8 # max
-          3 # tries
-          6000 # timeout
-          '#' # terminators
-          'phrase:conference:pin' # file
-          'phrase:conference:bad_pin' # invalid_file
-          'pin'
-        ].join ' '
-
-      get_conf_pin = seem =>
-        {body} = yield play_and_get_digits()
-          .catch (error) =>
-            @debug "get_conf_pin: #{error.stack ? error}"
-            body: {}
-        body.variable_pin
+      get_conf_pin = (o={}) =>
+        @prompt.get_pin
+          max: 8
+          tries: 3
+          timeout: 6000
+          file:'phrase:conference:pin'
+          invalid_file:'phrase:conference:bad_pin'
 
       authenticated = seem =>
         pin = @session.conf.pin

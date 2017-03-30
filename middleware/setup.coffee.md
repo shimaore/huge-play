@@ -83,6 +83,10 @@ Standard events: `add`.
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
 
+        sleep: (timeout) ->
+          new Promise (resolve) ->
+            setTimeout resolve, timeout
+
         direction: (direction) ->
           @session.direction = direction
           @call.emit 'direction', direction
