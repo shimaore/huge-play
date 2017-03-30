@@ -83,6 +83,12 @@ Commands
 
 * doc.number_domain.calendars: array or object of calendars. Each calendar is an array of dates in `YYYY-MM-DD` format. The calendars are used as filters by doc.local_number.ornaments' `in_calendars` command.
 
+FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
+
+    ingress = [
+      require './ingress/post'
+    ]
+
     module.exports = commands =
 
 Actions
@@ -90,8 +96,42 @@ Actions
 
 These actions are terminal for the statement.
 
+      stop: ->
+        debug 'stop'
+        'over'
+
       accept: ->
         debug 'accept'
+        'over'
+
+      hangup: ->
+        yield @action 'hangup'
+        @direction 'hangup'
+        'over'
+
+      send: seem (destination) ->
+        debug 'send'
+        @destination = destination
+        for m in ingress
+          try
+            yield m.include.call this
+          catch error
+            @debug "#{m.name} in menu_send: #{error.stack ? error}"
+        'over'
+
+`menu_route`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
+
+      menu_send: seem ->
+        debug 'menu_send'
+        return false unless @menu?
+        yield @menu.expect()
+        debug 'menu_send', @menu.value
+        @destination = @menu.value
+        for m in ingress
+          try
+            yield m.include.call this
+          catch error
+            @debug "#{m.name} in menu_send: #{error.stack ? error}"
         'over'
 
       reject: seem ->
@@ -125,6 +165,29 @@ Other actions must return `true`.
         # FIXME TODO
         true
 
+`play`: play a file, uninterrupted (should be used for short prompts)
+
+      play: seem (file) ->
+        debug 'play', file
+        url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
+        yield @action 'answer'
+        yield @unset 'playback_terminators'
+        yield @action 'playback', url
+        true
+
+`menu_play`: play a file, stop playing when a key is pressed
+
+      menu_play: seem (file) ->
+        debug 'menu_play', file
+        url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
+        yield @action 'answer'
+        yield @dtmf.playback url
+        true
+
+      wait: seem (ms) ->
+        debug 'wait', ms
+        yield @dtmf.playback "silence_stream://#{ms}"
+        debug 'wait over', ms
 
 Preconditions
 -------------
@@ -277,6 +340,29 @@ Notice: `failed` here means the call failed to be sent to the user *and* no othe
       called_suspicious:      chain is_suspicious  local_egress
       caller_e164_suspicious: chain is_suspicious  global_ingress
       called_e164_suspicious: chain is_suspicious  global_egress
+
+Menus
+-----
+
+`menu_start`: start collecting digits for a menu; digits received before this command are discarded.
+
+      menu: seem ( min = 1, max = min, itd ) ->
+        debug 'menu_start'
+        yield @action 'answer'
+        @dtmf.clear()
+        @menu =
+          expect: seem =>
+            @menu.value ?= yield @dtmf.expect min, max, itd
+        true
+
+`menu_on`: true if the user keyed the choice
+
+      menu_on: seem (choice) ->
+        debug 'menu_on', choice
+        return false unless @menu?
+        yield @menu.expect()
+        debug 'menu_on', choice, @menu.value
+        @menu.value is choice
 
 Pattern
 -------
