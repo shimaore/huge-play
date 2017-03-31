@@ -68,6 +68,11 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
       if fifo.music?
         yield @export hold_music: fifo_uri id, fifo.music
 
+FIXME: This is taken from the centrex-{country} code, but really it should be more generic.
+
+      if @session.ccnq_from_e164?
+        @source = "+#{@session.ccnq_from_e164}"
+
       sofias = []
 
 * session.fifo.members (array) (required) List of static members for this hunt-group/ACD/FIFO.
