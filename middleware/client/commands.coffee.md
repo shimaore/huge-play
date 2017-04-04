@@ -2,6 +2,7 @@
     debug = (require 'debug') @name
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
+    run = require 'flat-ornament'
     seem = require 'seem'
 
 Lists handling
@@ -363,6 +364,33 @@ Menus
         yield @menu.expect()
         debug 'menu_on', choice, @menu.value
         @menu.value is choice
+
+      goto_menu: seem (number) ->
+        debug 'goto_menu', number
+
+Copying the logic from middleware/client/ingress/fifo
+
+        type = 'menu'
+        items = @session.number_domain_data.menus
+        unless items?
+          @debug.csr "Number domain has no data for #{type}."
+          return
+        unless items.hasOwnProperty number
+          @debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
+          return
+        item = items[number]
+        @tag "#{type} number #{number}"
+        unless item?
+          @debug.csr "Number domain as no data #{number} for #{type}."
+          return
+        item.name ?= "#{number}"
+        @session[type] = item
+        @direction type
+
+        @debug "Using #{type} #{number}", item
+
+        yield run.call this, item, @ornaments_commands
+        'over'
 
 Pattern
 -------
