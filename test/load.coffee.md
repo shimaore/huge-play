@@ -16,6 +16,7 @@
           'middleware/client/setup.coffee.md'
           'middleware/client/fifo.coffee.md'
           'middleware/client/ornaments.coffee.md'
+          'middleware/client/menu.coffee.md'
           'middleware/client/egress/fifo.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/centrex-FR.coffee.md'
