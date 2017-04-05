@@ -129,6 +129,17 @@ Contrarily to established practices, our code uses lowercase country names.
       if @session.country?
         @session.country = @session.country.toLowerCase()
 
+Eavesdrop registration
+----------------------
+
+      eavesdrop_key = "outbound:#{@source}@#{@session.number_domain}"
+      @debug 'Set outbound eavesdrop', eavesdrop_key
+      yield @redis.setAsync eavesdrop_key, @call.uuid
+      @call.once 'CHANNEL_HANGUP_COMPLETE'
+      .then seem =>
+        @debug 'Clear outbound eavesdrop', eavesdrop_key
+        yield @redis.delAsync eavesdrop_key
+
       @debug 'Ready',
         endpoint_name: @session.endpoint_name
         outbound_route: @session.outbound_route

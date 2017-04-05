@@ -11,7 +11,7 @@
         @debug 'No number domain'
         return
 
-      return unless m = @destination.match /^(81\d|82|83|84)(\d+)$/
+      return unless m = @destination.match /^(81\d|82|83|84|88)(\d+)$/
 
       action = m[1]
       number = parseInt m[2], 10
@@ -25,6 +25,7 @@ The destination matched.
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
       ACTION_INTERCEPT = '84'
+      ACTION_EAVESDROP = '88'
 
       @debug 'Routing', action, number
 
@@ -80,9 +81,41 @@ The destination matched.
           if uuid?
             yield @set intercept_unbridged_only: true
             yield @action 'intercept', uuid
-            @direction 'intercepted'
+            @direction 'intercepted' # Really `intercepting`, but oh well
           else
             yield @action 'hangup'
+          return
+
+        when ACTION_EAVESDROP
+          inbound_uuid = yield @redis.getAsync "inbound:#{number}@#{@session.number_domain}"
+          outbound_uuid = yield @redis.getAsync "outbound:#{number}@#{@session.number_domain}"
+          @debug 'Eavesdrop', inbound_uuid, outbound_uuid
+          switch
+            when inbound_uuid?
+              uuid = inbound_uuid
+              yield @set
+                eavesdrop_bridge_aleg: true
+                eavesdrop_bridge_bleg: true
+                eavesdrop_whisper_aleg: true
+                eavesdrop_whisper_bleg: false
+            when outbound_uuid?
+              uuid = outbound_uuid
+              yield @set
+                eavesdrop_bridge_aleg: true
+                eavesdrop_bridge_bleg: true
+                eavesdrop_whisper_aleg: false
+                eavesdrop_whisper_bleg: true
+            else
+              yield @action 'hangup'
+              return
+
+          yield @set
+            eavesdrop_indicate_failed: 'tone_stream://%(125,0,300)'
+            eavesdrop_indicate_new: 'tone_stream://%(125,0,600);%(125,0,450)'
+            eavesdrop_indicate_idle: 'tone_stream://%(125,125,450);%(125,0,450)'
+            eavesdrop_enable_dtmf: true
+          yield @action 'eavesdrop', uuid
+          @direction 'eavesdropping'
           return
 
         when ACTION_FIFO_LOGIN
