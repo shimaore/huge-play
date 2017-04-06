@@ -2,6 +2,7 @@
     debug = (require 'debug') @name
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
+    request = require 'superagent'
     run = require 'flat-ornament'
     seem = require 'seem'
 
@@ -295,6 +296,24 @@ Calendars
       anonymous: ->
         debug 'anonymous'
         @session.caller_privacy
+
+      webhook: seem (uri) ->
+        debug 'webhook'
+        try
+          {body} = yield request
+            .post uri
+            .send
+              reference_data: @session.reference_data
+              call_reference_data: @session.call_reference_data
+              tags: @session.reference_data?.tags
+              ccnq_from_e164: @session.ccnq_from_e164
+              ccnq_to_e164: @session.ccnq_to_e164
+          if body?
+            @user_tags body.tags
+          true
+        catch
+          debug 'webhook: error'
+          false
 
 Postconditions
 --------------
