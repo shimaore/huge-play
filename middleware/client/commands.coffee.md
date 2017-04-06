@@ -244,12 +244,15 @@ start: '18:00', end: '08:00'
         else
           start <= now or now <= end
 
-Nightime flag
+      user_tag: (tag) ->
+        @user_tag tag
+        true
 
-      nighttime: ->
-        debug 'nighttime'
-        # FIXME: check if the @source has nighttime activated
-        false
+      has_tag: (tag) ->
+        @has_tag tag
+
+      has_user_tag: (tag) ->
+        @has_user_tag tag
 
 Calendars
 

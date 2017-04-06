@@ -45,6 +45,7 @@ The dialplan and country (and other parameters) might also be available in the `
           debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
       @tag @session.number_domain_data._id
+      @user_tags @session.number_domain_data.tags
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
 * doc.number_domain.country (optional) country used for ingress calls to this domain.

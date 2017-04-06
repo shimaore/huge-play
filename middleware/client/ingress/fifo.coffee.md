@@ -39,6 +39,7 @@ In this case the conference name is the number-domain and the conference name.
             @debug.dev "number_domain #{number_domain}: #{error}"
             null
         @tag @session.number_domain_data._id
+        @user_tags @session.number_domain_data.tags
 
         if @session.number_domain_data?.timezone?
           @session.timezone ?= @session.number_domain_data?.timezone

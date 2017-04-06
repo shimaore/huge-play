@@ -22,6 +22,7 @@
 
       @session.e164_number = yield @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
       @tag @session.e164_number._id
+      @user_tags @session.e164_number.tags
 
 * session.e164_number.fs_variables See doc.global_number.fs_variables
 * doc.global_number (object, optional) Additional FreeSwitch variables to be set on egress calls (for the calling number). These will show up in CDRs on the client side.

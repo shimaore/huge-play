@@ -17,6 +17,8 @@
         @source = @destination
       @destination = @session.destination
       @direction 'egress'
+      @tag @session.endpoint._id
+      @user_tags @session.endpoint.tags
 
 FIXME the original URI part should be the Request-URI per RFC5806
 

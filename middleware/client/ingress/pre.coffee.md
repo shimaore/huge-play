@@ -35,6 +35,7 @@ We retrieve the *global-number* record based on the destination.
 
       @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_to_e164}"
       @tag @session.e164_number._id
+      @user_tags @session.e164_number.tags
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 

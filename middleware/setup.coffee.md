@@ -255,6 +255,7 @@ Retrieve number data.
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
           @tag @session.number._id
+          @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
 
@@ -292,8 +293,20 @@ Set the account so that if we redirect to an external number the egress module c
           if tag?
             @session.reference_data?.tags.push tag
 
+        user_tag: (tag) ->
+          if tag?
+            @tag "user-tag:#{tag}"
+
+        user_tags: (tags) ->
+          return unless tags?
+          for tag in tags
+            @user_tag tag
+
         has_tag: (tag) ->
           @session.reference_data?.tags? and tag in @session.reference_data.tags
+
+        has_user_tag: (tag) ->
+          tag? and @has_tag "user-tag:#{tag}"
 
         is_remote: seem (name,local_server) ->
 
