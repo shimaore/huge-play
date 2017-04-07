@@ -24,7 +24,7 @@
     "cuddly": "^1.1.5",
     "date-holidays": "^0.1.7",
     "debug": "^2.6.3",
-    "flat-ornament": "^1.2.0",
+    "flat-ornament": "^2.0.0",
     "moment": "^2.18.0",
     "moment-timezone": "^0.5.11",
     "nimble-direction": "^6.1.1",
