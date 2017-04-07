@@ -63,11 +63,11 @@ The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
 
       @cfg.statistics.on 'report', (data) =>
 
+        data.host ?= @cfg.host
+
 The `call` event is pre-registered (in spicy-action) on the `calls` bus.
 
-        @socket.emit 'call',
-          host: @cfg.host
-          data: data
+        @socket.emit 'call', data
 
 Standard events: `add`.
 
