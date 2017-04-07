@@ -105,7 +105,8 @@ Add any endpoint- or number- specific dispatch room (this allows end-users to re
 We assume the room names match record IDs.
 
           push_in @session.endpoint?._id
-          push_in ['endpoint',@session.number?.endpoint].join ':'
+          if @session.number?.endpoint?
+            push_in ['endpoint',@session.number?.endpoint].join ':'
           push_in @session.number?._id
           push_in @session.e164_number?._id
           if @session.number_domain_data?.dialplan is 'centrex'
