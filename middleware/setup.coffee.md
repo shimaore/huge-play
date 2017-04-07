@@ -63,8 +63,6 @@ The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
 
       @cfg.statistics.on 'report', (data) =>
 
-        data.host ?= @cfg.host
-
 The `call` event is pre-registered (in spicy-action) on the `calls` bus.
 
         @socket.emit 'call', data
@@ -130,12 +128,14 @@ FIXME: Move the `call` socket.io code from tough-rate to huge-play.
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
           o._in ?= @_in()
+          o.host ?= @cfg.host
           @call.emit 'report', o
           @cfg.statistics.emit 'report', o
 
         save_ref: seem ->
           if @cfg.update_session_reference_data?
             data = @session.reference_data
+            data.host ?= @cfg.host
             data = yield @cfg.update_session_reference_data data, @session.call_reference_data
             @cfg.statistics.emit 'reference', data
             @session.reference_data = data
