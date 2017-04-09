@@ -116,9 +116,6 @@ We assume the room names match record IDs.
 
           _in
 
-Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends the notification out via socket.io.
-FIXME: Move the `call` socket.io code from tough-rate to huge-play.
-
         report: (o) ->
           unless @call? and @session?
             @debug.dev 'report: improper environment'

@@ -259,6 +259,8 @@ Note the different alternatives for routing:
         { parameters, to_uri }
       ]
 
+      @report state: 'ingress-call'
+
 ### Build the set of `_in` targets for notifications of the reference data.
 
       @session.reference_data._in ?= []
