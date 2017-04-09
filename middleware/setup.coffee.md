@@ -110,6 +110,10 @@ We assume the room names match record IDs.
           if @session.number_domain_data?.dialplan is 'centrex'
             push_in @session.number_domain_data._id
 
+          if @session.reference_data?.tags?
+            for tag in @session.reference_data.tags when tag.match /^\w+:/
+              push_in tag
+
           _in
 
 Notice that `report` only works if e.g. tough-rate/middleware/call-handler sends the notification out via socket.io.
