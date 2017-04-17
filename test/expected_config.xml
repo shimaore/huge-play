@@ -362,6 +362,9 @@
 <param name="enable-cacert-check" value="true"/>
 <param name="enable-ssl-verifyhost" value="true"/>
 <param name="timeout" value="120"/>
+<param name="file-cache-ttl" value="1"/>
+<param name="abs-file-cache-ttl" value="1"/>
+<param name="file-not-found-expires" value="1"/>
 </params>
 </profile>
 </profiles>

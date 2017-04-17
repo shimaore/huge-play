@@ -189,6 +189,11 @@ module.exports = renderable (cfg) ->
               param 'enable-cacert-check', cfg.httapi_cacert_check ? true
               param 'enable-ssl-verifyhost', cfg.httpapi_verify_host ? true
               param 'timeout', cfg.httapi_timeout ? 120
+              # Force very low cache (cannot be zero because mod_httapi both uses >-1 and >0 in its code).
+              param 'file-cache-ttl', 1
+              param 'abs-file-cache-ttl', 1
+              # Use file-not-found-expires=1 to force cache bypass
+              param 'file-not-found-expires', 1
 
       configuration name:'conference.conf', ->
         callerControls ->

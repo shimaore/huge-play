@@ -169,7 +169,7 @@ Promise resolves into the new PIN or `null`.
 Provide a URI to access the web services (attachment upload/download) defined below.
 Note that since FreeSwitch has trouble with query parameters (`Invalid file format [wav?rev=…]`) the revision number has to be provided as part of the path.
 
-      prompt.uri = (domain,db,id,file,rev,simple) =>
+      prompt.uri = (domain,db,id,file,rev) =>
         host = @cfg.web.host ? '127.0.0.1'
         port = @cfg.web.port
 
@@ -180,10 +180,7 @@ Note that since FreeSwitch has trouble with query parameters (`Invalid file form
         file = qs.escape file
         path = "/#{domain}/#{db}/#{id}/#{rev}/#{file}"
 
-        if simple
-          "http://(cache=false)#{host}:#{port}#{path}"
-        else
-          "http://(cache=false,nohead=true)#{host}:#{port}#{path}"
+        "http://#{host}:#{port}#{path}"
 
       @prompt = prompt
       return
