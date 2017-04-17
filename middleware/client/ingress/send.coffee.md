@@ -22,15 +22,19 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
     @send = send = seem (destinations) ->
 
-      intercept_key = "inbound_call:#{@destination}@#{@session.number_domain}"
+      key = "#{@destination}@#{@session.number_domain}"
+
+      intercept_key = "inbound_call:#{key}"
       yield @redis.setAsync intercept_key, @call.uuid
 
-      eavesdrop_key = "inbound:#{@destination}@#{@session.number_domain}"
+      eavesdrop_key = "inbound:#{key}"
       @debug 'Set inbound eavesdrop', eavesdrop_key
       yield @redis.setAsync eavesdrop_key, @call.uuid
+      @call.emit 'inbound', {key,id:@call.uuid}
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem =>
         @debug 'Clear inbound eavesdrop', eavesdrop_key
+        @call.emit 'inbound-end', {key,id:@call.uuid}
         yield @redis.delAsync eavesdrop_key
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>

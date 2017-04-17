@@ -19,9 +19,11 @@
 The destination matched.
 
       ACTION_FIFO_ROUTE = '810'
-      ACTION_FIFO_LOGIN = '811'
+      ACTION_QUEUER_LOGIN = '811'
+      ACTION_QUEUER_LEAVE = '812'
+      ACTION_QUEUER_OFFHOOK = '813'
       ACTION_FIFO_VOICEMAIL = '817'
-      ACTION_FIFO_LOGOUT = '819'
+      ACTION_QUEUER_LOGOUT = '819'
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
       ACTION_INTERCEPT = '84'
@@ -35,7 +37,7 @@ The destination matched.
           @debug.csr "number_domain #{number_domain}: #{error}"
           {}
 
-      get = (name) =>
+      get = (name,type) =>
 
         items = @session.number_domain_data[name]
 
@@ -48,15 +50,33 @@ The destination matched.
           return
 
         item = items[number]
-        item.name ?= "#{number}"
+        if item?
+          item.short_name ?= "#{type}-#{number}"
+          item.name ?= item.short_name
+          item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
         item
 
       route = (name,type) =>
-        item = get name
+        item = get name, type
         return unless item?
         @session[type] = item
         @direction type
         return
+
+      agent_tags = =>
+        tags = []
+        {skills,queues} = @session.number
+        if skills?
+          for skill in skills
+            tags.push "skill:#{skill}"
+        if queues?
+          for queue in queues
+            tags.push "queue:#{queue}"
+        tags
+
+This works only for centrex.
+
+      full_source = "#{@source}@#{@session.number_domain}"
 
       switch action
 
@@ -84,6 +104,7 @@ The destination matched.
             @direction 'intercepted' # Really `intercepting`, but oh well
           else
             yield @action 'hangup'
+            @direction 'failed'
           return
 
         when ACTION_EAVESDROP
@@ -107,6 +128,7 @@ The destination matched.
                 eavesdrop_whisper_bleg: true
             else
               yield @action 'hangup'
+              @direction 'failed'
               return
 
           yield @set
@@ -118,39 +140,66 @@ The destination matched.
           @direction 'eavesdropping'
           return
 
-        when ACTION_FIFO_LOGIN
-          @debug 'FIFO: log in'
-          fifo = get 'fifos'
-          return unless fifo?
+        when ACTION_QUEUER_LOGIN
+          @debug 'Queuer: log in'
+          fifo = get 'fifos', 'fifo'
           yield @action 'answer'
-          yield @fifo_add fifo, @source
-          yield @action 'playback', 'ivr/ivr-you_are_now_logged_in.wav'
+          yield @sleep 2000
+          yield @queuer_login full_source, fifo, agent_tags()
+          yield @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           yield @action 'hangup'
+          @direction 'completed'
           return
 
-        when ACTION_FIFO_LOGOUT
-          @debug 'FIFO: log out'
-          fifo = get 'fifos'
+        when ACTION_QUEUER_OFFHOOK
+          @debug 'Queuer: off-hook agent'
+          yield @action 'answer'
+          yield @sleep 2000
+          yield @set
+            hangup_after_bridge: false
+            park_after_bridge: true
+          fifo = get 'fifos', 'fifo'
+          yield @queuer_offhook full_source, @call, fifo, agent_tags()
+          @direction 'queuer-offhook'
+          return
+
+        when ACTION_QUEUER_LEAVE
+          @debug 'Queuer: leave queue'
+          fifo = get 'fifos', 'fifo'
           return unless fifo?
           yield @action 'answer'
-          yield @fifo_del fifo, @source
-          yield @action 'playback', 'ivr/ivr-you_are_now_logged_out.wav'
+          yield @sleep 2000
+          yield @queuer_leave full_source, fifo
+          yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
           yield @action 'hangup'
+          @direction 'completed'
+          return
+
+        when ACTION_QUEUER_LOGOUT
+          @debug 'Queuer: log out'
+          yield @action 'answer'
+          yield @sleep 2000
+          yield @queuer_logout full_source
+          yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
+          yield @action 'hangup'
+          @direction 'completed'
           return
 
         when ACTION_FIFO_VOICEMAIL
           @debug 'FIFO: voicemail'
-          fifo = get 'fifos'
-          unless fifo.user_database?
+          fifo = get 'fifos', 'fifo'
+          unless fifo?.user_database?
             yield @action 'hangup'
+            @direction 'failed'
             return
           @destination = 'inbox'
           @source = 'user-database'
           @session.voicemail_user_database = fifo.user_database
-          @session.voicemail_user_id = fifo.name
+          @session.voicemail_user_id = fifo.full_name
           @direction 'voicemail'
 
         else
           @debug 'Unknown action', action
           yield @action 'hangup'
+          @direction 'failed'
           return

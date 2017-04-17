@@ -35,9 +35,7 @@ FIFO handling
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 
-      fifo_name = @fifo_name fifo
-
-      @tag "fifo:#{fifo_name}"
+      @tag "fifo:#{fifo.full_name}"
 
 Ready to send, answer the call.
 
@@ -72,6 +70,37 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
 
       if @session.ccnq_from_e164?
         @source = "+#{@session.ccnq_from_e164}"
+
+      if fifo.tags?
+        for tag in fifo.tags
+          @user_tag tag
+
+      if fifo.required_skills?
+        for skill in fifo.required_skills
+          @tag "skill:#{skill}"
+
+      if typeof fifo.queue is 'string'
+        @tag "queue:#{fifo.queue}"
+
+      if fifo.priority?
+        @tag "priority:#{fifo.priority}"
+
+If the call-group should use the queuer, then do that.
+
+      if fifo.queue
+
+        {queuer} = @cfg
+        Call = @cfg.queuer_Call
+
+        call = new Call
+          id: @call.uuid
+          tags: @session.reference_data?.tags
+        yield call.set 'source', @source
+        yield queuer.queue_ingress_call call
+        # FIXME: play fifo_uri id, fifo.announce
+        return
+
+Otherwise use the hunt-group behavior.
 
       sofias = []
 
@@ -137,7 +166,7 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
       debug "FIFO returned with cause #{cause}"
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
-        debug "Successful call when routing FIFO #{fifo_name} through #{sofias.join ','}"
+        debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
         yield @action 'hangup'
         return
 
@@ -155,7 +184,7 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         debug 'Send to voicemail (user-database)'
         @destination = 'user-database'
         @session.voicemail_user_database = fifo.user_database
-        @session.voicemail_user_id = fifo_name
+        @session.voicemail_user_id = fifo.full_name
         @direction 'voicemail'
         return
 

@@ -5,7 +5,6 @@
       list = [
           'middleware/logger.coffee.md'
           'middleware/setup.coffee.md'
-          'middleware/setup-fifo.coffee.md'
           'middleware/cdr.coffee.md'
           'middleware/handled.coffee.md'
           'middleware/dtmf.coffee.md'
@@ -17,6 +16,7 @@
           'middleware/client/fifo.coffee.md'
           'middleware/client/ornaments.coffee.md'
           'middleware/client/menu.coffee.md'
+          'middleware/client/queuer.coffee.md'
           'middleware/client/egress/fifo.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/centrex-FR.coffee.md'

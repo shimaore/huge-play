@@ -132,12 +132,15 @@ Contrarily to established practices, our code uses lowercase country names.
 Eavesdrop registration
 ----------------------
 
-      eavesdrop_key = "outbound:#{@source}@#{@session.number_domain}"
+      key = "#{@source}@#{@session.number_domain}"
+      eavesdrop_key = "outbound:#{key}"
       @debug 'Set outbound eavesdrop', eavesdrop_key
+      @call.emit 'outbound', {key,id:@call.uuid}
       yield @redis.setAsync eavesdrop_key, @call.uuid
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem =>
         @debug 'Clear outbound eavesdrop', eavesdrop_key
+        @call.emit 'outbound-end', {key,id:@call.uuid}
         yield @redis.delAsync eavesdrop_key
 
       @debug 'Ready',

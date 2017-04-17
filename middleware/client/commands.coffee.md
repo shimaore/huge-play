@@ -249,6 +249,18 @@ start: '18:00', end: '08:00'
         @user_tag tag
         true
 
+      required_skill: (skill) ->
+        @tag "skill:#{skill}"
+        true
+
+      priority: (priority) ->
+        @tag "priority:#{priority}"
+        true
+
+      queue: (queue) ->
+        @tag "queue:#{queue}"
+        true
+
       has_tag: (tag) ->
         @has_tag tag
 
