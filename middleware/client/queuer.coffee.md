@@ -54,7 +54,9 @@
               "number:#{@key}"
             ]
             state: new_state
-            data: data
+
+          for own k, v of data
+            notification[k] ?= v
 
           cfg.statistics.emit 'queuer', notification
 
