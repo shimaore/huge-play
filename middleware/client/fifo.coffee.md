@@ -21,9 +21,7 @@ FIFO handling
       return unless @session.direction is 'fifo'
 
       fifo_uri = (id,name) =>
-        id = qs.escape id
-        name = qs.escape name
-        @prompt.uri "/prov/prov/#{id}/#{name}"
+        @prompt.uri 'prov', 'prov', id, name
 
       unless @session.fifo?
         debug 'Missing FIFO data'
@@ -95,6 +93,10 @@ If the call-group should use the queuer, then do that.
         call = new Call
           id: @call.uuid
           tags: @session.reference_data?.tags
+
+        if fifo.announce?
+          call.announce fifo_uri id, fifo.announce
+
         yield call.set_remote_number @source
         yield queuer.queue_ingress_call call
         # FIXME: play fifo_uri id, fifo.announce
