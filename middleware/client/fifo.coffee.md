@@ -95,7 +95,7 @@ If the call-group should use the queuer, then do that.
         call = new Call
           id: @call.uuid
           tags: @session.reference_data?.tags
-        yield call.set 'source', @source
+        yield call.set_remote_number @source
         yield queuer.queue_ingress_call call
         # FIXME: play fifo_uri id, fifo.announce
         return
