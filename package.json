@@ -42,23 +42,12 @@
     "chai-as-promised": "^6.0.0",
     "coffee-coverage": "^2.0.1",
     "coffee-script": "^1.12.5",
-    "cz-conventional-changelog": "^2.0.0",
-    "ghooks": "^2.0.0",
-    "mocha": "^3.3.0",
-    "validate-commit-msg": "^2.12.1"
+    "mocha": "^3.3.0"
   },
   "peerDependencies": {
     "useful-wind": "^7.4.0"
   },
   "optionalDependencies": {
     "tough-rate": "^18"
-  },
-  "config": {
-    "ghooks": {
-      "commit-msg": "validate-commit-msg"
-    },
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }
