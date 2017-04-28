@@ -2,6 +2,46 @@
     @name = "#{pkg.name}:middleware:client:conference"
     seem = require 'seem'
 
+Duplicated in tough-rate, black-metal, `sofia_string`, … (FIXME)
+
+    escape = (v) ->
+      "#{v}".replace ',', ','
+
+    make_params = (data) ->
+      ("#{k}=#{escape v}" for own k,v of data).join ','
+
+    @notify = ->
+
+Duplicated from middleware/client/queuer (FIXME)
+
+      profile = @cfg.session?.profile
+      host = @cfg.host
+      p = @cfg.profiles?[profile]
+      if p?
+        port = p.egress_sip_port ? p.sip_port+10000
+
+Note: if there are multiple profiles in use we will get in trouble at that point.
+
+        local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
+
+      @socket.on 'add-to-conference', seem ({name,endpoint,destination}) =>
+
+        is_remote = yield @cfg.is_remote name, local_server
+
+        endpoint_data = yield @prov.get "endpoint:#{endpoint}"
+
+        {account} = endpoint_data
+        calling_number = endpoint.asserted_number
+
+Call it out
+
+        params = make_params
+          origination_caller_id_number: calling_number
+          'sip_h_P-Charge-Info': account
+          'sip_h_X-CCNQ3-Endpoint': endpoint
+
+        yield @api "conference #{name} dial {#{params}}sofia/#{profile}/#{destination}@#{host}:#{port}"
+
     @include = seem ->
 
       return unless @session.direction is 'conf'
