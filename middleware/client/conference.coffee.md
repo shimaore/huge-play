@@ -1,6 +1,7 @@
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:conference"
     seem = require 'seem'
+    fs = require 'fs'
 
 Duplicated in tough-rate, black-metal, `sofia_string`, … (FIXME)
 
@@ -141,7 +142,17 @@ Really we should just barge on the channel if we need anything more complex than
           yield play_in_conference namefile
           .catch (error) =>
             @debug "error: #{error.stack ? error}"
-          # FIXME unlink namefile
+
+        @call.once 'cleanup_linger'
+        .then =>
+          yield play_in_conference 'tone_stream://%(125,0,600);%(125,0,450);%(125,0,300)'
+          yield play_in_conference namefile
+
+          # FIXME: This assumes we are co-located (inside the same container) as FreeSwitch
+          # which is stronger than our regular assumption (=we are co-located on the same VM
+          # but not in the same container).
+          # We should ask FreeSwitch to do the `unlink` here.
+          try fs.unlinkSync namefile
 
         setTimeout announce, 1000
 
