@@ -48,7 +48,7 @@ Call it out
 
     @server_pre = ->
 
-      @cfg.statistics.on 'start-conference', seem (name) =>
+      @cfg.statistics.on 'record-conference', seem (name) =>
 
         still_running = seem =>
           (yield @api "conference #{name} get count").match /^\d+/
@@ -198,5 +198,10 @@ Log into the conference
 
         @debug 'conference'
         @cfg.statistics.emit 'start-conference', conf_name
+
+* doc.number_domain.conferences[].record (boolean) If true the conference calls will be recorded.
+
+        if @session.conf.record
+          @cfg.statistics.emit 'record-conference', conf_name
         yield @action 'conference', "#{conf_name}++flags{}"
         return
