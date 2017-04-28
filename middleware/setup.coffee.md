@@ -50,6 +50,52 @@
         period = @cfg.period_of null
         id = "#{period}-#{uuid}"
 
+      @cfg.is_remote = seem (name,local_server) ->
+
+        unless @redis?
+          @debug.dev 'Missing redis'
+          return null
+
+Use redis to retrieve the server on which this call should be hosted.
+
+        server = local_server
+
+Set if not exists, [setnx](https://redis.io/commands/setnx)
+(Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
+
+        key = "server for #{name}"
+
+        first_time = yield @redis
+          .setnxAsync key, server
+          .catch (error) ->
+            @debug.ops "error #{error.stack ? error}"
+            null
+
+        if not first_time
+          server = yield @redis
+            .getAsync key
+            .catch (error) ->
+              @debug.ops "error #{error.stack ? error}"
+              null
+
+Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
+
+        @debug 'Checking for local handling', server, local_server
+
+        switch server
+
+          when null
+            @debug.ops 'Redis failed'
+            return null
+
+          when local_server
+            @debug 'Handling is local'
+            return false
+
+          else
+            @debug 'Handling is remote'
+            return server
+
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
 
@@ -309,52 +355,6 @@ Set the account so that if we redirect to an external number the egress module c
 
         has_user_tag: (tag) ->
           tag? and @has_tag "user-tag:#{tag}"
-
-        is_remote: seem (name,local_server) ->
-
-          unless @redis?
-            @debug.dev 'Missing redis'
-            return null
-
-Use redis to retrieve the server on which this call should be hosted.
-
-          server = local_server
-
-Set if not exists, [setnx](https://redis.io/commands/setnx)
-(Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
-
-          key = "server for #{name}"
-
-          first_time = yield @redis
-            .setnxAsync key, server
-            .catch (error) ->
-              @debug.ops "error #{error.stack ? error}"
-              null
-
-          if not first_time
-            server = yield @redis
-              .getAsync key
-              .catch (error) ->
-                @debug.ops "error #{error.stack ? error}"
-                null
-
-Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
-
-          @debug 'Checking for local handling', server, local_server
-
-          switch server
-
-            when null
-              @debug.ops 'Redis failed'
-              return null
-
-            when local_server
-              @debug 'Handling is local'
-              return false
-
-            else
-              @debug 'Handling is remote'
-              return server
 
       }
 
