@@ -10,7 +10,7 @@
 Transfer Workaround
 -------------------
 
-      is_remote = yield @is_remote @session.number_domain, [@session.local_server,@session.client_server].join '/'
+      is_remote = yield @cfg.is_remote @session.number_domain, [@session.local_server,@session.client_server].join '/'
 
       if is_remote
         server = is_remote.split('/')[0]

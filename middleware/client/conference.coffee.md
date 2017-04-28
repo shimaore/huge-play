@@ -16,7 +16,7 @@
 
       conf_name = @conf_name @session.conf
 
-      is_remote = yield @is_remote conf_name, @session.local_server
+      is_remote = yield @cfg.is_remote conf_name, @session.local_server
 
 Conference is remote
 --------------------
