@@ -43,6 +43,41 @@ Call it out
 
         yield @api "conference #{name} dial {#{params}}sofia/#{profile}/#{destination}@#{host}:#{port}"
 
+    seconds = 1000
+    minutes = 60*seconds
+
+    @server_pre = ->
+
+      @cfg.statistics.on 'start-conference', seem (name) =>
+
+        still_running = seem =>
+          (yield @api "conference #{name} get count").match /^\d+/
+
+        @debug 'start-conference', name
+        recording = yield @api "conference #{name} chkrecord"
+
+Do not start a new recording if one is already active.
+
+        return unless recording.match /is not being recorded/
+
+Get a URL for recording
+
+        return unless @cfg.recording_uri?
+
+        uri = yield @cfg.recording_uri name
+        yield @api "conference #{name} start #{uri}"
+        last_uri = uri
+
+        while yield still_running()
+          yield sleep 29*minutes
+          uri = yield @cfg.recording_uri name
+          yield @api "conference #{name} start #{uri}"
+          yield sleep  1*minutes
+          yield @api "conference #{name} stop #{last_uri}"
+          last_uri = uri
+
+        return
+
     @include = seem ->
 
       return unless @session.direction is 'conf'
@@ -162,5 +197,6 @@ Really we should just barge on the channel if we need anything more complex than
 Log into the conference
 
         @debug 'conference'
+        @cfg.statistics.emit 'start-conference', conf_name
         yield @action 'conference', "#{conf_name}++flags{}"
         return

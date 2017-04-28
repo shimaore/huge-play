@@ -96,6 +96,41 @@ Check whether handling is local (assuming FreeSwitch is co-hosted, which is our 
             @debug 'Handling is remote'
             return server
 
+These methods parallel the ones in black-metal/api.
+Eventually the two should be merged.
+
+Create a new socket client
+
+      @cfg._client = _client = =>
+        new Promise (resolve) =>
+          try
+            client = FS.client ->
+              resolve this
+            client.connect (@cfg.socket_port ? 5722), '127.0.0.1'
+          catch error
+            @debug '_client: error', error
+            resolve null
+          return
+
+Create a new socket client bound to a given UUID
+
+      @cfg.uuid_client = seem (uuid) ->
+        client = yield _client()
+        yield client.send "myevents #{uuid} json"
+        yield client.event_json 'ALL'
+        yield client.linger()
+        # yield client.auto_cleanup() # Already done by esl
+        client
+
+Use a default client for generic / shared APIs
+
+      default_client = yield _client()
+
+      @cfg.api = (cmd) ->
+        default_client.api cmd
+
+      null
+
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
 
