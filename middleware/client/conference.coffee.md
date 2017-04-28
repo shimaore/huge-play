@@ -105,6 +105,9 @@ Really we should just barge on the channel if we need anything more complex than
 
         setTimeout announce, 1000
 
+        yield @set
+          conference_max_members: @session.conf.max_members ? null
+
 Log into the conference
 
         @debug 'conference'
