@@ -3,6 +3,10 @@
     seem = require 'seem'
     fs = require 'fs'
 
+    sleep = (timeout) ->
+      new Promise (resolve) ->
+        setTimeout resolve, timeout
+
 Duplicated in tough-rate, black-metal, `sofia_string`, … (FIXME)
 
     escape = (v) ->
