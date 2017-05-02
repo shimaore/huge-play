@@ -94,8 +94,22 @@ If the call-group should use the queuer, then do that.
           id: @call.uuid
           tags: @session.reference_data?.tags
 
+Announcements while in-queue
+
         if fifo.announce?
-          call.announce fifo_uri id, fifo.announce
+          uri = fifo_uri id, fifo.announce
+
+Option 1: the advantage of this option is that we can do whatever we want.
+Note that this is executed async wrt activating the queuer.
+
+          do seem =>
+            until yield call.presenting()
+              yield call.announce uri
+            return
+
+Option 2: let FreeSwitch handle it, but we have less flexibility.
+
+          # @call.execute_uuid null, 'playback', uri, -1
 
         yield call.set_remote_number @source
         yield queuer.queue_ingress_call call
