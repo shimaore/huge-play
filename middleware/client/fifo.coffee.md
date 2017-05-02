@@ -103,8 +103,8 @@ Option 1: the advantage of this option is that we can do whatever we want.
 Note that this is executed async wrt activating the queuer.
 
           do seem =>
-            until yield call.presenting()
-              yield call.announce uri
+            until @call.closed or yield call.presenting()
+              yield @action 'playback', uri
             return
 
 Option 2: let FreeSwitch handle it, but we have less flexibility.
