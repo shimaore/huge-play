@@ -26,6 +26,7 @@ Note: if there are multiple profiles in use we will get in trouble at that point
         local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
 
       @socket.on 'add-to-conference', seem ({name,endpoint,destination}) =>
+        @debug 'add-to-conference', name, endpoint, destination
 
         is_remote = yield @cfg.is_remote name, local_server
 
@@ -41,7 +42,7 @@ Call it out
           'sip_h_P-Charge-Info': account
           'sip_h_X-CCNQ3-Endpoint': endpoint
 
-        yield @api "conference #{name} dial {#{params}}sofia/#{profile}/#{destination}@#{host}:#{port}"
+        yield @cfg.api "conference #{name} dial {#{params}}sofia/#{profile}/#{destination}@#{host}:#{port}"
 
     seconds = 1000
     minutes = 60*seconds
@@ -51,29 +52,36 @@ Call it out
       @cfg.statistics.on 'record-conference', seem (name) =>
 
         still_running = seem =>
-          (yield @api "conference #{name} get count").match /^\d+/
+          (yield @cfg.api "conference #{name} get count").match /^\d+/
 
-        @debug 'start-conference', name
-        recording = yield @api "conference #{name} chkrecord"
+        @debug 'record-conference', name
+        recording = yield @cfg.api "conference #{name} chkrecord"
 
 Do not start a new recording if one is already active.
 
-        return unless recording.match /is not being recorded/
+        @debug 'record-conference: recording', name, recording
+        unless recording.body?.match /is not being recorded/
+          @debug 'Already recording'
+          return
 
 Get a URL for recording
 
-        return unless @cfg.recording_uri?
+        unless @cfg.recording_uri?
+          @debug.dev 'Missing recording_uri', name
+          return
 
         uri = yield @cfg.recording_uri name
-        yield @api "conference #{name} start #{uri}"
+        yield @cfg.api "conference #{name} start #{uri}"
+        yield @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
         last_uri = uri
 
         while yield still_running()
           yield sleep 29*minutes
           uri = yield @cfg.recording_uri name
-          yield @api "conference #{name} start #{uri}"
+          yield @cfg.api "conference #{name} start #{uri}"
+          yield @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
           yield sleep  1*minutes
-          yield @api "conference #{name} stop #{last_uri}"
+          yield @cfg.api "conference #{name} stop #{last_uri}"
           last_uri = uri
 
         return
@@ -202,6 +210,9 @@ Log into the conference
 * doc.number_domain.conferences[].record (boolean) If true the conference calls will be recorded.
 
         if @session.conf.record
-          @cfg.statistics.emit 'record-conference', conf_name
+          start_recording = =>
+            @cfg.statistics.emit 'record-conference', conf_name
+          setTimeout start_recording, 1000
+
         yield @action 'conference', "#{conf_name}++flags{}"
         return

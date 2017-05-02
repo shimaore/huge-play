@@ -6,6 +6,7 @@
     uuidV4 = require 'uuid/v4'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
+    FS = require 'esl'
 
     Redis = require 'redis'
     Bluebird = require 'bluebird'
@@ -106,7 +107,7 @@ Create a new socket client
           try
             client = FS.client ->
               resolve this
-            client.connect (@cfg.socket_port ? 5722), '127.0.0.1'
+            client.keepConnected (@cfg.socket_port ? 5722), '127.0.0.1'
           catch error
             @debug '_client: error', error
             resolve null
@@ -124,12 +125,13 @@ Create a new socket client bound to a given UUID
 
 Use a default client for generic / shared APIs
 
-      default_client = yield _client()
+      default_client = null
 
-      @cfg.api = (cmd) ->
+      @cfg.api = seem (cmd) ->
+        default_client ?= yield _client()
         default_client.api cmd
 
-      null
+      return
 
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
@@ -156,6 +158,8 @@ Standard events: `add`.
             host: cfg.host
             key: data.key
             value: data.value.toJSON()
+
+      return
 
     @include = (ctx) ->
 
