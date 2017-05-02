@@ -129,7 +129,8 @@ Use a default client for generic / shared APIs
 
       @cfg.api = seem (cmd) ->
         default_client ?= yield _client()
-        default_client.api cmd
+        res = yield default_client.api cmd
+        res?.body ? null
 
       return
 

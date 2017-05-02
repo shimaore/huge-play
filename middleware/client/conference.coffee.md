@@ -52,7 +52,7 @@ Call it out
       @cfg.statistics.on 'record-conference', seem (name) =>
 
         still_running = seem =>
-          (yield @cfg.api "conference #{name} get count").match /^\d+/
+          (yield @cfg.api "conference #{name} get count")?.match /^\d+/
 
         @debug 'record-conference', name
         recording = yield @cfg.api "conference #{name} chkrecord"
@@ -60,8 +60,8 @@ Call it out
 Do not start a new recording if one is already active.
 
         @debug 'record-conference: recording', name, recording
-        unless recording.body?.match /is not being recorded/
-          @debug 'Already recording'
+        unless recording?.match /is not being recorded/
+          @debug 'Already recording or not ready'
           return
 
 Get a URL for recording
