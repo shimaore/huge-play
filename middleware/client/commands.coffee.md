@@ -87,7 +87,7 @@ Commands
 
 FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
 
-    ingress = [
+    ingress_modules = [
       require './ingress/post'
     ]
 
@@ -114,11 +114,11 @@ These actions are terminal for the statement.
       send: seem (destination) ->
         debug 'send'
         @destination = destination
-        for m in ingress
+        for m in ingress_modules
           try
             yield m.include.call this
           catch error
-            @debug "#{m.name} in menu_send: #{error.stack ? error}"
+            @debug "#{m.name} in send: #{error.stack ? error}"
         'over'
 
 `menu_route`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
@@ -129,7 +129,7 @@ These actions are terminal for the statement.
         yield @menu.expect()
         debug 'menu_send', @menu.value
         @destination = @menu.value
-        for m in ingress
+        for m in ingress_modules
           try
             yield m.include.call this
           catch error
