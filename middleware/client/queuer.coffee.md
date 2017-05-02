@@ -145,6 +145,7 @@ See `in_domain` in black-metal/tagged.
       @cfg.queuer_Agent = HugePlayAgent
       @cfg.queuer_Call = HugePlayCall
       @cfg.queuer = new Queuer @cfg
+      return
 
     @include = ->
 

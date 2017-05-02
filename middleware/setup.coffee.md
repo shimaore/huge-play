@@ -50,9 +50,9 @@
         period = @cfg.period_of null
         id = "#{period}-#{uuid}"
 
-      @cfg.is_remote = seem (name,local_server) ->
+      @cfg.is_remote = seem (name,local_server) =>
 
-        unless @redis?
+        unless redis?
           @debug.dev 'Missing redis'
           return null
 
@@ -65,14 +65,14 @@ Set if not exists, [setnx](https://redis.io/commands/setnx)
 
         key = "server for #{name}"
 
-        first_time = yield @redis
+        first_time = yield redis
           .setnxAsync key, server
           .catch (error) ->
             @debug.ops "error #{error.stack ? error}"
             null
 
         if not first_time
-          server = yield @redis
+          server = yield redis
             .getAsync key
             .catch (error) ->
               @debug.ops "error #{error.stack ? error}"
