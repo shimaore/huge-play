@@ -75,17 +75,17 @@ Get a URL for recording
           return
 
         uri = yield @cfg.recording_uri name
-        yield @cfg.api "conference #{name} start #{uri}"
+        yield @cfg.api "conference #{name} recording start #{uri}"
         yield @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
         last_uri = uri
 
         while yield still_running()
           yield sleep 29*minutes
           uri = yield @cfg.recording_uri name
-          yield @cfg.api "conference #{name} start #{uri}"
+          yield @cfg.api "conference #{name} recording start #{uri}"
           yield @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
           yield sleep  1*minutes
-          yield @cfg.api "conference #{name} stop #{last_uri}"
+          yield @cfg.api "conference #{name} recording stop #{last_uri}"
           last_uri = uri
 
         return
