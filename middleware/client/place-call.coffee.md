@@ -236,6 +236,12 @@ Session Reference Data
         data.host = host
         data.account = account
         data.state = 'connecting'
+        data.leg_options =
+          group_confirm_key: '1' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
+          group_confirm_file: 'phrase:conference:confirm' # defaults to `silence`
+          group_confirm_error_file: null
+          group_confirm_read_timeout: 15000 # defaults to 5000
+          group_confirm_cancel_timeout: false
 
         data = save_ref data, call
 

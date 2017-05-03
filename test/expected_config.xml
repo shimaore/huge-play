@@ -3520,6 +3520,14 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
+<input pattern="^confirm$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -3536,6 +3544,14 @@
 <match>
 <action function="play-file" data="file_string://$1"/>
 <action function="play-file" data="conference/conf-has-joined.wav"/>
+</match>
+</input>
+<input pattern="^confirm$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
 </macro>
@@ -4618,6 +4634,14 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
+<input pattern="^confirm$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -4634,6 +4658,14 @@
 <match>
 <action function="play-file" data="file_string://$1"/>
 <action function="play-file" data="conference/conf-has-joined.wav"/>
+</match>
+</input>
+<input pattern="^confirm$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
 </macro>
