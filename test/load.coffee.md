@@ -17,6 +17,7 @@
           'middleware/client/ornaments.coffee.md'
           'middleware/client/menu.coffee.md'
           'middleware/client/queuer.coffee.md'
+          'middleware/client/place-call.coffee.md'
           'middleware/client/egress/fifo.coffee.md'
           'middleware/client/egress/post.coffee.md'
           'middleware/client/egress/centrex-FR.coffee.md'
@@ -54,14 +55,26 @@
         L = require '../middleware/logger.coffee.md'
         S = require '../middleware/setup.coffee.md'
         it "should load #{m}", seem ->
-          ctx =
-            cfg:
-              prefix_admin: ''
+          cfg =
+            prefix_admin: ''
+          ctx = {cfg}
 
           M = require "../#{m}"
           yield L.server_pre.call ctx, ctx
           yield S.server_pre.call ctx, ctx
           yield M.server_pre?.call ctx, ctx
+
+          cfg.statistics =
+            on: ->
+            emit: ->
+            add: ->
+          socket =
+            on: ->
+            emit: ->
+          ctx = {cfg,socket}
+          yield L.notify.call ctx, ctx
+          yield S.notify.call ctx, ctx
+          yield M.notify?.call ctx, ctx
 
           call_ctx =
             cfg: ctx.cfg # useful-wind/router
