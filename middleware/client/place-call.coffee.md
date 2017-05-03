@@ -19,7 +19,7 @@ This module also triggers calls from within a conference.
 
     @handler = handler = (cfg,ev) ->
 
-      save_ref = (data,call) ->
+      save_ref = seem (data,call) ->
         data = yield cfg.update_session_reference_data data, call
         ev.emit 'reference', data
         data
@@ -107,7 +107,7 @@ Session Reference Data
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
 
-        data = save_ref data, call
+        data = yield save_ref data, call
 
         params = make_params
 
@@ -171,7 +171,7 @@ The `originate` command will return when the call is answered by the callee (or 
         else
           data.tags.push 'caller-failed'
 
-        data = save_ref data, call
+        data = yield save_ref data, call
 
         debug 'Session state:', data.tags
 
@@ -236,14 +236,14 @@ Session Reference Data
         data.host = host
         data.account = account
         data.state = 'connecting'
-        data.leg_options =
+        data.call_options =
           group_confirm_key: '1' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
           group_confirm_file: 'phrase:conference:confirm' # defaults to `silence`
           group_confirm_error_file: null
           group_confirm_read_timeout: 15000 # defaults to 5000
           group_confirm_cancel_timeout: false
 
-        data = save_ref data, call
+        data = yield save_ref data, call
 
 Call it out
 
@@ -263,7 +263,7 @@ And `huge-play` requires these for routing an egress call.
           'sip_h_X-CCNQ3-Endpoint': endpoint
 
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
-        cmd = "conference #{name} dial #{sofia}"
+        cmd = "originate #{sofia} &conference(#{name}++flags{})"
 
         debug "Calling #{cmd}"
         res = yield cfg.api(cmd).catch (error) ->
@@ -273,7 +273,7 @@ And `huge-play` requires these for routing an egress call.
 
         debug "Conference returned", res
 
-        data = save_ref data, call
+        data = yield save_ref data, call
 
     @notify = ({cfg,socket}) ->
 

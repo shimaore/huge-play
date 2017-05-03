@@ -97,6 +97,8 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
 
       if @session.reference_data.leg_options?
         @session.leg_options = @session.reference_data.leg_options
+      if @session.reference_data.call_options?
+        @session.call_options = @session.reference_data.call_options
 
 SIP Profile
 -----------
