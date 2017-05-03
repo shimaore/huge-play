@@ -215,6 +215,10 @@ Try to get the asserted number, assuming Centrex.
         number_data = yield cfg.prov.get("number:#{endpoint}").catch -> {}
         calling_number = number_data.asserted_number ? endpoint.split('@')[0]
 
+        {language} = data
+        language ?= number_data.language
+        language ?= endpoint_data.language
+
 Duplicated from exultant-song (FIXME)
 
         debug 'call-to-conference: Placing call'
@@ -239,9 +243,10 @@ Session Reference Data
         data.call_options =
           group_confirm_key: '1' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
           group_confirm_file: 'phrase:conference:confirm' # defaults to `silence`
-          group_confirm_error_file: null
+          group_confirm_error_file: 'phrase:conference:confirm'
           group_confirm_read_timeout: 15000 # defaults to 5000
           group_confirm_cancel_timeout: false
+          language: language
 
         data = yield save_ref data, call
 
