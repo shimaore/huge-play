@@ -1396,11 +1396,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
 </macro>
@@ -1421,11 +1421,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
 </macro>
@@ -2436,11 +2436,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
 </macro>
@@ -2461,11 +2461,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
 </macro>
@@ -3548,11 +3548,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="more/please-type.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
@@ -3574,11 +3574,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="more/please-type.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
@@ -4662,11 +4662,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="more/please-type.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
@@ -4688,11 +4688,11 @@
 <action function="play-file" data="conference/conf-has-joined.wav"/>
 </match>
 </input>
-<input pattern="^confirm$" break_on_match="true">
+<input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="more/please-type.wav"/>
-<action function="play-file" data="digits/1.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
