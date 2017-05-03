@@ -49,6 +49,11 @@ See huge-play/conf/freeswitch
         debug 'Missing cfg.host or cfg.profiles[profile], not starting.', {profile}
         return
 
+Note: if there are multiple profiles in use we will get in trouble at that point. (FIXME)
+
+      local_server = "#{cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
+      debug 'Using local-server', local_server
+
 Place Call
 ----------
 
@@ -80,6 +85,12 @@ Load additional data from the endpoint.
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
         {account} = endpoint_data
+
+Ensure only one FreeSwitch server processes those.
+
+        domain = endpoint_data.number_domain ? 'default.local'
+        is_remote = yield cfg.is_remote(domain, local_server).catch -> true
+        return if is_remote
 
 FIXME The data sender must do resolution of the endpoint_via and associated translations????
 ANSWER: Yes. And store the result in `caller`.
@@ -183,11 +194,6 @@ Parameters:
 - `endpoint`
 - `name`
 - `destination`
-
-Note: if there are multiple profiles in use we will get in trouble at that point. (FIXME)
-
-      local_server = "#{cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
-      debug 'Using local-server', local_server
 
       ev.on 'call-to-conference', seem (data) =>
         {endpoint,name,destination,_id} = data
