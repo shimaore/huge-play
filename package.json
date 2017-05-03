@@ -23,7 +23,7 @@
     "bluebird": "^3.5.0",
     "bumpy-lawyer": "^2.5.0",
     "cuddly": "^1.1.5",
-    "date-holidays": "^0.1.9",
+    "date-holidays": "^0.1.10",
     "debug": "^2.6.6",
     "esl": "^5.3.0",
     "flat-ornament": "^2.0.0",
