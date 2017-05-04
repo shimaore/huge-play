@@ -11,10 +11,13 @@
         @debug 'No number domain'
         return
 
-      return unless m = @destination.match /^(81\d|82|83|84|88)(\d+)$/
+      return unless m = @destination.match /^(81\d|82|83|84|88)(\d*)$/
 
       action = m[1]
-      number = parseInt m[2], 10
+      if m[2] is ''
+        number = null
+      else
+        number = parseInt m[2], 10
 
 The destination matched.
 
@@ -45,7 +48,7 @@ The destination matched.
           @debug.csr "Number domain has no #{name}."
           return
 
-        unless items.hasOwnProperty number
+        unless number? and items.hasOwnProperty number
           @debug.dev "No property #{number} in #{name} of #{@session.number_domain}"
           return
 
@@ -58,10 +61,10 @@ The destination matched.
 
       route = (name,type) =>
         item = get name, type
-        return unless item?
+        return false unless item?
         @session[type] = item
         @direction type
-        return
+        true
 
       agent_tags = =>
         tags = []
@@ -78,36 +81,46 @@ This works only for centrex.
 
       full_source = "#{@source}@#{@session.number_domain}"
 
+      failed = =>
+        @debug 'Failed'
+        @direction 'failed'
+        @action 'hangup' # keep last
+
       switch action
 
         when ACTION_CONF_ROUTE
           @debug 'Conf: call'
-          route 'conferences', 'conf'
+          unless route 'conferences', 'conf'
+            return failed()
           return
 
         when ACTION_MENU_ROUTE
           @debug 'Menu: call'
-          route 'menus', 'menu'
+          unless route 'menus', 'menu'
+            return failed()
           return
 
         when ACTION_FIFO_ROUTE
           @debug 'FIFO: call'
-          route 'fifos', 'fifo'
+          unless route 'fifos', 'fifo'
+            return failed()
           return
 
         when ACTION_INTERCEPT
+          return failed() unless number?
+
           uuid = yield @redis.getAsync "inbound_call:#{number}@#{@session.number_domain}"
           @debug 'Intercept', uuid
-          if uuid?
-            yield @set intercept_unbridged_only: true
-            yield @action 'intercept', uuid
-            @direction 'intercepted' # Really `intercepting`, but oh well
-          else
-            yield @action 'hangup'
-            @direction 'failed'
+          return failed() unless uuid?
+
+          yield @set intercept_unbridged_only: true
+          yield @action 'intercept', uuid
+          @direction 'intercepted' # Really `intercepting`, but oh well
           return
 
         when ACTION_EAVESDROP
+          return failed() unless number?
+
           inbound_uuid = yield @redis.getAsync "inbound:#{number}@#{@session.number_domain}"
           outbound_uuid = yield @redis.getAsync "outbound:#{number}@#{@session.number_domain}"
           @debug 'Eavesdrop', inbound_uuid, outbound_uuid
@@ -127,9 +140,7 @@ This works only for centrex.
                 eavesdrop_whisper_aleg: false
                 eavesdrop_whisper_bleg: true
             else
-              yield @action 'hangup'
-              @direction 'failed'
-              return
+              return failed()
 
           yield @set
             eavesdrop_indicate_failed: 'tone_stream://%(125,0,300)'
@@ -153,12 +164,12 @@ This works only for centrex.
 
         when ACTION_QUEUER_OFFHOOK
           @debug 'Queuer: off-hook agent'
+          fifo = get 'fifos', 'fifo'
           yield @action 'answer'
           yield @sleep 2000
           yield @set
             hangup_after_bridge: false
             park_after_bridge: true
-          fifo = get 'fifos', 'fifo'
           yield @queuer_offhook full_source, @call, fifo, agent_tags()
           @direction 'queuer-offhook'
           return
@@ -166,7 +177,7 @@ This works only for centrex.
         when ACTION_QUEUER_LEAVE
           @debug 'Queuer: leave queue'
           fifo = get 'fifos', 'fifo'
-          return unless fifo?
+          return failed() unless fifo?
           yield @action 'answer'
           yield @sleep 2000
           yield @queuer_leave full_source, fifo
@@ -177,9 +188,10 @@ This works only for centrex.
 
         when ACTION_QUEUER_LOGOUT
           @debug 'Queuer: log out'
+          fifo = get 'fifos', 'fifo'
           yield @action 'answer'
           yield @sleep 2000
-          yield @queuer_logout full_source
+          yield @queuer_logout full_source, fifo
           yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
           yield @action 'hangup'
           @direction 'completed'
@@ -188,10 +200,7 @@ This works only for centrex.
         when ACTION_FIFO_VOICEMAIL
           @debug 'FIFO: voicemail'
           fifo = get 'fifos', 'fifo'
-          unless fifo?.user_database?
-            yield @action 'hangup'
-            @direction 'failed'
-            return
+          return failed() unless fifo?.user_database?
           @destination = 'inbox'
           @source = 'user-database'
           @session.voicemail_user_database = fifo.user_database
@@ -200,6 +209,4 @@ This works only for centrex.
 
         else
           @debug 'Unknown action', action
-          yield @action 'hangup'
-          @direction 'failed'
-          return
+          return failed()
