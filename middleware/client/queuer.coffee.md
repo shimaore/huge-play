@@ -189,6 +189,7 @@ On-hook agent
         debug 'queuer_logout', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        yield agent.clear_tags()
         yield agent.transition 'logout'
         agent
 
