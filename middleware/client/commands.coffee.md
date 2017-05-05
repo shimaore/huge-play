@@ -106,13 +106,14 @@ These actions are terminal for the statement.
         debug 'accept'
         'over'
 
-      hangup: ->
+      hangup: seem ->
         yield @action 'hangup'
         @direction 'hangup'
         'over'
 
       send: seem (destination) ->
         debug 'send'
+        @session.direction = 'ingress'
         @destination = destination
         for m in ingress_modules
           try
