@@ -21,7 +21,8 @@ Note: since we might also come here because we are routing an internal call, ski
       yield @export sip_invite_domain: @session.number_domain
 
       if @session.centrex_internal
-        yield @export alert_info: 'info=centrex-internal'
+        # yield @export alert_info: 'info=centrex-internal'
+        yield @export alert_info: '<http://127.0.0.1/Bellcore-dr2>'
       else
         if @session.ccnq_from_e164?
           @source = "+#{@session.ccnq_from_e164}"
