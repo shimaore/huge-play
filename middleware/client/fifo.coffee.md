@@ -99,7 +99,6 @@ Announcements while in-queue
         if fifo.announce?
           uri = fifo_uri id, fifo.announce
 
-Option 1: the advantage of this option is that we can do whatever we want.
 Note that this is executed async wrt activating the queuer.
 
           do seem =>
@@ -107,13 +106,9 @@ Note that this is executed async wrt activating the queuer.
               yield @action 'playback', uri
             return
 
-Option 2: let FreeSwitch handle it, but we have less flexibility.
-
-          # @call.execute_uuid null, 'playback', uri, -1
-
         yield call.set_remote_number @source
         yield queuer.queue_ingress_call call
-        # FIXME: play fifo_uri id, fifo.announce
+
         return
 
 Otherwise use the hunt-group behavior.
