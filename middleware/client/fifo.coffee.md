@@ -11,6 +11,12 @@ TBD: We'll be using some shared state (like Redis) with handlers on ingress/egre
       Handles routing to a given ~~FIFO queue~~ACD~~hunt-group.
     '''
 
+    sleep = (timeout) ->
+      new Promise (resolve) ->
+        setTimeout resolve, timeout
+
+    second = 1000
+
     @include = seem ->
 
 FIFO handling
@@ -108,6 +114,33 @@ Note that this is executed async wrt activating the queuer.
 
         yield call.set_remote_number @source
         yield queuer.queue_ingress_call call
+
+If the call is not processed (no agents are ready), attemp overflow.
+
+        call_tags = yield call.tags()
+
+        attempt_overflow = seem (suffix) ->
+          if yield queuer.ingress_pool.has call
+            yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
+            yield queuer.reevaluate_idle_agents()
+            true
+          else
+            false
+
+Attempt overflow immediately
+
+        unless attempt_overflow 'overflow'
+          return
+
+Attempt overflow after a delay
+
+        yield sleep 30*second
+        unless attempt_overflow 'overflow:30s'
+          return
+
+        yield sleep 30*second
+        unless attempt_overflow 'overflow:60s'
+          return
 
         return
 
