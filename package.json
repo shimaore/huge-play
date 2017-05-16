@@ -19,7 +19,7 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^1.4.0",
+    "black-metal": "^1.4.1",
     "bluebird": "^3.5.0",
     "bumpy-lawyer": "^2.5.2",
     "date-holidays": "^0.1.10",
@@ -27,14 +27,14 @@
     "flat-ornament": "^2.0.0",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
-    "nimble-direction": "^6.1.1",
+    "nimble-direction": "^6.1.2",
     "pouchdb": "6.1.1",
     "redis": "^2.7.1",
     "request": "^2.81.0",
     "seem": "^2.0.0",
     "shimaore-pouchdb": "6.1.1",
     "superagent": "^3.5.2",
-    "tangible": "^1.0.1",
+    "tangible": "^1.2.2",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
@@ -42,10 +42,10 @@
     "chai-as-promised": "^6.0.0",
     "coffee-coverage": "^2.0.1",
     "coffee-script": "^1.12.5",
-    "mocha": "^3.3.0"
+    "mocha": "^3.4.1"
   },
   "peerDependencies": {
-    "useful-wind": "^7.4.0"
+    "useful-wind": "^7.5.2"
   },
   "optionalDependencies": {
     "tough-rate": "^18.4"
