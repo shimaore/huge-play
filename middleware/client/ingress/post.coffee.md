@@ -2,7 +2,7 @@
     pkg = require '../../../package.json'
     assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     url = require 'url'
     tones = require '../tones'
 
@@ -42,7 +42,7 @@ Retrieve number data.
       dst_number = yield @validate_local_number()
 
       unless dst_number?
-        @debug 'Number not found'
+        debug 'Number not found'
         return
 
 Call rejection: reject anonymous caller

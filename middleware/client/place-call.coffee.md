@@ -9,7 +9,7 @@ This module also triggers calls from within a conference.
     seem = require 'seem'
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:place-call"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     escape = (v) ->
       "#{v}".replace ',', ','

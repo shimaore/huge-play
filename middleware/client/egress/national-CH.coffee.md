@@ -1,6 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:national-CH"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     translate_source = (source) ->
       switch

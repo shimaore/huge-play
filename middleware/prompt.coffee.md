@@ -1,6 +1,6 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:prompt"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     request = require 'request'
     qs = require 'querystring'

@@ -3,7 +3,7 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:pre"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     @include = seem ->
       return unless @session.direction is 'ingress'
 

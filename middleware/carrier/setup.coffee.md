@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     uuidV4 = require 'uuid/v4'
 

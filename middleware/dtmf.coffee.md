@@ -1,6 +1,6 @@
     @name = 'huge-play:middleware:dtmf'
     seem = require 'seem'
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     @include = ->
 

@@ -1,6 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:privacy-CH"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     @include = ->
 
       return unless @session.direction is 'egress'

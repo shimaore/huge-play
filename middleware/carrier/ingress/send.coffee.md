@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:carrier:ingress:send"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
 Send a call out using carrier-side rules.
 

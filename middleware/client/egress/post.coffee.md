@@ -3,7 +3,7 @@
 
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:post"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     assert = require 'assert'
     tones = require '../tones'
 

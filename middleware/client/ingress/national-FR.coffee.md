@@ -1,6 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:national-FR"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     @include = ->
 
       return unless @session.direction is 'ingress'

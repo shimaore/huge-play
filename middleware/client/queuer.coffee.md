@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:queuer'
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     seem = require 'seem'
     pkg = name:'huge-play'
 

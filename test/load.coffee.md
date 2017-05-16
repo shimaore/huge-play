@@ -3,7 +3,6 @@
       require '../middleware/client/commands'
     describe 'Modules', ->
       list = [
-          'middleware/logger.coffee.md'
           'middleware/setup.coffee.md'
           'middleware/cdr.coffee.md'
           'middleware/handled.coffee.md'
@@ -52,7 +51,7 @@
         ]
 
       unit = (m) ->
-        L = require '../middleware/logger.coffee.md'
+        L = require 'tangible'
         S = require '../middleware/setup.coffee.md'
         it "should load #{m}", seem ->
           cfg =

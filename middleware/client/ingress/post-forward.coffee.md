@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:post-forward"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
 Call-Handler
 ============

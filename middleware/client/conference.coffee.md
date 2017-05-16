@@ -1,6 +1,6 @@
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:conference"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     seem = require 'seem'
     fs = require 'fs'
 

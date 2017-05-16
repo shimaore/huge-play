@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:centrex-CH"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     tones = require '../tones'
 
     default_internal_ringback = tones.ch.ringback

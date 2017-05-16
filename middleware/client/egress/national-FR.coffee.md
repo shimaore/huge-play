@@ -16,7 +16,7 @@ See http://www.arcep.fr/index.php?id=interactivenumeros
 
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:national-FR"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
 
     translate_source = (source) ->
       switch

@@ -1,7 +1,7 @@
     pkg = require '../../../package.json'
     seem = require 'seem'
     @name = "#{pkg.name}:middleware:client:forward:basic"
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     {hostname} = require 'os'
 
     @include = seem ->

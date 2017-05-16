@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:client:commands'
-    debug = (require 'debug') @name
+    debug = (require 'tangible') @name
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
     request = require 'superagent'
@@ -21,7 +21,7 @@ List ID for an ingress call.
       pid = @req.header 'P-Asserted-Identity'
       interesting_number = if pid? then url.parse(pid).auth else @source
       list_id = "list:#{list}@#{interesting_number}"
-      @debug 'local_ingress', list, interesting_number
+      debug 'local_ingress', list, interesting_number
       list_id
 
 List ID for an egress call.
@@ -31,7 +31,7 @@ List ID for an egress call.
       list = "#{caller}@#{@session.number_domain}"
       interesting_number = @destination
       list_id = "list:#{list}@#{interesting_number}"
-      @debug 'local_egress', list, interesting_number
+      debug 'local_egress', list, interesting_number
       list_id
 
 Global ingress
@@ -119,7 +119,7 @@ These actions are terminal for the statement.
           try
             yield m.include.call this
           catch error
-            @debug "#{m.name} in send: #{error.stack ? error}"
+            debug "#{m.name} in send: #{error.stack ? error}"
         'over'
 
 `menu_route`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
@@ -134,7 +134,7 @@ These actions are terminal for the statement.
           try
             yield m.include.call this
           catch error
-            @debug "#{m.name} in menu_send: #{error.stack ? error}"
+            debug "#{m.name} in menu_send: #{error.stack ? error}"
         'over'
 
       reject: seem ->
@@ -408,21 +408,21 @@ Copying the logic from middleware/client/ingress/fifo
         type = 'menu'
         items = @session.number_domain_data.menus
         unless items?
-          @debug.csr "Number domain has no data for #{type}."
+          debug.csr "Number domain has no data for #{type}."
           return
         unless items.hasOwnProperty number
-          @debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
+          debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
           return
         item = items[number]
         @tag "#{type} number #{number}"
         unless item?
-          @debug.csr "Number domain as no data #{number} for #{type}."
+          debug.csr "Number domain as no data #{number} for #{type}."
           return
         item.name ?= "#{number}"
         @session[type] = item
         @direction type
 
-        @debug "Using #{type} #{number}", item
+        debug "Using #{type} #{number}", item
 
         yield run.call this, item, @ornaments_commands
         'over'
