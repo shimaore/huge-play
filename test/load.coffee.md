@@ -51,7 +51,7 @@
         ]
 
       unit = (m) ->
-        L = require 'tangible'
+        L = require 'tangible/middleware'
         S = require '../middleware/setup.coffee.md'
         it "should load #{m}", seem ->
           cfg =

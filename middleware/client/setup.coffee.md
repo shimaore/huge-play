@@ -100,6 +100,12 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
       if @session.reference_data.call_options?
         @session.call_options = @session.reference_data.call_options
 
+Logger
+------
+
+      if @session.reference_data.dev_logger
+        @session.dev_logger = true
+
 SIP Profile
 -----------
 

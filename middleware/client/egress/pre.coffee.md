@@ -37,6 +37,9 @@ Endpoint might be provided in the reference data for example for an `originate` 
       if @session.endpoint.timezone?
         @session.timezone ?= @session.endpoint.timezone
 
+      if @session.endpoint.trace
+        @session.dev_logger = true
+
       @set
         ccnq_endpoint: @session.endpoint_name
         ccnq_endpoint_json: JSON.stringify @session.endpoint
@@ -101,6 +104,8 @@ On a static trunk, the number might not be present.
       @tag @session.number._id
       if @session.number.timezone?
         @session.timezone ?= @session.number.timezone
+      if @session.number.trace
+        @session.dev_logger = true
 
 Dialplan
 --------

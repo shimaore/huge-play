@@ -46,6 +46,11 @@ The global number might contain additional FreeSwitch variables. Load these extr
         debug 'Using fs_variables'
         yield @set @session.e164_number.fs_variables
 
+* doc.global_number.trace (boolean) trace
+
+      if @session.e164_number.trace
+        @session.dev_logger = true
+
 * session.e164_number.voicemail_main See doc.global_number.voicemail_main
 * doc.global_number.voicemail_main (boolean) If true, the number is the main number for access to voicemail (from an external number).
 * session.e164_number.language See doc.global_number.language

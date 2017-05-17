@@ -50,6 +50,8 @@ Build the destination FreeSwitch dialstring
 
       @session.reference_data._in ?= []
       @_in @session.reference_data._in
+      if @session.dev_logger
+        @session.reference_data.dev_logger = true
       yield @save_ref()
 
       debug 'Done.'

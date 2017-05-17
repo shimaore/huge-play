@@ -117,6 +117,12 @@ The end-time is set in `cdr.coffee.md`, along with the `report` field.
 
       yield @save_ref()
 
+Logger
+------
+
+      if @session.reference_data?.dev_logger
+        @session.dev_logger = true
+
 SIP Profile
 -----------
 

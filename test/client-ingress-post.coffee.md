@@ -4,7 +4,7 @@
 
     describe 'client-ingress-post', ->
       m = require '../middleware/client/ingress/post'
-      l = require 'tangible'
+      l = require 'tangible/middleware'
       s = require '../middleware/setup'
 
       cfg =
