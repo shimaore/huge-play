@@ -10,6 +10,7 @@
           'middleware/prompt.coffee.md'
           'middleware/reference_in_pouchdb.coffee.md'
           'middleware/trace_in_pouchdb.coffee.md'
+          'middleware/trace_in_tangible.coffee.md'
 
           'middleware/client/setup.coffee.md'
           'middleware/client/fifo.coffee.md'
