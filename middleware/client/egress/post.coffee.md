@@ -47,7 +47,6 @@ The URL module parses the SIP username as `auth`.
 
       @session.reference_data.account = @session.ccnq_account
       @tag "account:#{@session.reference_data.account}"
-      yield @save_ref()
 
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 
