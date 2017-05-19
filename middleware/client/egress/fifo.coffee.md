@@ -30,6 +30,7 @@ The destination matched.
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
       ACTION_INTERCEPT = '84'
+      ACTION_MONITOR = '87'
       ACTION_EAVESDROP = '88'
 
       @debug 'Routing', action, number
@@ -130,6 +131,41 @@ This works only for centrex.
               yield @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
+                eavesdrop_whisper_aleg: false
+                eavesdrop_whisper_bleg: false
+            when outbound_uuid?
+              uuid = outbound_uuid
+              yield @set
+                eavesdrop_bridge_aleg: true
+                eavesdrop_bridge_bleg: true
+                eavesdrop_whisper_aleg: false
+                eavesdrop_whisper_bleg: false
+            else
+              return failed()
+
+          yield @set
+            eavesdrop_indicate_failed: 'silence_stream://125'
+            eavesdrop_indicate_new: 'silence_stream://125'
+            eavesdrop_indicate_idle: 'silence_stream://125'
+            eavesdrop_enable_dtmf: true
+          yield @action 'answer'
+          yield @sleep 200
+          yield @action 'eavesdrop', uuid
+          @direction 'eavesdropping'
+          return
+
+        when ACTION_MONITOR
+          return failed() unless number?
+
+          inbound_uuid = yield @redis.getAsync "inbound:#{number}@#{@session.number_domain}"
+          outbound_uuid = yield @redis.getAsync "outbound:#{number}@#{@session.number_domain}"
+          @debug 'Monitor', inbound_uuid, outbound_uuid
+          switch
+            when inbound_uuid?
+              uuid = inbound_uuid
+              yield @set
+                eavesdrop_bridge_aleg: true
+                eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: true
                 eavesdrop_whisper_bleg: false
             when outbound_uuid?
@@ -147,6 +183,8 @@ This works only for centrex.
             eavesdrop_indicate_new: 'tone_stream://%(125,0,600);%(125,0,450)'
             eavesdrop_indicate_idle: 'tone_stream://%(125,125,450);%(125,0,450)'
             eavesdrop_enable_dtmf: true
+          yield @action 'answer'
+          yield @sleep 200
           yield @action 'eavesdrop', uuid
           @direction 'eavesdropping'
           return
