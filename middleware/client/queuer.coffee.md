@@ -69,9 +69,9 @@
             ]
             state: new_state
 
-          notification.tags = yield agent.tags().catch -> []
+          notification.tags = yield @tags().catch -> []
 
-          offhook = yield agent.get_offhook_call().catch -> null
+          offhook = yield @get_offhook_call().catch -> null
           if offhook
             notification.offhook = true
           else
