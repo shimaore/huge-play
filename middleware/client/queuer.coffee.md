@@ -28,8 +28,9 @@
       @socket.on 'queuer:get-agent-state', seem (key) =>
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
-        tags = yield agent.tags().catch -> []
-        agent.notify state, {tags}
+        # async
+        agent.notify state, {}
+        return
 
     @server_pre = ->
 
@@ -60,13 +61,21 @@
 
         new_call: (data) -> new HugePlayCall data
 
-        notify: (new_state,data) ->
+        notify: seem (new_state,data) ->
           notification =
             _in: [
               "endpoint:#{@key}"
               "number:#{@key}"
             ]
             state: new_state
+
+          notification.tags = yield agent.tags().catch -> []
+
+          offhook = yield agent.get_offhook_call().catch -> null
+          if offhook
+            notification.offhook = true
+          else
+            notification.offhook = false
 
           for own k, v of data
             notification[k] ?= v
@@ -145,6 +154,7 @@ See `in_domain` in black-metal/tagged.
 
           yield call.set_remote_number body.destination
 
+          # async
           @notify 'create-egress-call', data
 
           debug 'create_egress_call: complete'
