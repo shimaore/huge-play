@@ -18,6 +18,19 @@
       @cfg.statistics.on 'queuer', (data) =>
         @socket.emit 'queuer', data
 
+      queuer = @cfg.queuer
+      Agent = @cfg.queuer_Agent
+
+      @socket.emit 'register',
+        event: 'queuer:get-agent-state',
+        default_room: 'calls'
+
+      @socket.on 'queuer:get-agent-state', seem (key) =>
+        agent = new Agent queuer, key
+        state = yield agent.get_state().catch -> null
+        tags = yield agent.tags().catch -> []
+        agent.notify state, {tags}
+
     @server_pre = ->
 
       cfg = @cfg
