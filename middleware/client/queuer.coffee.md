@@ -22,7 +22,7 @@
       Agent = @cfg.queuer_Agent
 
       @socket.emit 'register',
-        event: 'queuer:get-agent-state',
+        event: 'queuer:get-agent-state'
         default_room: 'calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
@@ -31,6 +31,10 @@
         # async
         agent.notify state, {}
         return
+
+      @socket.emit 'register',
+        event: 'queuer:get-egress-pool'
+        default_room: 'calls'
 
       @socket.on 'queuer:get-egress-pool', seem (domain) =>
 

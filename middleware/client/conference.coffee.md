@@ -52,6 +52,10 @@ Get a URL for recording
 
     @notify = ->
 
+      @socket.emit 'register',
+        event: 'conference:get-participants'
+        default_room: 'calls'
+
       @socket.on 'conference:get-participants', seem (conf_name) =>
         debug 'conference:get-participants', conf_name
 
