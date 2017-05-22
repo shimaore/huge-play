@@ -13,17 +13,17 @@
 
     @server_pre = ->
 
-      @cfg.statistics.on 'record-conference', seem (name) =>
+      @cfg.statistics.on 'conference:record', seem (name) =>
 
         still_running = seem =>
           (yield @cfg.api "conference #{name} get count")?.match /^\d+/
 
-        @debug 'record-conference', name
+        @debug 'conference:record', name
         recording = yield @cfg.api "conference #{name} chkrecord"
 
 Do not start a new recording if one is already active.
 
-        @debug 'record-conference: recording', name, recording
+        @debug 'conference:record: recording', name, recording
         unless recording?.match /is not being recorded/
           @debug 'Already recording or not ready'
           return
@@ -169,13 +169,18 @@ Really we should just barge on the channel if we need anything more complex than
 Log into the conference
 
         @debug 'conference'
-        @cfg.statistics.emit 'start-conference', conf_name
+        @cfg.statistics.emit 'conference:started',
+          conference_name: conf_name
+          _in: [
+            "number_domain:#{@session.number_domain}"
+            "conference:#{conf_name}"
+          ]
 
 * doc.number_domain.conferences[].record (boolean) If true the conference calls will be recorded.
 
         if @session.conf.record
           start_recording = =>
-            @cfg.statistics.emit 'record-conference', conf_name
+            @cfg.statistics.emit 'conference:record', conf_name
           setTimeout start_recording, 1000
 
         yield @action 'conference', "#{conf_name}++flags{}"
