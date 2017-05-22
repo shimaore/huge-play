@@ -33,8 +33,6 @@ FIFO handling
         debug 'Missing FIFO data'
         return
 
-* session.fifo.name (string) (optional) The name of the FIFO. Defaults to the FIFO index in the doc.number_domain.fifos array. It is interpreted within a given number-domain, so different number-domains might have the same FIFO name.
-
       fifo = @session.fifo
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.

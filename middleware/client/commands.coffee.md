@@ -422,7 +422,6 @@ Copying the logic from middleware/client/ingress/fifo
         unless item?
           debug.csr "Number domain as no data #{number} for #{type}."
           return
-        item.name ?= "#{number}"
         @session[type] = item
         @direction type
 

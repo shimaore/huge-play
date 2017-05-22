@@ -90,7 +90,6 @@ Move handling to `fifo` middleware.
 These are also found in middleware/client/egress/fifo.
 
       item.short_name ?= "#{type}-#{number}"
-      item.name ?= item.short_name
       item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
       @session[type] = item
       @direction type

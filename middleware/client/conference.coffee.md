@@ -92,7 +92,7 @@ Get a URL for recording
         @debug.dev 'Missing conference data'
         return
 
-      conf_name = @conf_name @session.conf
+      conf_name = @session.conf.full_name
 
       is_remote = yield @cfg.is_remote conf_name, @session.local_server
 

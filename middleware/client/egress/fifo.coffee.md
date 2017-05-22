@@ -56,7 +56,6 @@ The destination matched.
         item = items[number]
         if item?
           item.short_name ?= "#{type}-#{number}"
-          item.name ?= item.short_name
           item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
         item
 
