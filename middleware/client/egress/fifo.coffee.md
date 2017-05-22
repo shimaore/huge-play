@@ -56,7 +56,10 @@ The destination matched.
         item = items[number]
         if item?
           item.short_name ?= "#{type}-#{number}"
-          item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
+          if type is 'conf'
+            item.full_name ?= "#{@session.number_domain}-#{item.short_name}"
+          else
+            item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
         item
 
       route = (name,type) =>
