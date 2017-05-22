@@ -50,6 +50,36 @@ Get a URL for recording
 
         return
 
+    @notify = ->
+
+      @socket.on 'conference:get-participants', (conf_name) ->
+        # FIXME this is magic
+        return unless $ = conf_name.match /^(\S+)-conf-\d+$/
+
+        domain = $[1]
+
+        # FIXME only try if local
+
+        list = yield @call
+          .api "conference #{conf_name} json_list"
+          .catch -> null
+
+        return unless list?
+        # and list[0] is '['
+
+        content = try JSON.parse list
+        return unless content?
+
+        conf_data = content[0]
+        return unless conf_data?
+
+        conf_data._in = [
+          "number_domain:#{domain}"
+          "conference:#{conf_name}"
+        ]
+
+        @socket.emit 'conference:participants', conf_data
+
     @include = seem ->
 
       return unless @session.direction is 'conf'
