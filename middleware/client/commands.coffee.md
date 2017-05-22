@@ -321,6 +321,7 @@ Calendars
               tags: @session.reference_data?.tags
               ccnq_from_e164: @session.ccnq_from_e164
               ccnq_to_e164: @session.ccnq_to_e164
+              _in: @_in()
           if body?
             @user_tags body.tags
           true
