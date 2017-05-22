@@ -269,6 +269,9 @@ Note the different alternatives for routing:
         @session.reference_data.dev_logger = true
       yield @save_ref()
 
+      if @session.number.record_ingress
+        @record_call @session.number._id
+
       debug 'Done.'
       return
 

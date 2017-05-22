@@ -106,6 +106,8 @@ On a static trunk, the number might not be present.
         @session.timezone ?= @session.number.timezone
       if @session.number.trace
         @session.dev_logger = true
+      if @session.number.record_egress
+        @record_call @session.number._id
 
 Dialplan
 --------

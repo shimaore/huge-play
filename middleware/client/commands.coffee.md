@@ -192,6 +192,9 @@ Other actions must return `true`.
         yield @dtmf.playback "silence_stream://#{ms}"
         debug 'wait over', ms
 
+      record: (name) ->
+        @record_call name
+
 Preconditions
 -------------
 

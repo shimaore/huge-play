@@ -13,6 +13,9 @@
     Bluebird.promisifyAll Redis.RedisClient.prototype
     Bluebird.promisifyAll Redis.Multi.prototype
 
+    seconds = 1000
+    minutes = 60*seconds
+
     @config = seem ->
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
@@ -395,6 +398,32 @@ Set the account so that if we redirect to an external number the egress module c
 
         has_user_tag: (tag) ->
           tag? and @has_tag "user-tag:#{tag}"
+
+        record_call: (name) ->
+          unless @cfg.recording_uri?
+            return false
+
+Keep recording (async)
+
+          do seem =>
+            uri = yield @cfg.recording_uri name
+            yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+
+            last_uri = uri
+
+            still_running = true
+            @call.on 'CHANNEL_HANGUP_COMPLETE', ->
+              still_running = false
+
+            while still_running
+              yield @sleep 29*minutes
+              uri = yield @cfg.recording_uri name
+              yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+              yield @sleep 1*minutes
+              yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
+              last_uri = uri
+
+          return true
 
       }
 
