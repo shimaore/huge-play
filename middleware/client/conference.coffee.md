@@ -52,7 +52,9 @@ Get a URL for recording
 
     @notify = ->
 
-      @socket.on 'conference:get-participants', (conf_name) ->
+      @socket.on 'conference:get-participants', seem (conf_name) =>
+        debug 'conference:get-participants', conf_name
+
         # FIXME this is magic
         return unless $ = conf_name.match /^(\S+)-conf-\d+$/
 
@@ -60,7 +62,7 @@ Get a URL for recording
 
         # FIXME only try if local
 
-        list = yield @call
+        list = yield @cfg
           .api "conference #{conf_name} json_list"
           .catch -> null
 
