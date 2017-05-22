@@ -32,6 +32,25 @@
         agent.notify state, {}
         return
 
+      @socket.on 'queuer:get-egress-pool', seem (domain) =>
+
+        # FIXME only reply if we are serving the domain
+
+        tag = "number_domain:#{domain}"
+        calls = queuer.egress_pool.not_presenting()
+        result = []
+        for call in calls
+          if yield call.has_tag(tag).catch( -> null )
+            result.push
+              key: call.key
+              destination: call.destination
+              tags: yield call.tags().catch -> []
+
+        notification =
+          _in: [ tag ]
+          calls: result
+        @socket.emit 'queuer:egress-pool'
+
     @server_pre = ->
 
       cfg = @cfg
