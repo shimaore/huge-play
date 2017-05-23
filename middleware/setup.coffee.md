@@ -435,13 +435,16 @@ Set the account so that if we redirect to an external number the egress module c
 
         record_call: (name) ->
           unless @cfg.recording_uri?
+            @debug.dev 'No recording_uri, call will not be recorded.'
             return false
 
 Keep recording (async)
 
           do seem =>
             uri = yield @cfg.recording_uri name
-            yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+            debug 'Recording', @call.uuid, uri
+            outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+            debug 'Recording', @call.uuid, uri, outcome
 
             last_uri = uri
 
@@ -452,11 +455,14 @@ Keep recording (async)
             while still_running
               yield @sleep 29*minutes
               uri = yield @cfg.recording_uri name
+              debug 'Recording next segment', @call.uuid, uri
               yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
               yield @sleep 1*minutes
+              debug 'Stopping previous segment', @call.uuid, last_uri
               yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
               last_uri = uri
 
+          @debug 'Going to record', name
           return true
 
       }
