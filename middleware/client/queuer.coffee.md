@@ -19,19 +19,19 @@
       queuer = @cfg.queuer
       Agent = @cfg.queuer_Agent
 
-      @register 'queuer-get-agent-state', 'calls'
+      @register 'queuer:get-agent-state', 'calls'
 
-      @socket.on 'queuer-get-agent-state', seem (key) =>
+      @socket.on 'queuer:get-agent-state', seem (key) =>
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
         # async
         agent.notify state, {}
         return
 
-      @register 'queuer-get-egress-pool', 'calls'
-      @register 'queuer-egress-pool', 'calls'
+      @register 'queuer:get-egress-pool', 'calls'
+      @register 'queuer:egress-pool', 'calls'
 
-      @socket.on 'queuer-get-egress-pool', seem (domain) =>
+      @socket.on 'queuer:get-egress-pool', seem (domain) =>
 
         # FIXME only reply if we are serving the domain
 
@@ -48,7 +48,7 @@
         notification =
           _in: [ tag ]
           calls: result
-        @socket.emit 'queuer-egress-pool'
+        @socket.emit 'queuer:egress-pool'
 
     @server_pre = ->
 
