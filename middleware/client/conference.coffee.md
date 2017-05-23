@@ -52,11 +52,11 @@ Get a URL for recording
 
     @notify = ->
 
-      @register 'conference:get-participants', 'calls'
-      @register 'conference:participants', 'calls'
+      @register 'conference-get-participants', 'calls'
+      @register 'conference-participants', 'calls'
 
-      @socket.on 'conference:get-participants', seem (conf_name) =>
-        debug 'conference:get-participants', conf_name
+      @socket.on 'conference-get-participants', seem (conf_name) =>
+        debug 'conference-get-participants', conf_name
 
         # FIXME this is magic
         return unless $ = conf_name.match /^(\S+)-conf-\d+$/
@@ -83,7 +83,7 @@ Get a URL for recording
           "conference:#{conf_name}"
         ]
 
-        @socket.emit 'conference:participants', conf_data
+        @socket.emit 'conference-participants', conf_data
 
     @include = seem ->
 
