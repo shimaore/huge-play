@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "22.9.12",
+  "version": "22.9.13",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublish": "coffee -M -c middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
