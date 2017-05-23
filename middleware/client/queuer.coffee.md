@@ -11,9 +11,7 @@
 
     @notify = ->
 
-      @socket.emit 'register',
-        event: 'queuer',
-        default_room: 'calls'
+      @register 'queuer', 'calls'
 
       @cfg.statistics.on 'queuer', (data) =>
         @socket.emit 'queuer', data
@@ -21,9 +19,7 @@
       queuer = @cfg.queuer
       Agent = @cfg.queuer_Agent
 
-      @socket.emit 'register',
-        event: 'queuer:get-agent-state'
-        default_room: 'calls'
+      @register 'queuer:get-agent-state', 'calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
         agent = new Agent queuer, key
@@ -32,9 +28,8 @@
         agent.notify state, {}
         return
 
-      @socket.emit 'register',
-        event: 'queuer:get-egress-pool'
-        default_room: 'calls'
+      @register 'queuer:get-egress-pool', 'calls'
+      @register 'queuer:egress-pool', 'calls'
 
       @socket.on 'queuer:get-egress-pool', seem (domain) =>
 

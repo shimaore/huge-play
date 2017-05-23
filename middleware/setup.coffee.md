@@ -163,6 +163,40 @@ Standard events: `add`.
             key: data.key
             value: data.value.toJSON()
 
+      @on_connexion = (init) =>
+
+Run on re-connections (`welcome` is sent by spicy-action when we connect).
+
+        @socket.on 'welcome', init
+
+Run manually when we start (the `welcome` message has probably already been seen).
+
+        init()
+
+Register a new event on the bus.
+
+      @register = (event,default_room = null) =>
+        @on_connexion =>
+          @debug 'Register', {event, default_room}
+          @socket.emit 'register', {event,default_room}
+
+Configure our client to receive specific queues.
+
+      @socket.on 'configured', (data) =>
+        @debug 'Socket configured', data
+
+      @configure = (options) =>
+        @on_connexion =>
+          @debug 'Configure', options
+          @socket.emit 'configure', options
+
+      @socket.on 'connect', =>
+        @debug.ops 'connect'
+      @socket.on 'connect_error', =>
+        @debug.ops 'connect_error'
+      @socket.on 'disconnect', =>
+        @debug.ops 'disconnect'
+
       return
 
     @include = (ctx) ->
