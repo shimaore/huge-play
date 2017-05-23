@@ -50,7 +50,7 @@
         notification =
           _in: [ tag ]
           calls: result
-        @socket.emit 'queuer:egress-pool'
+        @socket.emit 'queuer:egress-pool', notification
 
     @server_pre = ->
 
