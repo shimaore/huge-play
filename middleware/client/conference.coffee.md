@@ -52,7 +52,8 @@ Get a URL for recording
 
     @notify = ->
 
-      @register 'conference:get-participants', 'calls'
+      @configure dial_calls: true
+      @register 'conference:get-participants', 'dial_calls'
       @register 'conference:participants', 'calls'
 
       @socket.on 'conference:get-participants', seem (conf_name) =>

@@ -11,6 +11,8 @@
 
     @notify = ->
 
+      @configure dial_calls: true
+
       @register 'queuer', 'calls'
 
       @cfg.statistics.on 'queuer', (data) =>
@@ -19,7 +21,7 @@
       queuer = @cfg.queuer
       Agent = @cfg.queuer_Agent
 
-      @register 'queuer:get-agent-state', 'calls'
+      @register 'queuer:get-agent-state', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
         agent = new Agent queuer, key
@@ -28,7 +30,7 @@
         agent.notify state, {}
         return
 
-      @register 'queuer:get-egress-pool', 'calls'
+      @register 'queuer:get-egress-pool', 'dial_calls'
       @register 'queuer:egress-pool', 'calls'
 
       @socket.on 'queuer:get-egress-pool', seem (domain) =>
