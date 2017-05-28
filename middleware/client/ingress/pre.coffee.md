@@ -17,15 +17,6 @@ Do not process here if the dialplan is already known (e.g. because Centrex sent 
 
       debug 'Ready'
 
-E.164
------
-
-All external ingress calls come in as E.164 (with plus sign).
-
-      @session.dialplan = 'e164'
-      @session.ccnq_from_e164 = @source
-      @session.ccnq_to_e164 = @destination
-
 Global number
 -------------
 
@@ -33,7 +24,20 @@ We retrieve the *global-number* record based on the destination.
 
 * session.e164_number (object) The doc.global_number record for of the destination of an inbound call.
 
-      @session.e164_number = yield @cfg.prov.get "number:#{@session.ccnq_to_e164}"
+      @session.e164_number = yield @cfg.prov
+        .get "number:#{@destination}"
+        .catch -> null
+      return unless @session.e164_number?
+
+E.164
+-----
+
+All external ingress calls come in as E.164 (without plus sign).
+
+      @session.dialplan = 'e164'
+      @session.ccnq_from_e164 = @source
+      @session.ccnq_to_e164 = @destination
+
       @tag @session.e164_number._id
       @user_tags @session.e164_number.tags
 
