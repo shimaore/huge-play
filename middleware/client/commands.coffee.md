@@ -124,7 +124,7 @@ These actions are terminal for the statement.
             debug "#{m.name} in send: #{error.stack ? error}"
         'over'
 
-`menu_route`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
+`menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
 
       menu_send: seem ->
         debug 'menu_send'
