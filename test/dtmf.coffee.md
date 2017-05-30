@@ -1,7 +1,7 @@
     seem = require 'seem'
     chai = require 'chai'
     chai.should()
-    debug = (require 'debug') 'huge-play:test:dtmf'
+    debug = (require 'tangible') 'huge-play:test:dtmf'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
