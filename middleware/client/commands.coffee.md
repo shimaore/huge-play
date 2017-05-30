@@ -88,6 +88,7 @@ Commands
 FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
 
     ingress_modules = [
+      require './ingress/fifo'
       require './ingress/post'
     ]
 
@@ -117,6 +118,7 @@ These actions are terminal for the statement.
         @destination = destination
         for m in ingress_modules
           try
+            debug "#{m.name} in send"
             yield m.include.call this
           catch error
             debug "#{m.name} in send: #{error.stack ? error}"
