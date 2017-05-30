@@ -115,9 +115,21 @@ Note that this is executed async wrt activating the queuer.
 
 If the call is not processed (no agents are ready), attemp overflow.
 
+Overflow is the weird concept that instead of giving a caller access to all of our capable
+agents immediately, we decide to lengthen response time and leave some agents idle, by only
+allowing access to them if some conditions are met.
+Since we are trying to extend the pool of agents, this is only possible by adding more
+desirable queues to a given call. (Adding more required skills would build a smaller pool.)
+
         call_tags = yield call.tags()
+        call_tags = call_tags.filter (tag) -> tag.match /^queue:/
+
+        if call_tags.length is 0
+          debug 'no queues, cannot overflow'
+          return
 
         attempt_overflow = seem (suffix) ->
+          debug 'attempt overflow', call_tags, suffix
           if yield queuer.ingress_pool.has call
             yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
             yield queuer.reevaluate_idle_agents()
