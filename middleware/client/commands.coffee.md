@@ -87,6 +87,19 @@ Commands
 
 FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
 
+    menu_conference_module =
+      include: ->
+        return unless @dialplan is 'centrex'
+        return unless m = @destination.match /^82(\d+)$/
+        number = parseInt m[1], 10
+        item = @session.number_domain_data?.conferences?[number]
+        if item?
+          item.short_name ?= "conf-#{number}"
+          item.full_name ?= "#{@session.number_domain}-#{item.short_name}"
+          @session.conf = item
+          @direction 'conf'
+        return
+
     ingress_modules = [
       require './ingress/fifo'
       require './ingress/post'
@@ -132,7 +145,7 @@ These actions are terminal for the statement.
         yield @menu.expect()
         debug 'menu_send', @menu.value
         @destination = @menu.value
-        for m in ingress_modules
+        for m in [menu_conference_module,ingress_modules...]
           try
             yield m.include.call this
           catch error
