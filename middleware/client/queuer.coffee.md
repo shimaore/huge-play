@@ -123,7 +123,8 @@
             debug 'create_egress_call: no queuer_webhook', @domain
             return null
 
-          options = {@key,@number,@domain,tags:@tags()}
+          tags = yield @tags()
+          options = {@key,@number,@domain,tags}
           debug 'create_egress_call: send request', options
           {body} = yield request
             .post queuer_webhook
