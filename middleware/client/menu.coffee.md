@@ -20,6 +20,10 @@
       yield @export
         t38_passthru: false
         sip_wait_for_aleg_ack: not call_is_answered
+      yield @set
+        sip_wait_for_aleg_ack: not call_is_answered
+
+      @session.wait_for_aleg_ack = not call_is_answered
 
       @debug 'Menu starting.'
       @menu_depth = 0
