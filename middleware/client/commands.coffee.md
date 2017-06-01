@@ -103,8 +103,6 @@ FIXME Allow for modules using us to specify which module(s) to run in case of me
         return
 
     ingress_modules = [
-      require './ingress/fifo'
-      require './ingress/post'
     ]
 
     module.exports = commands =
