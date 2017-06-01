@@ -385,7 +385,7 @@ Retrieve number data.
             @session.timezone ?= @session.number.timezone
 
           if @session.number.error?
-            @debug "Could not locate destination number #{dst_number}: #{@session.number.error}"
+            @debug "Could not locate destination number #{dst_number}"
             @tag 'invalid-local-number'
             yield @respond '486 Not Found'
             return
