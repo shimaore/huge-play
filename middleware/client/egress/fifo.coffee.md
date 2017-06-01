@@ -11,7 +11,7 @@
         @debug 'No number domain'
         return
 
-      return unless m = @destination.match /^(81\d|82|83|84|88)(\d*)$/
+      return unless m = @destination.match /^(81\d|82|83|84|87|88)(\d*)$/
 
       action = m[1]
       if m[2] is ''
@@ -121,6 +121,8 @@ This works only for centrex.
           @direction 'intercepted' # Really `intercepting`, but oh well
           return
 
+Eavesdrop: call to listen (no notification, no whisper).
+
         when ACTION_EAVESDROP
           return failed() unless number?
 
@@ -155,6 +157,8 @@ This works only for centrex.
           yield @action 'eavesdrop', uuid
           @direction 'eavesdropping'
           return
+
+Monitor: call to listen (with notification beep), and whisper
 
         when ACTION_MONITOR
           return failed() unless number?
