@@ -191,6 +191,7 @@ Monitor: call to listen (with notification beep), and whisper
             eavesdrop_enable_dtmf: true
           yield @action 'answer'
           yield @sleep 200
+          yield @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)"
           yield @action 'eavesdrop', uuid
           @direction 'eavesdropping'
           return
