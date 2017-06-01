@@ -45,7 +45,7 @@ Ready to send, answer the call.
       yield @action 'answer'
       call_is_answered = true
 
-      @export
+      yield @export
         t38_passthru: false
 
 Basically if the pre_answer we should wait; once the call is answered we won't be getting any more ACK, though.

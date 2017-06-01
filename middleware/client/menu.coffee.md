@@ -15,6 +15,12 @@
         return
 
       yield @action 'answer'
+      call_is_answered = true
+
+      yield @export
+        t38_passthru: false
+        sip_wait_for_aleg_ack: not call_is_answered
+
       @debug 'Menu starting.'
       @menu_depth = 0
       yield run.call this, @session.menu, @ornaments_commands
