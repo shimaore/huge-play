@@ -129,7 +129,7 @@ These actions are terminal for the statement.
         debug 'send'
         @session.direction = 'ingress'
         @destination = destination
-        serialize.modules ingress_modules, this, 'include'
+        yield serialize.modules ingress_modules, this, 'include'
         'over'
 
 `menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
@@ -141,7 +141,7 @@ These actions are terminal for the statement.
         debug 'menu_send', @menu.value
         @session.direction = 'ingress'
         @destination = @menu.value
-        serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
+        yield serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
         'over'
 
       reject: seem ->

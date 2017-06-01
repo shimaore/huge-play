@@ -15,5 +15,7 @@
         return
 
       yield @action 'answer'
+      @debug 'Menu starting.'
       yield run.call this, @session.menu, @ornaments_commands
+      @debug 'Menu completed.'
       return
