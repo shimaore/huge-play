@@ -7,6 +7,8 @@
     seem = require 'seem'
     serialize = require 'useful-wind-serialize'
 
+    max_menu_depth = 42
+
 Lists handling
 ==============
 
@@ -434,6 +436,12 @@ Copying the logic from middleware/client/ingress/fifo
 
         debug "Using #{type} #{number}", item
 
+        @menu_depth ?= 0
+        @menu_depth++
+        if @menu_depth > max_menu_depth
+          return false
+
+        yield @sleep 200
         yield run.call this, item, @ornaments_commands
         'over'
 
