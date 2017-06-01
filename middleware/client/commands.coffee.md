@@ -200,6 +200,7 @@ Other actions must return `true`.
         debug 'wait', ms
         yield @dtmf.playback "silence_stream://#{ms}"
         debug 'wait over', ms
+        true
 
       record: (name) ->
         @record_call name
