@@ -159,6 +159,7 @@ See `in_domain` in black-metal/tagged.
             destination: body.destination
             domain: "#{host}:#{port}"
             tags: body.tags
+            block_dtmf: true
             params:
               sip_invite_params: "'xref=#{_id}'"
               origination_caller_id_number: @number
@@ -192,7 +193,10 @@ See `in_domain` in black-metal/tagged.
       @cfg.queuer = new Queuer @cfg
       return
 
-    @include = ->
+    @include = seem ->
+
+      if @session.reference_data?.block_dtmf
+        yield @action 'block_dtmf'
 
       queuer = @cfg.queuer
       Agent = @cfg.queuer_Agent
