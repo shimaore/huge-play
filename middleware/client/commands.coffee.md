@@ -408,6 +408,7 @@ Menus
 `menu_on`: true if the user keyed the choice
 
       menu_on: seem (choice) ->
+        choice = "#{choice}"
         debug 'menu_on', choice
         return false unless @menu?
         yield @menu.expect()
