@@ -5,6 +5,7 @@
     request = require 'superagent'
     run = require 'flat-ornament'
     seem = require 'seem'
+    serialize = require 'useful-wind-serialize'
 
 Lists handling
 ==============
@@ -88,6 +89,7 @@ Commands
 FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
 
     menu_conference_module =
+      name: 'menu_conference_module'
       include: ->
         return unless @dialplan is 'centrex'
         return unless m = @destination.match /^82(\d+)$/
@@ -129,12 +131,7 @@ These actions are terminal for the statement.
         debug 'send'
         @session.direction = 'ingress'
         @destination = destination
-        for m in ingress_modules
-          try
-            debug "#{m.name} in send"
-            yield m.include.call this
-          catch error
-            debug "#{m.name} in send: #{error.stack ? error}"
+        serialize.modules ingress_modules, this, 'include'
         'over'
 
 `menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
@@ -144,12 +141,9 @@ These actions are terminal for the statement.
         return false unless @menu?
         yield @menu.expect()
         debug 'menu_send', @menu.value
+        @session.direction = 'ingress'
         @destination = @menu.value
-        for m in [menu_conference_module,ingress_modules...]
-          try
-            yield m.include.call this
-          catch error
-            debug "#{m.name} in menu_send: #{error.stack ? error}"
+        serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
         'over'
 
       reject: seem ->
