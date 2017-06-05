@@ -102,6 +102,22 @@ Session Reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier is included in the context.
+
+      @session.reference ?= @req.variable 'session_reference'
+
+In all other cases, look (very hard) for a `xref` parameter.
+
+      reference_in = (name) =>
+        if m = @req.variable(name)?.match /xref=([\w-]+)/
+          @session.reference ?= m[1]
+
+      reference_in 'sip_from_params'
+      reference_in 'sip_to_params'
+      reference_in 'sip_req_params'
+      reference_in 'sip_contact_params'
+      reference_in 'sip_referred_by_params'
+      reference_in 'sip_h_X-FS-Refer-Params'
+
 Otherwise, since the call is coming from a carrier we force the creation of a new context.
 
       yield @get_ref()
