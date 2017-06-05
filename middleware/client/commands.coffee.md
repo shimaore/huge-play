@@ -261,6 +261,7 @@ start: '18:00', end: '08:00'
 
       user_tag: (tag) ->
         @user_tag tag
+        @report state:'menu', user_tag:tag
         true
 
       required_skill: (skill) ->

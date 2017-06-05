@@ -10,6 +10,7 @@ First-line handler for outbound calls
       return unless @session.direction is 'egress'
 
       @tag 'egress'
+      @report state:'egress'
 
 Endpoint
 --------

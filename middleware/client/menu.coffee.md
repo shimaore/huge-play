@@ -14,6 +14,8 @@
         @debug 'Missing menu data.'
         return
 
+      @report state:'menu'
+
       yield @action 'answer'
       call_is_answered = true
 

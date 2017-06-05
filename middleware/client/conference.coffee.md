@@ -126,6 +126,8 @@ Conference is handled locally
 
       @debug 'Conference is local'
 
+      @report state:'conference'
+
 Validate passcode if any.
 
       language = @session.conf.language

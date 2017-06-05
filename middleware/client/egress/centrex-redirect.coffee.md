@@ -14,6 +14,7 @@ Transfer Workaround
 
       if is_remote
         server = is_remote.split('/')[1]
+        @report {state:'centrex-redirect', server}
 
         uri = "<sip:#{@destination}@#{server};xref=#{@session.reference}>"
         @debug 'Handling is remote', uri

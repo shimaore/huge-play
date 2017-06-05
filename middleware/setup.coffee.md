@@ -251,6 +251,7 @@ We assume the room names match record IDs.
           o.dialplan ?= @session.dialplan
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
+          o.reference_data ?= @session.reference_data
           o._in ?= @_in()
           o.host ?= @cfg.host
           @call.emit 'report', o

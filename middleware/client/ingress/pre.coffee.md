@@ -8,6 +8,7 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
       return unless @session.direction is 'ingress'
 
       @tag 'ingress'
+      @report state:'ingress'
 
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
