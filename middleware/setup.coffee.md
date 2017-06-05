@@ -245,6 +245,7 @@ We assume the room names match record IDs.
             return
 
           o.call ?= @call.uuid
+          o.session ?= @session._id
           o.source ?= @source
           o.destination ?= @destination
           o.direction ?= @session.direction
