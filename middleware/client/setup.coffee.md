@@ -67,6 +67,7 @@ In all other cases, look (very hard) for a `xref` parameter.
       reference_in 'sip_req_params'
       reference_in 'sip_contact_params'
       reference_in 'sip_referred_by_params'
+      reference_in 'sip_h_X-FS-Refer-Params'
 
       yield @get_ref()
       @tag 'client-side'
