@@ -201,6 +201,8 @@ Configure our client to receive specific queues.
 
     @include = (ctx) ->
 
+      @session.reports = []
+
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
 
@@ -244,19 +246,35 @@ We assume the room names match record IDs.
             @debug.dev 'report: improper environment'
             return
 
-          o.call ?= @call.uuid
-          o.session ?= @session._id
+Data that will both be recorded in the `reports` array and in the notification. This is data that might change in a given session and it is therefor useful to record at the different reporting spots.
+
           o.source ?= @source
           o.destination ?= @destination
           o.direction ?= @session.direction
           o.dialplan ?= @session.dialplan
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
-          o.reference_data ?= @session.reference_data
-          o._in ?= @_in()
-          o.host ?= @cfg.host
-          @call.emit 'report', o
-          @cfg.statistics.emit 'report', o
+
+          @session.reports.push o
+
+Data that is only reported in the notification since it is duplicated when published in the reference (because it is already set up in `@session.call_reference_data`) and does not change,
+
+          notification =
+            call: @call.uuid
+            session: @session._id
+            reports: @session.reports
+            reference_data: @session.reference_data
+
+or is data only used during the notification.
+
+            _in: @_in()
+            host: @cfg.host
+
+          for own k,v of o
+            notification[k] = v
+
+          @call.emit 'report', notification
+          @cfg.statistics.emit 'report', notification
 
         save_ref: seem ->
           if @cfg.update_session_reference_data?

@@ -131,6 +131,7 @@ The end-time is set in `cdr.coffee.md`, along with the `report` field.
       @session.call_reference_data =
         uuid: @call.uuid
         session: @session._id
+        reports: @session.reports
         start_time: new Date() .toJSON()
         source: @source
         destination: @destination
