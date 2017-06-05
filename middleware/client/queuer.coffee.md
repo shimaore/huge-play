@@ -143,6 +143,8 @@
             debug 'create_egress_call: incomplete response', @domain, body
             return null
 
+          body.tags.push 'queuer'
+
           debug 'create_egress_call: creating call', @domain, body
           body.tags.push 'egress'
 
