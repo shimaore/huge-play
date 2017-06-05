@@ -24,21 +24,24 @@
       @register 'queuer:get-agent-state', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
+        debug 'queue:get-agent-state', key
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
         # async
         agent.notify state, {}
+        debug 'queue:get-agent-state: done', key, state
         return
 
       @register 'queuer:get-egress-pool', 'dial_calls'
       @register 'queuer:egress-pool', 'calls'
 
       @socket.on 'queuer:get-egress-pool', seem (domain) =>
+        debug 'queuer:get-egress-pool', domain
 
         # FIXME only reply if we are serving the domain
 
         tag = "number_domain:#{domain}"
-        calls = queuer.egress_pool.not_presenting()
+        calls = yield queuer.egress_pool.not_presenting()
         result = []
         for call in calls
           if yield call.has_tag(tag).catch( -> null )
@@ -51,6 +54,8 @@
           _in: [ tag ]
           calls: result
         @socket.emit 'queuer:egress-pool', notification
+        debug 'queuer:get-egress-pool: done', domain, notification
+        return
 
     @server_pre = ->
 
@@ -82,6 +87,7 @@
         new_call: (data) -> new HugePlayCall data
 
         notify: seem (new_state,data) ->
+          debug 'agent.notify', @key, new_state
           notification =
             _in: [
               "endpoint:#{@key}"
@@ -101,6 +107,8 @@
             notification[k] ?= v
 
           cfg.statistics.emit 'queuer', notification
+          debug 'agent.notify: done', @key, notification
+          return
 
         create_egress_call: seem ->
           debug 'create_egress_call', @domain
