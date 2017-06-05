@@ -55,3 +55,7 @@ The dialplan and country (and other parameters) might also be available in the `
       @session.country  = @session.number_domain_data?.country  ? @session.e164_number.country
       if @session.country?
         @session.country = @session.country.toLowerCase()
+
+      @report state:'local-number'
+      debug 'OK'
+      return

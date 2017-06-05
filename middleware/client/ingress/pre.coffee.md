@@ -8,7 +8,6 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
       return unless @session.direction is 'ingress'
 
       @tag 'ingress'
-      @report state:'ingress'
 
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
@@ -71,5 +70,6 @@ The global number might contain additional FreeSwitch variables. Load these extr
         @session.number_domain = @session.e164_number.voicemail_number_domain
         @direction 'voicemail'
 
+      @report state:'ingress'
       debug 'OK'
       return

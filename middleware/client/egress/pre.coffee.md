@@ -10,7 +10,6 @@ First-line handler for outbound calls
       return unless @session.direction is 'egress'
 
       @tag 'egress'
-      @report state:'egress'
 
 Endpoint
 --------
@@ -219,5 +218,6 @@ For backward-compatibility we currently ignore ICE proposals.
 
       yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
-      @debug 'Done'
-      null
+      @report state:'egress'
+      @debug 'OK'
+      return

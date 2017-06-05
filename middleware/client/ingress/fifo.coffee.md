@@ -99,3 +99,4 @@ These are also found in middleware/client/egress/fifo.
       @report state:type
 
       @debug "Using #{type} #{number}", item
+      return
