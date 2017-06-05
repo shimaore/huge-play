@@ -106,6 +106,8 @@ Otherwise, since the call is coming from a carrier we force the creation of a ne
 
       yield @get_ref()
       @tag 'carrier-side'
+      @tag "source:#{@source}"
+      @tag "destination:#{@destination}"
 
 * session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.
