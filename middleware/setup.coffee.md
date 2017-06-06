@@ -469,7 +469,7 @@ Keep recording (async)
             last_uri = uri
 
             still_running = true
-            @call.on 'CHANNEL_HANGUP_COMPLETE', ->
+            @call.once 'CHANNEL_HANGUP_COMPLETE', ->
               still_running = false
 
             while still_running
