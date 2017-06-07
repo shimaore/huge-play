@@ -264,6 +264,10 @@ start: '18:00', end: '08:00'
         @report state:'menu', user_tag:tag
         true
 
+      alert_info: seem (alert_info) ->
+        yield @export {alert_info}
+        true
+
       required_skill: (skill) ->
         @tag "skill:#{skill}"
         true
