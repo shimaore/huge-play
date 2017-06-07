@@ -52,7 +52,8 @@ See huge-play/conf/freeswitch
 Note: if there are multiple profiles in use we will get in trouble at that point. (FIXME)
 
       local_server = "#{cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
-      debug 'Using local-server', local_server
+      client_server = "#{cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
+      debug 'Using', {local_server,client_server}
 
 Place Call
 ----------
@@ -89,7 +90,10 @@ Load additional data from the endpoint.
 Ensure only one FreeSwitch server processes those.
 
         domain = endpoint_data.number_domain ? 'default.local'
-        is_remote = yield cfg.is_remote(domain, local_server).catch -> true
+
+Note that Centrex-redirect uses both the local-server and the client-server.
+
+        is_remote = yield cfg.is_remote(domain, [local_server,client_server].join '/').catch -> true
         return if is_remote
 
 FIXME The data sender must do resolution of the endpoint_via and associated translations????
