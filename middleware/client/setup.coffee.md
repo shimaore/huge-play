@@ -101,6 +101,11 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
         @session.wait_for_aleg_ack = false      # in huge-play
         @session.sip_wait_for_aleg_ack = false  # in tough-rate
 
+Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
+
+        if @session.reference_data.account?
+          yield @export 'sip_h_P-Charge-Info': "sip:#{@session.reference_data.account}@#{@cfg.host}"
+
       if @session.reference_data.leg_options?
         @session.leg_options = @session.reference_data.leg_options
       if @session.reference_data.call_options?
