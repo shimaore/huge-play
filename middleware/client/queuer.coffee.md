@@ -6,6 +6,10 @@
     queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
+    sleep = (timeout) ->
+      new Promise (resolve) ->
+        setTimeout resolve, timeout
+
     API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
 
@@ -27,8 +31,9 @@
         debug 'queue:get-agent-state', key
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
+        missed = yield agent.get_missed().catch -> 0
         # async
-        agent.notify state, {}
+        agent.notify state, {missed}
         debug 'queue:get-agent-state: done', key, state
         return
 
@@ -220,6 +225,7 @@ See `in_domain` in black-metal/tagged.
 
       end_of_call = seem ({key,id}) ->
         debug 'End of call', key, id
+        yield sleep 2*1000
         agent = new Agent queuer, key
         yield agent.del_call id
 
