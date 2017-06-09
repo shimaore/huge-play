@@ -115,6 +115,7 @@ Note that this is executed async wrt activating the queuer.
             return
 
         yield call.set_remote_number @source
+        yield call.set_alert_info @session.alert_info if @session.alert_info?
         yield queuer.queue_ingress_call call
 
 If the call is not processed (no agents are ready), attemp overflow.

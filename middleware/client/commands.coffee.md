@@ -266,6 +266,7 @@ start: '18:00', end: '08:00'
 
       alert_info: seem (alert_info) ->
         yield @export {alert_info}
+        @session.alert_info = alert_info
         true
 
       required_skill: (skill) ->
