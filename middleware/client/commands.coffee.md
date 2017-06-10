@@ -292,8 +292,10 @@ Calendars
       in_calendars: (calendars) ->
         debug 'calendars', calendars
 
-        domain_calendars = @session.number_domain_data?.calendars
-        return unless domain_calendars?
+        if 'string' is typeof calendars
+          calendars = [calendars]
+
+        domain_calendars = @session.number_domain_data?.calendars ? {}
 
         now = Moment()
         if @session.timezone?
@@ -301,7 +303,7 @@ Calendars
         now_date = new Date now
         now = now.format 'YYYY-MM-DD'
 
-        for calendar in calendars when domain_calendars[calendar]?
+        for calendar in calendars
           switch
 
             when m = calendar.match /^_holidays_(.*)$/
