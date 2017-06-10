@@ -124,6 +124,7 @@ Session Reference Data
 
         data = yield save_ref data, call
 
+        xref = "xref=#{_id}"
         params = make_params
 
 Ensure we can track the call by forcing its UUID.
@@ -132,9 +133,12 @@ Ensure we can track the call by forcing its UUID.
 
 These are used by `huge-play/middleware/client/setup`.
 
-          session_reference: call.session
+          session_reference: _id
           origination_context: context
-          sip_from_params: "xref=#{call.session}"
+          sip_invite_params: xref
+          sip_invite_to_params: xref
+          sip_invite_contact_params: xref
+          sip_invite_from_params: xref
 
 And `ccnq4-opensips` requires `X-CCNQ3-Endpoint` for routing.
 
@@ -262,13 +266,17 @@ Session Reference Data
 
 Call it out
 
+        xref = "xref:#{_id}"
         params = make_params
 
 Ensure we can track the call by forcing its UUID.
 
           origination_uuid: call.uuid
-          sip_invite_from_params: "xref=#{call.session}"
-          sip_invite_to_params: "xref=#{call.session}"
+
+          sip_invite_params: xref
+          sip_invite_to_params: xref
+          sip_invite_contact_params: xref
+          sip_invite_from_params: xref
 
           origination_caller_id_number: calling_number
 

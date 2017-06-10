@@ -176,7 +176,7 @@ See `in_domain` in black-metal/tagged.
             tags: body.tags
             block_dtmf: true
             params:
-              sip_invite_params: "'xref=#{_id}'"
+              sip_invite_params: "xref=#{_id}"
               origination_caller_id_number: @number
           }
 
