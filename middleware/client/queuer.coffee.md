@@ -84,6 +84,10 @@
         profile: "#{pkg.name}-#{profile}-egress"
         get_reference_data: (reference) ->
           cfg.get_session_reference_data reference
+        update_reference_data: seem (data,call_reference_data) ->
+          data.host ?= cfg.host
+          data = yield cfg.update_session_reference_data data, call_reference_data
+          cfg.statistics.emit 'reference', data
 
       class HugePlayAgent extends TaggedAgent
 
