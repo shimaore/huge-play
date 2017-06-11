@@ -117,6 +117,7 @@ Note that this is executed async wrt activating the queuer.
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
         yield call.set_reference @session.reference
+        yield call.clear_tags() # `presenting`, `bridged`
         yield queuer.queue_ingress_call call
 
 If the call is not processed (no agents are ready), attemp overflow.

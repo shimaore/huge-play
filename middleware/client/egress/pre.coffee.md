@@ -92,16 +92,21 @@ Source (calling) number
 * session.number (object) Data from doc.number for the calling number in an egress call.
 
       src_number = "#{@source}@#{number_domain}"
-      @session.number = yield @cfg.prov
-        .get "number:#{src_number}"
+      if @session.transfer
+        @session.number = {}
+      else
+        @session.number = yield @cfg.prov
+          .get "number:#{src_number}"
 
 On a static trunk, the number might not be present.
 
-        .catch (error) =>
-          @debug.ops "number:#{src_number}: #{error}"
-          {}
+          .catch (error) =>
+            @debug.ops "number:#{src_number}: #{error}"
+            {}
 
-      @tag @session.number._id
+
+      if @session.number._id?
+        @tag @session.number._id
       if @session.number.timezone?
         @session.timezone ?= @session.number.timezone
       if @session.number.trace
@@ -139,16 +144,17 @@ Contrarily to established practices, our code uses lowercase country names.
 Eavesdrop registration
 ----------------------
 
-      key = "#{@source}@#{@session.number_domain}"
+      key = src_number
       eavesdrop_key = "outbound:#{key}"
-      @debug 'Set outbound eavesdrop', eavesdrop_key
-      @call.emit 'outbound', {key,id:@call.uuid}
-      yield @redis.setAsync eavesdrop_key, @call.uuid
-      @call.once 'CHANNEL_HANGUP_COMPLETE'
-      .then seem =>
-        @debug 'Clear outbound eavesdrop', eavesdrop_key
-        @call.emit 'outbound-end', {key,id:@call.uuid}
-        yield @redis.delAsync eavesdrop_key
+      unless @session.transfer
+        @debug 'Set outbound eavesdrop', eavesdrop_key
+        @call.emit 'outbound', {key,id:@call.uuid}
+        yield @redis.setAsync eavesdrop_key, @call.uuid
+        @call.once 'CHANNEL_HANGUP_COMPLETE'
+        .then seem =>
+          @debug 'Clear outbound eavesdrop', eavesdrop_key
+          @call.emit 'outbound-end', {key,id:@call.uuid}
+          yield @redis.delAsync eavesdrop_key
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name
