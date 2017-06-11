@@ -86,6 +86,8 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
+      @debug '>>>> New call', @session.context
+
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
         return @respond '500 Malformed context'
@@ -108,7 +110,7 @@ In case of a transfer, the session identifier is included in the context.
 In all other cases, look (very hard) for a `xref` parameter.
 
       reference_in = (name) =>
-        if m = @req.variable(name)?.match /xref=([\w-]+)/
+        if m = @req.variable(name)?.match /xref[=:]([\w-]+)/
           @session.reference ?= m[1]
 
       reference_in 'sip_from_params'
