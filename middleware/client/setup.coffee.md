@@ -144,6 +144,27 @@ The default transfer context assumes the transfer request is coming from a custo
 
       if @session.direction is 'transfer'
         @session.transfer = true
+
+For a blind transfer (or an attended transfer to FIFO) we'll get:
+```
+variable_transfer_source: "(unix epoch time):(new profile's uuid):bl_xfer:(destination)/sbc-transfer-(xref)/inline:'socket:… async full'"
+variable_sip_h_Referred-By: '<sip:(referrer)@…;xref:(xref)>',
+variable_sip_refer_to: '<sip:(new-dest)@…>',
+```
+
+On the other hand, an attended transfer to internal extension does not seem to go through here.
+
+        sip_refer_to = @req.variable 'sip_refer_to'
+        sip_referred_by = @req.variable 'sip_h_Referred-By'
+
+        if sip_refer_to? and sip_referred_by?
+          m = sip_refer_to.match /sip:(\d+)@/
+          @debug 'refer_to', m[1]
+          @destination = m[1]
+          m = sip_referred_by.match /sip:(\d+)@/
+          @debug 'referred_by', m[1]
+          referred_by = m[1]
+
         @direction 'egress'
 
 The handled transfer context assumes the transfer request is coming from a (presumably trusted) server. It is used by the tough-rate call-handler.
