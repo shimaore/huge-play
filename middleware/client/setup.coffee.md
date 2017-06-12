@@ -142,7 +142,7 @@ The default transfer context assumes the transfer request is coming from a custo
         @session.reference
       ].join '-'
 
-      if @session.direction is 'transfer'
+      if @session.direction is 'transfer' or @req.variable('transfer_source')?
         @session.transfer = true
 
 For a blind transfer (or an attended transfer to FIFO) we'll get:
@@ -152,7 +152,6 @@ variable_sip_h_Referred-By: '["name"] <sip:(referrer)@…;xref:(xref)>',
 variable_sip_refer_to: '<sip:(new-dest)@…>',
 ```
 
-Attended transfer extension-to-extension will have
 ```
 Channel-Transfer-Source
 Caller-Transfer-Source
