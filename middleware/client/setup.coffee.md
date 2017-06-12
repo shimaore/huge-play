@@ -197,10 +197,12 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
         @debug.dev 'Missing profile', @session.profile
 
       sip_params = "xref=#{@session.reference}"
+      our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
 
       yield @set
         session_reference: @session.reference
         force_transfer_context: @session.default_transfer_context
+        # force_transfer_dialplan: our_dialplan
 
       yield @export
         session_reference: @session.reference
@@ -209,7 +211,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
 
         sip_redirect_profile: @session.profile
         sip_redirect_context: @session.default_transfer_context
-        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
+        sip_redirect_dialplan: our_dialplan
         sip_redirect_contact_params: sip_params
 
         sip_invite_params: sip_params
