@@ -27,6 +27,7 @@ Endpoint might be provided in the reference data for example for an `originate` 
         return @respond '485 Missing X-CCNQ3-Endpoint'
 
       @debug 'endpoint', @session.endpoint_name
+      @session.reference_data.endpoint = @session.endpoint_name
 
       yield @unset 'sip_h_X-CCNQ3-Endpoint'
 

@@ -36,7 +36,7 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>> New call', @session.context
+      @debug '>>> New call', @session.context, @data
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
@@ -148,11 +148,19 @@ The default transfer context assumes the transfer request is coming from a custo
 For a blind transfer (or an attended transfer to FIFO) we'll get:
 ```
 variable_transfer_source: "(unix epoch time):(new profile's uuid):bl_xfer:(destination)/sbc-transfer-(xref)/inline:'socket:… async full'"
-variable_sip_h_Referred-By: '<sip:(referrer)@…;xref:(xref)>',
+variable_sip_h_Referred-By: '["name"] <sip:(referrer)@…;xref:(xref)>',
 variable_sip_refer_to: '<sip:(new-dest)@…>',
 ```
 
-On the other hand, an attended transfer to internal extension does not seem to go through here.
+Attended transfer extension-to-extension will have
+```
+Channel-Transfer-Source
+Caller-Transfer-Source
+variable_transfer_source
+variable_transfer_history
+variable_pre_transfer_caller_id_name
+variable_pre_transfer_caller_id_number
+```
 
         sip_refer_to = @req.variable 'sip_refer_to'
         sip_referred_by = @req.variable 'sip_h_Referred-By'
