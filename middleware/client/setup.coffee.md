@@ -164,6 +164,8 @@ On the other hand, an attended transfer to internal extension does not seem to g
           m = sip_referred_by.match /sip:(\d+)@/
           @debug 'referred_by', m[1]
           referred_by = m[1]
+          @session.wait_for_aleg_ack = false      # in huge-play
+          @session.sip_wait_for_aleg_ack = false  # in tough-rate
 
         @direction 'egress'
 
