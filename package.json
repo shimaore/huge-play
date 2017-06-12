@@ -19,7 +19,7 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^3.0.6",
+    "black-metal": "^3.0.7",
     "bluebird": "^3.5.0",
     "bumpy-lawyer": "^2.5.2",
     "date-holidays": "^0.2.1",
