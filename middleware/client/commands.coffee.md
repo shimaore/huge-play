@@ -93,7 +93,7 @@ FIXME Allow for modules using us to specify which module(s) to run in case of me
     menu_conference_module =
       name: 'menu_conference_module'
       include: ->
-        return unless @dialplan is 'centrex'
+        return unless @session.dialplan is 'centrex'
         return unless m = @destination.match /^82(\d+)$/
         number = parseInt m[1], 10
         item = @session.number_domain_data?.conferences?[number]
