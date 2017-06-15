@@ -306,12 +306,12 @@ or is data only used during the notification.
 
         get_ref: seem ->
           @session.reference ?= @cfg.reference_id()
-          if @cfg.get_session_reference_data?
+          if @cfg.get_reference_data?
             @debug 'Loading reference_data', @session.reference
-            @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
+            @session.reference_data ?= yield @cfg.get_reference_data @session.reference
           else
             @session.reference_data ?= _id: @session.reference
-            @debug.dev 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            @debug.dev 'Missing @cfg.get_reference_data, using empty reference_data', @session.reference
 
         save_trace: ->
           @cfg.update_trace_data? @session
