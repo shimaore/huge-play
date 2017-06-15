@@ -349,7 +349,7 @@ or is data only used during the notification.
 
         respond: (response) ->
           @statistics?.add ['immediate-response',response]
-          @report state: 'immediate-response', response: response
+          @notify state: 'immediate-response', response: response
           @session.first_response_was ?= response
 
 Prevent extraneous processing of this call.
@@ -430,6 +430,7 @@ Retrieve number data.
           if @session.number.disabled
             @debug "Number #{dst_number} is disabled"
             @tag 'disabled-local-number'
+            @notify state:'disabled-local-number', number: @session.number._id
             yield @respond '486 Administratively Forbidden' # was 403
             return
 
@@ -442,6 +443,11 @@ Set the account so that if we redirect to an external number the egress module c
 
           @session.reference_data.account = @session.number.account
           @tag "account:#{@session.reference_data.account}"
+          @report
+            state:'validated-local-number'
+            number: @session.number._id
+            endpoint: @session.endpoint_name
+            account: @session.reference_data.account
           yield @save_ref()
 
           dst_number
@@ -453,12 +459,12 @@ Set the account so that if we redirect to an external number the egress module c
           @session.reference_data?.tags?= []
           if tag?
             @session.reference_data?.tags.push tag
-            @report 'add-tag', tag
+            @report {event:'tag', tag}
 
         user_tag: (tag) ->
           if tag?
             @tag "user-tag:#{tag}"
-            @report 'user-tag', tag
+            @report {event:'user-tag', tag}
 
         user_tags: (tags) ->
           return unless tags?
@@ -495,6 +501,7 @@ Keep recording (async)
               uri = yield @cfg.recording_uri name
               @debug 'Recording next segment', @call.uuid, uri
               yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+              @notify event:'recording'
               yield @sleep 1*minutes
               @debug 'Stopping previous segment', @call.uuid, last_uri
               yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
