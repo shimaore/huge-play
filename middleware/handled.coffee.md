@@ -24,5 +24,6 @@
         return
 
       @debug 'transfering call to', d
+      @report state:'handled', handled_to: d
       res = yield @action 'bridge', d
       @debug 'call transferred', res

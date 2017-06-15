@@ -18,20 +18,16 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.linger()
 
-      unless @statistics? and @report?
+      unless @statistics? and @notify?
         debug.dev 'Error: Improper environment'
         return
 
       @statistics.add 'incoming-calls'
-      @report state: 'incoming-call'
+      @notify state: 'incoming-call'
 
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem (res) =>
         debug "Channel Hangup Complete"
-
-Invalidate our local copy of `@session.reference_data`.
-
-        yield @get_ref()
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
@@ -51,7 +47,7 @@ Invalidate our local copy of `@session.reference_data`.
         @session.cdr_report = report
         @call.emit 'cdr_report', report
 
-Update the (existing) call reference data
+Update the (existing) call data
 
         @session.call_data.end_time = new Date() .toJSON()
         @session.call_data.report = report
@@ -63,6 +59,7 @@ Update the (existing) call reference data
           @session.call_data.tz_end_time = Moment @session.call_data.end_time
             .tz @session.timezone
             .format()
+        yield @save_call()
 
         for own k,v of report
           switch k
@@ -77,8 +74,8 @@ Update the (existing) call reference data
 
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
-        @report state: 'end', data: report
-        yield @save_ref()
+        @notify state: 'end', data: report
+        yield @save_call()
         yield @save_trace()
         debug "CDR: Channel Hangup Complete", report
       .catch (error) =>

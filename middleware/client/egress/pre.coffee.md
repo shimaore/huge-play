@@ -240,6 +240,6 @@ For backward-compatibility we currently ignore ICE proposals.
 
       yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
-      @report state:'egress'
+      @notify state:'egress'
       @debug 'OK'
       return

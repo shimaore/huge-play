@@ -16,17 +16,22 @@ Rewrite error response code.
       switch
         when @session.call_failed
           @debug 'Call Failed'
+          @notify state:'call-failed'
           yield @respond '486 Call Failed'
 
         when @session.was_transferred
+          @notify state:'call-was-transferred'
           @debug 'Was Transferred'
 
         when @session.was_picked
+          @notify state:'call-was-picked'
           @debug 'Was Picked'
 
         else
           @debug 'Hangup'
           @tag 'hangup'
+          @notify state:'hangup'
           yield @action 'hangup'
 
+      yield @save_call()
       yield @save_ref()

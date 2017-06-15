@@ -19,8 +19,8 @@ This module also triggers calls from within a conference.
 
     @handler = handler = (cfg,ev) ->
 
-      save_ref = seem (data,call) ->
-        data = yield cfg.update_session_reference_data data, call
+      save_ref = seem (data) ->
+        data = yield cfg.update_reference_data data
         ev.emit 'reference', data
         data
 
@@ -34,8 +34,8 @@ This module also triggers calls from within a conference.
       sofia_profile = "huge-play-#{profile}-egress"
       context = "#{profile}-egress"
 
-      unless cfg.update_session_reference_data?
-        debug 'Missing cfg.update_session_reference_data, not starting.'
+      unless cfg.update_reference_data?
+        debug 'Missing cfg.update_reference_data, not starting.'
         return
 
 See huge-play/conf/freeswitch
@@ -103,10 +103,12 @@ ANSWER: Yes. And store the result in `caller`.
 
 Call Reference Data
 
-        call =
+        call_data =
           uuid: "place-call-#{_id}"
           session: _id
           start_time: new Date() .toJSON()
+
+        call_data = yield save_call call_data
 
 Session Reference Data
 
@@ -122,7 +124,7 @@ Session Reference Data
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
         xref = "xref=#{_id}"
         params = make_params
@@ -190,7 +192,7 @@ The `originate` command will return when the call is answered by the callee (or 
         else
           data.tags.push 'caller-failed'
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
         debug 'Session state:', data.tags
 

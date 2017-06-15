@@ -214,6 +214,7 @@ Configure our client to receive specific queues.
           @session.direction = direction
           @call.emit 'direction', direction
           @tag "direction:#{direction}"
+          @report {event:'direction', direction}
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
@@ -255,10 +256,14 @@ Data that will both be recorded in the `reports` array and in the notification. 
           o.dialplan ?= @session.dialplan
           o.country ?= @session.country
           o.number_domain ?= @session.number_domain
+          o.report_type = 'in-call'
 
           @session.reports.push o
 
-Data that is only reported in the notification since it is duplicated when published in the reference (because it is already set up in `@session.call_reference_data`) and does not change,
+        notify: (o) ->
+          @report o
+
+Data that is only reported in the notification since it is duplicated when published in the reference (because it is already set up in `@session.call_data`) and does not change,
 
           notification =
             call: @call.uuid
@@ -485,6 +490,7 @@ Set the account so that if we redirect to an external number the egress module c
 Keep recording (async)
 
           keep_recording = seem =>
+            @notify event:'recording'
             uri = yield @cfg.recording_uri name
             @debug 'Recording', @call.uuid, uri
             outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"

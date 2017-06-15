@@ -91,7 +91,7 @@ If the call-group should use the queuer, then do that.
 
       if fifo.queue
 
-        @report state:'queue'
+        @notify state:'queue', name:fifo.full_name, queue: fifo.queue
 
         {queuer} = @cfg
         Call = @cfg.queuer_Call
@@ -164,7 +164,7 @@ Attempt overflow after a delay
 
 Otherwise use the hunt-group behavior.
 
-      @report state:'group'
+      @notify state:'group', name:fifo.full_name
 
       sofias = []
 

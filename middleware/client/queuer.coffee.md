@@ -82,11 +82,17 @@
         redis: redis
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
+        report: seem (o) ->
+          o.report_type = 'queuer-call'
+          notification =
+            call: @id
+            reference: yield @get_reference()
+          yield cfg.save_report o, notification
         get_reference_data: (reference) ->
           cfg.get_session_reference_data reference
-        update_reference_data: seem (data,call_reference_data) ->
+        update_reference_data: seem (data,call_data) ->
           data.host ?= cfg.host
-          data = yield cfg.update_session_reference_data data, call_reference_data
+          data = yield cfg.update_reference_data data, call_data
           cfg.statistics.emit 'reference', data
 
       class HugePlayAgent extends TaggedAgent
@@ -101,8 +107,12 @@
             _in: [
               "endpoint:#{@key}"
               "number:#{@key}"
+              "number_domain:#{@domain}"
             ]
             state: new_state
+            agent: @key
+            number: @number
+            number_domain: @domain
 
           notification.tags = yield @tags().catch -> []
 
@@ -118,6 +128,13 @@
           cfg.statistics.emit 'queuer', notification
           debug 'agent.notify: done', @key, notification
           return
+
+        report: seem (o) ->
+          o.agent = @key
+          o.number = @number
+          o.number_domain = @domain
+          o.report_type = 'queuer-agent'
+          yield cfg.save_report? o
 
         create_egress_call: seem ->
           debug 'create_egress_call', @domain
@@ -185,10 +202,12 @@ See `in_domain` in black-metal/tagged.
           }
 
           debug 'create_egress_call: saving reference', data
-          yield cfg.update_session_reference_data data,
+          yield cfg.update_reference_data data,
             uuid: 'create-egress-call'
             session: "create-egress-call-#{data._id}"
             start_time: new Date() .toJSON()
+            source: @number
+            destination: body.destination
 
           call = new HugePlayCall
             destination: data._id
@@ -246,14 +265,14 @@ On-hook agent
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_onhook()
-        yield @report 'queuer-login', {source,fifo,tags}
+        yield @report {state:'queuer-login',source,fifo,tags}
         agent
 
       @queuer_leave = seem (source,fifo) ->
         debug 'queuer_leave', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        yield @report 'queuer-leave', {source,fifo}
+        yield @report {state:'queuer-leave',source,fifo}
         agent
 
       @queuer_logout = seem (source,fifo) ->
@@ -262,7 +281,7 @@ On-hook agent
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.clear_tags()
         yield agent.transition 'logout'
-        yield @report 'queuer-logout', {source,fifo}
+        yield @report {state:'queuer-logout',source,fifo}
         agent
 
 Off-hook agent
@@ -274,5 +293,5 @@ Off-hook agent
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_offhook uuid
-        yield @report 'queuer-offhook', {source,fifo,tags}
+        yield @report {state:'queuer-offhook',source,fifo,tags}
         agent

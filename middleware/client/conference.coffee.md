@@ -126,7 +126,7 @@ Conference is handled locally
 
       @debug 'Conference is local'
 
-      @report state:'conference'
+      @notify state:'conference', name:conf_name
 
 Validate passcode if any.
 

@@ -36,6 +36,9 @@
           res:
             set: -> Promise.resolve null
             export: -> Promise.resolve null
+          call:
+            uuid: 'little-bear'
+            emit: ->
         l.include.call ctx, ctx
         s.include.call ctx, ctx
         m.include
