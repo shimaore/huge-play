@@ -86,6 +86,7 @@
           o.report_type = 'queuer-call'
           notification =
             call: @id
+            session: yield @get 'session'
             reference: yield @get_reference()
           yield cfg.save_report o, notification
         get_reference_data: (reference) ->
