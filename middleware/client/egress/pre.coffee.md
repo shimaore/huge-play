@@ -9,6 +9,10 @@ First-line handler for outbound calls
 
       return unless @session.direction is 'egress'
 
+      music_uri = (doc) =>
+        return null unless doc.music?
+        @prompt.uri 'prov', 'prov', doc._id, doc.music
+
       @tag 'egress'
 
 Endpoint
@@ -36,8 +40,9 @@ Endpoint might be provided in the reference data for example for an `originate` 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
       @tag @session.endpoint._id
       if @session.endpoint.timezone?
-        @session.timezone ?= @session.endpoint.timezone
-
+        @session.timezone = @session.endpoint.timezone
+      if @session.endpoint.music?
+        @session.music = music_uri @session.endpoint
       if @session.endpoint.trace
         @session.dev_logger = true
 
@@ -84,8 +89,13 @@ The `number_domain` field is required, but the number-domain record is optional.
 
       @debug 'number_domain', number_domain
       @tag @session.number_domain_data._id
+
+Number-domain is less specific than endpoint, so do not override.
+
       if @session.number_domain_data.timezone?
         @session.timezone ?= @session.number_domain_data.timezone
+      if @session.number_domain_data.music?
+        @session.music ?= music_uri @session.number_domain_data
 
 Source (calling) number
 -----------------------
@@ -108,8 +118,13 @@ On a static trunk, the number might not be present.
 
       if @session.number._id?
         @tag @session.number._id
+
+Number is more specific than endpoint or number-domain, override.
+
       if @session.number.timezone?
-        @session.timezone ?= @session.number.timezone
+        @session.timezone = @session.number.timezone
+      if @session.number.music?
+        @session.music = music_uri @session.number
       if @session.number.trace
         @session.dev_logger = true
       if @session.number.record_egress

@@ -9,6 +9,10 @@
 
       return unless @session.direction is 'ingress'
 
+      music_uri = (doc) =>
+        return null unless doc.music?
+        @prompt.uri 'prov', 'prov', doc._id, doc.music
+
       @debug "Testing for FIFO/conference/menu in #{@destination}"
 
       m = @destination.match /^(fifo|conf|menu|localconf)-(.+)$/
@@ -43,6 +47,8 @@ In this case the conference name is the number-domain and the conference name.
 
         if @session.number_domain_data?.timezone?
           @session.timezone ?= @session.number_domain_data?.timezone
+        if @session.number_domain_data?.music?
+          @session.music ?= music_uri @session.number_domain_data
 
 We won't be able to route if there is no number-domain data.
 

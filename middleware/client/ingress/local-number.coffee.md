@@ -7,6 +7,10 @@
 
       return unless @session.direction is 'ingress'
 
+      music_uri = (doc) =>
+        return null unless doc.music?
+        @prompt.uri 'prov', 'prov', doc._id, doc.music
+
 Global number provides inbound routing
 --------------------------------------
 
@@ -51,6 +55,8 @@ The dialplan and country (and other parameters) might also be available in the `
 * doc.number_domain.country (optional) country used for ingress calls to this domain.
 
       @session.timezone = @session.number_domain_data?.timezone ? @session.e164_number.timezone
+      @session.music    = music_uri @session.number_domain_data
+      @session.music   ?= music_uri @session.e164_number
       @session.dialplan = @session.number_domain_data?.dialplan ? @session.e164_number.dialplan
       @session.country  = @session.number_domain_data?.country  ? @session.e164_number.country
       if @session.country?
