@@ -1,6 +1,7 @@
     seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:client:setup"
+    debug = (require 'tangible') @name
 
     uuidV4 = require 'uuid/v4'
 
@@ -10,7 +11,18 @@
 * doc.local_number.type (required) `number`
 * doc.local_number.number (required) `<local-number>@<number-domain>`
 
+Config
+======
+
+Note that client-side the fields are called `profiles` and are stored in the JSON configuration.
+
+Call-Processing
+===============
+
     @include = seem ->
+
+Session Context
+---------------
 
 For example, in `@data` we might get:
 
@@ -21,9 +33,6 @@ variable_recovery_profile_name: 'huge-play-sbc-ingress',
 ```
 
 The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in  @session.sip_profile .
-
-Session Context
----------------
 
 * session.context (string) The original Sofia Context for this (ingress) call.
 
@@ -36,7 +45,7 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>> New call', @session.context, @data
+      @debug '>>>> New call', @session.context, @data
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
@@ -135,7 +144,7 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
 Logger
 ------
 
-      if @session.reference_data.dev_logger
+      if @session.reference_data?.dev_logger
         @session.dev_logger = true
 
 SIP Profile
@@ -143,13 +152,15 @@ SIP Profile
 
 Define the (sofia-sip) SIP profiles used to send calls out.
 
-      @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
-      @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
+      sip_profile_client = "#{pkg.name}-#{@session.profile}-egress"
+      sip_profile_carrier = "#{pkg.name}-#{@session.profile}-ingress"
+      @session.sip_profile_client ?= sip_profile_client
+      @session.sip_profile_carrier ?= sip_profile_carrier
 
       if @session.direction is 'ingress'
-        @session.sip_profile ?= @session.sip_profile_client
+        @session.sip_profile ?= sip_profile_client
       else
-        @session.sip_profile ?= @session.sip_profile_carrier
+        @session.sip_profile ?= sip_profile_carrier
 
       @session.transfer = false
 
@@ -221,6 +232,9 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
         @session.client_server = "#{@cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
       else
         @debug.dev 'Missing profile', @session.profile
+
+Set FreeSwitch variables
+------------------------
 
       sip_params = "xref=#{@session.reference}"
       our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"

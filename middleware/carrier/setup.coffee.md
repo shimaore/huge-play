@@ -13,6 +13,9 @@
 Config
 ======
 
+Note that carrier-side the fields are called `sip_profiles` and are stored in the database.
+The FreeSwitch configuration uses the `profiles` field, which defaults to using port 5080.
+
     @config = seem ->
 
 Create the proper profiles and ACLs
@@ -73,9 +76,10 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
       debug 'Configuring SIP Profiles', @cfg.sip_profiles
       null
 
-    @include = seem ->
+Call-Processing
+===============
 
-First start with the same code as client-side.
+    @include = seem ->
 
 Session Context
 ---------------
@@ -86,7 +90,7 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>>> New call', @session.context
+      @debug '>>>> New call', @session.context, @data
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
@@ -103,7 +107,7 @@ Session Reference
 * session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
-In case of a transfer, the session identifier is included in the context.
+In case of a transfer, the session identifier might be included in the context.
 
       @session.reference ?= @req.variable 'session_reference'
 
@@ -167,11 +171,14 @@ SIP Profile
 
 Define the (sofia-sip) SIP profiles used to send calls out.
 
+      sip_profile_client = "#{pkg.name}-#{@session.profile}-egress"
+      sip_profile_carrier = "#{pkg.name}-#{@session.profile}-ingress"
+
       @session.sip_profile = @req.variable 'sip_profile'
       if @session.direction is 'ingress'
-        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-egress"
+        @session.sip_profile ?= sip_profile_client
       else
-        @session.sip_profile ?= "#{pkg.name}-#{@session.profile}-ingress"
+        @session.sip_profile ?= sip_profile_carrier
 
       @session.transfer = false
 
@@ -196,7 +203,11 @@ The FreeSwitch configuration uses the `profiles` field, which defaults to using 
 
       @session.profile_data = @cfg.sip_profiles[@session.profile]
 
+Set FreeSwitch variables
+------------------------
+
       sip_params = "xref=#{@session.reference}"
+      our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
 
       yield @set
         session_reference: @session.reference
@@ -207,7 +218,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
 
         sip_redirect_profile: @session.profile
         sip_redirect_context: @session.default_transfer_context
-        sip_redirect_dialplan: "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
+        sip_redirect_dialplan: our_dialplan
         sip_redirect_contact_params: sip_params
 
         sip_invite_params: sip_params
