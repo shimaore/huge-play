@@ -53,14 +53,14 @@ Invalidate our local copy of `@session.reference_data`.
 
 Update the (existing) call reference data
 
-        @session.call_reference_data.end_time = new Date() .toJSON()
-        @session.call_reference_data.report = report
+        @session.call_data.end_time = new Date() .toJSON()
+        @session.call_data.report = report
         if @session.timezone?
-          @session.call_reference_data.timezone = @session.timezone
-          @session.call_reference_data.tz_start_time = Moment @session.call_reference_data.start_time
+          @session.call_data.timezone = @session.timezone
+          @session.call_data.tz_start_time = Moment @session.call_data.start_time
             .tz @session.timezone
             .format()
-          @session.call_reference_data.tz_end_time = Moment @session.call_reference_data.end_time
+          @session.call_data.tz_end_time = Moment @session.call_data.end_time
             .tz @session.timezone
             .format()
 

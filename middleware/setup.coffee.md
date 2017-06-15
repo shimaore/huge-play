@@ -277,19 +277,27 @@ or is data only used during the notification.
           @call.emit 'report', notification
           @cfg.statistics.emit 'report', notification
 
-        save_ref: seem ->
-          if @cfg.update_session_reference_data?
-            data = @session.reference_data
-            data.host ?= @cfg.host
-            call = @session.call_reference_data
-            call.host ?= @cfg.host
-            call.references ?= []
-            call.references.push @session.reference unless @session.reference in call.references
-            data = yield @cfg.update_session_reference_data data, call
-            @cfg.statistics.emit 'reference', data
-            @session.reference_data = data
+        save_call: seem ->
+          if @cfg.update_call_data?
+            {call_data} = @session
+            call_data.host ?= @cfg.host
+            call_data.references ?= []
+            call_data.references.push @session.reference unless @session.reference in call_data.references
+            call_data = yield @cfg.update_call_data call_data
+            @cfg.statistics.emit 'call', call_data
+            @session.call_data = call_data
           else
-            @debug.dev 'Missing @cfg.update_session_reference_data, not saving'
+            @debug.dev 'Missing @cfg.update_call_data, not saving'
+
+        save_ref: seem ->
+          if @cfg.update_reference_data?
+            {reference_data} = @session
+            reference_data.host ?= @cfg.host
+            reference_data = yield @cfg.update_reference_data reference_data
+            @cfg.statistics.emit 'reference', reference_data
+            @session.reference_data = reference_data
+          else
+            @debug.dev 'Missing @cfg.update_reference_data, not saving'
 
         get_ref: seem ->
           @session.reference ?= @cfg.reference_id()

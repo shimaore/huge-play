@@ -28,7 +28,7 @@ FIXME: use redis instead.
 
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
-      if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
+      if @cfg.get_reference_data? or @cfg.update_reference_data?
         @debug.dev 'Another module provided the functions, not starting.'
         return
 
@@ -49,10 +49,13 @@ FIXME: use redis instead.
         period = id[0...7]
         database = [db_prefix,period].join '-'
 
+      now = ->
+        new Date().toJSON()
+
 Get
 ---
 
-      @cfg.get_session_reference_data = get_data = (id) ->
+      @cfg.get_reference_data = get_data = (id) ->
         database = name_for_id id
 
         db = get_db database
@@ -63,16 +66,51 @@ Get
 Update
 ------
 
-      save_call = (call,tries = 3) =>
+### Report
+
+Normally reports are generated in-call and stored in the `reports` array of the call.
+For out-of-call reports we store them in a structure similar to the one used for calls.
+
+      @cfg.save_report = save_report = (o,notification = {},tries = 3) =>
+        o.timestamp ?= now()
+
+        doc =
+          host: @cfg.host
+          reports: [o]
+
+        for own k,v of data when k[0] isnt '_' and v? and typeof v isnt 'function'
+          doc[k] ?= v
+
+        db = get_db o.timestamp
+        db
+        .put doc
+
+In case of failure, retry.
+
+        .catch seem (error) =>
+          @debug "reference error: #{error.stack}", error
+          if tries-- > 0
+            yield sleep 181
+            yield save_report o, tries
+          else
+            call
+
+### Call/Session
+
+A call/session is a single call handled by a FreeSwitch call to `socket`. It is slightly related but not exactly quite what SIP would call a "call".
+
+      @cfg.update_call_data = save_call = (call_data,tries = 3) =>
+
+        call_data.timestamp ?= now()
 
 Merge calls (but keep them ordered)
 Note: we use the parameter `call` and completely ignore the values in `data.calls`.
 
         doc = yield db
-          .get call.session
-          .catch -> _id:call.session
+          .get call_data.session
+          .catch -> _id:call_data.session
 
-        for own k,v of data when k[0] isnt '_' and k isnt 'tags' and k isnt 'calls' and v? and typeof v isnt 'function'
+        for own k,v of data when k[0] isnt '_' and v? and typeof v isnt 'function'
           doc[k] = v
 
         db
@@ -87,15 +125,19 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "reference error: #{error.stack}", error
+          @debug "update_call_data error: #{error.stack}", error
           if tries-- > 0
-            yield sleep 173
-            yield save_call call, tries
+            yield sleep 179
+            yield save_call call_data, tries
           else
-            call
+            call_data
 
-      @cfg.update_session_reference_data = save_data = seem (data,call,tries = 3) =>
-        id = data._id
+### Reference
+
+A reference is a what a human would call a `call`: a call originated somewhere, as it progresses through menus, redirections, transfers, …
+
+      @cfg.update_reference_data = save_data = seem (reference_data,tries = 3) =>
+        id = reference_data._id
         database = name_for_id id
 
         db = get_db database
@@ -106,9 +148,9 @@ In case of failure, retry, or return the submitted data.
 Merge tags (but keep them ordered)
 
         doc.tags ?= []
-        if data.tags?
+        if reference_data.tags?
           tags = new Set doc.tags
-          for tag in data.tags when not tags.has tag
+          for tag in reference_data.tags when not tags.has tag
             doc.tags.push tag
 
 Known fields are:
@@ -117,7 +159,7 @@ Known fields are:
 - destination (used by exultant-songs)
 - account (set by huge-play, not sure it's actually used)
 
-        for own k,v of data when k[0] isnt '_' and k isnt 'tags' and k isnt 'calls' and v? and typeof v isnt 'function'
+        for own k,v of reference_data when k[0] isnt '_' and k isnt 'tags' and k isnt 'calls' and v? and typeof v isnt 'function'
           doc[k] = v
 
         db
@@ -132,12 +174,12 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "reference error: #{error.stack}", error
+          @debug "update_reference_data error: #{error.stack}", error
           if tries-- > 0
             yield sleep 173
-            yield save_data data, call, tries
+            yield save_data reference_data, call, tries
           else
-            data
+            reference_data
 
       @debug 'Ready.'
 

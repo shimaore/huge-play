@@ -338,7 +338,7 @@ Calendars
             .post uri
             .send
               reference_data: @session.reference_data
-              call_reference_data: @session.call_reference_data
+              call_data: @session.call_data
               tags: @session.reference_data?.tags
               ccnq_from_e164: @session.ccnq_from_e164
               ccnq_to_e164: @session.ccnq_to_e164
