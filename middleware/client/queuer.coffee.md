@@ -1,4 +1,4 @@
-    @name = 'huge-play:middleware:queuer'
+    @name = 'huge-play:middleware:client:queuer'
     debug = (require 'tangible') @name
     seem = require 'seem'
     pkg = name:'huge-play'
@@ -246,12 +246,14 @@ On-hook agent
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_onhook()
+        yield @report 'queuer-login', {source,fifo,tags}
         agent
 
       @queuer_leave = seem (source,fifo) ->
         debug 'queuer_leave', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        yield @report 'queuer-leave', {source,fifo}
         agent
 
       @queuer_logout = seem (source,fifo) ->
@@ -260,6 +262,7 @@ On-hook agent
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.clear_tags()
         yield agent.transition 'logout'
+        yield @report 'queuer-logout', {source,fifo}
         agent
 
 Off-hook agent
@@ -271,4 +274,5 @@ Off-hook agent
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_offhook uuid
+        yield @report 'queuer-offhook', {source,fifo,tags}
         agent

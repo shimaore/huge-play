@@ -248,6 +248,7 @@ We assume the room names match record IDs.
 
 Data that will both be recorded in the `reports` array and in the notification. This is data that might change in a given session and it is therefor useful to record at the different reporting spots.
 
+          o.timestamp = new Date().toJSON()
           o.source ?= @source
           o.destination ?= @destination
           o.direction ?= @session.direction
@@ -280,7 +281,11 @@ or is data only used during the notification.
           if @cfg.update_session_reference_data?
             data = @session.reference_data
             data.host ?= @cfg.host
-            data = yield @cfg.update_session_reference_data data, @session.call_reference_data
+            call = @session.call_reference_data
+            call.host ?= @cfg.host
+            call.references ?= []
+            call.references.push @session.reference unless @session.reference in call.references
+            data = yield @cfg.update_session_reference_data data, call
             @cfg.statistics.emit 'reference', data
             @session.reference_data = data
           else
@@ -403,6 +408,8 @@ Retrieve number data.
           @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
+          if @session.number.music?
+            @session.music ?= @session.number.music
 
           if @session.number.error?
             @debug "Could not locate destination number #{dst_number}"
@@ -438,10 +445,12 @@ Set the account so that if we redirect to an external number the egress module c
           @session.reference_data?.tags?= []
           if tag?
             @session.reference_data?.tags.push tag
+            @report 'add-tag', tag
 
         user_tag: (tag) ->
           if tag?
             @tag "user-tag:#{tag}"
+            @report 'user-tag', tag
 
         user_tags: (tags) ->
           return unless tags?

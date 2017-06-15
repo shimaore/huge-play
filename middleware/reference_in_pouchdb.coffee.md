@@ -63,6 +63,37 @@ Get
 Update
 ------
 
+      save_call = (call,tries = 3) =>
+
+Merge calls (but keep them ordered)
+Note: we use the parameter `call` and completely ignore the values in `data.calls`.
+
+        doc = yield db
+          .get call.session
+          .catch -> _id:call.session
+
+        for own k,v of data when k[0] isnt '_' and k isnt 'tags' and k isnt 'calls' and v? and typeof v isnt 'function'
+          doc[k] = v
+
+        db
+        .put doc
+
+In case of success, return the updated document.
+
+        .then ({rev}) ->
+          doc._rev = rev
+          doc
+
+In case of failure, retry, or return the submitted data.
+
+        .catch seem (error) =>
+          @debug "reference error: #{error.stack}", error
+          if tries-- > 0
+            yield sleep 173
+            yield save_call call, tries
+          else
+            call
+
       @cfg.update_session_reference_data = save_data = seem (data,call,tries = 3) =>
         id = data._id
         database = name_for_id id
@@ -79,16 +110,6 @@ Merge tags (but keep them ordered)
           tags = new Set doc.tags
           for tag in data.tags when not tags.has tag
             doc.tags.push tag
-
-Merge calls (but keep them ordered)
-Note: we use the parameter `call` and completely ignore the values in `data.calls`.
-
-        do (call) ->
-          doc.calls ?= []
-          for c, i in doc.calls when c.session is call.session
-            doc.calls[i] = call
-            return
-          doc.calls.push call
 
 Known fields are:
 - tags (managed above)

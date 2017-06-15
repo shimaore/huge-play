@@ -63,7 +63,6 @@ Update the (existing) call reference data
           @session.call_reference_data.tz_end_time = Moment @session.call_reference_data.end_time
             .tz @session.timezone
             .format()
-        yield @save_ref()
 
         for own k,v of report
           switch k
@@ -79,6 +78,7 @@ Update the (existing) call reference data
 Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
 
         @report state: 'end', data: report
+        yield @save_ref()
         yield @save_trace()
         debug "CDR: Channel Hangup Complete", report
       .catch (error) =>
