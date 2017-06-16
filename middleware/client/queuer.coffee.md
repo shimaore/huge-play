@@ -26,6 +26,7 @@
       Agent = @cfg.queuer_Agent
 
       @register 'queuer:get-agent-state', 'dial_calls'
+      @register 'queuer:log-agent-out', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
         debug 'queue:get-agent-state', key
@@ -35,6 +36,14 @@
         # async
         agent.notify state, {missed}
         debug 'queue:get-agent-state: done', key, state
+        return
+
+      @socket.on 'queuer:log-agent-out', seem (key) =>
+        debug 'queue:log-agent-out', key
+        agent = new Agent queuer, key
+        yield agent.clear_tags()
+        yield agent.transition 'logout'
+        debug 'queue:log-agent-out: done', key, state
         return
 
       @register 'queuer:get-egress-pool', 'dial_calls'
