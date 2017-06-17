@@ -204,6 +204,8 @@ See `in_domain` in black-metal/tagged.
             destination: data._id
             tags: body.tags
 
+          yield call.save()
+
           yield call.set_remote_number body.destination
 
           # async
