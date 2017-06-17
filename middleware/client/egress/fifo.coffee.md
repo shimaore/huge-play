@@ -113,7 +113,7 @@ This works only for centrex.
         when ACTION_INTERCEPT
           return failed() unless number?
 
-          uuid = yield @redis.getAsync "inbound_call:#{number}@#{@session.number_domain}"
+          uuid = yield @local_redis.getAsync "inbound_call:#{number}@#{@session.number_domain}"
           @debug 'Intercept', uuid
           return failed() unless uuid?
 
@@ -127,8 +127,8 @@ Eavesdrop: call to listen (no notification, no whisper).
         when ACTION_EAVESDROP
           return failed() unless number?
 
-          inbound_uuid = yield @redis.getAsync "inbound:#{number}@#{@session.number_domain}"
-          outbound_uuid = yield @redis.getAsync "outbound:#{number}@#{@session.number_domain}"
+          inbound_uuid = yield @local_redis.getAsync "inbound:#{number}@#{@session.number_domain}"
+          outbound_uuid = yield @local_redis.getAsync "outbound:#{number}@#{@session.number_domain}"
           @debug 'Eavesdrop', inbound_uuid, outbound_uuid
           switch
             when inbound_uuid?
@@ -164,8 +164,8 @@ Monitor: call to listen (with notification beep), and whisper
         when ACTION_MONITOR
           return failed() unless number?
 
-          inbound_uuid = yield @redis.getAsync "inbound:#{number}@#{@session.number_domain}"
-          outbound_uuid = yield @redis.getAsync "outbound:#{number}@#{@session.number_domain}"
+          inbound_uuid = yield @local_redis.getAsync "inbound:#{number}@#{@session.number_domain}"
+          outbound_uuid = yield @local_redis.getAsync "outbound:#{number}@#{@session.number_domain}"
           @debug 'Monitor', inbound_uuid, outbound_uuid
           switch
             when inbound_uuid?

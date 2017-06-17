@@ -165,12 +165,12 @@ Eavesdrop registration
       unless @session.transfer
         @debug 'Set outbound eavesdrop', eavesdrop_key
         @call.emit 'outbound', {key,id:@call.uuid}
-        yield @redis.setAsync eavesdrop_key, @call.uuid
+        yield @local_redis.setAsync eavesdrop_key, @call.uuid
         @call.once 'CHANNEL_HANGUP_COMPLETE'
         .then seem =>
           @debug 'Clear outbound eavesdrop', eavesdrop_key
           @call.emit 'outbound-end', {key,id:@call.uuid}
-          yield @redis.delAsync eavesdrop_key
+          yield @local_redis.delAsync eavesdrop_key
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name

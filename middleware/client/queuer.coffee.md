@@ -76,6 +76,7 @@
       cfg = @cfg
 
       redis = @cfg.redis_client
+      local_redis = @cfg.local_redis_client
       prov = @cfg.prov
       profile = @cfg.session?.profile
       api = API @cfg
@@ -84,11 +85,11 @@
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
 
-      return unless redis? and prov? and profile? and host? and port?
+      return unless redis? and local_redis? and prov? and profile? and host? and port?
 
       class HugePlayCall extends TaggedCall
 
-        redis: redis
+        redis: local_redis
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
         get_reference_data: (reference) ->
@@ -100,7 +101,7 @@
 
       class HugePlayAgent extends TaggedAgent
 
-        redis: redis
+        redis: local_redis
 
         new_call: (data) -> new HugePlayCall data
 
@@ -212,8 +213,11 @@ See `in_domain` in black-metal/tagged.
 
           return call
 
+The queuer's redis is used for call pools and the agents pool.
+Since we're bound to a server for domains it's OK.
+
       Queuer = queuer
-        redis: @cfg.redis_client
+        redis: local_redis
         Agent: HugePlayAgent
         Call: HugePlayCall
       @cfg.queuer_Agent = HugePlayAgent
