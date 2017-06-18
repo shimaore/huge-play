@@ -1,6 +1,7 @@
     seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:client:setup"
+    debug = (require 'tangible') @name
 
     uuidV4 = require 'uuid/v4'
 
@@ -10,7 +11,18 @@
 * doc.local_number.type (required) `number`
 * doc.local_number.number (required) `<local-number>@<number-domain>`
 
+Config
+======
+
+Note that client-side the fields are called `profiles` and are stored in the JSON configuration.
+
+Call-Processing
+===============
+
     @include = seem ->
+
+Session Context
+---------------
 
 For example, in `@data` we might get:
 
@@ -21,9 +33,6 @@ variable_recovery_profile_name: 'huge-play-sbc-ingress',
 ```
 
 The `sofia_profile_name` above is the one for the inbound leg (`A` leg). For the outbound leg we use the profile "on the other side"; its name is stored in  @session.sip_profile .
-
-Session Context
----------------
 
 * session.context (string) The original Sofia Context for this (ingress) call.
 
@@ -36,7 +45,7 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>> New call', @session.context, @data
+      @debug '>>>> New call', @session.context, @data
 
       unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
@@ -71,23 +80,42 @@ In all other cases, look (very hard) for a `xref` parameter.
       reference_in 'sip_referred_by_params'
       reference_in 'sip_h_X-FS-Refer-Params'
 
+If the call was originated by a phone it's normal for it to not have a reference,
+in which case one is created.
+
       yield @get_ref()
       @tag 'client-side'
       @tag "source:#{@source}"
       @tag "destination:#{@destination}"
+      yield @save_ref()
 
-* session.call_reference_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
+* session.call_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.
 
-      @session.call_reference_data =
+      @session.call_data =
+
+The call UUID (managed by FreeSwitch).
+
         uuid: @call.uuid
+
+The session ID (managed by `tangible/middleware`).
+
         session: @session._id
-        reports: @session.reports
+
+The reference we know about at the start of the call.
+
+        reference: @session.reference
+
+The time we started processing.
+
         start_time: new Date() .toJSON()
+
+A record of the (original, pre-processing) source and destination.
+
         source: @source
         destination: @destination
 
-      yield @save_ref()
+      yield @save_call()
 
 Click-to-dial (`place-call`)
 ----------------------------
@@ -116,7 +144,7 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
 Logger
 ------
 
-      if @session.reference_data.dev_logger
+      if @session.reference_data?.dev_logger
         @session.dev_logger = true
 
 SIP Profile
@@ -124,13 +152,15 @@ SIP Profile
 
 Define the (sofia-sip) SIP profiles used to send calls out.
 
-      @session.sip_profile_client ?= "#{pkg.name}-#{@session.profile}-egress"
-      @session.sip_profile_carrier ?= "#{pkg.name}-#{@session.profile}-ingress"
+      sip_profile_client = "#{pkg.name}-#{@session.profile}-egress"
+      sip_profile_carrier = "#{pkg.name}-#{@session.profile}-ingress"
+      @session.sip_profile_client ?= sip_profile_client
+      @session.sip_profile_carrier ?= sip_profile_carrier
 
       if @session.direction is 'ingress'
-        @session.sip_profile ?= @session.sip_profile_client
+        @session.sip_profile ?= sip_profile_client
       else
-        @session.sip_profile ?= @session.sip_profile_carrier
+        @session.sip_profile ?= sip_profile_carrier
 
       @session.transfer = false
 
@@ -202,6 +232,9 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
         @session.client_server = "#{@cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
       else
         @debug.dev 'Missing profile', @session.profile
+
+Set FreeSwitch variables
+------------------------
 
       sip_params = "xref=#{@session.reference}"
       our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"

@@ -259,7 +259,9 @@ Note the different alternatives for routing:
         { parameters, to_uri }
       ]
 
-      @report state: 'ingress-call'
+      @notify
+        state: 'ingress-call'
+        endpoint: @session.endpoint_name
 
 ### Build the set of `_in` targets for notifications of the reference data.
 

@@ -85,6 +85,7 @@
               emit: ->
               linger: -> Promise.resolve null
               exit: -> Promise.resolve null
+              event_json: -> Promise.resolve null
             req: # useful-wind/router
               variable: -> null
               header: -> null

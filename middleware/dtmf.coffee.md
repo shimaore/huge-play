@@ -2,7 +2,7 @@
     seem = require 'seem'
     debug = (require 'tangible') @name
 
-    @include = ->
+    @include = seem ->
 
       timer = null
       handler = null
@@ -102,6 +102,7 @@ However if we aren't done just yet, simply re-set the timers.
           set_timer()
           return
 
+      yield @call.event_json 'DTMF'
       @call.on 'DTMF', (res) =>
         dtmf_buffer ?= ''
         dtmf_buffer += res.body['DTMF-Digit']

@@ -12,6 +12,7 @@
       submit = null
       ctx =
         call:
+          event_json: ->
           on: (event,cb) ->
             if event is 'DTMF'
               submit = (c) ->

@@ -102,7 +102,7 @@ These are also found in middleware/client/egress/fifo.
         item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
       @session[type] = item
       @direction type
-      @report state:type
+      @report state:type, name: item.full_name
 
       @debug "Using #{type} #{number}", item
       return

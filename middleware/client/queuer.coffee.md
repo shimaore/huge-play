@@ -1,4 +1,4 @@
-    @name = 'huge-play:middleware:queuer'
+    @name = 'huge-play:middleware:client:queuer'
     debug = (require 'tangible') @name
     seem = require 'seem'
     pkg = name:'huge-play'
@@ -92,12 +92,27 @@
         redis: local_redis
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
+
+        report: seem (report) ->
+          report.timestamp = new Date().toJSON()
+          report.report_type = 'queuer-call'
+          report.call = @id
+          report.session = yield @get_session()
+          report.reference = yield @get_reference()
+          yield cfg.save_reports? [report]
+
         get_reference_data: (reference) ->
-          cfg.get_session_reference_data reference
-        update_reference_data: seem (data,call_reference_data) ->
-          data.host ?= cfg.host
-          data = yield cfg.update_session_reference_data data, call_reference_data
+          cfg.get_reference_data reference
+
+        update_reference_data: seem (data) ->
+          data = yield cfg.update_reference_data data
           cfg.statistics.emit 'reference', data
+          data
+
+        update_call_data: seem (data) ->
+          data = yield cfg.update_call_data data
+          cfg.statistics.emit 'call', data
+          data
 
       class HugePlayAgent extends TaggedAgent
 
@@ -111,8 +126,12 @@
             _in: [
               "endpoint:#{@key}"
               "number:#{@key}"
+              "number_domain:#{@domain}"
             ]
             state: new_state
+            agent: @key
+            number: @number
+            number_domain: @domain
 
           notification.tags = yield @tags().catch -> []
 
@@ -128,6 +147,13 @@
           cfg.statistics.emit 'queuer', notification
           debug 'agent.notify: done', @key, notification
           return
+
+        report: seem (report) ->
+          report.agent = @key
+          report.number = @number
+          report.number_domain = @domain
+          report.report_type = 'queuer-agent'
+          yield cfg.save_reports? [report]
 
         create_egress_call: seem ->
           debug 'create_egress_call', @domain
@@ -195,10 +221,16 @@ See `in_domain` in black-metal/tagged.
           }
 
           debug 'create_egress_call: saving reference', data
-          yield cfg.update_session_reference_data data,
+          yield cfg.update_reference_data data
+
+          call_data =
             uuid: 'create-egress-call'
-            session: "create-egress-call-#{data._id}"
+            session: "#{_id}-create-egress-call"
+            reference: _id
             start_time: new Date() .toJSON()
+            source: @number
+            destination: body.destination
+          yield cfg.update_call_data call_data
 
           call = new HugePlayCall
             destination: data._id
@@ -261,12 +293,14 @@ On-hook agent
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_onhook()
+        yield @report {state:'queuer-login',source,fifo,tags}
         agent
 
       @queuer_leave = seem (source,fifo) ->
         debug 'queuer_leave', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        yield @report {state:'queuer-leave',source,fifo}
         agent
 
       @queuer_logout = seem (source,fifo) ->
@@ -275,6 +309,7 @@ On-hook agent
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.clear_tags()
         yield agent.transition 'logout'
+        yield @report {state:'queuer-logout',source,fifo}
         agent
 
 Off-hook agent
@@ -285,5 +320,8 @@ Off-hook agent
         agent.clear_tags()
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        yield agent.accept_offhook uuid
+        call = yield agent.accept_offhook uuid
+        return unless call?
+        yield call.set_session @session._id
+        yield @report {state:'queuer-offhook',source,fifo,tags}
         agent

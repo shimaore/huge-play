@@ -4,7 +4,7 @@
     seem = require 'seem'
     Moment = require 'moment-timezone'
 
-    @include = ->
+    @include = seem ->
 
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
@@ -16,22 +16,19 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
         yield @call.exit().catch (error) =>
           debug.dev "exit: #{error}"
 
-      @call.linger()
+      yield @call.linger()
 
-      unless @statistics? and @report?
+      unless @statistics? and @notify?
         debug.dev 'Error: Improper environment'
         return
 
       @statistics.add 'incoming-calls'
-      @report state: 'incoming-call'
+      @notify state: 'incoming-call'
 
+      yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem (res) =>
         debug "Channel Hangup Complete"
-
-Invalidate our local copy of `@session.reference_data`.
-
-        yield @get_ref()
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
@@ -48,23 +45,6 @@ Invalidate our local copy of `@session.reference_data`.
           progress_media: data.variable_progress_mediamsec
           flow_bill:      data.variable_flow_billmsec
 
-        @session.cdr_report = report
-        @call.emit 'cdr_report', report
-
-Update the (existing) call reference data
-
-        @session.call_reference_data.end_time = new Date() .toJSON()
-        @session.call_reference_data.report = report
-        if @session.timezone?
-          @session.call_reference_data.timezone = @session.timezone
-          @session.call_reference_data.tz_start_time = Moment @session.call_reference_data.start_time
-            .tz @session.timezone
-            .format()
-          @session.call_reference_data.tz_end_time = Moment @session.call_reference_data.end_time
-            .tz @session.timezone
-            .format()
-        yield @save_ref()
-
         for own k,v of report
           switch k
             when 'direction'
@@ -76,9 +56,24 @@ Update the (existing) call reference data
             else
               @statistics.add k, v
 
-Dispatch the event, once using the normal dispatch path (goes to admin), and then on each individual room.
+        @session.cdr_report = report
+        @call.emit 'cdr_report', report
 
-        @report state: 'end', data: report
+Update the (existing) call data
+
+        @session.call_data.end_time = new Date() .toJSON()
+        @session.call_data.report = report
+        if @session.timezone?
+          @session.call_data.timezone = @session.timezone
+          @session.call_data.tz_start_time = Moment @session.call_data.start_time
+            .tz @session.timezone
+            .format()
+          @session.call_data.tz_end_time = Moment @session.call_data.end_time
+            .tz @session.timezone
+            .format()
+
+        @notify state: 'end', data: report
+        yield @save_call()
         yield @save_trace()
         debug "CDR: Channel Hangup Complete", report
       .catch (error) =>

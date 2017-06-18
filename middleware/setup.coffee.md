@@ -151,6 +151,7 @@ The `reference` event is pre-registered (in spicy-action) on the `calls` bus.
       @cfg.statistics.on 'report', (data) =>
 
 The `call` event is pre-registered (in spicy-action) on the `calls` bus.
+It receives a notification via the `@notify` method; the notification contains information about the call status, including the report data that triggered the notification.
 
         @socket.emit 'call', data
 
@@ -214,6 +215,7 @@ Configure our client to receive specific queues.
           @session.direction = direction
           @call.emit 'direction', direction
           @tag "direction:#{direction}"
+          @report {event:'direction', direction}
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
@@ -241,59 +243,90 @@ We assume the room names match record IDs.
 
           _in
 
-        report: (o) ->
+Data reporting (e.g. to save for managers reports).
+Typically `@report({state,…})` for calls, `@report({event,…})` for non-calls.
+
+        report: (report) ->
           unless @call? and @session?
             @debug.dev 'report: improper environment'
             return
 
-Data that will both be recorded in the `reports` array and in the notification. This is data that might change in a given session and it is therefor useful to record at the different reporting spots.
+          report.timestamp = new Date().toJSON()
+          report.source ?= @source
+          report.destination ?= @destination
+          report.direction ?= @session.direction
+          report.dialplan ?= @session.dialplan
+          report.country ?= @session.country
+          report.number_domain ?= @session.number_domain
 
-          o.source ?= @source
-          o.destination ?= @destination
-          o.direction ?= @session.direction
-          o.dialplan ?= @session.dialplan
-          o.country ?= @session.country
-          o.number_domain ?= @session.number_domain
+          report.call = @call.uuid
+          report.session = @session._id
+          report.reference = @session.reference
+          report.report_type = 'in-call'
 
-          @session.reports.push o
+          @session.reports.push report
 
-Data that is only reported in the notification since it is duplicated when published in the reference (because it is already set up in `@session.call_reference_data`) and does not change,
+        save_reports: (reports) ->
+          unless @call? and @session?
+            @debug.dev 'report: improper environment'
+            return
+
+          if yield @cfg.save_reports? @session.reports
+            @session.reports = []
+
+          return
+
+Real-time notification (e.g. to show on a web panel).
+
+        notify: (report) ->
+
+The report is first saved as usual.
+
+          @report report
+
+The notification is really about the call progress so far.
 
           notification =
             call: @call.uuid
             session: @session._id
             reports: @session.reports
             reference_data: @session.reference_data
-
-or is data only used during the notification.
-
             _in: @_in()
             host: @cfg.host
 
-          for own k,v of o
+          for own k,v of report
             notification[k] = v
 
           @call.emit 'report', notification
           @cfg.statistics.emit 'report', notification
 
-        save_ref: seem ->
-          if @cfg.update_session_reference_data?
-            data = @session.reference_data
-            data.host ?= @cfg.host
-            data = yield @cfg.update_session_reference_data data, @session.call_reference_data
-            @cfg.statistics.emit 'reference', data
-            @session.reference_data = data
+        save_call: seem ->
+          if @cfg.update_call_data?
+            {call_data} = @session
+            call_data = yield @cfg.update_call_data call_data
+            @cfg.statistics.emit 'call', call_data
+            @session.call_data = call_data
           else
-            @debug.dev 'Missing @cfg.update_session_reference_data, not saving'
+            @debug.dev 'Missing @cfg.update_call_data, not saving'
+
+        save_ref: seem ->
+          if @cfg.update_reference_data?
+            {reference_data} = @session
+            reference_data = yield @cfg.update_reference_data reference_data
+            @cfg.statistics.emit 'reference', reference_data
+            @session.reference_data = reference_data
+          else
+            @debug.dev 'Missing @cfg.update_reference_data, not saving'
 
         get_ref: seem ->
           @session.reference ?= @cfg.reference_id()
-          if @cfg.get_session_reference_data?
-            @debug 'Loading reference_data', @session.reference
-            @session.reference_data ?= yield @cfg.get_session_reference_data @session.reference
+          {reference} = @session
+          if @cfg.get_reference_data?
+            @debug 'Loading reference_data', reference
+            @session.reference_data ?= yield @cfg.get_reference_data reference
           else
-            @session.reference_data ?= _id: @session.reference
-            @debug.dev 'Missing @cfg.get_session_reference_data, using empty reference_data', @session.reference
+            @session.reference_data ?= { reference }
+            @debug.dev 'Missing @cfg.get_reference_data, using empty reference_data', reference
 
         save_trace: ->
           @cfg.update_trace_data? @session
@@ -336,7 +369,7 @@ or is data only used during the notification.
 
         respond: (response) ->
           @statistics?.add ['immediate-response',response]
-          @report state: 'immediate-response', response: response
+          @notify state: 'immediate-response', response: response
           @session.first_response_was ?= response
 
 Prevent extraneous processing of this call.
@@ -403,6 +436,8 @@ Retrieve number data.
           @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
+          if @session.number.music?
+            @session.music ?= @session.number.music
 
           if @session.number.error?
             @debug "Could not locate destination number #{dst_number}"
@@ -415,6 +450,7 @@ Retrieve number data.
           if @session.number.disabled
             @debug "Number #{dst_number} is disabled"
             @tag 'disabled-local-number'
+            @notify state:'disabled-local-number', number: @session.number._id
             yield @respond '486 Administratively Forbidden' # was 403
             return
 
@@ -427,6 +463,11 @@ Set the account so that if we redirect to an external number the egress module c
 
           @session.reference_data.account = @session.number.account
           @tag "account:#{@session.reference_data.account}"
+          @report
+            state:'validated-local-number'
+            number: @session.number._id
+            endpoint: @session.endpoint_name
+            account: @session.reference_data.account
           yield @save_ref()
 
           dst_number
@@ -438,10 +479,12 @@ Set the account so that if we redirect to an external number the egress module c
           @session.reference_data?.tags?= []
           if tag?
             @session.reference_data?.tags.push tag
+            @report {event:'tag', tag}
 
         user_tag: (tag) ->
           if tag?
             @tag "user-tag:#{tag}"
+            @report {event:'user-tag', tag}
 
         user_tags: (tags) ->
           return unless tags?
@@ -462,6 +505,7 @@ Set the account so that if we redirect to an external number the egress module c
 Keep recording (async)
 
           keep_recording = seem =>
+            @notify event:'recording'
             uri = yield @cfg.recording_uri name
             @debug 'Recording', @call.uuid, uri
             outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
@@ -478,6 +522,7 @@ Keep recording (async)
               uri = yield @cfg.recording_uri name
               @debug 'Recording next segment', @call.uuid, uri
               yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+              @notify event:'recording'
               yield @sleep 1*minutes
               @debug 'Stopping previous segment', @call.uuid, last_uri
               yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"

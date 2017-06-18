@@ -28,7 +28,7 @@ FIXME: use redis instead.
 
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
-      if @cfg.get_session_reference_data? or @cfg.update_session_reference_data?
+      if @cfg.get_reference_data? or @cfg.update_reference_data?
         @debug.dev 'Another module provided the functions, not starting.'
         return
 
@@ -46,13 +46,16 @@ FIXME: use redis instead.
           current_db = new RemotePouchDB current_db_name
 
       name_for_id = (id) ->
-        period = id[0...7]
+        period = id.substring 0, 7
         database = [db_prefix,period].join '-'
+
+      now = ->
+        new Date().toJSON()
 
 Get
 ---
 
-      @cfg.get_session_reference_data = get_data = (id) ->
+      @cfg.get_reference_data = get_data = (id) ->
         database = name_for_id id
 
         db = get_db database
@@ -63,40 +66,63 @@ Get
 Update
 ------
 
-      @cfg.update_session_reference_data = save_data = seem (data,call,tries = 3) =>
-        id = data._id
-        database = name_for_id id
+### Report
+
+Normally reports are generated in-call and stored in the `reports` array of the call.
+For out-of-call reports we store them in a structure similar to the one used for calls.
+
+      @cfg.save_reports = save_reports = (reports,tries = 3) =>
+
+        timestamp = now()
+        reference = null
+
+        reports.forEach (report) ->
+          report.timestamp ?= timestamp
+          report.host = @cfg.host
+          report.type = 'report'
+          reference ?= report.reference if report.reference?
+
+        reference ?= timestamp
+
+        database = name_for_id reference
+        db = get_db database
+
+        db
+        .bulkDocs reports
+
+In case of failure, retry.
+FIXME Properly handle bulkDocs semantics.
+
+        .catch seem (error) =>
+          @debug "reference error: #{error.stack}", error
+          if tries-- > 0
+            yield sleep 181
+            yield save_reports notification, tries
+          else
+            call
+
+### Call/Session
+
+A call/session is a single call handled by a FreeSwitch call to `socket`. It is slightly related but not exactly quite what SIP would call a "call".
+
+      @cfg.update_call_data = save_call = seem (call_data,tries = 3) =>
+
+        # assert call_data.reference?
+        # assert call_data.session?
+        # assert call_data.reports?
+
+        database = name_for_id call_data.reference
 
         db = get_db database
-        doc = yield db
-          .get id
-          .catch -> _id:id
+        doc = yield db.get(call_data.session).catch -> null
 
-Merge tags (but keep them ordered)
+        doc ?=
+          _id: call_data.session
+          timestamp: now()
+          host: @cfg.host
+          type: 'call'
 
-        doc.tags ?= []
-        if data.tags?
-          tags = new Set doc.tags
-          for tag in data.tags when not tags.has tag
-            doc.tags.push tag
-
-Merge calls (but keep them ordered)
-Note: we use the parameter `call` and completely ignore the values in `data.calls`.
-
-        do (call) ->
-          doc.calls ?= []
-          for c, i in doc.calls when c.session is call.session
-            doc.calls[i] = call
-            return
-          doc.calls.push call
-
-Known fields are:
-- tags (managed above)
-- calls (managed above)
-- destination (used by exultant-songs)
-- account (set by huge-play, not sure it's actually used)
-
-        for own k,v of data when k[0] isnt '_' and k isnt 'tags' and k isnt 'calls' and v? and typeof v isnt 'function'
+        for own k,v of call_data when k[0] isnt '_' and v? and typeof v isnt 'function'
           doc[k] = v
 
         db
@@ -111,12 +137,65 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "reference error: #{error.stack}", error
+          @debug "update_call_data error: #{error.stack}", error
+          if tries-- > 0
+            yield sleep 179
+            yield save_call call_data, tries
+          else
+            call_data
+
+### Reference
+
+A reference is a what a human would call a `call`: a call originated somewhere, as it progresses through menus, redirections, transfers, …
+The main purpose of storing the reference-data is to allow data to be propagated along the chain.
+
+      @cfg.update_reference_data = save_data = seem (reference_data,tries = 3) =>
+        {_id} = reference_data
+        database = name_for_id _id
+
+        db = get_db database
+        doc = yield db.get(_id).catch -> null
+
+        doc ?=
+          _id: _id
+          timestamp: now()
+          host: @cfg.host
+          type: 'reference'
+
+Merge tags (but keep them ordered)
+
+        doc.tags ?= []
+        if reference_data.tags?
+          tags = new Set doc.tags
+          for tag in reference_data.tags when not tags.has tag
+            doc.tags.push tag
+
+Known fields are:
+- tags (managed above)
+- destination (used by exultant-songs)
+- account (set by huge-play)
+
+        for own k,v of reference_data when k[0] isnt '_' and k isnt 'tags' and v? and typeof v isnt 'function'
+          doc[k] = v
+
+        db
+        .put doc
+
+In case of success, return the updated document.
+
+        .then ({rev}) ->
+          doc._rev = rev
+          doc
+
+In case of failure, retry, or return the submitted data.
+
+        .catch seem (error) =>
+          @debug "update_reference_data error: #{error.stack}", error
           if tries-- > 0
             yield sleep 173
-            yield save_data data, call, tries
+            yield save_data reference_data, tries
           else
-            data
+            reference_data
 
       @debug 'Ready.'
 

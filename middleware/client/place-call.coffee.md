@@ -19,23 +19,32 @@ This module also triggers calls from within a conference.
 
     @handler = handler = (cfg,ev) ->
 
-      save_ref = seem (data,call) ->
-        data = yield cfg.update_session_reference_data data, call
+      save_ref = seem (data) ->
+        data = yield cfg.update_reference_data data
         ev.emit 'reference', data
+        data
+
+      save_call = seem (data) ->
+        data = yield cfg.update_call_data data
+        ev.emit 'call', data
         data
 
 * cfg.session.profile (string) Configuration profile that should be used to place calls towards client, for automated calls.
 
       profile = cfg.session?.profile
       unless profile?
-        debug 'Missing cfg.session.profile, not starting.'
+        debug.dev 'Missing cfg.session.profile, not starting.'
         return
 
       sofia_profile = "huge-play-#{profile}-egress"
       context = "#{profile}-egress"
 
-      unless cfg.update_session_reference_data?
-        debug 'Missing cfg.update_session_reference_data, not starting.'
+      unless cfg.update_reference_data?
+        debug.dev 'Missing cfg.update_reference_data, not starting.'
+        return
+
+      unless cfg.update_call_data?
+        debug.dev 'Missing cfg.update_call_data, not starting.'
         return
 
 See huge-play/conf/freeswitch
@@ -101,13 +110,6 @@ ANSWER: Yes. And store the result in `caller`.
 
         debug 'place-call: Placing call'
 
-Call Reference Data
-
-        call =
-          uuid: "place-call-#{_id}"
-          session: _id
-          start_time: new Date() .toJSON()
-
 Session Reference Data
 
         data._in = [
@@ -122,14 +124,10 @@ Session Reference Data
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
         xref = "xref=#{_id}"
         params = make_params
-
-Ensure we can track the call by forcing its UUID.
-
-          origination_uuid: call.uuid
 
 These are used by `huge-play/middleware/client/setup`.
 
@@ -190,7 +188,7 @@ The `originate` command will return when the call is answered by the callee (or 
         else
           data.tags.push 'caller-failed'
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
         debug 'Session state:', data.tags
 
@@ -237,13 +235,6 @@ Duplicated from exultant-song (FIXME)
 
         debug 'call-to-conference: Placing call'
 
-Call Reference Data
-
-        call =
-          uuid: "call-to-conference-#{_id}"
-          session: _id
-          start_time: new Date() .toJSON()
-
 Session Reference Data
 
         data._in = [
@@ -262,16 +253,12 @@ Session Reference Data
           group_confirm_cancel_timeout: false
           language: language
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
 Call it out
 
         xref = "xref:#{_id}"
         params = make_params
-
-Ensure we can track the call by forcing its UUID.
-
-          origination_uuid: call.uuid
 
           sip_invite_params: xref
           sip_invite_to_params: xref
@@ -296,7 +283,7 @@ And `huge-play` requires these for routing an egress call.
 
         debug "Conference returned", res
 
-        data = yield save_ref data, call
+        data = yield save_ref data
 
     @notify = ({cfg,socket}) ->
 
