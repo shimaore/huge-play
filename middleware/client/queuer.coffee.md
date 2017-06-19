@@ -144,7 +144,7 @@
             agent: @key
             number: @number
             number_domain: @domain
-            host: cfg.host
+            host: host
 
           notification.tags = yield @tags().catch -> []
 
