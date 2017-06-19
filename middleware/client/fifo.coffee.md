@@ -64,9 +64,11 @@ FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done i
         continue_on_fail: true
 
       if fifo.announce?
-        yield @set ringback: fifo_uri id, fifo.announce
+        announce_uri = fifo_uri id, fifo.announce
+        yield @set ringback: announce_uri
       if fifo.music?
-        yield @export hold_music: fifo_uri id, fifo.music
+        music_uri = fifo_uri id, fifo.music
+        yield @export hold_music: music_uri
 
 FIXME: This is taken from the centrex-{country} code, but really it should be more generic.
 
@@ -102,11 +104,12 @@ If the call-group should use the queuer, then do that.
 
         yield call.save()
         yield call.set_session @session._id
+        if fifo.music?
+          yield call.set_music music_uri
 
 Announcements while in-queue
 
         if fifo.announce?
-          uri = fifo_uri id, fifo.announce
 
 Note that this is executed async wrt activating the queuer.
 
@@ -115,7 +118,7 @@ Note that this is executed async wrt activating the queuer.
               if yield call.bridged()
                 yield @sleep 1000
               else
-                yield @action 'playback', uri
+                yield @action 'playback', announce_uri
             return
 
         yield call.set_remote_number @source
