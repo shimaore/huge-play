@@ -107,17 +107,8 @@ If the call-group should use the queuer, then do that.
         if fifo.music?
           yield call.set_music music_uri
 
-Announcements while in-queue
-
         if fifo.announce?
-
-Note that this is executed async wrt activating the queuer.
-
-          do seem =>
-            until @call.closed or yield call.bridged()
-              yield @action 'playback', announce_uri
-              yield @sleep 20
-            return
+          yield @action 'endless_playback', announce_uri
 
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
