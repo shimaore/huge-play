@@ -112,7 +112,9 @@ Note that this is executed async wrt activating the queuer.
 
           do seem =>
             until @call.closed
-              unless yield call.bridged()
+              if yield call.bridged()
+                yield @sleep 1000
+              else
                 yield @action 'playback', uri
             return
 
