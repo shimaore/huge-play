@@ -10,6 +10,9 @@
       new Promise (resolve) ->
         setTimeout resolve, timeout
 
+    domain_of = (key) ->
+      key?.split('@')[1]
+
     API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
 
@@ -30,6 +33,10 @@
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
         debug 'queue:get-agent-state', key
+
+        is_remote = yield @cfg.is_remote domain_of key
+        return if is_remote isnt false
+
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
         missed = yield agent.get_missed().catch -> 0
@@ -40,6 +47,10 @@
 
       @socket.on 'queuer:log-agent-out', seem (key) =>
         debug 'queue:log-agent-out', key
+
+        is_remote = yield @cfg.is_remote domain_of key
+        return if is_remote isnt false
+
         agent = new Agent queuer, key
         yield agent.clear_tags()
         yield agent.transition 'logout'
@@ -52,7 +63,8 @@
       @socket.on 'queuer:get-egress-pool', seem (domain) =>
         debug 'queuer:get-egress-pool', domain
 
-        # FIXME only reply if we are serving the domain
+        is_remote = yield @cfg.is_remote domain
+        return if is_remote isnt false
 
         tag = "number_domain:#{domain}"
         calls = yield queuer.egress_pool.not_presenting()
@@ -132,6 +144,7 @@
             agent: @key
             number: @number
             number_domain: @domain
+            host: cfg.host
 
           notification.tags = yield @tags().catch -> []
 
@@ -213,6 +226,7 @@ See `in_domain` in black-metal/tagged.
             account
             destination: body.destination
             domain: "#{host}:#{port}"
+            number_domain: @domain
             tags: body.tags
             block_dtmf: true
             params:
@@ -269,13 +283,15 @@ Since we're bound to a server for domains it's OK.
 
       return unless queuer? and Agent?
 
-      start_of_call = seem ({key,id}) ->
-        debug 'Start of call', key, id
+      start_of_call = seem ({key,id}) =>
+        debug 'Start of call', key, id, @session.dialplan
+        return unless @session.dialplan is 'centrex'
         agent = new Agent queuer, key
         yield agent.add_call id
 
-      end_of_call = seem ({key,id}) ->
-        debug 'End of call', key, id
+      end_of_call = seem ({key,id}) =>
+        debug 'End of call', key, id, @session.dialplan
+        return unless @session.dialplan is 'centrex'
         yield sleep 2*1000
         agent = new Agent queuer, key
         yield agent.del_call id

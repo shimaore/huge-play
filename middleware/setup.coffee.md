@@ -54,13 +54,39 @@
         period = @cfg.period_of null
         id = "#{period}-#{uuid}"
 
+Use redis to retrieve the server on which this call should be hosted, and set it to `local_server` if none was previously set.
+Returns either:
+- `false` to indicate the call should be handled locally;
+- the value previously stored if it is available;
+- `null` if the determination could not be made (for example due to parameter, configuration, or server error).
+
+If the `local_server` parameter is not provided (it normally should), only the previously stored value is checked. This should never be used when dealing with calls, since it means the call might not go through.
+
       @cfg.is_remote = seem (name,local_server) =>
 
-        unless redis?
-          @debug.dev 'Missing redis'
+        unless name?
           return null
 
-Use redis to retrieve the server on which this call should be hosted.
+        unless redis?
+          @debug.dev 'is_remote: Missing redis'
+          return null
+
+Just probing (this is only useful when retrieving data, never when handling calls).
+
+        if not local_server?
+          server = yield redis
+            .getAsync key
+            .catch (error) ->
+              @debug.ops "error #{error.stack ? error}"
+              null
+
+          switch server?.substring 0, @cfg.host.length
+            when null
+              return null
+            when @cfg.host
+              return false
+            else
+              return server
 
         server = local_server
 
