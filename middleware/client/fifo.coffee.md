@@ -114,11 +114,9 @@ Announcements while in-queue
 Note that this is executed async wrt activating the queuer.
 
           do seem =>
-            until @call.closed
-              if yield call.bridged()
-                yield @sleep 1000
-              else
-                yield @action 'playback', announce_uri
+            until @call.closed or yield call.bridged()
+              yield @action 'playback', announce_uri
+              yield @sleep 20
             return
 
         yield call.set_remote_number @source
