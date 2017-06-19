@@ -67,6 +67,8 @@ If the `local_server` parameter is not provided (it normally should), only the p
         unless name?
           return null
 
+        key = "server for #{name}"
+
         unless redis?
           @debug.dev 'is_remote: Missing redis'
           return null
@@ -92,8 +94,6 @@ Just probing (this is only useful when retrieving data, never when handling call
 
 Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
-
-        key = "server for #{name}"
 
         first_time = yield redis
           .setnxAsync key, server
