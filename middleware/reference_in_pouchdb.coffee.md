@@ -2,6 +2,7 @@ Register the database we use to store session state.
 FIXME: use redis instead.
 
     @name = 'huge-play:middleware:reference_in_pouchdb'
+    debug = require('tangible') @name
 
     seem = require 'seem'
     PouchDB = require 'shimaore-pouchdb'
@@ -18,7 +19,7 @@ FIXME: use redis instead.
       base = @cfg.session?.base ? @cfg.data?.url
 
       unless base
-        @debug.dev 'No cfg.session.base nor cfg.data.url, references will not be saved.'
+        debug.dev 'No cfg.session.base nor cfg.data.url, references will not be saved.'
         return
 
       base += '/' unless base.match /\/$/
@@ -29,7 +30,7 @@ FIXME: use redis instead.
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
       if @cfg.get_reference_data? or @cfg.update_reference_data?
-        @debug.dev 'Another module provided the functions, not starting.'
+        debug.dev 'Another module provided the functions, not starting.'
         return
 
       RemotePouchDB = PouchDB.defaults prefix: base
@@ -52,6 +53,8 @@ FIXME: use redis instead.
       now = ->
         new Date().toJSON()
 
+      {host} = @cfg
+
 Get
 ---
 
@@ -71,14 +74,14 @@ Update
 Normally reports are generated in-call and stored in the `reports` array of the call.
 For out-of-call reports we store them in a structure similar to the one used for calls.
 
-      @cfg.save_reports = save_reports = (reports,tries = 3) =>
+      @cfg.save_reports = save_reports = (reports,tries = 3) ->
 
         timestamp = now()
         reference = null
 
         reports.forEach (report) ->
           report.timestamp ?= timestamp
-          report.host = @cfg.host
+          report.host = host
           report.type = 'report'
           reference ?= report.reference if report.reference?
 
@@ -94,7 +97,7 @@ In case of failure, retry.
 FIXME Properly handle bulkDocs semantics.
 
         .catch seem (error) =>
-          @debug "reference error: #{error.stack}", error
+          debug "reference error: #{error.stack}", error
           if tries-- > 0
             yield sleep 181
             yield save_reports notification, tries
@@ -105,7 +108,7 @@ FIXME Properly handle bulkDocs semantics.
 
 A call/session is a single call handled by a FreeSwitch call to `socket`. It is slightly related but not exactly quite what SIP would call a "call".
 
-      @cfg.update_call_data = save_call = seem (call_data,tries = 3) =>
+      @cfg.update_call_data = save_call = seem (call_data,tries = 3) ->
 
         # assert call_data.reference?
         # assert call_data.session?
@@ -118,7 +121,7 @@ A call/session is a single call handled by a FreeSwitch call to `socket`. It is 
         doc ?=
           _id: call_data.session
           timestamp: now()
-          host: @cfg.host
+          host: host
           type: 'call'
 
         for own k,v of call_data when k[0] isnt '_' and v? and typeof v isnt 'function'
@@ -136,7 +139,7 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "update_call_data error: #{error.stack}", error
+          debug "update_call_data error: #{error.stack}", error
           if tries-- > 0
             yield sleep 179
             yield save_call call_data, tries
@@ -148,7 +151,7 @@ In case of failure, retry, or return the submitted data.
 A reference is a what a human would call a `call`: a call originated somewhere, as it progresses through menus, redirections, transfers, …
 The main purpose of storing the reference-data is to allow data to be propagated along the chain.
 
-      @cfg.update_reference_data = save_data = seem (reference_data,tries = 3) =>
+      @cfg.update_reference_data = save_data = seem (reference_data,tries = 3) ->
         {_id} = reference_data
         database = name_for_id _id
 
@@ -158,7 +161,7 @@ The main purpose of storing the reference-data is to allow data to be propagated
         doc ?=
           _id: _id
           timestamp: now()
-          host: @cfg.host
+          host: host
           type: 'reference'
 
 Merge tags (but keep them ordered)
@@ -189,13 +192,13 @@ In case of success, return the updated document.
 In case of failure, retry, or return the submitted data.
 
         .catch seem (error) =>
-          @debug "update_reference_data error: #{error.stack}", error
+          debug "update_reference_data error: #{error.stack}", error
           if tries-- > 0
             yield sleep 173
             yield save_data reference_data, tries
           else
             reference_data
 
-      @debug 'Ready.'
+      debug 'Ready.'
 
     @include = ->
