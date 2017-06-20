@@ -27,15 +27,28 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       intercept_key = "inbound_call:#{key}"
       yield @local_redis?.setAsync intercept_key, @call.uuid
 
+Eavesdrop registration
+----------------------
+
       eavesdrop_key = "inbound:#{key}"
-      @debug 'Set inbound eavesdrop', eavesdrop_key
-      yield @local_redis?.setAsync eavesdrop_key, @call.uuid
-      @call.emit 'inbound', {key,id:@call.uuid}
-      @call.once 'CHANNEL_HANGUP_COMPLETE'
-      .then seem =>
-        @debug 'Clear inbound eavesdrop', eavesdrop_key
-        @call.emit 'inbound-end', {key,id:@call.uuid}
-        yield @local_redis?.delAsync eavesdrop_key
+
+      unless @call.closed
+
+        @debug 'Set inbound eavesdrop', eavesdrop_key
+        yield @local_redis?.setAsync eavesdrop_key, @call.uuid
+
+        when_done = seem =>
+          @debug 'Clear inbound eavesdrop', eavesdrop_key
+          @call.emit 'inbound-end', {key,id:@call.uuid}
+          yield @local_redis?.delAsync eavesdrop_key
+          return
+
+        @call.once 'socket-close', when_done
+
+        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
+        @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
+
+        @call.emit 'inbound', {key,id:@call.uuid}
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"

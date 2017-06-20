@@ -162,15 +162,24 @@ Eavesdrop registration
 
       key = src_number
       eavesdrop_key = "outbound:#{key}"
-      unless @session.transfer
+
+      unless @session.transfer or @call.closed
+
         @debug 'Set outbound eavesdrop', eavesdrop_key
-        @call.emit 'outbound', {key,id:@call.uuid}
         yield @local_redis?.setAsync eavesdrop_key, @call.uuid
-        @call.once 'CHANNEL_HANGUP_COMPLETE'
-        .then seem =>
+
+        when_done = seem =>
           @debug 'Clear outbound eavesdrop', eavesdrop_key
           @call.emit 'outbound-end', {key,id:@call.uuid}
           yield @local_redis?.delAsync eavesdrop_key
+          return
+
+        @call.once 'socket-close', when_done
+
+        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
+        @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
+
+        @call.emit 'outbound', {key,id:@call.uuid}
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name
