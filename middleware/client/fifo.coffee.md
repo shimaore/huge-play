@@ -108,7 +108,7 @@ If the call-group should use the queuer, then do that.
           yield call.set_music music_uri
 
         if fifo.announce?
-          yield @action 'endless_playback', announce_uri
+          @action 'endless_playback', announce_uri # async
 
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
