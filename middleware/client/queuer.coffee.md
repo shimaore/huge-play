@@ -107,7 +107,7 @@
         port = p.egress_sip_port ? p.sip_port+10000
 
       unless redis? and local_redis? and prov? and profile? and host? and port?
-        @debug 'Missing configuration'
+        @debug.dev 'Missing configuration'
         return
 
       class HugePlayCall extends TaggedCall
