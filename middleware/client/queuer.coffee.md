@@ -40,8 +40,9 @@
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
         missed = yield agent.get_missed().catch -> 0
+        count = yield agent.count().catch -> 0
         # async
-        agent.notify state, {missed}
+        agent.notify state, {missed,count}
         debug 'queue:get-agent-state: done', key, state
         return
 
