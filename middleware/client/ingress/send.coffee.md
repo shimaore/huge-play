@@ -25,17 +25,17 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis.setAsync intercept_key, @call.uuid
+      yield @local_redis?.setAsync intercept_key, @call.uuid
 
       eavesdrop_key = "inbound:#{key}"
       @debug 'Set inbound eavesdrop', eavesdrop_key
-      yield @local_redis.setAsync eavesdrop_key, @call.uuid
+      yield @local_redis?.setAsync eavesdrop_key, @call.uuid
       @call.emit 'inbound', {key,id:@call.uuid}
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then seem =>
         @debug 'Clear inbound eavesdrop', eavesdrop_key
         @call.emit 'inbound-end', {key,id:@call.uuid}
-        yield @local_redis.delAsync eavesdrop_key
+        yield @local_redis?.delAsync eavesdrop_key
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
@@ -52,7 +52,7 @@ Send the call(s)
 
       res = yield @action 'bridge', sofia.join ','
 
-      yield @local_redis.delAsync intercept_key
+      yield @local_redis?.delAsync intercept_key
 
 Post-attempt handling
 ---------------------
