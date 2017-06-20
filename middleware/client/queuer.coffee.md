@@ -18,15 +18,23 @@
 
     @notify = ->
 
+      queuer = @cfg.queuer
+      Agent = @cfg.queuer_Agent
+
+      unless queuer?
+        debug.dev 'queuer is not available'
+        return
+
+      unless Agent?
+        debug.dev 'Agent is not available'
+        return
+
       @configure dial_calls: true
 
       @register 'queuer', 'calls'
 
       @cfg.statistics.on 'queuer', (data) =>
         @socket.emit 'queuer', data
-
-      queuer = @cfg.queuer
-      Agent = @cfg.queuer_Agent
 
       @register 'queuer:get-agent-state', 'dial_calls'
       @register 'queuer:log-agent-out', 'dial_calls'
@@ -98,7 +106,9 @@
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
 
-      return unless redis? and local_redis? and prov? and profile? and host? and port?
+      unless redis? and local_redis? and prov? and profile? and host? and port?
+        @debug 'Missing configuration'
+        return
 
       class HugePlayCall extends TaggedCall
 
