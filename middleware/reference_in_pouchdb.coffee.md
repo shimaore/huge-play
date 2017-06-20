@@ -109,7 +109,6 @@ A call/session is a single call handled by a FreeSwitch call to `socket`. It is 
 
         # assert call_data.reference?
         # assert call_data.session?
-        # assert call_data.reports?
 
         database = name_for_id call_data.reference
 

@@ -292,16 +292,6 @@ Typically `@report({state,…})` for calls, `@report({event,…})` for non-calls
 
           @session.reports.push report
 
-        save_reports: (reports) ->
-          unless @call? and @session?
-            @debug.dev 'report: improper environment'
-            return
-
-          if yield @cfg.save_reports? @session.reports
-            @session.reports = []
-
-          return
-
 Real-time notification (e.g. to show on a web panel).
 
         notify: (report) ->
@@ -327,6 +317,9 @@ The notification is really about the call progress so far.
           @cfg.statistics.emit 'report', notification
 
         save_call: seem ->
+          if @session.reports.length > 0 and yield @cfg.save_reports? @session.reports
+            @session.reports = []
+
           if @cfg.update_call_data?
             {call_data} = @session
             call_data = yield @cfg.update_call_data call_data
