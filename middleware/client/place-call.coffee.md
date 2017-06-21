@@ -43,7 +43,7 @@ This module also triggers calls from within a conference.
             debug 'Lost the election.'
           return winner
       else
-        elected = -> true
+        elected = -> Promise.resolve true
 
 * cfg.session.profile (string) Configuration profile that should be used to place calls towards client, for automated calls.
 
@@ -189,7 +189,7 @@ timeout_sec
         ].join ' '
         cmd = "originate #{argv}"
 
-        return unless elected _id
+        return unless yield elected _id
 
         debug "Calling #{cmd}"
 
@@ -293,7 +293,7 @@ And `huge-play` requires these for routing an egress call.
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
         cmd = "originate #{sofia} &conference(#{name}++flags{})"
 
-        return unless elected _id
+        return unless yield elected _id
 
         debug "Calling #{cmd}"
         res = yield cfg.api(cmd).catch (error) ->
