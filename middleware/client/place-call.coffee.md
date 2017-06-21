@@ -37,7 +37,7 @@ This module also triggers calls from within a conference.
             .catch -> null
           if winner
             yield cfg.local_redis_client
-              .expire name, 60
+              .expireAsync name, 60
               .catch -> yes
           else
             debug 'Lost the election.'
