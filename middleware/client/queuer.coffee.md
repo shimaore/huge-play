@@ -296,7 +296,7 @@ Since we're bound to a server for domains it's OK.
 
       local_server = [@session.local_server,@session.client_server].join '/'
 
-      start_of_call = seem ({key,id,dialplan}) ->
+      start_of_call = seem ({key,id,dialplan}) =>
         debug 'Start of call', key, id, dialplan
 
         return unless dialplan is 'centrex'
