@@ -175,6 +175,7 @@ Eavesdrop registration
           return
 
         @call.once 'socket-close', when_done
+        @call.once 'tough-rate-hangup', when_done
 
         yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done

@@ -49,6 +49,6 @@
     "useful-wind": "^7.5.3"
   },
   "optionalDependencies": {
-    "tough-rate": "^18.4"
+    "tough-rate": "^18.6"
   }
 }
