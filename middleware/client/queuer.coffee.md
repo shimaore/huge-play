@@ -296,13 +296,21 @@ Since we're bound to a server for domains it's OK.
 
       start_of_call = seem ({key,id}) =>
         debug 'Start of call', key, id, @session.dialplan
+
         return unless @session.dialplan is 'centrex'
+        is_remote = yield @cfg.is_remote domain_of key
+        return if is_remote isnt false
+
         agent = new Agent queuer, key
         yield agent.add_call id
 
       end_of_call = seem ({key,id}) =>
         debug 'End of call', key, id, @session.dialplan
+
         return unless @session.dialplan is 'centrex'
+        is_remote = yield @cfg.is_remote domain_of key
+        return if is_remote isnt false
+
         yield sleep 2*1000
         agent = new Agent queuer, key
         yield agent.del_call id
