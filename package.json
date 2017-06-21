@@ -25,6 +25,7 @@
     "date-holidays": "^0.2.1",
     "esl": "^5.4.0",
     "flat-ornament": "^2.1.0",
+    "lru-cache": "^4.1.1",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "nimble-direction": "^6.1.4",

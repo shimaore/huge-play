@@ -7,6 +7,7 @@
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
     FS = require 'esl'
+    LRU = require 'lru-cache'
 
     Redis = require 'redis'
     Bluebird = require 'bluebird'
@@ -62,6 +63,10 @@ Returns either:
 
 If the `local_server` parameter is not provided (it normally should), only the previously stored value is checked. This should never be used when dealing with calls, since it means the call might not go through.
 
+      is_remote_cache = LRU
+        max: 2000
+        maxAge: 1*minutes
+
       @cfg.is_remote = seem (name,local_server) =>
 
         unless name?
@@ -76,11 +81,14 @@ If the `local_server` parameter is not provided (it normally should), only the p
 Just probing (this is only useful when retrieving data, never when handling calls).
 
         if not local_server?
-          server = yield redis
-            .getAsync key
-            .catch (error) ->
-              @debug.ops "error #{error.stack ? error}"
-              null
+          server = is_remote_cache.get name
+          if server is undefined
+            server = yield redis
+              .getAsync key
+              .catch (error) ->
+                @debug.ops "error #{error.stack ? error}"
+                null
+            is_remote_cache.set name, server
 
           switch server?.substring 0, @cfg.host.length
             when null
@@ -89,6 +97,8 @@ Just probing (this is only useful when retrieving data, never when handling call
               return false
             else
               return server
+
+Probe-and-update
 
         server = local_server
 
