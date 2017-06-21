@@ -63,7 +63,7 @@
         agent = new Agent queuer, key
         yield agent.clear_tags()
         yield agent.transition 'logout'
-        debug 'queue:log-agent-out: done', key, state
+        debug 'queue:log-agent-out: done', key
         return
 
       @register 'queuer:get-egress-pool', 'dial_calls'
@@ -296,20 +296,20 @@ Since we're bound to a server for domains it's OK.
 
       local_server = [@session.local_server,@session.client_server].join '/'
 
-      start_of_call = seem ({key,id}) =>
-        debug 'Start of call', key, id, @session.dialplan
+      start_of_call = seem ({key,id,dialplan}) ->
+        debug 'Start of call', key, id, dialplan
 
-        return unless @session.dialplan is 'centrex'
+        return unless dialplan is 'centrex'
         is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
 
         agent = new Agent queuer, key
         yield agent.add_call id
 
-      end_of_call = seem ({key,id}) =>
-        debug 'End of call', key, id, @session.dialplan
+      end_of_call = seem ({key,id,dialplan}) =>
+        debug 'End of call', key, id, dialplan
 
-        return unless @session.dialplan is 'centrex'
+        return unless dialplan is 'centrex'
         is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
 

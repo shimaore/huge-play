@@ -37,9 +37,11 @@ Eavesdrop registration
         @debug 'Set inbound eavesdrop', eavesdrop_key
         yield @local_redis?.setAsync eavesdrop_key, @call.uuid
 
+        attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
+
         when_done = seem =>
           @debug 'Clear inbound eavesdrop', eavesdrop_key
-          @call.emit 'inbound-end', {key,id:@call.uuid}
+          @call.emit 'inbound-end', attributes
           yield @local_redis?.delAsync eavesdrop_key
           return
 
@@ -48,7 +50,7 @@ Eavesdrop registration
         yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
 
-        @call.emit 'inbound', {key,id:@call.uuid}
+        @call.emit 'inbound', attributes
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"

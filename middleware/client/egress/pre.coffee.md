@@ -168,9 +168,11 @@ Eavesdrop registration
         @debug 'Set outbound eavesdrop', eavesdrop_key
         yield @local_redis?.setAsync eavesdrop_key, @call.uuid
 
+        attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
+
         when_done = seem =>
           @debug 'Clear outbound eavesdrop', eavesdrop_key
-          @call.emit 'outbound-end', {key,id:@call.uuid}
+          @call.emit 'outbound-end', attributes
           yield @local_redis?.delAsync eavesdrop_key
           return
 
@@ -180,7 +182,7 @@ Eavesdrop registration
         yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
 
-        @call.emit 'outbound', {key,id:@call.uuid}
+        @call.emit 'outbound', attributes
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name
