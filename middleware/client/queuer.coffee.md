@@ -294,11 +294,13 @@ Since we're bound to a server for domains it's OK.
 
       return unless queuer? and Agent?
 
+      local_server = [@session.local_server,@session.client_server].join '/'
+
       start_of_call = seem ({key,id}) =>
         debug 'Start of call', key, id, @session.dialplan
 
         return unless @session.dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote domain_of key
+        is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
 
         agent = new Agent queuer, key
@@ -308,7 +310,7 @@ Since we're bound to a server for domains it's OK.
         debug 'End of call', key, id, @session.dialplan
 
         return unless @session.dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote domain_of key
+        is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
 
         yield sleep 2*1000
