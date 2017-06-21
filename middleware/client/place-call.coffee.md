@@ -10,12 +10,15 @@ This module also triggers calls from within a conference.
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:place-call"
     debug = (require 'tangible') @name
+    uuidV4 = require 'uuid/v4'
 
     escape = (v) ->
       "#{v}".replace ',', ','
 
     make_params = (data) ->
       ("#{k}=#{escape v}" for own k,v of data).join ','
+
+    me = uuidV4()
 
     @handler = handler = (cfg,ev) ->
 
@@ -28,6 +31,22 @@ This module also triggers calls from within a conference.
         data = yield cfg.update_call_data data
         ev.emit 'call', data
         data
+
+      if cfg.local_redis?
+        elected = seem (key) ->
+          name = "elected-#{key}"
+          winner = yield cfg.local_redis
+            .setnxAsync name, me
+            .catch -> null
+          if winner
+            yield cfg.local_redis
+              .expire name, 60
+              .catch -> yes
+          else
+            debug 'Lost the election.'
+          return winner
+      else
+        elected = -> true
 
 * cfg.session.profile (string) Configuration profile that should be used to place calls towards client, for automated calls.
 
@@ -173,6 +192,8 @@ timeout_sec
         ].join ' '
         cmd = "originate #{argv}"
 
+        return unless elected _id
+
         debug "Calling #{cmd}"
 
         res = yield cfg.api(cmd).catch (error) ->
@@ -274,6 +295,8 @@ And `huge-play` requires these for routing an egress call.
 
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
         cmd = "originate #{sofia} &conference(#{name}++flags{})"
+
+        return unless elected _id
 
         debug "Calling #{cmd}"
         res = yield cfg.api(cmd).catch (error) ->
