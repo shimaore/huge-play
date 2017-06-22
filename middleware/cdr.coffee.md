@@ -33,17 +33,46 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
         data = res.body
+        integer = (x) ->
+          return null if isNaN v = parseInt x
+          v
+        float = (x) ->
+          return null if isNaN v = parseFloat x
+          v
+        uepoch = (x) ->
+          return null if isNaN v = parseInt x
+          v//1000
+
         report =
           direction:      @session.cdr_direction
           emergency:      @session.destination_emergency ? null
           onnet:          @session.destination_onnet ? null
-          duration:       data.variable_mduration
-          billable:       data.variable_billmsec
-          progress:       data.variable_progressmsec
-          answer:         data.variable_answermsec
-          wait:           data.variable_waitmsec
-          progress_media: data.variable_progress_mediamsec
-          flow_bill:      data.variable_flow_billmsec
+          duration:       integer data.variable_mduration
+          billable:       integer data.variable_billmsec
+          progress:       integer data.variable_progressmsec
+          answer:         integer data.variable_answermsec
+          wait:           integer data.variable_waitmsec
+          held:           integer data.variable_hold_accum_ms
+          progress_media: integer data.variable_progress_mediamsec
+          flow_bill:      integer data.variable_flow_billmsec
+
+          start_time:     uepoch data.variable_start_uepoch
+          answer_time:    uepoch data.variable_answer_uepoch
+          bridge_time:    uepoch data.variable_bridge_uepoch
+          progress_time:  uepoch data.variable_progress_uepoch
+
+even-numbered are hold 'on', odd-numbered are hold 'off'
+
+          hold_times:     data.variable_hold_events?.match(/(\d+)/g).map(uepoch) ? []
+          end_time:       uepoch data.variable_end_uepoch
+
+          audio_in_packets:     integer data.rtp_audio_in_packet_count
+          audio_out_packets:    integer data.rtp_audio_out_packet_count
+          skip_packets:         integer data.variable_rtp_audio_in_skip_packet_count
+          jitter_packets:       integer data.variable_rtp_audio_in_jitter_packet_count
+          jitter_min_variance:  float data.variable_rtp_audio_in_jitter_min_variance
+          jitter_max_variance:  float data.variable_rtp_audio_in_jitter_max_variance
+          in_mos:               float data.variable_rtp_audio_in_mos
 
         for own k,v of report
           switch k
