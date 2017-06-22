@@ -115,10 +115,6 @@ Music
       if @session.asserted?
         yield @set effective_caller_id_number: @session.asserted
 
-FIXME: should we override? if a call gets transferred we'll notify everyone in the chain.
-
-      @session.reference_data._in ?= []
-      @_in @session.reference_data._in
       if @session.dev_logger
         @session.reference_data.dev_logger = true
       yield @save_ref()

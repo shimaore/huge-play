@@ -12,6 +12,26 @@ FIXME: use redis instead.
       new Promise (resolve) ->
         setTimeout resolve, timeout
 
+    update_doc = (doc,data) ->
+
+Copy the `_in` field (which CouchDB won't accept) in a properly named one.
+
+      if data._in?
+        doc.in ?= data._in
+
+Merge tags (but keep them ordered)
+
+      if data.tags?
+        doc.tags ?= []
+        doc_tags = new Set doc.tags
+        for tag in data.tags when not doc_tags.has tag
+          doc.tags.push tag
+
+      for own k,v of data when k[0] isnt '_' and k isnt 'tags' and v? and typeof v isnt 'function'
+        doc[k] = v
+
+      doc
+
     @server_pre = ->
 
 * cfg.session.base (URI) base URI for databases that store automated / complete call records (call-center oriented). Default: cfg.data.url
@@ -77,21 +97,16 @@ For out-of-call reports we store them in a structure similar to the one used for
       @cfg.save_reports = save_reports = (reports,tries = 3) ->
 
         timestamp = now()
-        reference = null
-
-        reports.forEach (report) ->
-          report.timestamp ?= timestamp
-          report.host = host
-          report.type = 'report'
-          reference ?= report.reference if report.reference?
-
+        reference = reports.find( (r) -> r.reference? )?.reference
         reference ?= timestamp
 
         database = name_for_id reference
         db = get_db database
 
+        docs = reports.map (report) -> update_doc {}, report
+
         db
-        .bulkDocs reports
+        .bulkDocs docs
 
 In case of failure, retry.
 FIXME Properly handle bulkDocs semantics.
@@ -100,7 +115,7 @@ FIXME Properly handle bulkDocs semantics.
           debug "reference error: #{error.stack}", error
           if tries-- > 0
             yield sleep 181
-            yield save_reports notification, tries
+            yield save_reports reports, tries
           else
             call
 
@@ -120,12 +135,8 @@ A call/session is a single call handled by a FreeSwitch call to `socket`. It is 
 
         doc ?=
           _id: call_data.session
-          timestamp: now()
-          host: host
-          type: 'call'
 
-        for own k,v of call_data when k[0] isnt '_' and v? and typeof v isnt 'function'
-          doc[k] = v
+        doc = update_doc doc, call_data
 
         db
         .put doc
@@ -160,25 +171,8 @@ The main purpose of storing the reference-data is to allow data to be propagated
 
         doc ?=
           _id: _id
-          timestamp: now()
-          host: host
-          type: 'reference'
 
-Merge tags (but keep them ordered)
-
-        doc.tags ?= []
-        if reference_data.tags?
-          tags = new Set doc.tags
-          for tag in reference_data.tags when not tags.has tag
-            doc.tags.push tag
-
-Known fields are:
-- tags (managed above)
-- destination (used by exultant-songs)
-- account (set by huge-play)
-
-        for own k,v of reference_data when k[0] isnt '_' and k isnt 'tags' and v? and typeof v isnt 'function'
-          doc[k] = v
+        doc = update_doc doc, reference_data
 
         db
         .put doc

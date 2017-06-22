@@ -17,16 +17,14 @@ This module also triggers calls from within a conference.
     make_params = (data) ->
       ("#{k}=#{escape v}" for own k,v of data).join ','
 
+    now = ->
+      new Date().toJSON()
+
     @handler = handler = (cfg,ev) ->
 
       save_ref = seem (data) ->
         data = yield cfg.update_reference_data data
         ev.emit 'reference', data
-        data
-
-      save_call = seem (data) ->
-        data = yield cfg.update_call_data data
-        ev.emit 'call', data
         data
 
       if cfg.local_redis_client?
@@ -114,7 +112,8 @@ Load additional data from the endpoint.
 
 Ensure only one FreeSwitch server processes those.
 
-        domain = endpoint_data.number_domain ? 'default.local'
+        domain = endpoint_data.number_domain
+        return unless domain?
 
 Note that Centrex-redirect uses both the local-server and the client-server.
 
@@ -131,14 +130,18 @@ Session Reference Data
         data._in = [
           "endpoint:#{endpoint}"
           "account:#{account}"
+          "number_domain:#{domain}"
         ]
         data.tags ?= []
-        data.host = host
         data.account = account
         data.state = 'connecting-caller'
 
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
+
+        data.timestamp ?= now()
+        data.host = host
+        data.type = 'reference'
 
         data = yield save_ref data
 
@@ -258,9 +261,9 @@ Session Reference Data
         data._in = [
           "endpoint:#{endpoint}"
           "account:#{account}"
+          "number_domain:#{endpoint.number_domain}"
         ]
         data.tags ?= []
-        data.host = host
         data.account = account
         data.state = 'connecting'
         data.call_options =
@@ -270,6 +273,10 @@ Session Reference Data
           group_confirm_read_timeout: 15000 # defaults to 5000
           group_confirm_cancel_timeout: false
           language: language
+
+        data.timestamp ?= now()
+        data.host = host
+        data.type = 'reference'
 
         data = yield save_ref data
 
