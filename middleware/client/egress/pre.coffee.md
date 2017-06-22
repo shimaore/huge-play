@@ -89,6 +89,7 @@ The `number_domain` field is required, but the number-domain record is optional.
 
       @debug 'number_domain', number_domain
       @tag @session.number_domain_data._id
+      @user_tags @session.number_domain_data.tags
 
 Number-domain is less specific than endpoint, so do not override.
 

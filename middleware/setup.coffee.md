@@ -487,6 +487,7 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           @session.endpoint_name = @session.number.endpoint
           @session.reference_data.endpoint = @session.number.endpoint
+          @tag "endpoint:#{@session.number.endpoint}"
 
 Set the account so that if we redirect to an external number the egress module can find it.
 
