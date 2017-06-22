@@ -13,6 +13,9 @@
     domain_of = (key) ->
       key?.split('@')[1]
 
+    now = ->
+      new Date().toJSON()
+
     API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
 
@@ -117,11 +120,15 @@
         profile: "#{pkg.name}-#{profile}-egress"
 
         report: seem (report) ->
-          report.timestamp = new Date().toJSON()
           report.report_type = 'queuer-call'
           report.call = @id
           report.session = yield @get_session()
           report.reference = yield @get_reference()
+
+          report.timestamp = now()
+          report.host = host
+          report.type = 'report'
+
           yield cfg.save_reports? [report]
 
         get_reference_data: (reference) ->
@@ -173,10 +180,15 @@
           return
 
         report: seem (report) ->
+          report.report_type = 'queuer-agent'
           report.agent = @key
           report.number = @number
           report.number_domain = @domain
-          report.report_type = 'queuer-agent'
+
+          report.timestamp = now()
+          report.host = host
+          report.type = 'report'
+
           yield cfg.save_reports? [report]
 
         create_egress_call: seem ->
@@ -231,7 +243,6 @@ See `in_domain` in black-metal/tagged.
               "account:#{account}"
               "number_domain:#{@domain}"
             ]
-            host: host
             state: 'created'
             endpoint
             account
@@ -243,25 +254,38 @@ See `in_domain` in black-metal/tagged.
             params:
               sip_invite_params: "xref=#{_id}"
               origination_caller_id_number: @number
+
+            timestamp: now()
+            host: host
+            type: 'reference'
+            reference: _id
           }
 
           debug 'create_egress_call: saving reference', data
           yield cfg.update_reference_data data
 
+This is a "fake" call-data entry, to record the data we used to trigger the call for call-reporting purposes.
+
           call_data =
             uuid: 'create-egress-call'
             session: "#{_id}-create-egress-call"
             reference: _id
-            start_time: new Date() .toJSON()
+            start_time: now()
             source: @number
             destination: body.destination
+
+            timestamp: now()
+            host: host
+            type: 'call'
           yield cfg.update_call_data call_data
 
           call = new HugePlayCall
-            destination: data._id
+            destination: _id
             tags: body.tags
 
           yield call.save()
+
+This probably not necessary, since the destination number is actually retrieved from the reference-data.
 
           yield call.set_remote_number body.destination
 

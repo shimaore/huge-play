@@ -265,8 +265,6 @@ Note the different alternatives for routing:
 
 ### Build the set of `_in` targets for notifications of the reference data.
 
-      @session.reference_data._in ?= []
-      @_in @session.reference_data._in
       if @session.dev_logger
         @session.reference_data.dev_logger = true
       yield @save_ref()
