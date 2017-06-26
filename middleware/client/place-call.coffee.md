@@ -22,9 +22,8 @@ This module also triggers calls from within a conference.
 
     @handler = handler = (cfg,ev) ->
 
-      save_ref = seem (data) ->
-        data = yield cfg.update_reference_data data
-        ev.emit 'reference', data
+      save_ref = (data) ->
+        cfg.statistics.emit 'reference', data
         data
 
       if cfg.local_redis_client?
@@ -52,14 +51,6 @@ This module also triggers calls from within a conference.
 
       sofia_profile = "huge-play-#{profile}-egress"
       context = "#{profile}-egress"
-
-      unless cfg.update_reference_data?
-        debug.dev 'Missing cfg.update_reference_data, not starting.'
-        return
-
-      unless cfg.update_call_data?
-        debug.dev 'Missing cfg.update_call_data, not starting.'
-        return
 
 See huge-play/conf/freeswitch
 

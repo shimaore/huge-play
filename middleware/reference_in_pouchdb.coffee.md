@@ -32,7 +32,7 @@ Merge tags (but keep them ordered)
 
       doc
 
-    @server_pre = ->
+    @notify = ->
 
 * cfg.session.base (URI) base URI for databases that store automated / complete call records (call-center oriented). Default: cfg.data.url
 
@@ -48,10 +48,6 @@ Merge tags (but keep them ordered)
 (Name is fixed because it also appears in `spicy-action/public_proxy`.)
 
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
-
-      if @cfg.get_reference_data? or @cfg.update_reference_data?
-        debug.dev 'Another module provided the functions, not starting.'
-        return
 
       RemotePouchDB = PouchDB.defaults prefix: base
 
@@ -94,7 +90,7 @@ Update
 Normally reports are generated in-call and stored in the `reports` array of the call.
 For out-of-call reports we store them in a structure similar to the one used for calls.
 
-      @cfg.save_reports = save_reports = (reports,tries = 3) ->
+      save_reports = (reports,tries = 3) ->
 
         timestamp = now()
         reference = reports.find( (r) -> r.reference? )?.reference
@@ -119,11 +115,15 @@ FIXME Properly handle bulkDocs semantics.
           else
             call
 
+      @cfg.statistics.on 'reports', save_reports
+      @cfg.statistics.on 'report', (report) ->
+        save_reports [report]
+
 ### Call/Session
 
 A call/session is a single call handled by a FreeSwitch call to `socket`. It is slightly related but not exactly quite what SIP would call a "call".
 
-      @cfg.update_call_data = save_call = seem (call_data,tries = 3) ->
+      save_call = seem (call_data,tries = 3) ->
 
         # assert call_data.reference?
         # assert call_data.session?
@@ -157,12 +157,14 @@ In case of failure, retry, or return the submitted data.
           else
             call_data
 
+      @cfg.statistics.on 'call', save_call
+
 ### Reference
 
 A reference is a what a human would call a `call`: a call originated somewhere, as it progresses through menus, redirections, transfers, …
 The main purpose of storing the reference-data is to allow data to be propagated along the chain.
 
-      @cfg.update_reference_data = save_data = seem (reference_data,tries = 3) ->
+      save_data = seem (reference_data,tries = 3) ->
         {_id} = reference_data
         database = name_for_id _id
 
@@ -194,5 +196,7 @@ In case of failure, retry, or return the submitted data.
             reference_data
 
       debug 'Ready.'
+
+      @cfg.statistics.on 'reference', save_data
 
     @include = ->

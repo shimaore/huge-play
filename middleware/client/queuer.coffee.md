@@ -119,7 +119,7 @@
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
 
-        report: seem (report) ->
+        report: (report) ->
           report.report_type = 'queuer-call'
           report.call = @id
           report.session = yield @get_session()
@@ -129,18 +129,17 @@
           report.host = host
           report.type = 'report'
 
-          yield cfg.save_reports? [report]
+          cfg.statistics.emit 'report', report
+          report
 
         get_reference_data: (reference) ->
           cfg.get_reference_data reference
 
-        update_reference_data: seem (data) ->
-          data = yield cfg.update_reference_data data
+        update_reference_data: (data) ->
           cfg.statistics.emit 'reference', data
           data
 
-        update_call_data: seem (data) ->
-          data = yield cfg.update_call_data data
+        update_call_data: (data) ->
           cfg.statistics.emit 'call', data
           data
 
@@ -189,7 +188,7 @@
           report.host = host
           report.type = 'report'
 
-          yield cfg.save_reports? [report]
+          yield cfg.statistics.emit 'report', report
 
         create_egress_call: seem ->
           debug 'create_egress_call', @domain

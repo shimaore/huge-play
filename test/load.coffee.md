@@ -9,6 +9,7 @@
           'middleware/dtmf.coffee.md'
           'middleware/prompt.coffee.md'
           'middleware/reference_in_pouchdb.coffee.md'
+          'middleware/reference_in_socketio.coffee.md'
           'middleware/trace_in_pouchdb.coffee.md'
           'middleware/trace_in_tangible.coffee.md'
 

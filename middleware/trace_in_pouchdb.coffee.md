@@ -27,10 +27,6 @@ FIXME: use some common logging system instead.
 
       db_prefix = @cfg.TRACE_DB_PREFIX = 'trace'
 
-      if @cfg.update_trace_data?
-        @debug.dev 'Another module provided the function, not starting.'
-        return
-
       RemotePouchDB = PouchDB.defaults prefix: base
 
       current_db_name = null
@@ -51,7 +47,7 @@ FIXME: use some common logging system instead.
 Update
 ------
 
-      @cfg.update_trace_data = save_data = seem (data,tries = 3) =>
+      save_data = seem (data,tries = 3) =>
         id = data._id
         database = name_for_id data.logger_stamp
 
@@ -73,6 +69,8 @@ Update
             rev: data._rev
         data._rev = rev
         return
+
+      @cfg.statistics.on 'trace', save_data
 
       @debug 'Ready.'
 

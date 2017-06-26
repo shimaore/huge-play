@@ -181,35 +181,6 @@ Use a default client for generic / shared APIs
 
     @notify = ->
 
-The `call` event is pre-registered (in spicy-action) on the `calls` bus.
-We now use it to transport any data that is call related (at the `reference`-, `call/session`-, or `report`-level).
-We also try very hard to mimic the data that will end up in the database, so that event consumers can have a single method for both real-time and database-driven handling of call progress events.
-
-      @cfg.statistics.on 'reference', (data) =>
-
-        data.timestamp ?= now()
-        data.host ?= @cfg.host
-        data.type ?= 'reference'
-
-        @socket.emit 'call', data
-
-      @cfg.statistics.on 'call', (data) =>
-
-        data._id ?= data.session
-        data.timestamp ?= now()
-        data.host ?= @cfg.host
-        data.type ?= 'call'
-
-        @socket.emit 'call', data
-
-      @cfg.statistics.on 'report', (data) =>
-
-        data.timestamp ?= now()
-        data.host ?= @cfg.host
-        data.type ?= 'report'
-
-        @socket.emit 'call', data
-
 Standard events: `add`.
 
       if @cfg.notify_statistics
@@ -340,34 +311,26 @@ The report is first saved as usual.
 
           @cfg.statistics.emit 'report', report
 
-        save_call: seem ->
-          if @session.reports.length > 0 and yield @cfg.save_reports? @session.reports
+        save_call: ->
+
+          if @session.reports.length > 0
+            @cfg.statistics.emit 'reports', @session.reports
             @session.reports = []
 
-          if @cfg.update_call_data?
-            {call_data} = @session
-            @_in call_data._in ?= []
-            call_data._id = @session._id
-            call_data = yield @cfg.update_call_data call_data
+          {call_data} = @session
+          @_in call_data._in ?= []
+          call_data._id = @session._id
 
-            @cfg.statistics.emit 'call', call_data
+          @cfg.statistics.emit 'call', call_data
 
-            @session.call_data = call_data
-          else
-            @debug.dev 'Missing @cfg.update_call_data, not saving'
+          @session.call_data = call_data
 
-        save_ref: seem ->
-          if @cfg.update_reference_data?
-            {reference_data} = @session
-            @_in reference_data._in ?= []
-            reference_data.reference = @session.reference
-            reference_data = yield @cfg.update_reference_data reference_data
+        save_ref: ->
+          {reference_data} = @session
+          @_in reference_data._in ?= []
+          reference_data.reference = @session.reference
 
-            @cfg.statistics.emit 'reference', reference_data
-
-            @session.reference_data = reference_data
-          else
-            @debug.dev 'Missing @cfg.update_reference_data, not saving'
+          @cfg.statistics.emit 'reference', reference_data
 
         get_ref: seem ->
           @session.reference ?= @cfg.reference_id()
@@ -380,7 +343,7 @@ The report is first saved as usual.
             @debug.dev 'Missing @cfg.get_reference_data, using empty reference_data', reference
 
         save_trace: ->
-          @cfg.update_trace_data? @session
+          @cfg.statistics.emit 'trace', @session
 
         set: seem (name,value) ->
           return unless name?
