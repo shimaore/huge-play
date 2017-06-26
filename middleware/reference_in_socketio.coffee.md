@@ -16,7 +16,7 @@ We also try very hard to mimic the data that will end up in the database, so tha
         @socket.emit 'call', data
 
       @cfg.statistics.on 'reports', (reports) =>
-        report.forEach (report) ->
+        reports.forEach (report) ->
           @socket.emit 'call', report
 
     @include = ->
