@@ -2,7 +2,7 @@
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
     EventEmitter = require 'events'
-    moment = require 'moment-timezone'
+    Moment = require 'moment-timezone'
     uuidV4 = require 'uuid/v4'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
@@ -17,8 +17,8 @@
     seconds = 1000
     minutes = 60*seconds
 
-    now = ->
-      new Date().toJSON()
+    now = (tz = 'UTC') ->
+      Moment().tz(tz).format()
 
     @config = seem ->
       yield nimble @cfg
@@ -49,7 +49,7 @@
         local_redis.on 'warning', => @debug "local redis: warning"
 
       @cfg.period_of ?= (stamp = new Date(),timezone = 'UTC') ->
-        moment
+        Moment
         .tz stamp, timezone
         .format 'YYYY-MM'
 
@@ -271,13 +271,15 @@ We assume the room names match record IDs.
 
 Data reporting (e.g. to save for managers reports).
 Typically `@report({state,…})` for calls, `@report({event,…})` for non-calls.
+This version is meant to be used in-call.
 
         report: (report) ->
           unless @call? and @session?
             @debug.dev 'report: improper environment'
-            return
+            return false
 
-          report.timestamp = new Date().toJSON()
+          report.timezone ?= @session.timezone
+          report.timestamp ?= now report.timezone
           @_in report._in ?= []
           report.host ?= @cfg.host
           report.type ?= 'report'
@@ -295,21 +297,13 @@ Typically `@report({state,…})` for calls, `@report({event,…})` for non-calls
           report.report_type = 'in-call'
 
           @session.reports.push report
+          true
 
 Real-time notification (e.g. to show on a web panel).
 
         notify: (report) ->
-
-The report is first saved as usual.
-
-          report.timestamp ?= now()
-          @_in report._in ?= []
-          report.host ?= @cfg.host
-          report.type ?= 'report'
-
-          @report report
-
-          @cfg.statistics.emit 'report', report
+          if @report report
+            @cfg.statistics.emit 'report', report
 
         save_call: ->
 

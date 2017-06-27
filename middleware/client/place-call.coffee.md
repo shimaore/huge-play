@@ -10,6 +10,7 @@ This module also triggers calls from within a conference.
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:place-call"
     debug = (require 'tangible') @name
+    Moment = require 'moment-timezone'
 
     escape = (v) ->
       "#{v}".replace ',', ','
@@ -17,8 +18,8 @@ This module also triggers calls from within a conference.
     make_params = (data) ->
       ("#{k}=#{escape v}" for own k,v of data).join ','
 
-    now = ->
-      new Date().toJSON()
+    now = (tz = 'UTC') ->
+      Moment().tz(tz).format()
 
     @handler = handler = (cfg,ev) ->
 
@@ -99,7 +100,7 @@ Load additional data from the endpoint.
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
-        {account} = endpoint_data
+        {account,timezone} = endpoint_data
 
 Ensure only one FreeSwitch server processes those.
 
@@ -130,7 +131,8 @@ Session Reference Data
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
 
-        data.timestamp ?= now()
+        data.timestamp ?= now timezone
+        data.timezone = timezone
         data.host = host
         data.type = 'reference'
 
@@ -232,7 +234,7 @@ Load additional data from the endpoint.
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
-        {account} = endpoint_data
+        {account,timezone} = endpoint_data
 
 Try to get the asserted number, assuming Centrex.
 
@@ -242,6 +244,8 @@ Try to get the asserted number, assuming Centrex.
         {language} = data
         language ?= number_data.language
         language ?= endpoint_data.language
+
+        timezone ?= data.timezone if data.timezone?
 
 Duplicated from exultant-song (FIXME)
 
@@ -265,7 +269,7 @@ Session Reference Data
           group_confirm_cancel_timeout: false
           language: language
 
-        data.timestamp ?= now()
+        data.timestamp ?= now timezone
         data.host = host
         data.type = 'reference'
 

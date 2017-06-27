@@ -2,6 +2,7 @@
     debug = (require 'tangible') @name
     seem = require 'seem'
     pkg = name:'huge-play'
+    Moment = require 'moment-timezone'
 
     queuer = require 'black-metal/queuer'
     request = require 'superagent'
@@ -13,8 +14,8 @@
     domain_of = (key) ->
       key?.split('@')[1]
 
-    now = ->
-      new Date().toJSON()
+    now = (tz = 'UTC') ->
+      Moment().tz(tz).format()
 
     API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
@@ -125,7 +126,8 @@
           report.session = yield @get_session()
           report.reference = yield @get_reference()
 
-          report.timestamp = now()
+          report.timezone = yield @get 'timezone'
+          report.timestamp = now report.timezone
           report.host = host
           report.type = 'report'
 
@@ -184,7 +186,8 @@
           report.number = @number
           report.number_domain = @domain
 
-          report.timestamp = now()
+          report.timezone = yield @get 'timezone'
+          report.timestamp = now report.timezone
           report.host = host
           report.type = 'report'
 
@@ -201,7 +204,11 @@
             debug 'create_egress_call: missing number-domain', @domain
             return
 
-          {account,queuer_webhook} = @number_domain_data
+          {account,queuer_webhook,timezone} = @number_domain_data
+
+          timezone ?= null
+
+          yield @set 'timezone', timezone
 
           unless account?
             debug 'create_egress_call: no account', @domain
@@ -254,7 +261,8 @@ See `in_domain` in black-metal/tagged.
               sip_invite_params: "xref=#{_id}"
               origination_caller_id_number: @number
 
-            timestamp: now()
+            timestamp: now timezone
+            timezone: timezone
             host: host
             type: 'reference'
             reference: _id
@@ -269,11 +277,12 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
             uuid: 'create-egress-call'
             session: "#{_id}-create-egress-call"
             reference: _id
-            start_time: now()
+            start_time: now timezone
             source: @number
             destination: body.destination
+            timezone: timezone
 
-            timestamp: now()
+            timestamp: now timezone
             host: host
             type: 'call'
           yield cfg.update_call_data call_data
@@ -287,6 +296,7 @@ This probably not necessary, since the destination number is actually retrieved 
 
           yield call.set_remote_number body.destination
           yield call.set_tags body.tags
+          yield call.set 'timezone', timezone
 
           # async
           @notify 'create-egress-call', data

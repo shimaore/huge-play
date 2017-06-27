@@ -6,6 +6,25 @@
 
     @include = seem ->
 
+      @session.call_data ?= {}
+
+The time we started processing this call.
+
+      @session.call_data.start_time = Moment().format()
+
+The call UUID (managed by FreeSwitch).
+
+      @session.call_data.uuid = @call.uuid
+
+The session ID (managed by `tangible/middleware`).
+
+      @session.call_data.session = @session._id
+
+A record of the (original, pre-processing) source and destination.
+
+      @session.call_data.source = @source
+      @session.call_data.destination = @destination
+
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.once 'cleanup_linger'
@@ -90,7 +109,7 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
 
 Update the (existing) call data
 
-        @session.call_data.end_time = new Date() .toJSON()
+        @session.call_data.end_time = Moment().format()
         @session.call_data.report = report
         if @session.timezone?
           @session.call_data.timezone = @session.timezone

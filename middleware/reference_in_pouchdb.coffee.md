@@ -8,6 +8,8 @@ FIXME: use redis instead.
     PouchDB = require 'shimaore-pouchdb'
     uuidV4 = require 'uuid/v4'
 
+    Moment = require 'moment-timezone'
+
     sleep = (timeout) ->
       new Promise (resolve) ->
         setTimeout resolve, timeout
@@ -66,8 +68,8 @@ Merge tags (but keep them ordered)
         period = id.substring 0, 7
         database = [db_prefix,period].join '-'
 
-      now = ->
-        new Date().toJSON()
+      now = (tz = 'UTC') ->
+        Moment().tz(tz).format()
 
       {host} = @cfg
 

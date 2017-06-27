@@ -92,28 +92,9 @@ in which case one is created.
 * session.call_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
 The end-time is set in `cdr.coffee.md`, along with the `report` field.
 
-      @session.call_data =
-
-The call UUID (managed by FreeSwitch).
-
-        uuid: @call.uuid
-
-The session ID (managed by `tangible/middleware`).
-
-        session: @session._id
-
 The reference we know about at the start of the call.
 
-        reference: @session.reference
-
-The time we started processing.
-
-        start_time: new Date() .toJSON()
-
-A record of the (original, pre-processing) source and destination.
-
-        source: @source
-        destination: @destination
+      @session.call_data.reference = @session.reference
 
       yield @save_call()
 

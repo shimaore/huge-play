@@ -99,8 +99,10 @@
             emit: ->
             add: ->
 
+          C = require '../middleware/cdr.coffee.md'
           yield L.include.call call_ctx, call_ctx
           yield S.include.call call_ctx, call_ctx
+          yield C.include.call call_ctx, call_ctx
           yield M.include.call call_ctx, call_ctx
 
       for m in list
