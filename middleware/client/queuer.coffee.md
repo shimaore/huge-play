@@ -280,13 +280,13 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
 
           call = new HugePlayCall
             destination: _id
-            tags: body.tags
 
           yield call.save()
 
 This probably not necessary, since the destination number is actually retrieved from the reference-data.
 
           yield call.set_remote_number body.destination
+          yield call.set_tags body.tags
 
           # async
           @notify 'create-egress-call', data

@@ -100,10 +100,11 @@ If the call-group should use the queuer, then do that.
 
         call = new Call
           id: @call.uuid
-          tags: @session.reference_data?.tags
 
         yield call.save()
         yield call.set_session @session._id
+        yield call.set_tags @session.reference_data?.tags
+
         if fifo.music?
           yield call.set_music music_uri
 
