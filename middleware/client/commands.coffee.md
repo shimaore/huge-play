@@ -269,6 +269,14 @@ start: '18:00', end: '08:00'
         @session.alert_info = alert_info
         true
 
+      clear_call_center_tags: ->
+        @clear_call_center_tags()
+        true
+
+      clear_user_tags: ->
+        @clear_user_tags()
+        true
+
       required_skill: (skill) ->
         @tag "skill:#{skill}"
         true

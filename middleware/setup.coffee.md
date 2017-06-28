@@ -512,6 +512,20 @@ Set the account so that if we redirect to an external number the egress module c
         has_user_tag: (tag) ->
           tag? and @has_tag "user-tag:#{tag}"
 
+        clear_call_center_tags: ->
+          if @session.reference_data?.tags?
+            @session.reference_data.tags = @session.reference_data.tags
+              .filter (tag) ->
+                not tag.match /^(skill|priority|queue):/
+          null
+
+        clear_user_tags: ->
+          if @session.reference_data?.tags?
+            @session.reference_data.tags = @session.reference_data.tags
+              .filter (tag) ->
+                not tag.match /^user-tag:/
+          null
+
         record_call: (name) ->
           unless @cfg.recording_uri?
             @debug.dev 'No recording_uri, call will not be recorded.'
