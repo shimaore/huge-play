@@ -8,8 +8,12 @@
 
       @session.call_data ?= {}
 
+      @session.call_data.type = 'call'
+      @session.call_data.host = @cfg.host
+
 The time we started processing this call.
 
+      @session.call_data.timestamp =
       @session.call_data.start_time = Moment().format()
 
 The call UUID (managed by FreeSwitch).
@@ -109,7 +113,9 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
 
 Update the (existing) call data
 
+        @session.call_data.timestamp =
         @session.call_data.end_time = Moment().format()
+
         @session.call_data.report = report
         if @session.timezone?
           @session.call_data.timezone = @session.timezone
@@ -120,7 +126,7 @@ Update the (existing) call data
             .tz @session.timezone
             .format()
 
-        @notify state: 'end', data: report
+        @notify state: 'end', {report}
         yield @save_call()
         yield @save_trace()
         debug "CDR: Channel Hangup Complete", report
