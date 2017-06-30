@@ -138,10 +138,30 @@
           cfg.get_reference_data reference
 
         update_reference_data: (data) ->
+          data.report_type = 'queuer'
+          data.call = @id
+          data.session = yield @get_session()
+          data.reference = yield @get_reference()
+
+          data.timezone = yield @get 'timezone'
+          data.timestamp = now report.timezone
+          report.host = host
+          data.type = 'reference'
+
           cfg.statistics.emit 'reference', data
           data
 
         update_call_data: (data) ->
+          data.report_type = 'queuer'
+          data.call = @id
+          data.session = yield @get_session()
+          data.reference = yield @get_reference()
+
+          data.timezone = yield @get 'timezone'
+          data.timestamp = now report.timezone
+          report.host = host
+          data.type = 'call'
+
           cfg.statistics.emit 'call', data
           data
 
