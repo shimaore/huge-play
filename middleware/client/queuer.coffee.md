@@ -155,7 +155,7 @@
 
           data.timezone = yield @get 'timezone'
           data.timestamp = now report.timezone
-          report.host = host
+          data.host = host
           data.type = 'reference'
 
           cfg.statistics.emit 'reference', data
@@ -174,7 +174,7 @@
 
           data.timezone = yield @get 'timezone'
           data.timestamp = now report.timezone
-          report.host = host
+          data.host = host
           data.type = 'call'
 
           cfg.statistics.emit 'call', data
