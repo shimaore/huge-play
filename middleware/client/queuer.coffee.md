@@ -126,10 +126,10 @@
 
           unless data.session?
             new_session = yield @get_session()
-            data.session = new_session if new_session?
+            report.session = new_session if new_session?
           unless data.reference?
             new_reference = yield @get_reference()
-            data.reference = new_reference if new_reference?
+            report.reference = new_reference if new_reference?
 
           report.timezone = yield @get 'timezone'
           report.timestamp = now report.timezone
@@ -154,7 +154,7 @@
             data.reference = new_reference if new_reference?
 
           data.timezone = yield @get 'timezone'
-          data.timestamp = now report.timezone
+          data.timestamp = now data.timezone
           data.host = host
           data.type = 'reference'
 
@@ -173,7 +173,7 @@
             data.reference = new_reference if new_reference?
 
           data.timezone = yield @get 'timezone'
-          data.timestamp = now report.timezone
+          data.timestamp = now data.timezone
           data.host = host
           data.type = 'call'
 
