@@ -120,7 +120,7 @@
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
 
-        report: (report) ->
+        report: seem (report) ->
           report.report_type = 'queuer-call'
           report.call = @id
 
@@ -142,7 +142,7 @@
         get_reference_data: (reference) ->
           cfg.get_reference_data reference
 
-        update_reference_data: (data) ->
+        update_reference_data: seem (data) ->
           data.report_type = 'queuer'
           data.call = @id
 
@@ -161,7 +161,7 @@
           cfg.statistics.emit 'reference', data
           data
 
-        update_call_data: (data) ->
+        update_call_data: seem (data) ->
           data.report_type = 'queuer'
           data.call = @id
 
