@@ -114,7 +114,7 @@ If the call-group should use the queuer, then do that.
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
         yield call.set_reference @session.reference
-        yield call.reset 'presenting'
+        yield call.clear()
         yield call.del_tag 'bridged'
         yield queuer.queue_ingress_call call
 
