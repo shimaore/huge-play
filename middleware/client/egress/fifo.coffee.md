@@ -72,13 +72,15 @@ The destination matched.
 
       agent_tags = =>
         tags = []
-        {skills,queues} = @session.number
+        {skills,queues,multi} = @session.number
         if skills?
           for skill in skills
             tags.push "skill:#{skill}"
         if queues?
           for queue in queues
             tags.push "queue:#{queue}"
+        if multi
+          tags.push 'multi'
         tags
 
 This works only for centrex.
