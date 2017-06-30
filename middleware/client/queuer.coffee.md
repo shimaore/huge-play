@@ -123,8 +123,13 @@
         report: (report) ->
           report.report_type = 'queuer-call'
           report.call = @id
-          report.session = yield @get_session()
-          report.reference = yield @get_reference()
+
+          unless data.session?
+            new_session = yield @get_session()
+            data.session = new_session if new_session?
+          unless data.reference?
+            new_reference = yield @get_reference()
+            data.reference = new_reference if new_reference?
 
           report.timezone = yield @get 'timezone'
           report.timestamp = now report.timezone
@@ -140,8 +145,13 @@
         update_reference_data: (data) ->
           data.report_type = 'queuer'
           data.call = @id
-          data.session = yield @get_session()
-          data.reference = yield @get_reference()
+
+          unless data.session?
+            new_session = yield @get_session()
+            data.session = new_session if new_session?
+          unless data.reference?
+            new_reference = yield @get_reference()
+            data.reference = new_reference if new_reference?
 
           data.timezone = yield @get 'timezone'
           data.timestamp = now report.timezone
@@ -154,8 +164,13 @@
         update_call_data: (data) ->
           data.report_type = 'queuer'
           data.call = @id
-          data.session = yield @get_session()
-          data.reference = yield @get_reference()
+
+          unless data.session?
+            new_session = yield @get_session()
+            data.session = new_session if new_session?
+          unless data.reference?
+            new_reference = yield @get_reference()
+            data.reference = new_reference if new_reference?
 
           data.timezone = yield @get 'timezone'
           data.timestamp = now report.timezone
