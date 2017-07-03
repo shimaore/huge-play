@@ -18,6 +18,7 @@ FIXME: use redis instead.
     cache = LRU
       max: 2
       dispose: (key,value) ->
+        debug 'Dispose of', key
         value?.close?()
 
     update_doc = (doc,data) ->
@@ -58,12 +59,11 @@ Merge tags (but keep them ordered)
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
       get_db = (database) ->
-        if cache.has database
-          cache.get database
-        else
-          db = new PouchDB database, prefix: base
-          cache.set database, db
-          db
+        db = cache.get database
+        return db if db?
+        db = new PouchDB database, prefix: base
+        cache.set database, db
+        db
 
       name_for_id = (id) ->
         period = id.substring 0, 7
