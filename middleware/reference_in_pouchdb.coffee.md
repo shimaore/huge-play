@@ -116,7 +116,7 @@ FIXME Properly handle bulkDocs semantics.
             yield sleep 181
             yield save_reports reports, tries
           else
-            call
+            reports
 
       @cfg.statistics.on 'reports', save_reports
       @cfg.statistics.on 'report', (report) ->
