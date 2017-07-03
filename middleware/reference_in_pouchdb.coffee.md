@@ -6,6 +6,7 @@ FIXME: use redis instead.
 
     seem = require 'seem'
     PouchDB = require 'shimaore-pouchdb'
+    LRU = require 'lru-cache'
     uuidV4 = require 'uuid/v4'
 
     Moment = require 'moment-timezone'
@@ -13,6 +14,11 @@ FIXME: use redis instead.
     sleep = (timeout) ->
       new Promise (resolve) ->
         setTimeout resolve, timeout
+
+    cache = LRU
+      max: 2
+      dispose: (key,value) ->
+        value?.close?()
 
     update_doc = (doc,data) ->
 
@@ -51,18 +57,13 @@ Merge tags (but keep them ordered)
 
       db_prefix = @cfg.REFERENCE_DB_PREFIX = 'reference'
 
-      RemotePouchDB = PouchDB.defaults prefix: base
-
-      current_db_name = null
-      current_db = null
-
       get_db = (database) ->
-        if current_db_name is database
-          current_db
+        if cache.has database
+          cache.get database
         else
-          current_db?.close()
-          current_db_name = database
-          current_db = new RemotePouchDB current_db_name
+          db = new PouchDB database, prefix: base
+          cache.set database, db
+          db
 
       name_for_id = (id) ->
         period = id.substring 0, 7
