@@ -7,8 +7,6 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     @include = seem ->
       return unless @session.direction is 'ingress'
 
-      @tag 'ingress'
-
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
       if @session.dialplan?
@@ -38,8 +36,8 @@ All external ingress calls come in as E.164 (without plus sign).
       @session.ccnq_from_e164 = @source
       @session.ccnq_to_e164 = @destination
 
-      @tag @session.e164_number._id
-      @user_tags @session.e164_number.tags
+      yield @reference.add_in @session.e164_number._id
+      yield @user_tags @session.e164_number.tags
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 

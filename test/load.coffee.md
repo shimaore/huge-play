@@ -8,9 +8,9 @@
           'middleware/handled.coffee.md'
           'middleware/dtmf.coffee.md'
           'middleware/prompt.coffee.md'
-          'middleware/reference_in_pouchdb.coffee.md'
-          'middleware/reference_in_socketio.coffee.md'
-          'middleware/trace_in_pouchdb.coffee.md'
+          'middleware/reference_in/socketio.coffee.md'
+          'middleware/reference_in/io_client.coffee.md'
+          'middleware/reference_in/io_server.coffee.md'
           'middleware/trace_in_tangible.coffee.md'
 
           'middleware/client/setup.coffee.md'
@@ -95,6 +95,7 @@
               export: -> Promise.resolve null
             data: # useful-wind/router
               'Channel-Context': 'sbc-ingress'
+            reference: get_block_dtmf: ->
           call_ctx.cfg.statistics ?=  # thinkable-ducks/server
             emit: ->
             add: ->

@@ -13,8 +13,6 @@ First-line handler for outbound calls
         return null unless doc.music?
         @prompt.uri 'prov', 'prov', doc._id, doc.music
 
-      @tag 'egress'
-
 Endpoint
 --------
 
@@ -24,21 +22,21 @@ Endpoint
 
 Endpoint might be provided in the reference data for example for an `originate` call (in exultant-songs).
 
-      @session.endpoint_name ?= @session.reference_data.endpoint
+      @session.endpoint_name ?= yield @reference.get_endpoint()
 
       unless @session.endpoint_name?
         @debug.dev 'Missing endpoint_name', @call.data
         return @respond '485 Missing X-CCNQ3-Endpoint'
 
       @debug 'endpoint', @session.endpoint_name
-      @session.reference_data.endpoint = @session.endpoint_name
+      yield @reference.set_endpoint @session.endpoint_name
 
       yield @unset 'sip_h_X-CCNQ3-Endpoint'
 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
       @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
-      @tag @session.endpoint._id
+      yield @reference.add_in @session.endpoint._id
       if @session.endpoint.timezone?
         @session.timezone = @session.endpoint.timezone
       if @session.endpoint.music?
@@ -88,8 +86,8 @@ The `number_domain` field is required, but the number-domain record is optional.
           {}
 
       @debug 'number_domain', number_domain
-      @tag @session.number_domain_data._id
-      @user_tags @session.number_domain_data.tags
+      yield @reference.add_in @session.number_domain_data._id
+      yield @user_tags @session.number_domain_data.tags
 
 Number-domain is less specific than endpoint, so do not override.
 
@@ -116,9 +114,8 @@ On a static trunk, the number might not be present.
             @debug.ops "number:#{src_number}: #{error}"
             {}
 
-
       if @session.number._id?
-        @tag @session.number._id
+        yield @reference.add_in @session.number._id
 
 Number is more specific than endpoint or number-domain, override.
 
@@ -253,6 +250,10 @@ For backward-compatibility we currently ignore ICE proposals.
 
       yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
-      @notify state:'egress'
+      @report
+        state:'egress'
+        endpoint: @session.endpoint._id
+        number_domain: @session.number_domain_data._id
+        number: @session.number._id ? null
       @debug 'OK'
       return

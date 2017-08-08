@@ -21,7 +21,7 @@ Now, we have two cases:
 * doc.global_number.local_number (string) The identifier of the local-number into which this global-number gets translated for inbound calls. (The identifier must have the format `<number>@<number-domain>` and a `number:<number>@<number-domain>` record must exist.)
 
       return unless @session.e164_number?.local_number?
-      @tag "number:#{@session.e164_number.local_number}"
+      yield @reference.add_in "number:#{@session.e164_number.local_number}"
 
 These are used e.g. for Centrex, and override the destination number and number-domain.
 
@@ -48,8 +48,8 @@ The dialplan and country (and other parameters) might also be available in the `
         .catch (error) =>
           debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
-      @tag @session.number_domain_data._id
-      @user_tags @session.number_domain_data.tags
+      yield @reference.add_in @session.number_domain_data._id
+      yield @user_tags @session.number_domain_data.tags
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
 * doc.number_domain.country (optional) country used for ingress calls to this domain.
@@ -62,6 +62,9 @@ The dialplan and country (and other parameters) might also be available in the `
       if @session.country?
         @session.country = @session.country.toLowerCase()
 
-      @report state:'local-number'
+      @report
+        state:'local-number'
+        number: @session.e164_number.local_number
+        number_domain: @session.number_domain_data._id
       debug 'OK'
       return

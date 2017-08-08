@@ -29,9 +29,5 @@ Rewrite error response code.
 
         else
           @debug 'Hangup'
-          @tag 'hangup'
           @notify state:'hangup'
           yield @action 'hangup'
-
-      yield @save_call()
-      yield @save_ref()

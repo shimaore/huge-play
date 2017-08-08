@@ -3,8 +3,6 @@
     @name = "#{pkg.name}:middleware:client:setup"
     debug = (require 'tangible') @name
 
-    uuidV4 = require 'uuid/v4'
-
 * doc.local_number Record with an identifier `number:<local-number>@<number-domain>`. These records are used on the client-side SBCs. They are one of the two types of `doc.number`.
 * doc.number If the identifier of a number contains a `@` character, it is a `doc.local_number`.
 * doc.local_number._id (required) `number:<local-number>@<number-domain>`
@@ -59,7 +57,6 @@ Session Reference
 -----------------
 
 * session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
-* session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier might be included in the context.
@@ -83,29 +80,21 @@ In all other cases, look (very hard) for a `xref` parameter.
 If the call was originated by a phone it's normal for it to not have a reference,
 in which case one is created.
 
-      yield @get_ref()
-      @tag 'client-side'
-      @tag "source:#{@source}"
-      @tag "destination:#{@destination}"
-      yield @save_ref()
+      {Reference} = @cfg
+      @reference = new Reference @session.reference
+      @session.reference = @reference.id
 
-* session.call_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call. Each object is saved in session.reference_data.calls.
-The end-time is set in `cdr.coffee.md`, along with the `report` field.
-
-The reference we know about at the start of the call.
-
-      @session.call_data.reference = @session.reference
-
-      yield @save_call()
+      @notify state: 'incoming-call-client-side'
 
 Click-to-dial (`place-call`)
 ----------------------------
 
 Force the destination for `exultant-songs` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
 
-      if @session.reference_data.destination?
-        @destination = @session.reference_data.destination
-        @session.reference_data.destination = null
+      d = yield @reference.get_destination()
+      if d?
+        @destination = d
+        yield @reference.set_destination null
 
 Also, do not wait for an ACK, since we're calling out (to the "caller") when using exultant-songs.
 
@@ -114,18 +103,18 @@ Also, do not wait for an ACK, since we're calling out (to the "caller") when usi
 
 Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
 
-        if @session.reference_data.account?
-          yield @export 'sip_h_P-Charge-Info': "sip:#{@session.reference_data.account}@#{@cfg.host}"
+        a = @reference.get_account()
+        if a?
+          yield @export 'sip_h_P-Charge-Info': "sip:#{a}@#{@cfg.host}"
 
-      if @session.reference_data.leg_options?
-        @session.leg_options = @session.reference_data.leg_options
-      if @session.reference_data.call_options?
-        @session.call_options = @session.reference_data.call_options
+      o = yield @reference.get_call_options()
+      if o?
+        @session.call_options = o
 
 Logger
 ------
 
-      if @session.reference_data?.dev_logger
+      if yield @reference.get_dev_logger()
         @session.dev_logger = true
 
 SIP Profile

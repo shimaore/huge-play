@@ -207,12 +207,9 @@ Really we should just barge on the channel if we need anything more complex than
 Log into the conference
 
         @debug 'conference'
-        @cfg.statistics.emit 'conference:started',
-          conference_name: conf_name
-          _in: [
-            "number_domain:#{@session.number_domain}"
-            "conference:#{conf_name}"
-          ]
+        yield @reference.add_in "number_domain:#{@session.number_domain}"
+        # yield @reference.add_in "conference:#{conf_name}"
+        @notify state: 'conference:started', conference: conf_name
 
 * doc.number_domain.conferences[].record (boolean) If true the conference calls will be recorded.
 

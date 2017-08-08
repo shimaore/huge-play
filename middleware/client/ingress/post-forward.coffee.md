@@ -44,13 +44,8 @@ Build the destination FreeSwitch dialstring
         { parameters, to_uri }
       ]
 
-      @tag 'post-forward'
-
-### Build the set of `_in` targets for notifications of the reference data.
-
       if @session.dev_logger
-        @session.reference_data.dev_logger = true
-      yield @save_ref()
+        yield @reference.set_dev_logger true
 
       debug 'Done.'
       return

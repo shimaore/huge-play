@@ -3,8 +3,6 @@
     @name = "#{pkg.name}:middleware:carrier:setup"
     debug = (require 'tangible') @name
 
-    uuidV4 = require 'uuid/v4'
-
 * doc.global_number Record with an identifier `number:<global-number>`. These records are used between the carrier SBCs and the client SBCs. They are one of the two types of `doc.number`.
 * doc.number If the identifier of a number does not contain a `@` character, it is a `doc.global_number`.
 * doc.global_number._id (required) `number:<global-number>`
@@ -104,7 +102,6 @@ Session Reference
 -----------------
 
 * session.reference (string) Identifies a call spanning multiple FreeSwitch servers.
-* session.reference_data (object) Data associated with the session.reference
 
 The `reference` is used to track a given call through various systems and associate parameters (e.g. client information) to the call as a whole.
 In case of a transfer, the session identifier might be included in the context.
@@ -126,26 +123,16 @@ In all other cases, look (very hard) for a `xref` parameter.
 
 Otherwise, since the call is coming from a carrier we force the creation of a new context.
 
-      yield @get_ref()
-      @tag 'carrier-side'
-      @tag "source:#{@source}"
-      @tag "destination:#{@destination}"
-      yield @save_ref()
+      {Reference} = @cfg
+      @reference = new Reference @session.reference
+      @session.reference = @reference.id
 
-* session.call_data (object) cross-references the FreeSwitch call ID, the session.reference multi-server call reference, and provide start-time / end-time for the FreeSwitch call.
-The end-time is set in `cdr.coffee.md`, along with the `report` field.
-
-
-The reference we know about at the start of the call.
-
-      @session.call_data.reference = @session.reference
-
-      yield @save_call()
+      @notify state:'incoming-call-carrier-side'
 
 Logger
 ------
 
-      if @session.reference_data?.dev_logger
+      if yield @reference.get_dev_logger()
         @session.dev_logger = true
 
 SIP Profile

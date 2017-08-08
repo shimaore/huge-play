@@ -23,10 +23,6 @@ This module also triggers calls from within a conference.
 
     @handler = handler = (cfg,ev) ->
 
-      save_ref = (data) ->
-        cfg.statistics.emit 'reference', data
-        data
-
       if cfg.local_redis_client?
         elected = seem (key) ->
           name = "elected-#{key}"
@@ -70,6 +66,8 @@ Note: if there are multiple profiles in use we will get in trouble at that point
       client_server = "#{cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
       debug 'Using', {local_server,client_server}
 
+      {Reference} = cfg
+
 Place Call
 ----------
 
@@ -88,11 +86,18 @@ Event parameters:
 
       ev.on 'place-call', seem (data) =>
         {endpoint,caller,_id} = data
+
+        data.callee_name ?= pkg.name
+        data.callee_num ?= data.destination
+
+FIXME The data sender must do resolution of the endpoint_via and associated translations????
+ANSWER: Yes. And store the result in the field `caller`.
+
         debug 'Received place-call', data
 
 A proper call UUID is required.
 
-        return unless _id?.match /^\d{4}-\d{2}[\w-]+$/
+        return unless _id?
 
 Load additional data from the endpoint.
 
@@ -112,31 +117,18 @@ Note that Centrex-redirect uses both the local-server and the client-server.
         is_remote = yield cfg.is_remote(domain, [local_server,client_server].join '/').catch -> true
         return if is_remote
 
-FIXME The data sender must do resolution of the endpoint_via and associated translations????
-ANSWER: Yes. And store the result in `caller`.
-
         debug 'place-call: Placing call'
 
 Session Reference Data
 
-        data._in = [
+        my_reference = new Reference _id
+
+        yield my_reference.add_in [
           "endpoint:#{endpoint}"
           "account:#{account}"
           "number_domain:#{domain}"
         ]
-        data.tags ?= []
-        data.account = account
-        data.state = 'connecting-caller'
-
-        data.callee_name ?= pkg.name
-        data.callee_num ?= data.destination
-
-        data.timestamp ?= now timezone
-        data.timezone = timezone
-        data.host = host
-        data.type = 'reference'
-
-        data = yield save_ref data
+        yield my_reference.set_account account
 
         xref = "xref=#{_id}"
         params = make_params
@@ -198,11 +190,9 @@ The `originate` command will return when the call is answered by the callee (or 
 
         debug "Originate returned", res
         if res[0] is '+'
-          data.tags.push 'caller-connected'
+          debug 'caller-connected', _id
         else
-          data.tags.push 'caller-failed'
-
-        data = yield save_ref data
+          debug.dev 'caller-failed', _id
 
         debug 'Session state:', data.tags
 
@@ -221,7 +211,7 @@ Parameters:
 
 A proper call UUID is required.
 
-        return unless data._id?.match /^\d{4}-\d{2}[\w-]+$/
+        return unless data._id?
 
 Ensure we are co-located with the FreeSwitch instance serving this conference.
 
@@ -253,27 +243,22 @@ Duplicated from exultant-song (FIXME)
 
 Session Reference Data
 
-        data._in = [
+        my_reference = new Reference _id
+
+        yield my_reference.add_in [
           "endpoint:#{endpoint}"
           "account:#{account}"
           "number_domain:#{endpoint.number_domain}"
         ]
-        data.tags ?= []
-        data.account = account
-        data.state = 'connecting'
-        data.call_options =
+        yield my_reference.set_account account
+        yield my_reference.set_endpoint endpoint
+        yield my_reference.set_call_options
           group_confirm_key: '5' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
           group_confirm_file: 'phrase:conference:confirm:5' # defaults to `silence`
           group_confirm_error_file: 'phrase:conference:confirm:5'
           group_confirm_read_timeout: 15000 # defaults to 5000
           group_confirm_cancel_timeout: false
           language: language
-
-        data.timestamp ?= now timezone
-        data.host = host
-        data.type = 'reference'
-
-        data = yield save_ref data
 
 Call it out
 
@@ -287,11 +272,6 @@ Call it out
 
           origination_caller_id_number: calling_number
 
-And `huge-play` requires these for routing an egress call.
-
-          'sip_h_P-Charge-Info': "sip:#{account}@#{host}"
-          'sip_h_X-CCNQ3-Endpoint': endpoint
-
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
         cmd = "originate #{sofia} &conference(#{name}++flags{})"
 
@@ -304,8 +284,6 @@ And `huge-play` requires these for routing an egress call.
           msg
 
         debug "Conference returned", res
-
-        data = yield save_ref data
 
     @notify = ({cfg,socket}) ->
 

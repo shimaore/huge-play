@@ -67,7 +67,6 @@ The destination matched.
         return false unless item?
         @session[type] = item
         @direction type
-        @notify state:type
         true
 
       agent_tags = =>

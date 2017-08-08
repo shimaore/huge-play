@@ -269,24 +269,24 @@ start: '18:00', end: '08:00'
         @session.alert_info = alert_info
         true
 
-      clear_call_center_tags: ->
-        @clear_call_center_tags()
+      clear_call_center_tags: seem ->
+        yield @clear_call_center_tags()
         true
 
-      clear_user_tags: ->
-        @clear_user_tags()
+      clear_user_tags: seem ->
+        yield @clear_user_tags()
         true
 
-      required_skill: (skill) ->
-        @tag "skill:#{skill}"
+      required_skill: seem (skill) ->
+        yield @tag "skill:#{skill}"
         true
 
-      priority: (priority) ->
-        @tag "priority:#{priority}"
+      priority: seem (priority) ->
+        yield @tag "priority:#{priority}"
         true
 
-      queue: (queue) ->
-        @tag "queue:#{queue}"
+      queue: seem (queue) ->
+        yield @tag "queue:#{queue}"
         true
 
       has_tag: (tag) ->
@@ -345,14 +345,12 @@ Calendars
           {body} = yield request
             .post uri
             .send
-              reference_data: @session.reference_data
-              call_data: @session.call_data
-              tags: @session.reference_data?.tags
+              tags: yield @reference.get_tags()
               ccnq_from_e164: @session.ccnq_from_e164
               ccnq_to_e164: @session.ccnq_to_e164
               _in: @_in()
           if body?
-            @user_tags body.tags
+            yield @user_tags body.tags
           true
         catch
           debug 'webhook: error'
@@ -445,7 +443,6 @@ Copying the logic from middleware/client/ingress/fifo
           debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
           return
         item = items[number]
-        @tag "#{type} number #{number}"
         unless item?
           debug.csr "Number domain as no data #{number} for #{type}."
           return

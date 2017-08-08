@@ -15,15 +15,9 @@
       refer_to = clean_uri @req.variable 'sip_refer_to'
       d = "sofia/#{@session.sip_profile}/#{refer_to}"
 
-      if @session.reference_data?
-        @tag 'handled'
-        yield @save_ref()
-      else
-        @debug.dev 'Missing reference data when handling to', d
-        yield @respond '500', 'Missing reference'
-        return
-
       @debug 'transfering call to', d
-      @report state:'handled', handled_to: d
+      @report
+        state:'handled'
+        handled_to: d
       res = yield @action 'bridge', d
       @debug 'call transferred', res

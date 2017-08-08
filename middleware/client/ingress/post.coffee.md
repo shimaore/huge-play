@@ -61,7 +61,7 @@ Call rejection: reject anonymous caller
             return
 
           debug 'reject anonymous'
-          @tag 'reject-anonymous'
+          @notify state: 'reject-anonymous'
           # return @respond '603 Decline (anonymous)'
           yield @action 'answer'
 
@@ -86,14 +86,14 @@ Call rejection: reject anonymous caller
         list = yield @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
-            @tag 'blacklisted'
+            @notify state: 'blacklisted'
             if @session.number.list_to_voicemail
               # @destination unchanged
               @direction 'voicemail'
               return
             return @respond '486 Decline (blacklisted)' # was 603
           if @session.number.use_whitelist and not list.whitelist
-            @tag 'not whitelisted'
+            @notify state: 'not whitelisted'
             if @session.number.list_to_voicemail
               # @destination unchanged
               @direction 'voicemail'
@@ -185,19 +185,19 @@ Call Forward All
       @session.reason = 'unconditional' # RFC5806
       if @session.cfa_voicemail
         debug 'cfa:voicemail'
-        @tag 'cfa:voicemail'
+        @notify state: 'cfa:voicemail'
         @destination = @session.cfa_voicemail_number
         @direction 'voicemail'
         return
       if @session.cfa_number?
         debug 'cfa:forward'
-        @tag 'cfa:forward'
+        @notify state: 'cfa:forward'
         @session.destination = @session.cfa_number
         @direction 'forward'
         return
       if @session.cfa?
         debug 'cfa:fallback'
-        @tag 'cfa:fallback'
+        @notify state: 'cfa:fallback'
         @session.initial_destinations = [ to_uri: @session.cfa ]
         return
       @session.reason = null
@@ -266,8 +266,7 @@ Note the different alternatives for routing:
 ### Build the set of `_in` targets for notifications of the reference data.
 
       if @session.dev_logger
-        @session.reference_data.dev_logger = true
-      yield @save_ref()
+        yield @reference.set_dev_logger true
 
       if @session.number.record_ingress
         @record_call @session.number._id

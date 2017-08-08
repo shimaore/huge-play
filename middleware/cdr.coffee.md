@@ -6,28 +6,24 @@
 
     @include = seem ->
 
-      @session.call_data ?= {}
-
-      @session.call_data.type = 'call'
-      @session.call_data.host = @cfg.host
+      call_data = {}
 
 The time we started processing this call.
 
-      @session.call_data.timestamp =
-      @session.call_data.start_time = Moment().format()
+      call_data.start_time = Date.now()
 
 The call UUID (managed by FreeSwitch).
 
-      @session.call_data.uuid = @call.uuid
+      call_data.uuid = @call.uuid
 
 The session ID (managed by `tangible/middleware`).
 
-      @session.call_data.session = @session._id
+      call_data.session = @session._id
 
 A record of the (original, pre-processing) source and destination.
 
-      @session.call_data.source = @source
-      @session.call_data.destination = @destination
+      call_data.source = @source
+      call_data.destination = @destination
 
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
@@ -46,7 +42,6 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
         return
 
       @statistics.add 'incoming-calls'
-      @notify state: 'incoming-call'
 
       yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
       @call.once 'CHANNEL_HANGUP_COMPLETE'
@@ -66,7 +61,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
           return null if isNaN v = parseInt x
           v//1000
 
-        report =
+        cdr_report =
           direction:      @session.cdr_direction
           emergency:      @session.destination_emergency ? null
           onnet:          @session.destination_onnet ? null
@@ -97,10 +92,10 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
           jitter_max_variance:  float data.variable_rtp_audio_in_jitter_max_variance
           in_mos:               float data.variable_rtp_audio_in_mos
 
-        for own k,v of report
+        for own k,v of cdr_report
           switch k
             when 'direction'
-              @statistics.add "direction-#{v}", report.billable
+              @statistics.add "direction-#{v}", cdr_report.billable
             when 'emergency'
               @statistics.add "emergency" if v
             when 'onnet'
@@ -108,28 +103,25 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
             else
               @statistics.add k, v
 
-        @session.cdr_report = report
-        @call.emit 'cdr_report', report
+        @session.cdr_report = cdr_report
+        @call.emit 'cdr_report', cdr_report
 
 Update the (existing) call data
 
-        @session.call_data.timestamp =
-        @session.call_data.end_time = Moment().format()
+        call_data.end_time = Date.now()
 
-        @session.call_data.report = report
         if @session.timezone?
-          @session.call_data.timezone = @session.timezone
-          @session.call_data.tz_start_time = Moment @session.call_data.start_time
+          call_data.timezone = @session.timezone
+          call_data.tz_start_time = Moment call_data.start_time
             .tz @session.timezone
             .format()
-          @session.call_data.tz_end_time = Moment @session.call_data.end_time
+          call_data.tz_end_time = Moment call_data.end_time
             .tz @session.timezone
             .format()
 
-        @notify state: 'end', {report}
-        yield @save_call()
-        yield @save_trace()
-        debug "CDR: Channel Hangup Complete", report
+        @notify {state:'end', call_data, cdr_report}
+        @save_trace().catch -> yes # Async
+        debug "CDR: Channel Hangup Complete", cdr_report
       .catch (error) =>
         debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
 

@@ -19,13 +19,18 @@
         @source = @destination
       @destination = @session.destination
       @direction 'egress'
-      @tag @session.endpoint._id
-      @user_tags @session.endpoint.tags
+      # yield @reference.add_in @session.endpoint._id
+      yield @user_tags @session.endpoint.tags
+
 
 FIXME the original URI part should be the Request-URI per RFC5806
 
       yield @export
         sip_h_Diversion: "<sip:#{@destination}@#{@cfg.host ? hostname()}>;reason=#{@session.reason}"
+
+      @report
+        state: 'pre-forward'
+        endpoint: @session.endpoint._id
 
       debug 'OK',
         'session.outbound_route': @session.outbound_route

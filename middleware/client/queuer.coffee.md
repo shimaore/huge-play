@@ -19,6 +19,7 @@
 
     API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
+    RedisInterface = require 'normal-key/interface'
 
     @notify = ->
 
@@ -35,16 +36,13 @@
 
       @configure dial_calls: true
 
-      @register 'queuer', 'calls'
-
-      @cfg.statistics.on 'queuer', (data) =>
-        @socket.emit 'queuer', data
+Events received downstream.
 
       @register 'queuer:get-agent-state', 'dial_calls'
       @register 'queuer:log-agent-out', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
-        debug 'queue:get-agent-state', key
+        debug 'queuer:get-agent-state', key
 
         is_remote = yield @cfg.is_remote domain_of key
         return if is_remote isnt false
@@ -55,7 +53,7 @@
         count = yield agent.count().catch -> 0
         # async
         agent.notify state, {missed,count}
-        debug 'queue:get-agent-state: done', key, state
+        debug 'queuer:get-agent-state: done', key, state
         return
 
       @socket.on 'queuer:log-agent-out', seem (key) =>
@@ -69,6 +67,8 @@
         yield agent.transition 'logout'
         debug 'queue:log-agent-out: done', key
         return
+
+Downstream/upstream pair for egress-pool retrieval.
 
       @register 'queuer:get-egress-pool', 'dial_calls'
       @register 'queuer:egress-pool', 'calls'
@@ -100,7 +100,6 @@
 
       cfg = @cfg
 
-      redis = @cfg.redis_client
       local_redis = @cfg.local_redis_client
       prov = @cfg.prov
       profile = @cfg.session?.profile
@@ -110,83 +109,27 @@
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
 
-      unless redis? and local_redis? and prov? and profile? and host? and port?
+      unless local_redis? and prov? and profile? and host? and port?
         @debug.dev 'Missing configuration'
         return
 
+      HugePlayReference = @cfg.Reference
+      local_redis_interface = new RedisInterface [local_redis]
+
       class HugePlayCall extends TaggedCall
 
-        redis: local_redis
+        redis: local_redis_interface
         api: api
         profile: "#{pkg.name}-#{profile}-egress"
-
-        report: seem (report) ->
-          report.report_type = 'queuer-call'
-          report.call = @id
-
-          unless data.session?
-            new_session = yield @get_session()
-            report.session = new_session if new_session?
-          unless data.reference?
-            new_reference = yield @get_reference()
-            report.reference = new_reference if new_reference?
-
-          report.timezone = yield @get 'timezone'
-          report.timestamp = now report.timezone
-          report.host = host
-          report.type = 'report'
-
-          cfg.statistics.emit 'report', report
-          report
-
-        get_reference_data: (reference) ->
-          cfg.get_reference_data reference
-
-        update_reference_data: seem (data) ->
-          data.report_type = 'queuer'
-          data.call = @id
-
-          unless data.session?
-            new_session = yield @get_session()
-            data.session = new_session if new_session?
-          unless data.reference?
-            new_reference = yield @get_reference()
-            data.reference = new_reference if new_reference?
-
-          data.timezone = yield @get 'timezone'
-          data.timestamp = now data.timezone
-          data.host = host
-          data.type = 'reference'
-
-          cfg.statistics.emit 'reference', data
-          data
-
-        update_call_data: seem (data) ->
-          data.report_type = 'queuer'
-          data.call = @id
-
-          unless data.session?
-            new_session = yield @get_session()
-            data.session = new_session if new_session?
-          unless data.reference?
-            new_reference = yield @get_reference()
-            data.reference = new_reference if new_reference?
-
-          data.timezone = yield @get 'timezone'
-          data.timestamp = now data.timezone
-          data.host = host
-          data.type = 'call'
-
-          cfg.statistics.emit 'call', data
-          data
+        Reference: HugePlayReference
 
       class HugePlayAgent extends TaggedAgent
 
-        redis: local_redis
+        redis: local_redis_interface
 
         new_call: (data) -> new HugePlayCall data
 
-        notify: seem (new_state,data) ->
+        notify: seem (new_state,data,event = null) ->
           debug 'agent.notify', @key, new_state
           notification =
             _in: [
@@ -194,11 +137,15 @@
               "number:#{@key}"
               "number_domain:#{@domain}"
             ]
+            _notify: true
+            _queuer: true
             state: new_state
+            event: event
             agent: @key
             number: @number
             number_domain: @domain
             host: host
+            dialplan: 'centrex'
 
           notification.tags = yield @tags().catch -> []
 
@@ -211,22 +158,9 @@
           for own k, v of data
             notification[k] ?= v
 
-          cfg.statistics.emit 'queuer', notification
+          cfg.statistics.emit 'report', notification
           debug 'agent.notify: done', @key, notification
           return
-
-        report: seem (report) ->
-          report.report_type = 'queuer-agent'
-          report.agent = @key
-          report.number = @number
-          report.number_domain = @domain
-
-          report.timezone = yield @get 'timezone'
-          report.timestamp = now report.timezone
-          report.host = host
-          report.type = 'report'
-
-          yield cfg.statistics.emit 'report', report
 
         create_egress_call: seem ->
           debug 'create_egress_call', @domain
@@ -275,36 +209,24 @@ See `in_domain` in black-metal/tagged.
           body.tags.push "number_domain:#{@domain}"
 
           endpoint = @key
-          _id = cfg.reference_id()
-          data = {
-            _id
-            _in: [
-              "endpoint:#{endpoint}"
-              "number:#{endpoint}" # Centrex-only
-              "account:#{account}"
-              "number_domain:#{@domain}"
-            ]
-            state: 'created'
-            endpoint
-            account
-            destination: body.destination
-            domain: "#{host}:#{port}"
-            number_domain: @domain
-            tags: body.tags
-            block_dtmf: true
-            params:
-              sip_invite_params: "xref=#{_id}"
-              origination_caller_id_number: @number
+          reference = new HugePlayReference()
+          _id = reference.id
 
-            timestamp: now timezone
-            timezone: timezone
-            host: host
-            type: 'reference'
-            reference: _id
-          }
+FIXME This is highly inefficient, we should be able to create the structure at once.
 
-          debug 'create_egress_call: saving reference', data
-          yield cfg.update_reference_data data
+          yield reference.add_in [
+            "endpoint:#{endpoint}"
+            "number:#{endpoint}" # Centrex-only
+            "account:#{account}"
+            "number_domain:#{@domain}"
+          ]
+          yield reference.set_endpoint endpoint
+          yield reference.set_account account
+          yield reference.set_destination body.destination
+          yield reference.set_source @number
+          yield reference.set_domain "#{host}:#{port}"
+          yield reference.set_tags body.tags
+          yield reference.set_block_dtmf true
 
 This is a "fake" call-data entry, to record the data we used to trigger the call for call-reporting purposes.
 
@@ -320,9 +242,8 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
             timestamp: now timezone
             host: host
             type: 'call'
-          yield cfg.update_call_data call_data
 
-          call = new HugePlayCall
+          call = @new_call
             destination: _id
 
           yield call.save()
@@ -334,17 +255,17 @@ This probably not necessary, since the destination number is actually retrieved 
           yield call.set 'timezone', timezone
 
           # async
-          @notify 'create-egress-call', data
+          @notify 'create-egress-call', call_data
 
           debug 'create_egress_call: complete'
 
           return call
 
-The queuer's redis is used for call pools and the agents pool.
-Since we're bound to a server for domains it's OK.
+The queuer's Redis is used for call pools and the agents pool.
+Since we're bound to a server for domains it's OK to use the local Redis.
 
       Queuer = queuer
-        redis: local_redis
+        redis: local_redis_interface
         Agent: HugePlayAgent
         Call: HugePlayCall
       @cfg.queuer_Agent = HugePlayAgent
@@ -354,7 +275,7 @@ Since we're bound to a server for domains it's OK.
 
     @include = seem ->
 
-      if @session.reference_data?.block_dtmf
+      if yield @reference.get_block_dtmf()
         yield @action 'block_dtmf'
 
       queuer = @cfg.queuer

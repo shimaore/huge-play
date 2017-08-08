@@ -6,13 +6,22 @@
       m = require '../middleware/client/ingress/post'
       l = require 'tangible/middleware'
       s = require '../middleware/setup'
+      sc = require '../middleware/client/setup'
 
+      class Foo
+        get_destination: ->
+        add_in: ->
+        set_endpoint: ->
+        set_account: ->
+        get_call_options: ->
+        get_dev_logger: ->
       cfg =
         prov:
           get: (id) ->
             return Promise.resolve docs[id]
         statistics:
           emit: ->
+        Reference: Foo
 
       docs =
         'number:1234@some':
@@ -31,16 +40,20 @@
           session:
             direction: 'ingress'
             number_domain: 'some'
-            reference_data: {}
           action: -> Promise.resolve null
           res:
             set: -> Promise.resolve null
             export: -> Promise.resolve null
+          req:
+            variable: ->
           call:
             uuid: 'little-bear'
             emit: ->
+          data: # useful-wind/router
+            'Channel-Context': 'sbc-ingress'
         l.include.call ctx, ctx
         s.include.call ctx, ctx
+        sc.include.call ctx, ctx
         m.include
           .call ctx
           .then ->

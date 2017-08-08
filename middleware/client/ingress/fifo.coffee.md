@@ -42,20 +42,21 @@ In this case the conference name is the number-domain and the conference name.
           .catch (error) =>
             @debug.dev "number_domain #{number_domain}: #{error}"
             null
-        @tag @session.number_domain_data._id
-        @user_tags @session.number_domain_data.tags
+        yield @user_tags @session.number_domain_data?.tags
 
         if @session.number_domain_data?.timezone?
           @session.timezone ?= @session.number_domain_data?.timezone
         if @session.number_domain_data?.music?
           @session.music ?= music_uri @session.number_domain_data
+        if @session.number_domain_data?.dialplan?
+          @session.dialplan ?= @session.number_domain_data.dialplan
 
 We won't be able to route if there is no number-domain data.
 
       unless @session.number_domain_data?
         @debug.dev 'Missing number_domain_data'
         return
-      @tag @session.number_domain_data._id
+      yield @reference.add_in @session.number_domain_data._id
 
 * doc.global_number.local_number To route to a FIFO, this field must contain `fifo-<fifo-number>@<number-domain>`. The fifo-number is typically between 0 and 9; it represents an index in doc.number_domain.fifos.
 * doc.number_domain.fifos (array) An array describing the FIFOs in this number-domain, indexed on the fifo-number. Typically the fifo-number is from 0 to 9. See session.fifo for a description of the contents.
@@ -88,7 +89,6 @@ Move handling to `fifo` middleware.
         return
 
       item = items[number]
-      @tag "#{type} number #{number}"
       unless item?
         @debug.csr "Number domain has no data #{number} for #{type}."
         return
@@ -102,7 +102,11 @@ These are also found in middleware/client/egress/fifo.
         item.full_name ?= "#{item.short_name}@#{@session.number_domain}"
       @session[type] = item
       @direction type
-      @report state:type, name: item.full_name
+      @report
+        state: type
+        name: item.full_name
+        number: number ? null
+        number_domain: @session.number_domain_data?._id ? null
 
       @debug "Using #{type} #{number}", item
       return

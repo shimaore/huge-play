@@ -21,8 +21,8 @@
 * session.e164_number (object) The doc.global_number record for the source of an outbound call.
 
       @session.e164_number = yield @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
-      @tag @session.e164_number._id
-      @user_tags @session.e164_number.tags
+      yield @reference.add_in @session.e164_number._id
+      yield @user_tags @session.e164_number.tags
 
 * session.e164_number.fs_variables See doc.global_number.fs_variables
 * doc.global_number (object, optional) Additional FreeSwitch variables to be set on egress calls (for the calling number). These will show up in CDRs on the client side.
@@ -39,14 +39,16 @@ The URL module parses the SIP username as `auth`.
       if pci?
         @session.ccnq_account = (url.parse pci).auth
       else
-        @session.ccnq_account = @session.reference_data.account ? null
+        @session.ccnq_account = yield @reference.get_account()
+
+      @session.ccnq_account ?= null
 
       unless @session.ccnq_account?
         debug 'Invalid Charge-Info', pci
         return @respond '403 Missing Charge-Info'
 
-      @session.reference_data.account = @session.ccnq_account
-      @tag "account:#{@session.reference_data.account}"
+      yield @reference.set_account @session.ccnq_account
+      yield @reference.add_in "account:#{@session.ccnq_account}"
 
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 
@@ -98,9 +100,6 @@ Codec negotiation with late-neg:
 
           inherit_codec: @session.inherit_codec ? true
 
-      @tag "from_e164:#{@session.ccnq_from_e164}"
-      @tag "to_e164:#{@session.ccnq_to_e164}"
-
       if @session.ringback?
         yield @set ringback: @session.ringback
 
@@ -116,7 +115,13 @@ Music
         yield @set effective_caller_id_number: @session.asserted
 
       if @session.dev_logger
-        @session.reference_data.dev_logger = true
-      yield @save_ref()
+        yield @reference.set_dev_logger true
+
+      @report
+        state: 'client-egress-accepted'
+        account: @session.ccnq_account
+        number: @session.e164_number._id
+        from_e164: @session.ccnq_from_e164
+        to_e164: @session.ccnq_to_e164
 
       debug 'OK'

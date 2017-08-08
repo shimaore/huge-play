@@ -14,7 +14,5 @@ Make sure the call isn't processed any further.
 The only post-call action currently is to hangup the call.
 
       @debug 'Hangup'
-      @tag 'hangup'
+      @notify state: 'hangup'
       yield @action 'hangup'
-
-      yield @save_ref()

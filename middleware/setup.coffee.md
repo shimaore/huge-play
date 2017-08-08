@@ -3,16 +3,16 @@
     pkg = require '../package.json'
     EventEmitter = require 'events'
     Moment = require 'moment-timezone'
-    uuidV4 = require 'uuid/v4'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
     FS = require 'esl'
     LRU = require 'lru-cache'
 
-    Redis = require 'redis'
-    Bluebird = require 'bluebird'
-    Bluebird.promisifyAll Redis.RedisClient.prototype
-    Bluebird.promisifyAll Redis.Multi.prototype
+    Redis = require 'normal-key/redis'
+    RedisInterface = require 'normal-key/interface'
+
+    Reference = require './reference'
+    debug = (require 'tangible') @name
 
     seconds = 1000
     minutes = 60*seconds
@@ -28,35 +28,45 @@
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
+Local and Global Redis
+----------------------
+
+      make_a_redis = (label,config) =>
+        a_redis = Redis.createClient config
+        a_redis.on 'error', (error) =>
+          debug "#{label}: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
+        a_redis.on 'ready',         => debug "#{label}: ready"
+        a_redis.on 'connect',       => debug "#{label}: connect"
+        a_redis.on 'reconnecting',  => debug "#{label}: reconnecting"
+        a_redis.on 'end',           => debug "#{label}: end"
+        a_redis.on 'warning',       => debug "#{label}: warning"
+        a_redis
+
       if @cfg.redis?
-        @cfg.redis_client = redis = Redis.createClient @cfg.redis
-        redis.on 'error', (error) =>
-          @debug "redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
-        redis.on 'ready', => @debug "redis: ready"
-        redis.on 'connect', => @debug "redis: connect"
-        redis.on 'reconnecting', => @debug "redis: reconnecting"
-        redis.on 'end', => @debug "redis: end"
-        redis.on 'warning', => @debug "redis: warning"
+        @cfg.global_redis_client = make_a_redis 'global redis', @cfg.redis
 
       if @cfg.local_redis?
-        @cfg.local_redis_client = local_redis = Redis.createClient @cfg.local_redis
-        local_redis.on 'error', (error) =>
-          @debug "local redis: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
-        local_redis.on 'ready', => @debug "local redis: ready"
-        local_redis.on 'connect', => @debug "local redis: connect"
-        local_redis.on 'reconnecting', => @debug "local redis: reconnecting"
-        local_redis.on 'end', => @debug "local redis: end"
-        local_redis.on 'warning', => @debug "local redis: warning"
+        @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis
+
+      redis_interface = new RedisInterface [@cfg.global_redis_client,@cfg.local_redis_client]
+
+      class HugePlayReference extends Reference
+        redis: redis_interface
+
+      @cfg.Reference = HugePlayReference
+
+Period
+------
+
+Used by billing code.
 
       @cfg.period_of ?= (stamp = new Date(),timezone = 'UTC') ->
         Moment
         .tz stamp, timezone
         .format 'YYYY-MM'
 
-      @cfg.reference_id ?= =>
-        uuid = uuidV4()
-        period = @cfg.period_of null
-        id = "#{period}-#{uuid}"
+Is-remote Cache
+---------------
 
 Use redis to retrieve the server on which this call should be hosted, and set it to `local_server` if none was previously set.
 Returns either:
@@ -77,8 +87,8 @@ If the `local_server` parameter is not provided (it normally should), only the p
 
         key = "server for #{name}"
 
-        unless redis?
-          @debug.dev 'is_remote: Missing redis'
+        unless @cfg.global_redis_client?
+          debug.dev 'is_remote: Missing global redis'
           return null
 
 Just probing (this is only useful when retrieving data, never when handling calls).
@@ -86,10 +96,10 @@ Just probing (this is only useful when retrieving data, never when handling call
         if not local_server?
           server = is_remote_cache.get name
           if server is undefined
-            server = yield redis
+            server = yield @cfg.global_redis_client
               .getAsync key
               .catch (error) ->
-                @debug.ops "error #{error.stack ? error}"
+                debug.ops "error #{error.stack ? error}"
                 null
             is_remote_cache.set name, server
 
@@ -108,36 +118,39 @@ Probe-and-update
 Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
 
-        first_time = yield redis
+        first_time = yield @cfg.globbal_redis_client
           .setnxAsync key, server
           .catch (error) ->
-            @debug.ops "error #{error.stack ? error}"
-            null
+            debug.ops "error #{error.stack ? error}, forcing local server"
+            1
 
         if not first_time
-          server = yield redis
+          server = yield @cfg.global_redis_client
             .getAsync key
             .catch (error) ->
-              @debug.ops "error #{error.stack ? error}"
+              debug.ops "error #{error.stack ? error}"
               null
 
 Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
-        @debug 'Checking for local handling', server, local_server
+        debug 'Checking for local handling', server, local_server
 
         switch server
 
           when null
-            @debug.ops 'Redis failed'
+            debug.ops 'Redis failed'
             return null
 
           when local_server
-            @debug 'Handling is local'
+            debug 'Handling is local'
             return false
 
           else
-            @debug 'Handling is remote'
+            debug 'Handling is remote'
             return server
+
+FreeSwitch API Client
+---------------------
 
 These methods parallel the ones in black-metal/api.
 Eventually the two should be merged.
@@ -151,7 +164,7 @@ Create a new socket client
               resolve this
             client.keepConnected (@cfg.socket_port ? 5722), '127.0.0.1'
           catch error
-            @debug '_client: error', error
+            debug '_client: error', error
             resolve null
           return
 
@@ -176,8 +189,14 @@ Use a default client for generic / shared APIs
 
       return
 
+Web
+---
+
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
+
+Inbound notifications
+---------------------
 
     @notify = ->
 
@@ -204,31 +223,32 @@ Register a new event on the bus.
 
       @register = (event,default_room = null) =>
         @on_connexion =>
-          @debug 'Register', {event, default_room}
+          debug 'Register', {event, default_room}
           @socket.emit 'register', {event,default_room}
 
 Configure our client to receive specific queues.
 
       @socket.on 'configured', (data) =>
-        @debug 'Socket configured', data
+        debug 'Socket configured', data
 
       @configure = (options) =>
         @on_connexion =>
-          @debug 'Configure', options
+          debug 'Configure', options
           @socket.emit 'configure', options
 
       @socket.on 'connect', =>
-        @debug.ops 'connect'
+        debug.ops 'connect'
       @socket.on 'connect_error', =>
-        @debug.ops 'connect_error'
+        debug.ops 'connect_error'
       @socket.on 'disconnect', =>
-        @debug.ops 'disconnect'
+        debug.ops 'disconnect'
 
       return
 
-    @include = (ctx) ->
+Context Extension
+-----------------
 
-      @session.reports = []
+    @include = (ctx) ->
 
       ctx[k] = v for own k,v of {
         statistics: @cfg.statistics
@@ -240,7 +260,6 @@ Configure our client to receive specific queues.
         direction: (direction) ->
           @session.direction = direction
           @call.emit 'direction', direction
-          @tag "direction:#{direction}"
           @report {event:'direction', direction}
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
@@ -263,23 +282,25 @@ We assume the room names match record IDs.
           if @session.number_domain_data?.dialplan is 'centrex'
             push_in @session.number_domain_data._id
 
-          if @session.reference_data?.tags?
-            for tag in @session.reference_data.tags when tag.match /^\w+:/
+          if @reference?
+            tags = yield @reference.get_in()
+            for tag in tags
               push_in tag
 
           _in
 
 Data reporting (e.g. to save for managers reports).
-Typically `@report({state,…})` for calls, `@report({event,…})` for non-calls.
+Typically `@report({state,…})` for calls state changes / progress, `@report({event,…})` for non-calls.
 This version is meant to be used in-call.
 
         report: (report) ->
           unless @call? and @session?
-            @debug.dev 'report: improper environment'
+            debug.dev 'report: improper environment'
             return false
 
           report.timezone ?= @session.timezone
           report.timestamp ?= now report.timezone
+          report.now = Date.now()
           @_in report._in ?= []
           report.host ?= @cfg.host
           report.type ?= 'report'
@@ -290,51 +311,21 @@ This version is meant to be used in-call.
           report.dialplan ?= @session.dialplan
           report.country ?= @session.country
           report.number_domain ?= @session.number_domain
+          report.number_domain_dialplan ?= @session.number_domain_data?.dialplan
 
           report.call = @call.uuid
           report.session = @session._id
           report.reference = @session.reference
           report.report_type = 'in-call'
 
-          @session.reports.push report
+          @cfg.statistics.emit 'report', report
           true
 
 Real-time notification (e.g. to show on a web panel).
 
         notify: (report) ->
-          if @report report
-            @cfg.statistics.emit 'report', report
-
-        save_call: ->
-
-          if @session.reports.length > 0
-            @cfg.statistics.emit 'reports', @session.reports
-            @session.reports = []
-
-          {call_data} = @session
-          @_in call_data._in ?= []
-          call_data._id = @session._id
-
-          @cfg.statistics.emit 'call', call_data
-
-          @session.call_data = call_data
-
-        save_ref: ->
-          {reference_data} = @session
-          @_in reference_data._in ?= []
-          reference_data.reference = @session.reference
-
-          @cfg.statistics.emit 'reference', reference_data
-
-        get_ref: seem ->
-          @session.reference ?= @cfg.reference_id()
-          {reference} = @session
-          if @cfg.get_reference_data?
-            @debug 'Loading reference_data', reference
-            @session.reference_data ?= yield @cfg.get_reference_data reference
-          else
-            @session.reference_data ?= { reference }
-            @debug.dev 'Missing @cfg.get_reference_data, using empty reference_data', reference
+          report._notify = true
+          @report report
 
         save_trace: ->
           @cfg.statistics.emit 'trace', @session
@@ -383,7 +374,6 @@ Real-time notification (e.g. to show on a web panel).
 Prevent extraneous processing of this call.
 
           @direction 'responded'
-          @tag "response:#{response}"
 
           if @session.alternate_response?
             @session.alternate_response response
@@ -392,14 +382,14 @@ Prevent extraneous processing of this call.
 
         sofia_string: seem (number, extra_params = []) ->
 
-          @debug 'sofia_string', number, extra_params
+          debug 'sofia_string', number, extra_params
 
           id = "number:#{number}@#{@session.number_domain}"
 
           number_data = yield @cfg.prov
             .get id
             .catch (error) ->
-              @debug.ops "#{id} #{error.stack ? error}"
+              debug.ops "#{id} #{error.stack ? error}"
               {}
 
           return '' unless number_data.number?
@@ -440,24 +430,23 @@ Retrieve number data.
           @session.number = yield @cfg.prov
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
-          @tag @session.number._id
-          @user_tags @session.number.tags
+          yield @reference.add_in @session.number._id
+          yield @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
           if @session.number.music?
             @session.music ?= @session.number.music
 
           if @session.number.error?
-            @debug "Could not locate destination number #{dst_number}"
-            @tag 'invalid-local-number'
+            debug.dev "Could not locate destination number #{dst_number}"
+            @notify state: 'invalid-local-number', number: @session.number._id
             yield @respond '486 Not Found'
             return
 
-          @debug "validate_local_number: Got dst_number #{dst_number}", @session.number
+          debug "validate_local_number: Got dst_number #{dst_number}", @session.number
 
           if @session.number.disabled
-            @debug "Number #{dst_number} is disabled"
-            @tag 'disabled-local-number'
+            debug.ops "Number #{dst_number} is disabled"
             @notify state:'disabled-local-number', number: @session.number._id
             yield @respond '486 Administratively Forbidden' # was 403
             return
@@ -465,74 +454,70 @@ Retrieve number data.
 Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
 
           @session.endpoint_name = @session.number.endpoint
-          @session.reference_data.endpoint = @session.number.endpoint
-          @tag "endpoint:#{@session.number.endpoint}"
+          yield @reference.set_endpoint @session.number.endpoint
+          yield @reference.add_in "endpoint:#{@session.number.endpoint}"
 
 Set the account so that if we redirect to an external number the egress module can find it.
 
-          @session.reference_data.account = @session.number.account
-          @tag "account:#{@session.reference_data.account}"
+          yield @reference.set_account @session.number.account
+          yield @reference.add_in "account:#{@session.number.account}"
           @report
-            state:'validated-local-number'
+            state: 'validated-local-number'
             number: @session.number._id
             endpoint: @session.endpoint_name
-            account: @session.reference_data.account
-          yield @save_ref()
+            account: @session.number.account
 
           dst_number
 
-        redis: @cfg.redis_client
+        global_redis: @cfg.global_redis_client
         local_redis: @cfg.local_redis_client
 
-        tag: (tag) ->
-          @session.reference_data?.tags?= []
+        tag: seem (tag) ->
           if tag?
-            @session.reference_data?.tags.push tag
+            yield @reference.add_tag tag
             @report {event:'tag', tag}
 
-        user_tag: (tag) ->
+        user_tag: seem (tag) ->
           if tag?
-            @tag "user-tag:#{tag}"
+            yield @reference.add_tag "user-tag:#{tag}"
             @report {event:'user-tag', tag}
 
-        user_tags: (tags) ->
+        user_tags: seem (tags) ->
           return unless tags?
           for tag in tags
-            @user_tag tag
+            yield @user_tag tag
 
-        has_tag: (tag) ->
-          @session.reference_data?.tags? and tag in @session.reference_data.tags
+        has_tag: seem (tag) ->
+          tag? and yield @reference.has_tag tag
 
-        has_user_tag: (tag) ->
-          tag? and @has_tag "user-tag:#{tag}"
+        has_user_tag: seem (tag) ->
+          tag? and yield @has_tag "user-tag:#{tag}"
 
-        clear_call_center_tags: ->
-          if @session.reference_data?.tags?
-            @session.reference_data.tags = @session.reference_data.tags
-              .filter (tag) ->
-                not tag.match /^(skill|priority|queue):/
+        clear_call_center_tags: seem ->
+          tags = yield @reference.tags()
+          for tag in tags when tag.match /^(skill|priority|queue):/
+            yield @reference.del_tag tag
           null
 
-        clear_user_tags: ->
-          if @session.reference_data?.tags?
-            @session.reference_data.tags = @session.reference_data.tags
-              .filter (tag) ->
-                not tag.match /^user-tag:/
+        clear_user_tags: seem ->
+          tags = yield @reference.tags()
+          for tag in tags when tag.match /^user-tag:/
+            yield @reference.del_tag tag
           null
 
         record_call: (name) ->
           unless @cfg.recording_uri?
-            @debug.dev 'No recording_uri, call will not be recorded.'
+            debug.dev 'No recording_uri, call will not be recorded.'
             return false
 
 Keep recording (async)
 
           keep_recording = seem =>
-            @notify event:'recording'
+            @report event:'recording'
             uri = yield @cfg.recording_uri name
-            @debug 'Recording', @call.uuid, uri
+            debug 'Recording', @call.uuid, uri
             outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
-            @debug 'Recording', @call.uuid, uri, outcome
+            debug 'Recording', @call.uuid, uri, outcome
 
             last_uri = uri
 
@@ -543,20 +528,20 @@ Keep recording (async)
             while still_running
               yield @sleep 29*minutes
               uri = yield @cfg.recording_uri name
-              @debug 'Recording next segment', @call.uuid, uri
+              debug 'Recording next segment', @call.uuid, uri
               yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
-              @notify event:'recording'
+              @report event:'recording'
               yield @sleep 1*minutes
-              @debug 'Stopping previous segment', @call.uuid, last_uri
+              debug 'Stopping previous segment', @call.uuid, last_uri
               yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
               last_uri = uri
 
             return
 
           keep_recording().catch (error) =>
-            @debug "record_call: #{error.stack ? error}"
+            debug "record_call: #{error.stack ? error}"
 
-          @debug 'Going to record', name
+          debug 'Going to record', name
           return true
 
       }

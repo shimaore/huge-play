@@ -125,17 +125,17 @@ No further processing in case of success.
 
       if @session.was_connected
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
-        @tag 'answered'
+        @notify state: 'answered'
         return
 
       if @session.was_picked
         @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
-        @tag 'picked'
+        @notify state: 'picked'
         return
 
       if @session.was_transferred
         @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
-        @tag 'transferred'
+        @notify state: 'transferred'
         return
 
 Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).
@@ -214,19 +214,22 @@ Use CFDA if present
         if @session.cfda_voicemail
           @debug 'cfda: voicemail'
           @destination = @session.cfda_voicemail_number
+          @notify state: 'forward-no-answer-to-voicemail'
           @direction 'voicemail'
           return
         if @session.cfda_number?
           @debug 'cfda:number'
           @session.destination = @session.cfda_number
+          @notify state: 'forward-no-answer-to-number'
           @direction 'forward'
           return
         if @session.cfda?
           @debug 'cfda: fallback'
           @session.tried_cfda = true
+          @notify state: 'forward-no-answer'
           return send.call this, [ to_uri: @session.cfda ]
 
       @debug 'Call Failed'
       @session.call_failed = true
-      @tag 'failed'
+      @notify state: 'failed'
       return

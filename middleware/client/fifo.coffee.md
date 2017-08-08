@@ -37,7 +37,7 @@ FIFO handling
 
 Build the full fifo name (used inside FreeSwitch) from the short fifo-name and the number-domain.
 
-      @tag "fifo:#{fifo.full_name}"
+      @notify state: 'fifo', fifo: fifo.full_name
 
 Ready to send, answer the call.
 
@@ -77,17 +77,17 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
 
       if fifo.tags?
         for tag in fifo.tags
-          @user_tag tag
+          yield @user_tag tag
 
       if fifo.required_skills?
         for skill in fifo.required_skills
-          @tag "skill:#{skill}"
+          yield @tag "skill:#{skill}"
 
       if typeof fifo.queue is 'string'
-        @tag "queue:#{fifo.queue}"
+        yield @tag "queue:#{fifo.queue}"
 
       if fifo.priority?
-        @tag "priority:#{fifo.priority}"
+        yield @tag "priority:#{fifo.priority}"
 
 If the call-group should use the queuer, then do that.
 
@@ -103,7 +103,8 @@ If the call-group should use the queuer, then do that.
 
         yield call.save()
         yield call.set_session @session._id
-        yield call.set_tags @session.reference_data?.tags
+        ref_tags = yield @reference.get_tags()
+        yield call.set_tags ref_tags
 
         if fifo.music?
           yield call.set_music music_uri
