@@ -195,8 +195,6 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
         sip_invite_contact_params: sip_params
         sip_invite_from_params: sip_params
 
-      @report 'carrier-side'
-
       @debug 'Ready',
         reference: @session.reference
         call: @call.uuid
