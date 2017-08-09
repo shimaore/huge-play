@@ -118,7 +118,7 @@ Probe-and-update
 Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
 
-        first_time = yield @cfg.globbal_redis_client
+        first_time = yield @cfg.global_redis_client
           .setnxAsync key, server
           .catch (error) ->
             debug.ops "error #{error.stack ? error}, forcing local server"
