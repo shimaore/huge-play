@@ -45,7 +45,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
       @call.once 'CHANNEL_HANGUP_COMPLETE'
-      .then seem (res) =>
+      .then (res) =>
         debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.

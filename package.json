@@ -28,7 +28,7 @@
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "nimble-direction": "^6.1.4",
-    "normal-key": "^1.0.6",
+    "normal-key": "^1.0.7",
     "request": "^2.81.0",
     "seem": "^2.0.0",
     "solid-gun": "^1.0.0",
