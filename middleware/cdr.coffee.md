@@ -120,7 +120,7 @@ Update the (existing) call data
             .format()
 
         @notify {state:'end', call_data, cdr_report}
-        @save_trace().catch -> yes # Async
+        @save_trace()
         debug "CDR: Channel Hangup Complete", cdr_report
       .catch (error) =>
         debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
