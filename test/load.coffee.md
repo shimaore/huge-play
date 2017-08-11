@@ -57,7 +57,7 @@
         S = require '../middleware/setup.coffee.md'
         it "should load #{m}", seem ->
           cfg =
-            prefix_admin: ''
+            prefix_admin: 'http://127.0.0.1:3987'
           ctx = {cfg}
 
           M = require "../#{m}"
@@ -81,7 +81,7 @@
             cfg: ctx.cfg # useful-wind/router
             session:{} # useful-wind/router
             call: # useful-wind/router + esl
-              once: -> Promise.resolve null
+              once: -> Promise.resolve body: {}
               on: ->
               emit: ->
               linger: -> Promise.resolve null
