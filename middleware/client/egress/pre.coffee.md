@@ -251,7 +251,7 @@ For backward-compatibility we currently ignore ICE proposals.
       yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
       @report
-        state:'egress'
+        state:'egress-received'
         endpoint: @session.endpoint._id
         number_domain: @session.number_domain_data._id
         number: @session.number._id ? null

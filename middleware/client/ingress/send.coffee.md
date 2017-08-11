@@ -65,6 +65,8 @@ Send the call(s)
 
       @debug 'Bridging', sofia
 
+      @report state: 'ingress-bridging'
+
       res = yield @action 'bridge', sofia.join ','
 
       yield @local_redis?.delAsync intercept_key
@@ -152,6 +154,8 @@ OpenSIPS marker for not registered
           tried_cfnr: @session.tried_cfnr
 
       if code is '604' and not @session.tried_cfnr
+        @report state: 'not-registered'
+
         @session.reason = 'unavailable' # RFC5806
         if @session.cfnr_voicemail
           @debug 'cfnr:voicemail'
@@ -186,6 +190,8 @@ Busy
 ----
 
       if code is '486' and not @session.tried_cfb
+        @report state: 'user-busy'
+
         @session.reason = 'user-busy' # RFC5806
         if @session.cfb_voicemail
           @debug 'cfb: voicemail'
@@ -210,6 +216,8 @@ All other codes
 Use CFDA if present
 
       if not @session.tried_cfda
+        @report state: 'no-answer'
+
         @session.reason = 'no-answer' # RFC5806
         if @session.cfda_voicemail
           @debug 'cfda: voicemail'
