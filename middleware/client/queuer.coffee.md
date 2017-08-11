@@ -145,6 +145,7 @@ Downstream/upstream pair for egress-pool retrieval.
             number: @number
             number_domain: @domain
             host: host
+            now: Date.now()
             dialplan: 'centrex'
 
           notification.tags = yield @tags().catch -> []
@@ -295,6 +296,8 @@ Since we're bound to a server for domains it's OK to use the local Redis.
         is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
 
+        @report event:'start-of-call', agent:key
+
         agent = new Agent queuer, key
         yield agent.add_call id
 
@@ -304,6 +307,8 @@ Since we're bound to a server for domains it's OK to use the local Redis.
         return unless dialplan is 'centrex'
         is_remote = yield @cfg.is_remote (domain_of key), local_server
         return if is_remote isnt false
+
+        @report event:'end-of-call', agent:key
 
         yield sleep 2*1000
         agent = new Agent queuer, key
