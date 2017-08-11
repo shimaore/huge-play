@@ -50,6 +50,6 @@
     "tough-rate": "^18.6"
   },
   "publishConfig": {
-    "tag": "dev"
+    "tag": "latest"
   }
 }
