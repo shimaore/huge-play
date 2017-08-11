@@ -123,6 +123,32 @@ Downstream/upstream pair for egress-pool retrieval.
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference
 
+        report: seem (data) ->
+          debug 'call.report', data
+          notification =
+            _queuer: true
+            host: host
+            now: Date.now()
+
+            key: @key
+            id: @id
+            destination: @destination
+
+            remote_number: yield @get_remote_number().catch -> null
+            alert_info: yield @alert_info().catch -> null
+            reference: yield @reference().catch -> null
+            session: yield @get_session().catch -> null
+            bridged: yield @bridged().catch -> null
+            presenting: yield @count().catch -> null
+            tags: yield @tags().catch -> []
+
+          for own k,v of data
+            notification[k] ?= v
+
+          cfg.statistics.emit 'report', notification
+          debug 'call.report: send', notification
+          return
+
       class HugePlayAgent extends TaggedAgent
 
         redis: local_redis_interface
@@ -132,20 +158,24 @@ Downstream/upstream pair for egress-pool retrieval.
         notify: seem (new_state,data,event = null) ->
           debug 'agent.notify', @key, new_state
           notification =
+            _queuer: true
             _in: [
               "endpoint:#{@key}"
               "number:#{@key}"
               "number_domain:#{@domain}"
             ]
             _notify: true
-            _queuer: true
+            host: host
+            now: Date.now()
+
             state: new_state
             event: event
             agent: @key
             number: @number
             number_domain: @domain
-            host: host
-            now: Date.now()
+
+The dialplan is used e.g. to know which messages to forward to the socket.io bus.
+
             dialplan: 'centrex'
 
           notification.tags = yield @tags().catch -> []
