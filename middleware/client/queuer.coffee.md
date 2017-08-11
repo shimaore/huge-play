@@ -148,6 +148,9 @@ Downstream/upstream pair for egress-pool retrieval.
             dialplan: 'centrex'
 
           notification.tags = yield @tags().catch -> []
+          agent_name = yield (@get 'name').catch -> null
+          if agent_name?
+            notification.agent_name = agent_name
 
           offhook = yield @get_offhook_call().catch -> null
           if offhook
@@ -313,9 +316,10 @@ Since we're bound to a server for domains it's OK to use the local Redis.
 
 On-hook agent
 
-      @queuer_login = seem (source,fifo,tags = []) ->
+      @queuer_login = seem (source,name,fifo,tags = []) ->
         debug 'queuer_login', source
         agent = new Agent queuer, source
+        yield agent.set 'name', name
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.accept_onhook()
@@ -340,9 +344,10 @@ On-hook agent
 
 Off-hook agent
 
-      @queuer_offhook = seem (source,{uuid},fifo,tags = []) ->
+      @queuer_offhook = seem (source,name,{uuid},fifo,tags = []) ->
         debug 'queuer_offhook', source, uuid, fifo
         agent = new Agent queuer, source
+        yield agent.set 'name', name
         agent.clear_tags()
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?

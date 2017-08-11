@@ -44,6 +44,9 @@ Endpoint might be provided in the reference data for example for an `originate` 
       if @session.endpoint.trace
         @session.dev_logger = true
 
+      @session.agent = @session.endpoint_name
+      @session.agent_name = @session.endpoint.display_name ? @source
+
       @set
         ccnq_endpoint: @session.endpoint_name
         ccnq_endpoint_json: JSON.stringify @session.endpoint

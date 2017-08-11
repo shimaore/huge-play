@@ -84,7 +84,8 @@ The destination matched.
 
 This works only for centrex.
 
-      full_source = "#{@source}@#{@session.number_domain}"
+      agent = @session.agent ? "#{@source}@#{@session.number_domain}"
+      agent_name = @session.agent_name ? @source
 
       failed = =>
         @debug 'Failed'
@@ -203,7 +204,7 @@ Monitor: call to listen (with notification beep), and whisper
           fifo = get 'fifos', 'fifo'
           yield @action 'answer'
           yield @sleep 2000
-          yield @queuer_login full_source, fifo, agent_tags()
+          yield @queuer_login agent, agent_name, fifo, agent_tags()
           yield @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           yield @action 'hangup'
           @direction 'completed'
@@ -217,7 +218,7 @@ Monitor: call to listen (with notification beep), and whisper
           yield @set
             hangup_after_bridge: false
             park_after_bridge: true
-          yield @queuer_offhook full_source, @call, fifo, agent_tags()
+          yield @queuer_offhook agent, agent_name, @call, fifo, agent_tags()
           @direction 'queuer-offhook'
           return
 
@@ -227,7 +228,7 @@ Monitor: call to listen (with notification beep), and whisper
           return failed() unless fifo?
           yield @action 'answer'
           yield @sleep 2000
-          yield @queuer_leave full_source, fifo
+          yield @queuer_leave agent, fifo
           yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
           yield @action 'hangup'
           @direction 'completed'
@@ -238,7 +239,7 @@ Monitor: call to listen (with notification beep), and whisper
           fifo = get 'fifos', 'fifo'
           yield @action 'answer'
           yield @sleep 2000
-          yield @queuer_logout full_source, fifo
+          yield @queuer_logout agent, fifo
           yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
           yield @action 'hangup'
           @direction 'completed'
