@@ -382,15 +382,15 @@ Notice: `failed` here means the call failed to be sent to the user *and* no othe
 
       answered: ->
         debug 'answered'
-        @has_tag 'answered'
+        if @session.was_connected then true else false
 
       picked: ->
         debug 'picked'
-        @has_tag 'picked'
+        if @session.was_picked then true else false
 
       transferred: ->
         debug 'transferred'
-        @has_tag 'transferred'
+        if @session.was_transferred then true else false
 
       caller_blacklist:       chain is_blacklisted local_ingress
       called_blacklist:       chain is_blacklisted local_egress
