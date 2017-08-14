@@ -8,9 +8,6 @@
           'middleware/handled.coffee.md'
           'middleware/dtmf.coffee.md'
           'middleware/prompt.coffee.md'
-          'middleware/reference_in/socketio.coffee.md'
-          'middleware/reference_in/io_client.coffee.md'
-          'middleware/reference_in/io_server.coffee.md'
           'middleware/trace_in_tangible.coffee.md'
 
           'middleware/client/setup.coffee.md'
