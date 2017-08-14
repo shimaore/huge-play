@@ -105,6 +105,7 @@ If the call-group should use the queuer, then do that.
         yield call.set_session @session._id
         ref_tags = yield @reference.tags()
         yield call.set_tags ref_tags
+        yield call.add_tag "number_domain:#{@session.number_domain}"
 
         if fifo.music?
           yield call.set_music music_uri
