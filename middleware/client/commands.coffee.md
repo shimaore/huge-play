@@ -345,7 +345,7 @@ Calendars
           {body} = yield request
             .post uri
             .send
-              tags: yield @reference.get_tags()
+              tags: yield @reference.tags()
               ccnq_from_e164: @session.ccnq_from_e164
               ccnq_to_e164: @session.ccnq_to_e164
               _in: @_in()

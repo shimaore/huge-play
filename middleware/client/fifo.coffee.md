@@ -103,7 +103,7 @@ If the call-group should use the queuer, then do that.
 
         yield call.save()
         yield call.set_session @session._id
-        ref_tags = yield @reference.get_tags()
+        ref_tags = yield @reference.tags()
         yield call.set_tags ref_tags
 
         if fifo.music?
