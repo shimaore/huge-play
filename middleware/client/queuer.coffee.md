@@ -135,7 +135,7 @@ Downstream/upstream pair for egress-pool retrieval.
             destination: @destination
 
             remote_number: yield @get_remote_number().catch -> null
-            alert_info: yield @alert_info().catch -> null
+            alert_info: yield @get_alert_info().catch -> null
             reference: yield @reference().catch -> null
             session: yield @get_session().catch -> null
             bridged: yield @bridged().catch -> null
