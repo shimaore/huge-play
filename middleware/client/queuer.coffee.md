@@ -145,7 +145,7 @@ Downstream/upstream pair for egress-pool retrieval.
           for own k,v of data
             notification[k] ?= v
 
-          cfg.statistics.emit 'report', notification
+          cfg.statistics.emit 'queuer', notification
           debug 'call.report: send', notification
           return
 
@@ -192,7 +192,7 @@ The dialplan is used e.g. to know which messages to forward to the socket.io bus
           for own k, v of data
             notification[k] ?= v
 
-          cfg.statistics.emit 'report', notification
+          cfg.statistics.emit 'queuer', notification
           debug 'agent.notify: done', @key, notification
           return
 
