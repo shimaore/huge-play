@@ -25,7 +25,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis?.setAsync intercept_key, @call.uuid
+      yield @local_redis?.set intercept_key, @call.uuid
 
 Eavesdrop registration
 ----------------------
@@ -35,14 +35,14 @@ Eavesdrop registration
       unless @call.closed
 
         @debug 'Set inbound eavesdrop', eavesdrop_key
-        yield @local_redis?.setAsync eavesdrop_key, @call.uuid
+        yield @local_redis?.set eavesdrop_key, @call.uuid
 
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem =>
           @debug 'Clear inbound eavesdrop', eavesdrop_key
           @call.emit 'inbound-end', attributes
-          yield @local_redis?.delAsync eavesdrop_key
+          yield @local_redis?.del eavesdrop_key
           return
 
         @call.once 'socket-close', when_done
@@ -69,7 +69,7 @@ Send the call(s)
 
       res = yield @action 'bridge', sofia.join ','
 
-      yield @local_redis?.delAsync intercept_key
+      yield @local_redis?.del intercept_key
 
 Post-attempt handling
 ---------------------

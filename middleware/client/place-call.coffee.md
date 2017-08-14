@@ -27,11 +27,11 @@ This module also triggers calls from within a conference.
         elected = seem (key) ->
           name = "elected-#{key}"
           winner = yield cfg.local_redis_client
-            .setnxAsync name, false
+            .setnx name, false
             .catch -> null
           if winner
             yield cfg.local_redis_client
-              .expireAsync name, 60
+              .expire name, 60
               .catch -> yes
           else
             debug 'Lost the election.'

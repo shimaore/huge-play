@@ -167,14 +167,14 @@ Eavesdrop registration
       unless @session.transfer or @call.closed
 
         @debug 'Set outbound eavesdrop', eavesdrop_key
-        yield @local_redis?.setAsync eavesdrop_key, @call.uuid
+        yield @local_redis?.set eavesdrop_key, @call.uuid
 
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem =>
           @debug 'Clear outbound eavesdrop', eavesdrop_key
           @call.emit 'outbound-end', attributes
-          yield @local_redis?.delAsync eavesdrop_key
+          yield @local_redis?.del eavesdrop_key
           return
 
         @call.once 'socket-close', when_done

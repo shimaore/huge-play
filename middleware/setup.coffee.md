@@ -8,7 +8,7 @@
     FS = require 'esl'
     LRU = require 'lru-cache'
 
-    Redis = require 'normal-key/redis'
+    Redis = require 'ioredis'
     RedisInterface = require 'normal-key/interface'
 
     Reference = require './reference'
@@ -97,7 +97,7 @@ Just probing (this is only useful when retrieving data, never when handling call
           server = is_remote_cache.get name
           if server is undefined
             server = yield @cfg.global_redis_client
-              .getAsync key
+              .get key
               .catch (error) ->
                 debug.ops "error #{error.stack ? error}"
                 null
@@ -119,14 +119,14 @@ Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
 
         first_time = yield @cfg.global_redis_client
-          .setnxAsync key, server
+          .setnx key, server
           .catch (error) ->
             debug.ops "error #{error.stack ? error}, forcing local server"
             1
 
         if not first_time
           server = yield @cfg.global_redis_client
-            .getAsync key
+            .get key
             .catch (error) ->
               debug.ops "error #{error.stack ? error}"
               null
