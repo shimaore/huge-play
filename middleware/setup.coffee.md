@@ -200,15 +200,6 @@ Inbound notifications
 
     @notify = ->
 
-Standard events: `add`.
-
-      if @cfg.notify_statistics
-        @cfg.statistics.on 'add', (data) =>
-          @socket.emit 'statistics:add',
-            host: cfg.host
-            key: data.key
-            value: data.value.toJSON()
-
       @on_connexion = (init) =>
 
 Run on re-connections (`welcome` is sent by spicy-action when we connect).
