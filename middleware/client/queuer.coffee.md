@@ -307,6 +307,9 @@ Since we're bound to a server for domains it's OK to use the local Redis.
       @cfg.queuer = new Queuer @cfg
       return
 
+Middleware
+==========
+
     @include = seem ->
 
       if yield @reference.get_block_dtmf()
@@ -318,12 +321,18 @@ Since we're bound to a server for domains it's OK to use the local Redis.
 
       return unless queuer? and Agent? and Call?
 
+Queuer Call object
+------------------
+
       @queuer_call = new Call
         id: @call.uuid
 
       yield @queuer_call.save()
       yield @queuer_call.set_session @session._id
       yield @queuer_call.set_reference @session.reference
+
+Agent state monitoring
+----------------------
 
       local_server = [@session.local_server,@session.client_server].join '/'
 
@@ -358,6 +367,7 @@ Since we're bound to a server for domains it's OK to use the local Redis.
       @call.once 'outbound-end', end_of_call
 
 On-hook agent
+-------------
 
       @queuer_login = seem (source,name,fifo,tags = []) ->
         debug 'queuer_login', source
@@ -386,6 +396,7 @@ On-hook agent
         agent
 
 Off-hook agent
+--------------
 
       @queuer_offhook = seem (source,name,{uuid},fifo,tags = []) ->
         debug 'queuer_offhook', source, uuid, fifo
