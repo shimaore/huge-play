@@ -314,8 +314,16 @@ Since we're bound to a server for domains it's OK to use the local Redis.
 
       queuer = @cfg.queuer
       Agent = @cfg.queuer_Agent
+      Call = @cfg.queuer_Call
 
-      return unless queuer? and Agent?
+      return unless queuer? and Agent? and Call?
+
+      @queuer_call = new Call
+        id: @call.uuid
+
+      yield @queuer_call.save()
+      yield @queuer_call.set_session @session._id
+      yield @queuer_call.set_reference @session.reference
 
       local_server = [@session.local_server,@session.client_server].join '/'
 

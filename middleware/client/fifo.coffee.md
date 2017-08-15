@@ -96,13 +96,8 @@ If the call-group should use the queuer, then do that.
         @notify state:'queue', name:fifo.full_name, queue: fifo.queue
 
         {queuer} = @cfg
-        Call = @cfg.queuer_Call
+        call = @queuer_call
 
-        call = new Call
-          id: @call.uuid
-
-        yield call.save()
-        yield call.set_session @session._id
         ref_tags = yield @reference.tags()
         yield call.set_tags ref_tags
         yield call.add_tag "number_domain:#{@session.number_domain}"
@@ -115,7 +110,6 @@ If the call-group should use the queuer, then do that.
 
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
-        yield call.set_reference @session.reference
         yield call.clear()
         yield call.del_tag 'bridged'
         yield queuer.queue_ingress_call call
