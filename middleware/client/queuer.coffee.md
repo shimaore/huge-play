@@ -189,10 +189,15 @@ The dialplan is used e.g. to know which messages to forward to the socket.io bus
           else
             notification.offhook = false
 
-          for own k, v of data
-            notification[k] ?= v
+Module `black-metal` 8.3.0 will report the call object as `data.call` (and this is currently the only parameter that might be provided).
 
-          cfg.statistics.emit 'queuer', notification
+If `data.call` is present we notify using the call's process; if it isn't we notify directly.
+This avoids sending two messages for the same event (one with incomplete data, the other with complete data).
+
+          if data.call?
+            yield call.report new_state, notification
+          else
+            cfg.statistics.emit 'queuer', notification
           debug 'agent.notify: done', @key, notification
           return
 
