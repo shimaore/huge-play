@@ -65,8 +65,7 @@ We only tweak a few things for the actual destination endpoint.
       yield @action 'sched_hangup', "+#{dlg_timeout}"
 
       yield @export
-        'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
-        'sip_h_X-CCNQ3-Endpoint': @session.endpoint_name
+        'sip_h_X-En': @session.endpoint_name
 
       debug 'set_params: done.'
       return

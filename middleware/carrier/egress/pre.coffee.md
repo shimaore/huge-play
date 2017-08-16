@@ -4,7 +4,7 @@
     @name = "#{pkg.name}:middleware:carrier:egress:pre"
     @include = seem ->
       return unless @session.direction is 'egress'
-      ccnq_username = @req.header 'CCNQ3-Registrant-Username'
+      ccnq_username = @req.header 'X-RU'
 
       @session.cdr_direction = @session.direction
 
@@ -19,16 +19,16 @@
         t38_passthru: true
 
 * doc.CDR Call Detail Records (normally stored in one or multiple separate database).
-* doc.CDR.variables.ccnq_extra (string) Content of the hdr.X-CCNQ3-Extra header.
-* doc.CDR.variables.ccnq_attrs (string:JSON) Content of the hdr.X-CCNQ3-Attrs header.
-* doc.CDR.variables.ccnq_username (string) Username, content of the hdr.X-CCNQ3-Registrant-Username header (if present).
+* doc.CDR.variables.ccnq_extra (string) Content of the hdr.X-Ex header.
+* doc.CDR.variables.ccnq_attrs (string:JSON) Content of the hdr.X-At header.
+* doc.CDR.variables.ccnq_username (string) Username, content of the hdr.X-RU header (if present).
 * doc.CDR.variables.ccnq_account (string) Account, username part of the hdr.P-Charge-Info standard header.
-* hdr.X-CCNQ3-Extra Copied into the `ccnq_extra` variable (shows up in CDRs).
-* hdr.X-CCNQ3-Attrs Copied into the `ccnq_attrs` variable (shows up in CDRs).
+* hdr.X-Ex Copied into the `ccnq_extra` variable (shows up in CDRs).
+* hdr.X-At Copied into the `ccnq_attrs` variable (shows up in CDRs).
 * hdr.P-Charge-Info The username part is copied into the `ccnq_account` variable (shows up in CDRs).
 
-        ccnq_extra: @req.header 'X-CCNQ3-Extra'
-        ccnq_attrs: @req.header 'X-CCNQ3-Attrs'
+        ccnq_extra: @req.header 'X-Ex'
+        ccnq_attrs: @req.header 'X-At'
         ccnq_username: ccnq_username
         ccnq_account: url.parse(@req.header 'P-Charge-Info').auth
 

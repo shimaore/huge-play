@@ -57,7 +57,7 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 
       id = "number_domain:#{@session.number_domain}"
 
-FIXME: Clear X-CCNQ3 headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
+FIXME: Clear X- headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
 
       debug 'Send to FIFO'
       yield @set

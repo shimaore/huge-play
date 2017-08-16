@@ -343,18 +343,17 @@ counts from the time the INVITE is placed until a progress indication (e.g. 180,
           sip_contact_user: @session.ccnq_from_e164
           effective_caller_id_number: @source
           sip_cid_type: 'pid'
-          'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
+          'sip_h_X-En': @session.endpoint_name
 
 These should not be forwarded towards customers.
 
-          'sip_h_X-CCNQ3-Attrs': null
-          'sip_h_X-CCNQ3-Endpoint': @session.endpoint_name
-          'sip_h_X-CCNQ3-Extra': null
-          'sip_h_X-CCNQ3-Location': null
-          'sip_h_X-CCNQ3-Registrant-Password': null
-          'sip_h_X-CCNQ3-Registrant-Realm': null
-          'sip_h_X-CCNQ3-Registrant-Target': null
-          'sip_h_X-CCNQ3-Routing': null
+          'sip_h_X-At': null
+          'sip_h_X-Ex': null
+          'sip_h_X-Lo': null
+          'sip_h_X-RP': null
+          'sip_h_X-RR': null
+          'sip_h_X-RT': null
+          'sip_h_X-Ro': null
 
 Ringbacks
 
@@ -366,15 +365,13 @@ Codec negotiation with late-neg:
 
           inherit_codec: @session.inherit_codec ? true
 
-* hdr.X-CCNQ3-Number-Domain Set on inbound calls to the number-domain of the local-number.
-* hdr.X-CCNQ3-Endpoint Set on inbound calls to the endpoint of the local-number.
+* hdr.X-En Set on inbound calls to the endpoint of the local-number.
 
       debug 'export parameters'
       yield @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
-        'sip_h_X-CCNQ3-Number-Domain': @session.number_domain
-        'sip_h_X-CCNQ3-Endpoint': @session.endpoint_name
+        'sip_h_X-En': @session.endpoint_name
         originate_timeout:fr_inv_timeout
         bridge_answer_timeout:fr_inv_timeout
 

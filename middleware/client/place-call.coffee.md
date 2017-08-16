@@ -142,9 +142,9 @@ These are used by `huge-play/middleware/client/setup`.
           sip_invite_contact_params: xref
           sip_invite_from_params: xref
 
-And `ccnq4-opensips` requires `X-CCNQ3-Endpoint` for routing.
+And `ccnq4-opensips` requires `X-En` for routing.
 
-          'sip_h_X-CCNQ3-Endpoint': data.endpoint
+          'sip_h_X-En': data.endpoint
 
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{caller}"
 

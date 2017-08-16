@@ -15,10 +15,9 @@ First-line handler for outbound calls
 
 Endpoint
 --------
+* session.endpoint_name (string) The name of the calling endpoint in an egress call, set from hdr.X-En
 
-* session.endpoint_name (string) The name of the calling endpoint in an egress call, set from hdr.X-CCNQ3-Endpoint.
-
-      @session.endpoint_name = @req.header 'X-CCNQ3-Endpoint'
+      @session.endpoint_name = @req.header 'X-En'
 
 Endpoint might be provided in the reference data for example for an `originate` call (in exultant-songs).
 
@@ -26,12 +25,12 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
       unless @session.endpoint_name?
         @debug.dev 'Missing endpoint_name', @call.data
-        return @respond '485 Missing X-CCNQ3-Endpoint'
+        return @respond '485 Missing Endpoint Header'
 
       @debug 'endpoint', @session.endpoint_name
       yield @reference.set_endpoint @session.endpoint_name
 
-      yield @unset 'sip_h_X-CCNQ3-Endpoint'
+      yield @unset 'sip_h_X-En'
 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
@@ -199,13 +198,13 @@ This is needed for emergency call routing.
 
 * doc.local_number.location (string) Emergency call routing location.
 * doc.src_endpoint.location (string) Emergency call routing location (if no doc.local_number.location is provided).
-* hdr.X-CCNQ3-Location (string) Emergency call routing location (set on egress calls from doc.local_number.location or doc.src_endpoint.location).
+* hdr.X-Lo (string) Emergency call routing location (set on egress calls from doc.local_number.location or doc.src_endpoint.location).
 
       location = @session.number.location
       location ?= @session.endpoint.location
       location ?= ''
       yield @set
-        'sip_h_X-CCNQ3-Location': location
+        'sip_h_X-Lo': location
       @session.emergency_location = location
 
 Privacy

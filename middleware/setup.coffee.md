@@ -399,13 +399,11 @@ This is a simplified version of the sofia-target (session.initial_destinations) 
 
 This is a simplified version of the sofia-string building code found in middleware:client:ingress:send.
 
-* hdr.X-CCNQ3-Endpoint Endpoint name, set when dialing numbers.
-* hdr.X-CCNQ3-Number-Domain Number domain name, set when dialing numbers.
+* hdr.X-En Endpoint name, set when dialing numbers.
 
           params = [
             extra_params...
-            "sip_h_X-CCNQ3-Endpoint=#{number_data.endpoint}"
-            "sip_h_X-CCNQ3-Number-Domain=#{@session.number_domain}"
+            "sip_h_X-En=#{number_data.endpoint}"
           ]
 
           "[#{params.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
