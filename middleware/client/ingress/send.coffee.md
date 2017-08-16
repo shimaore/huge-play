@@ -127,7 +127,7 @@ No further processing in case of success.
 
       if @session.was_connected
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
-        @notify state: 'answered'
+        @notify state: 'answered', agent: key
         return
 
       if @session.was_picked
