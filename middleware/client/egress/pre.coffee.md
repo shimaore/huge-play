@@ -198,13 +198,10 @@ This is needed for emergency call routing.
 
 * doc.local_number.location (string) Emergency call routing location.
 * doc.src_endpoint.location (string) Emergency call routing location (if no doc.local_number.location is provided).
-* hdr.X-Lo (string) Emergency call routing location (set on egress calls from doc.local_number.location or doc.src_endpoint.location).
 
       location = @session.number.location
       location ?= @session.endpoint.location
       location ?= ''
-      yield @set
-        'sip_h_X-Lo': location
       @session.emergency_location = location
 
 Privacy

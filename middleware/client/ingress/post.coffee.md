@@ -349,11 +349,9 @@ These should not be forwarded towards customers.
 
           'sip_h_X-At': null
           'sip_h_X-Ex': null
-          'sip_h_X-Lo': null
           'sip_h_X-RP': null
           'sip_h_X-RR': null
           'sip_h_X-RT': null
-          'sip_h_X-Ro': null
 
 Ringbacks
 
