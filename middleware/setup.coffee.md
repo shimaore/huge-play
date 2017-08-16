@@ -255,7 +255,7 @@ Context Extension
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
-        _in: (_in = [])->
+        _in: seem (_in = [])->
 
 Add any endpoint- or number- specific dispatch room (this allows end-users to receive events for endpoints and numbers they are authorized to monitor).
 
@@ -274,7 +274,7 @@ We assume the room names match record IDs.
             push_in @session.number_domain_data._id
 
           if @reference?
-            tags = yield @reference.get_in()
+            tags = yield @reference.get_in().catch -> []
             for tag in tags
               push_in tag
 
@@ -284,7 +284,7 @@ Data reporting (e.g. to save for managers reports).
 Typically `@report({state,…})` for calls state changes / progress, `@report({event,…})` for non-calls.
 This version is meant to be used in-call.
 
-        report: (report) ->
+        report: seem (report) ->
           unless @call? and @session?
             debug.dev 'report: improper environment'
             return false
@@ -292,7 +292,7 @@ This version is meant to be used in-call.
           report.timezone ?= @session.timezone
           report.timestamp ?= now report.timezone
           report.now = Date.now()
-          @_in report._in ?= []
+          report._in = yield @_in report._in
           report.host ?= @cfg.host
           report.type ?= 'report'
 

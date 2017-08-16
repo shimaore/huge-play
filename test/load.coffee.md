@@ -92,7 +92,9 @@
               export: -> Promise.resolve null
             data: # useful-wind/router
               'Channel-Context': 'sbc-ingress'
-            reference: get_block_dtmf: ->
+            reference:
+              get_block_dtmf: ->
+              get_in: -> Promise.resolve []
           call_ctx.cfg.statistics ?=  # thinkable-ducks/server
             emit: ->
             add: ->

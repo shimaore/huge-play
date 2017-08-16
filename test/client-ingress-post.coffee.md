@@ -15,6 +15,7 @@
         set_account: ->
         get_call_options: ->
         get_dev_logger: ->
+        get_in: -> Promise.resolve []
       cfg =
         prov:
           get: (id) ->
