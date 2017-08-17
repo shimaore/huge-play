@@ -10,10 +10,10 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
       if @session.dialplan?
-        debug 'Dialplan already set, skipping'
+        @debug 'Dialplan already set, skipping'
         return
 
-      debug 'Ready'
+      @debug 'Ready'
 
 Global number
 -------------
@@ -45,7 +45,7 @@ The global number might contain additional FreeSwitch variables. Load these extr
 * doc.global_number (object, optional) Additional FreeSwitch variables to be set on ingress calls (for the called number). These will show up in CDRs on the client side.
 
       if @session.e164_number.fs_variables?
-        debug 'Using fs_variables'
+        @debug 'Using fs_variables'
         yield @set @session.e164_number.fs_variables
 
 * doc.global_number.trace (boolean) trace
@@ -59,7 +59,7 @@ The global number might contain additional FreeSwitch variables. Load these extr
 * doc.global_number.language (string) Language-code to use for features, e.g. voicemail.
 
       if @session.e164_number.voicemail_main
-        debug 'Using voicemail_main'
+        @debug 'Using voicemail_main'
         @destination = 'main'
         @session.language = @session.e164_number.language
 
@@ -69,5 +69,5 @@ The global number might contain additional FreeSwitch variables. Load these extr
         @direction 'voicemail'
 
       @notify state:'ingress', e164_number: @session.e164_number._id
-      debug 'OK'
+      @debug 'OK'
       return

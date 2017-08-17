@@ -17,6 +17,7 @@
             if event is 'DTMF'
               submit = (c) ->
                 cb body: 'DTMF-Digit': c
+        debug: ->
       m.include.call ctx
 
       it 'should receive a single digit', seem ->

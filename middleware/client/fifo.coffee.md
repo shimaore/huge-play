@@ -22,7 +22,7 @@ TBD: We'll be using some shared state (like Redis) with handlers on ingress/egre
 FIFO handling
 =============
 
-      debug 'Starting'
+      @debug 'Starting'
 
       return unless @session.direction is 'fifo'
 
@@ -30,7 +30,7 @@ FIFO handling
         @prompt.uri 'prov', 'prov', id, name
 
       unless @session.fifo?
-        debug 'Missing FIFO data'
+        @debug 'Missing FIFO data'
         return
 
       fifo = @session.fifo
@@ -41,7 +41,7 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 
 Ready to send, answer the call.
 
-      debug 'Answer'
+      @debug 'Answer'
       yield @action 'answer'
       call_is_answered = true
 
@@ -59,7 +59,7 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 
 FIXME: Clear X- headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
 
-      debug 'Send to FIFO'
+      @debug 'Send to FIFO'
       yield @set
         continue_on_fail: true
 
@@ -126,11 +126,11 @@ desirable queues to a given call. (Adding more required skills would build a sma
         call_tags = call_tags.filter (tag) -> tag.match /^queue:/
 
         if call_tags.length is 0
-          debug 'no queues, cannot overflow'
+          @debug 'no queues, cannot overflow'
           return
 
         attempt_overflow = seem (suffix) ->
-          debug 'attempt overflow', call_tags, suffix
+          @debug 'attempt overflow', call_tags, suffix
           if yield queuer.ingress_pool.has call
             yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
             yield queuer.reevaluate_idle_agents()
@@ -190,13 +190,13 @@ Otherwise use the hunt-group behavior.
           leg_progress_timeout
           leg_timeout
         }]
-      debug 'bridge', sofias
+      @debug 'bridge', sofias
       res = yield @action 'bridge', sofias.join ','
 
       data = res.body
       @session.bridge_data ?= []
       @session.bridge_data.push data
-      debug 'Returned from FIFO', data
+      @debug 'Returned from FIFO', data
 
 Available parameters related to transfer are (in the case `bridge` is used):
 - `variable_transfer_source` (string)
@@ -214,16 +214,16 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       xfer = data.variable_transfer_history
       if xfer?
-        debug 'Call was transferred', xfer
+        @debug 'Call was transferred', xfer
         return
 
       cause = data?.variable_last_bridge_hangup_cause
       cause ?= data?.variable_originate_disposition
 
-      debug "FIFO returned with cause #{cause}"
+      @debug "FIFO returned with cause #{cause}"
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
-        debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
+        @debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
         yield @action 'hangup'
         return
 
@@ -231,21 +231,21 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 * session.fifo.user_database (string) If present, the call is redirected to this voicemail box if the FIFO failed (for example because no agents are available). Default: use session.fifo.voicemail if present.
 
       if fifo.voicemail?
-        debug 'Send to voicemail'
+        @debug 'Send to voicemail'
         @destination = fifo.voicemail
         @direction 'voicemail'
         yield @validate_local_number()
         return
 
       if fifo.user_database?
-        debug 'Send to voicemail (user-database)'
+        @debug 'Send to voicemail (user-database)'
         @destination = 'user-database'
         @session.voicemail_user_database = fifo.user_database
         @session.voicemail_user_id = fifo.full_name
         @direction 'voicemail'
         return
 
-      debug 'Hangup'
+      @debug 'Hangup'
       yield @action 'hangup'
 
 Backup notes

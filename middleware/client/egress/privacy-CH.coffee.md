@@ -8,11 +8,11 @@
       return unless @session.country is 'ch'
       return if @session.forwarding is true
 
-      debug 'Matching', @destination
+      @debug 'Matching', @destination
 
       if m = @destination.match /^\*31(\d+)$/
         @destination = m[1]
-        debug 'Replacing with ', @destination
+        @debug 'Replacing with ', @destination
 
 Add a `Privacy: id` header.
 

@@ -127,13 +127,13 @@ Otherwise, since the call is coming from a carrier we force the creation of a ne
       @reference = new Reference @session.reference
       @session.reference = @reference.id
 
-      @notify state:'incoming-call-carrier-side'
-
 Logger
 ------
 
       if yield @reference.get_dev_logger()
         @session.dev_logger = true
+
+      @notify state:'incoming-call-carrier-side'
 
 SIP Profile
 -----------

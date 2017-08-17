@@ -342,7 +342,7 @@ Agent state monitoring
       local_server = [@session.local_server,@session.client_server].join '/'
 
       start_of_call = seem ({key,id,dialplan}) =>
-        debug 'Start of call', key, id, dialplan
+        @debug 'Start of call', key, id, dialplan
 
         return unless dialplan is 'centrex'
         is_remote = yield @cfg.is_remote (domain_of key), local_server
@@ -354,7 +354,7 @@ Agent state monitoring
         yield agent.add_call id
 
       end_of_call = seem ({key,id,dialplan}) =>
-        debug 'End of call', key, id, dialplan
+        @debug 'End of call', key, id, dialplan
 
         return unless dialplan is 'centrex'
         is_remote = yield @cfg.is_remote (domain_of key), local_server
@@ -375,7 +375,7 @@ On-hook agent
 -------------
 
       @queuer_login = seem (source,name,fifo,tags = []) ->
-        debug 'queuer_login', source
+        @debug 'queuer_login', source
         agent = new Agent queuer, source
         yield agent.set 'name', name
         yield agent.add_tags tags
@@ -385,14 +385,14 @@ On-hook agent
         agent
 
       @queuer_leave = seem (source,fifo) ->
-        debug 'queuer_leave', source
+        @debug 'queuer_leave', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield @report {state:'queuer-leave',source,fifo}
         agent
 
       @queuer_logout = seem (source,fifo) ->
-        debug 'queuer_logout', source
+        @debug 'queuer_logout', source
         agent = new Agent queuer, source
         yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         yield agent.clear_tags()
@@ -404,7 +404,7 @@ Off-hook agent
 --------------
 
       @queuer_offhook = seem (source,name,{uuid},fifo,tags = []) ->
-        debug 'queuer_offhook', source, uuid, fifo
+        @debug 'queuer_offhook', source, uuid, fifo
         agent = new Agent queuer, source
         yield agent.set 'name', name
         agent.clear_tags()

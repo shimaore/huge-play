@@ -41,7 +41,7 @@ From: international number (why??)
       return unless @session.dialplan is 'national'
       return unless @session.country is 'fr'
 
-      debug 'source', @source
+      @debug 'source', @source
 
 Verify that the caller-id follows the proper format
 ---------------------------------------------------
@@ -147,7 +147,7 @@ international call
         m = @destination.match entry.match
         if m?
           @session.ccnq_to_e164 = entry.now m
-          debug 'Found', to_e164: @session.ccnq_to_e164
+          @debug 'Found', to_e164: @session.ccnq_to_e164
           return
 
-      debug 'None found', destination: @destination
+      @debug 'None found', destination: @destination

@@ -239,7 +239,7 @@ Optionally enforce that the calling number originates from the associated endpoi
 
       if @session.endpoint.check_from
         if @session.number.endpoint isnt @session.endpoint_name
-          debug 'From Username is not listed'
+          @debug 'From Username is not listed'
           return @respond '403 From Username is not listed'
 
 ICE

@@ -24,7 +24,7 @@ List ID for an ingress call.
       pid = @req.header 'P-Asserted-Identity'
       interesting_number = if pid? then url.parse(pid).auth else @source
       list_id = "list:#{list}@#{interesting_number}"
-      debug 'local_ingress', list, interesting_number
+      @debug 'local_ingress', list, interesting_number
       list_id
 
 List ID for an egress call.
@@ -34,7 +34,7 @@ List ID for an egress call.
       list = "#{caller}@#{@session.number_domain}"
       interesting_number = @destination
       list_id = "list:#{list}@#{interesting_number}"
-      debug 'local_egress', list, interesting_number
+      @debug 'local_egress', list, interesting_number
       list_id
 
 Global ingress
@@ -115,20 +115,21 @@ Actions
 These actions are terminal for the statement.
 
       stop: ->
-        debug 'stop'
+        @debug 'stop'
         'over'
 
       accept: ->
-        debug 'accept'
+        @debug 'accept'
         'over'
 
       hangup: seem ->
+        @debug 'hangup'
         yield @action 'hangup'
         @direction 'hangup'
         'over'
 
       send: seem (destination) ->
-        debug 'send'
+        @debug 'send'
         @session.direction = 'ingress'
         @destination = destination
         yield serialize.modules ingress_modules, this, 'include'
@@ -137,34 +138,34 @@ These actions are terminal for the statement.
 `menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
 
       menu_send: seem ->
-        debug 'menu_send'
+        @debug 'menu_send'
         return false unless @menu?
         yield @menu.expect()
-        debug 'menu_send', @menu.value
+        @debug 'menu_send', @menu.value
         @session.direction = 'ingress'
         @destination = @menu.value
         yield serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
         'over'
 
       reject: seem ->
-        debug 'reject'
+        @debug 'reject'
         yield @respond '486 Decline'
         'over'
 
       announce: seem (message) ->
-        debug 'announce', message
+        @debug 'announce', message
         yield @action 'answer'
         yield @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
         yield @action 'hangup'
         'over'
 
       voicemail: ->
-        debug 'voicemail'
+        @debug 'voicemail'
         @direction 'voicemail'
         'over'
 
       forward: (destination) ->
-        debug 'forward', destination
+        @debug 'forward', destination
         @session.reason = 'unspecified'
         @session.destination = destination
         @direction 'forward'
@@ -173,14 +174,14 @@ These actions are terminal for the statement.
 Other actions must return `true`.
 
       email: (recipient,template) ->
-        debug 'email', recipient, template
+        @debug 'email', recipient, template
         # FIXME TODO
         true
 
 `play`: play a file, uninterrupted (should be used for short prompts)
 
       play: seem (file) ->
-        debug 'play', file
+        @debug 'play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
         yield @action 'answer'
         yield @unset 'playback_terminators'
@@ -190,16 +191,16 @@ Other actions must return `true`.
 `menu_play`: play a file, stop playing when a key is pressed
 
       menu_play: seem (file) ->
-        debug 'menu_play', file
+        @debug 'menu_play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
         yield @action 'answer'
         yield @dtmf.playback url
         true
 
       wait: seem (ms) ->
-        debug 'wait', ms
+        @debug 'wait', ms
         yield @dtmf.playback "silence_stream://#{ms}"
-        debug 'wait over', ms
+        @debug 'wait over', ms
         true
 
       record: (name) ->
@@ -211,19 +212,19 @@ Preconditions
 These are best used after `post` is used but before `send` is used.
 
       source: (source) ->
-        debug 'source', source
+        @debug 'source', source
         pattern source, @source
 
       source_e164: (source) ->
-        debug 'source_e164', source
+        @debug 'source_e164', source
         pattern source, @session.ccnq_from_e164
 
       destination: (destination) ->
-        debug 'destination', destination
+        @debug 'destination', destination
         pattern destination, @destination
 
       destination_e164: (destination) ->
-        debug 'destination_e164', destination
+        @debug 'destination_e164', destination
         pattern destination, @session.ccnq_to_e164
 
 So, time conditions.
@@ -233,7 +234,7 @@ Then get some Date object up and running.
 Weekday condition
 
       weekdays: (days...) ->
-        debug 'weekdays', days...
+        @debug 'weekdays', days...
         now = Moment()
         if @session.timezone?
           now = now.tz @session.timezone
@@ -242,7 +243,7 @@ Weekday condition
 Time condition
 
       time: (start,end) ->
-        debug 'time', start, end
+        @debug 'time', start, end
         now = Moment()
         if @session.timezone?
           now = now.tz @session.timezone
@@ -298,7 +299,7 @@ start: '18:00', end: '08:00'
 Calendars
 
       in_calendars: (calendars) ->
-        debug 'calendars', calendars
+        @debug 'calendars', calendars
 
         if 'string' is typeof calendars
           calendars = [calendars]
@@ -336,11 +337,11 @@ Calendars
         false
 
       anonymous: ->
-        debug 'anonymous'
+        @debug 'anonymous'
         @session.caller_privacy
 
       webhook: seem (uri) ->
-        debug 'webhook'
+        @debug 'webhook'
         try
           {body} = yield request
             .post uri
@@ -353,7 +354,7 @@ Calendars
             yield @user_tags body.tags
           true
         catch
-          debug 'webhook: error'
+          @debug 'webhook: error'
           false
 
 Postconditions
@@ -363,47 +364,47 @@ These really only apply after the call has gone through `send` (but probably bef
 They can be used to provide further call treatment, similar to the various `CF..` conditions.
 
       busy: ->
-        debug 'busy'
+        @debug 'busy'
         @session.reason is 'user-busy'
 
       unavailable: ->
-        debug 'unavailable'
+        @debug 'unavailable'
         @session.reason is 'unavailable'
 
       'no-answer': ->
-        debug 'no-anwer'
+        @debug 'no-anwer'
         @session.reason is 'no-answer'
 
 Notice: `failed` here means the call failed to be sent to the user *and* no other CF.. condition handled it (sending to voicemail using `cfnr_voicemail` is not considered a failure for example).
 
       failed: ->
-        debug 'failed'
+        @debug 'failed'
         @session.call_failed
 
       answered: ->
-        debug 'answered'
+        @debug 'answered'
         if @session.was_connected then true else false
 
       picked: ->
-        debug 'picked'
+        @debug 'picked'
         if @session.was_picked then true else false
 
       transferred: ->
-        debug 'transferred'
+        @debug 'transferred'
         if @session.was_transferred then true else false
 
-      caller_blacklist:       chain is_blacklisted local_ingress
-      called_blacklist:       chain is_blacklisted local_egress
-      caller_e164_blacklist:  chain is_blacklisted global_ingress
-      called_e164_blacklist:  chain is_blacklisted global_egress
-      caller_whitelist:       chain is_whitelisted local_ingress
-      called_whitelist:       chain is_whitelisted local_egress
-      caller_e164_whitelist:  chain is_whitelisted global_ingress
-      called_e164_whitelist:  chain is_whitelisted global_egress
-      caller_suspicious:      chain is_suspicious  local_ingress
-      called_suspicious:      chain is_suspicious  local_egress
-      caller_e164_suspicious: chain is_suspicious  global_ingress
-      called_e164_suspicious: chain is_suspicious  global_egress
+      caller_blacklist:       chain is_blacklisted, local_ingress
+      called_blacklist:       chain is_blacklisted, local_egress
+      caller_e164_blacklist:  chain is_blacklisted, global_ingress
+      called_e164_blacklist:  chain is_blacklisted, global_egress
+      caller_whitelist:       chain is_whitelisted, local_ingress
+      called_whitelist:       chain is_whitelisted, local_egress
+      caller_e164_whitelist:  chain is_whitelisted, global_ingress
+      called_e164_whitelist:  chain is_whitelisted, global_egress
+      caller_suspicious:      chain is_suspicious, local_ingress
+      called_suspicious:      chain is_suspicious, local_egress
+      caller_e164_suspicious: chain is_suspicious, global_ingress
+      called_e164_suspicious: chain is_suspicious, global_egress
 
 Menus
 -----
@@ -411,7 +412,7 @@ Menus
 `menu_start`: start collecting digits for a menu; digits received before this command are discarded.
 
       menu: seem ( min = 1, max = min, itd ) ->
-        debug 'menu_start'
+        @debug 'menu_start'
         yield @action 'answer'
         @dtmf.clear()
         @menu =
@@ -423,33 +424,33 @@ Menus
 
       menu_on: seem (choice) ->
         choice = "#{choice}"
-        debug 'menu_on', choice
+        @debug 'menu_on', choice
         return false unless @menu?
         yield @menu.expect()
-        debug 'menu_on', choice, @menu.value
+        @debug 'menu_on', choice, @menu.value
         @menu.value is choice
 
       goto_menu: seem (number) ->
-        debug 'goto_menu', number
+        @debug 'goto_menu', number
 
 Copying the logic from middleware/client/ingress/fifo
 
         type = 'menu'
         items = @session.number_domain_data.menus
         unless items?
-          debug.csr "Number domain has no data for #{type}."
+          @debug.csr "Number domain has no data for #{type}."
           return
         unless items.hasOwnProperty number
-          debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
+          @debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
           return
         item = items[number]
         unless item?
-          debug.csr "Number domain as no data #{number} for #{type}."
+          @debug.csr "Number domain as no data #{number} for #{type}."
           return
         @session[type] = item
         @direction type
 
-        debug "Using #{type} #{number}", item
+        @debug "Using #{type} #{number}", item
 
         @menu_depth ?= 0
         @menu_depth++

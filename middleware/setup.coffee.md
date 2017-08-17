@@ -427,15 +427,15 @@ Retrieve number data.
             @session.music ?= @session.number.music
 
           if @session.number.error?
-            debug.dev "Could not locate destination number #{dst_number}"
+            @debug.dev "Could not locate destination number #{dst_number}"
             @notify state: 'invalid-local-number', number: @session.number._id
             yield @respond '486 Not Found'
             return
 
-          debug "validate_local_number: Got dst_number #{dst_number}", @session.number
+          @debug "validate_local_number: Got dst_number #{dst_number}", @session.number
 
           if @session.number.disabled
-            debug.ops "Number #{dst_number} is disabled"
+            @debug.ops "Number #{dst_number} is disabled"
             @notify state:'disabled-local-number', number: @session.number._id
             yield @respond '486 Administratively Forbidden' # was 403
             return
@@ -496,7 +496,7 @@ Set the account so that if we redirect to an external number the egress module c
 
         record_call: (name) ->
           unless @cfg.recording_uri?
-            debug.dev 'No recording_uri, call will not be recorded.'
+            @debug.dev 'No recording_uri, call will not be recorded.'
             return false
 
 Keep recording (async)
@@ -504,9 +504,9 @@ Keep recording (async)
           keep_recording = seem =>
             @report event:'recording'
             uri = yield @cfg.recording_uri name
-            debug 'Recording', @call.uuid, uri
+            @debug 'Recording', @call.uuid, uri
             outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
-            debug 'Recording', @call.uuid, uri, outcome
+            @debug 'Recording', @call.uuid, uri, outcome
 
             last_uri = uri
 
@@ -517,20 +517,20 @@ Keep recording (async)
             while still_running
               yield @sleep 29*minutes
               uri = yield @cfg.recording_uri name
-              debug 'Recording next segment', @call.uuid, uri
+              @debug 'Recording next segment', @call.uuid, uri
               yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
               @report event:'recording'
               yield @sleep 1*minutes
-              debug 'Stopping previous segment', @call.uuid, last_uri
+              @debug 'Stopping previous segment', @call.uuid, last_uri
               yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
               last_uri = uri
 
             return
 
           keep_recording().catch (error) =>
-            debug "record_call: #{error.stack ? error}"
+            @debug "record_call: #{error.stack ? error}"
 
-          debug 'Going to record', name
+          @debug 'Going to record', name
           return true
 
       }

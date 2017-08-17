@@ -84,6 +84,12 @@ in which case one is created.
       @reference = new Reference @session.reference
       @session.reference = @reference.id
 
+Logger
+------
+
+      if yield @reference.get_dev_logger()
+        @session.dev_logger = true
+
       @notify state: 'incoming-call-client-side'
 
 Click-to-dial (`place-call`)
@@ -110,12 +116,6 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
       o = yield @reference.get_call_options()
       if o?
         @session.call_options = o
-
-Logger
-------
-
-      if yield @reference.get_dev_logger()
-        @session.dev_logger = true
 
 SIP Profile
 -----------

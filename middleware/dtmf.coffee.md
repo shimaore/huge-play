@@ -28,7 +28,7 @@
         r
 
       expect = (min_length, max_length = 16, inter_digit = 3*1000, final = inter_digit) =>
-        debug 'expect', min_length, max_length
+        @debug 'expect', min_length, max_length
         clear_timer()
 
         new Promise (resolve) =>
