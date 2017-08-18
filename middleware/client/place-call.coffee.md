@@ -129,6 +129,7 @@ Session Reference Data
           "number_domain:#{domain}"
         ]
         yield my_reference.set_account account
+        yield my_reference.set_destination data.destination
 
         xref = "xref=#{_id}"
         params = make_params

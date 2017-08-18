@@ -95,7 +95,7 @@ Logger
 Click-to-dial (`place-call`)
 ----------------------------
 
-Force the destination for `exultant-songs` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
+Force the destination for `place-call` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
 
       d = yield @reference.get_destination()
       if d?
