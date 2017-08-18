@@ -318,9 +318,6 @@ Real-time notification (e.g. to show on a web panel).
           report._notify = true
           @report report
 
-        save_trace: ->
-          @cfg.statistics.emit 'trace', @session
-
         set: seem (name,value) ->
           return unless name?
 
