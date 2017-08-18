@@ -42,10 +42,10 @@ Events received downstream.
       @register 'queuer:log-agent-out', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', seem (key) =>
-        debug 'queuer:get-agent-state', key
-
         is_remote = yield @cfg.is_remote domain_of key
         return if is_remote isnt false
+
+        debug 'queuer:get-agent-state', key
 
         agent = new Agent queuer, key
         state = yield agent.get_state().catch -> null
@@ -53,18 +53,20 @@ Events received downstream.
         count = yield agent.count().catch -> 0
         # async
         agent.notify state, {missed,count}
+
         debug 'queuer:get-agent-state: done', key, state
         return
 
       @socket.on 'queuer:log-agent-out', seem (key) =>
-        debug 'queue:log-agent-out', key
-
         is_remote = yield @cfg.is_remote domain_of key
         return if is_remote isnt false
+
+        debug 'queue:log-agent-out', key
 
         agent = new Agent queuer, key
         yield agent.clear_tags()
         yield agent.transition 'logout'
+
         debug 'queue:log-agent-out: done', key
         return
 
