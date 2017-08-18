@@ -197,7 +197,7 @@ If `data.call` is present we notify using the call's process; if it isn't we not
 This avoids sending two messages for the same event (one with incomplete data, the other with complete data).
 
           if data.call?
-            yield data.call.report new_state, notification
+            yield data.call.report notification
           else
             cfg.statistics.emit 'queuer', notification
           debug 'agent.notify: done', @key, notification
