@@ -92,31 +92,6 @@ Logger
 
       @notify state: 'incoming-call-client-side'
 
-Click-to-dial (`place-call`)
-----------------------------
-
-Force the destination for `place-call` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
-
-      d = yield @reference.get_destination()
-      if d?
-        @destination = d
-        yield @reference.set_destination null
-
-Also, do not wait for an ACK, since we're calling out (to the "caller") when using exultant-songs.
-
-        @session.wait_for_aleg_ack = false      # in huge-play
-        @session.sip_wait_for_aleg_ack = false  # in tough-rate
-
-Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
-
-        a = @reference.get_account()
-        if a?
-          yield @export 'sip_h_P-Charge-Info': "sip:#{a}@#{@cfg.host}"
-
-      o = yield @reference.get_call_options()
-      if o?
-        @session.call_options = o
-
 SIP Profile
 -----------
 

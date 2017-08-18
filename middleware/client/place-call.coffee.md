@@ -296,4 +296,36 @@ Call it out
 
       debug 'Module Ready'
 
+Click-to-dial (`place-call`)
+----------------------------
+
     @include = ->
+
+Force the destination for `place-call` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
+
+      destination = yield @reference.get_destination()
+      if destination?
+
+        @destination = destination
+        yield @reference.set_destination null
+
+Also, do not wait for an ACK, since we're calling out (to the "caller"),
+and therefor the call is already connected by the time we get here.
+
+        @session.wait_for_aleg_ack = false      # in huge-play
+        @session.sip_wait_for_aleg_ack = false  # in tough-rate
+
+Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
+
+        account = @reference.get_account()
+        if account?
+          yield @export 'sip_h_P-Charge-Info': "sip:#{account}@#{@cfg.host}"
+
+Options might be provided for either `place-call` or `call-to-conference`.
+They are used in `tough-rate/middleware/call-handler`.
+
+      options = yield @reference.get_call_options()
+      if options?
+        @session.call_options = options
+
+      @debug 'Ready', {destination,account,options}
