@@ -8,7 +8,6 @@
           'middleware/handled.coffee.md'
           'middleware/dtmf.coffee.md'
           'middleware/prompt.coffee.md'
-          'middleware/trace_in_tangible.coffee.md'
 
           'middleware/client/setup.coffee.md'
           'middleware/client/fifo.coffee.md'
