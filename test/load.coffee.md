@@ -94,6 +94,8 @@
             reference:
               get_block_dtmf: ->
               get_in: -> Promise.resolve []
+              get_destination: -> Promise.resolve null
+              get_call_options: -> Promise.resolve {}
           call_ctx.cfg.statistics ?=  # thinkable-ducks/server
             emit: ->
             add: ->
