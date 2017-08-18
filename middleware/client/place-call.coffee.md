@@ -299,7 +299,7 @@ Call it out
 Click-to-dial (`place-call`)
 ----------------------------
 
-    @include = ->
+    @include = seem ->
 
 Force the destination for `place-call` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
 
