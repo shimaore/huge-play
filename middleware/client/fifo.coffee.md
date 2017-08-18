@@ -76,8 +76,7 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
         @source = "+#{@session.ccnq_from_e164}"
 
       if fifo.tags?
-        for tag in fifo.tags
-          yield @user_tag tag
+        yield @user_tags fifo.tags
 
       if fifo.required_skills?
         for skill in fifo.required_skills
