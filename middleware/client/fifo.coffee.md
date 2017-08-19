@@ -131,7 +131,7 @@ desirable queues to a given call. (Adding more required skills would build a sma
           @debug 'no queues, cannot overflow'
           return
 
-        attempt_overflow = seem (suffix) ->
+        attempt_overflow = seem (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
           if yield queuer.ingress_pool.has call
             yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
