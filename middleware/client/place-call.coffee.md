@@ -95,9 +95,9 @@ ANSWER: Yes. And store the result in the field `caller`.
 
         debug 'Received place-call', data
 
-A proper call UUID is required.
+A proper reference is required.
 
-        return unless _id?
+        return unless _id? and _id.match /^[\w-]+$/
 
 Load additional data from the endpoint.
 
@@ -210,9 +210,9 @@ Parameters:
         {endpoint,name,destination,_id} = data
         debug 'Received call-to-conference', data, local_server
 
-A proper call UUID is required.
+A proper reference is required.
 
-        return unless data._id?
+        return unless _id? and _id.match /^[\w-]+$/
 
 Ensure we are co-located with the FreeSwitch instance serving this conference.
 
