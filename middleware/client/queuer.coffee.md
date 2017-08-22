@@ -157,8 +157,11 @@ Downstream/upstream pair for egress-pool retrieval.
 
         new_call: (data) -> new HugePlayCall data
 
-        notify: seem (new_state,data,event = null) ->
+        notify: seem (transition,data) ->
           debug 'agent.notify', @key, new_state
+
+          {old_state,new_state,event} = transition
+
           notification =
             _queuer: true
             _in: [
@@ -171,6 +174,7 @@ Downstream/upstream pair for egress-pool retrieval.
             now: Date.now()
 
             state: new_state
+            old_state: old_state
             event: event
             agent: @key
             number: @number
