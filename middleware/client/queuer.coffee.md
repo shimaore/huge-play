@@ -52,7 +52,7 @@ Events received downstream.
         missed = yield agent.get_missed().catch -> 0
         count = yield agent.count().catch -> 0
         # async
-        agent.notify state, {missed,count}
+        agent.notify {state}, {missed,count}
 
         debug 'queuer:get-agent-state: done', key, state
         return
@@ -158,7 +158,7 @@ Downstream/upstream pair for egress-pool retrieval.
         new_call: (data) -> new HugePlayCall data
 
         notify: seem (transition,data) ->
-          debug 'agent.notify', @key, new_state
+          debug 'agent.notify', @key, transition
 
           {old_state,new_state,event} = transition
 
@@ -300,7 +300,7 @@ This probably not necessary, since the destination number is actually retrieved 
           yield call.set 'timezone', timezone
 
           # async
-          @notify 'create-egress-call', call_data
+          @notify {event:'create-egress-call'}, call_data
 
           debug 'create_egress_call: complete'
 
