@@ -88,8 +88,6 @@ Commands
 
 * doc.number_domain.calendars: array or object of calendars. Each calendar is an array of dates in `YYYY-MM-DD` format. The calendars are used as filters by doc.local_number.ornaments' `in_calendars` command.
 
-FIXME Allow for modules using us to specify which module(s) to run in case of menu-send.
-
     menu_conference_module =
       name: 'menu_conference_module'
       include: ->
