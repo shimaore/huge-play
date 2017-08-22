@@ -332,7 +332,7 @@ Calendars
                   return true
 
             else
-              if calendar of domain_calendars
+              if domain_calendars[calendar]?
                 {dates} = domain_calendars[calendar]
                 if dates? and now in dates
                   return true
