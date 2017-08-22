@@ -52,13 +52,13 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
         data = res.body
         integer = (x) ->
-          return null if isNaN v = parseInt x
+          return null if isNaN v = parseInt x, 10
           v
         float = (x) ->
           return null if isNaN v = parseFloat x
           v
         uepoch = (x) ->
-          return null if isNaN v = parseInt x
+          return null if isNaN v = parseInt x, 10
           v//1000
 
         cdr_report =
