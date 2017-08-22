@@ -124,8 +124,7 @@ allowing access to them if some conditions are met.
 Since we are trying to extend the pool of agents, this is only possible by adding more
 desirable queues to a given call. (Adding more required skills would build a smaller pool.)
 
-        call_tags = yield call.tags()
-        call_tags = call_tags.filter (tag) -> tag.match /^queue:/
+        call_tags = ref_tags.filter (tag) -> tag.match /^queue:/
 
         if call_tags.length is 0
           @debug 'no queues, cannot overflow'
@@ -133,6 +132,7 @@ desirable queues to a given call. (Adding more required skills would build a sma
 
         attempt_overflow = seem (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
+          yield call.load()
           if yield queuer.ingress_pool.has call
             yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
             yield queuer.reevaluate_idle_agents()
