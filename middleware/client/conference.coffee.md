@@ -11,7 +11,7 @@
     seconds = 1000
     minutes = 60*seconds
 
-    @server_pre = ->
+    @init = ->
 
       @cfg.statistics.on 'conference:record', seem (name) =>
 
