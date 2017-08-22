@@ -300,11 +300,13 @@ start: '18:00', end: '08:00'
 
 Calendars
 
-      in_calendars: (calendars) ->
+      in_calendars: (calendars...) ->
         @debug 'calendars', calendars
 
-        if 'string' is typeof calendars
-          calendars = [calendars]
+Legacy format: only one argument and that argument is an array.
+
+        if calendars.length is 1 and typeof calendars[0] not in ['string','number']
+          calendars = calendars[0]
 
         domain_calendars = @session.number_domain_data?.calendars ? {}
 
