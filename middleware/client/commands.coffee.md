@@ -470,22 +470,20 @@ Pattern
 
 Does the number `n` match the pattern `p`.
 
-The pattern's `text` field must consists of only:
+The pattern must consists of only:
 - digits
-- '?' -- replace single of above
-- '..' -- replace zero or more
-
-The pattern's `not` field must
+- '?', '.' -- replace single of above
+- '..', '...', '…' -- replace zero or more
 
     pattern = (p,n) ->
 
-      unless p.match /^(\d|\?|\.\.)+$/
+      unless p.match /^(\d|\?|\.|\.\.|\.\.\.|…)+$/
         debug 'invalid pattern', p
         return false
 
       p = p
-        .replace /\.\./g, '\\d*'
-        .replace /\?/g, '\\d'
+        .replace /\.\.|\.\.\.|…/g, '\\d*'
+        .replace /\?|\./g, '\\d'
 
       r = new RegExp "^#{p}$"
 
