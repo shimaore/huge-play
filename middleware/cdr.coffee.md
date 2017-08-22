@@ -100,6 +100,8 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
               @statistics.add "emergency" if v
             when 'onnet'
               @statistics.add "onnet" if v
+            when 'hold_times', 'end_time', 'start_time', 'answer_time', 'bridge_time', 'progress_time'
+              no
             else
               @statistics.add k, v
 
