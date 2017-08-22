@@ -289,6 +289,9 @@ This version is meant to be used in-call.
             debug.dev 'report: improper environment'
             return false
 
+          report.old_state ?= @session.state
+          @session.state = report.state if report.state?
+
           report.timezone ?= @session.timezone
           report.timestamp ?= now report.timezone
           report.now = Date.now()
