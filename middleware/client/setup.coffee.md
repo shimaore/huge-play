@@ -67,8 +67,13 @@ In case of a call from `exultant-songs`, the session identifier is in variable `
 In all other cases, look (very hard) for a `xref` parameter.
 
       reference_in = (name) =>
-        if m = @req.variable(name)?.match /xref[=:]([\w-]+)/
+        v = @req.variable name
+        return unless v?
+        m = v.match /xref[=:]([\w-]+)/
+        if m? and m[1]?
           @session.reference ?= m[1]
+        else
+          @debug.dev "#{name} #{v} has no xref"
 
       reference_in 'sip_from_params'
       reference_in 'sip_to_params'
