@@ -52,7 +52,7 @@ Events received downstream.
         missed = yield agent.get_missed().catch -> 0
         count = yield agent.count().catch -> 0
         # async
-        agent.notify {state}, {missed,count}
+        agent.notify {new_state:state}, {missed,count}
 
         debug 'queuer:get-agent-state: done', key, state
         return
