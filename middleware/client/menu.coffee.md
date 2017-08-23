@@ -30,5 +30,6 @@
       @debug 'Menu starting.'
       @menu_depth = 0
       yield run.call this, @session.menu, @ornaments_commands
+        .catch (error) => @debug.catch error
       @debug 'Menu completed.'
       return
