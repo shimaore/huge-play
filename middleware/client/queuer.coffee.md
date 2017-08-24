@@ -82,7 +82,7 @@ Downstream/upstream pair for egress-pool retrieval.
         return if is_remote isnt false
 
         tag = "number_domain:#{domain}"
-        calls = yield queuer.egress_pool.not_presenting()
+        calls = yield queuer.egress_pool.calls()
         result = []
         for call in calls
           if yield call.has_tag(tag).catch( -> null )
