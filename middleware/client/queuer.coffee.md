@@ -105,7 +105,7 @@ Downstream/upstream pair for egress-pool retrieval.
       local_redis = @cfg.local_redis_client
       prov = @cfg.prov
       profile = @cfg.session?.profile
-      api = API @cfg
+      api = API @cfg.api
       host = @cfg.host
       p = @cfg.profiles?[profile]
       if p?
@@ -121,7 +121,9 @@ Downstream/upstream pair for egress-pool retrieval.
       class HugePlayCall extends TaggedCall
 
         redis: local_redis_interface
-        api: api
+        api: api.truthy
+        monitor_api: api.monitor
+
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference
 
