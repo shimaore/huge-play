@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "31.1.17",
+  "version": "32.0.0-pre",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublish": "coffee -c middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
@@ -29,7 +29,7 @@
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "nimble-direction": "^6.2.2",
-    "normal-key": "^2.0.1",
+    "normal-key": "^3.0.0",
     "request": "^2.81.0",
     "seem": "^2.0.0",
     "solid-gun": "^1.0.0",
@@ -45,6 +45,6 @@
     "mocha": "^3.5.0"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "development"
   }
 }

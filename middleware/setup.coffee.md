@@ -48,10 +48,13 @@ Local and Global Redis
       if @cfg.local_redis?
         @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis
 
-      redis_interface = new RedisInterface [@cfg.global_redis_client,@cfg.local_redis_client]
+How long should we keep a reference after the last update?
+
+      call_timeout = 8*3600
+      redis_interface = new RedisInterface @cfg.global_redis_client, call_timeout
 
       class HugePlayReference extends Reference
-        redis: redis_interface
+        interface: redis_interface
 
       @cfg.Reference = HugePlayReference
 
@@ -157,7 +160,7 @@ Eventually the two should be merged.
 
 Create a new socket client
 
-      @cfg._client = _client = =>
+      _client = =>
         new Promise (resolve) =>
           try
             client = FS.client ->
@@ -182,10 +185,67 @@ Use a default client for generic / shared APIs
 
       default_client = null
 
-      @cfg.api = seem (cmd) ->
+      _api = seem (cmd) ->
         default_client ?= yield _client()
         res = yield default_client.api cmd
+
+      @cfg.api = seem (cmd) =>
+        res = yield _api cmd
         res?.body ? null
+
+      @cfg.api.send = _api
+      @cfg.api.create = _client
+
+      @cfg.api.truthy = (cmd) =>
+        on_success = (res) ->
+          switch
+            when res.uuid?
+              res.uuid
+            when res.body is 'true'
+              true
+            when res.body is 'false'
+              false
+            else
+              true
+        on_failure = (error) ->
+          false
+
+        _api cmd
+        .then on_success, on_resolve
+
+      UNIQUE_ID = 'Unique-ID'
+
+      monitor_client = null
+      monitored_events = {}
+
+FIXME: Can only be called once on a given `id`.
+
+Remember to always call `monitor.end()` when you are done with the monitor!
+
+      @cfg.api.monitor = seem (id,events...) ->
+        monitor_client ?= yield _client()
+        monitor_client.filter UNIQUE_ID, id
+
+        ev = new EventEmitter()
+        listener = (msg) ->
+          return unless msg?.headers?[UNIQUE_ID] is id
+          ev.emit event, msg
+
+        for event in events
+          do (event) ->
+            monitored_events[event] ?= 0
+            monitor_client.event_json event if monitored_events[event]++ is 0
+            monitor_client.on event, listener
+
+        ev.end = ->
+          monitor_client.filter_delete UNIQUE_ID, id
+          for event in events
+            monitor_client.removeListener event, listener
+            monitor_client.nixevent event if --monitored_events[event] is 0
+          ev.removeAllListeners()
+          ev = null
+
+        ev
 
       return
 

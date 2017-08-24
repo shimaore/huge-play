@@ -42,9 +42,9 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       get_block_dtmf: GET 'block_dtmf'
 
       add_in: (role) ->
-        @redis.add @__in_key, role
+        @interface.add @__in_key, role
 
       get_in: ->
-        @redis.members @__in_key
+        @interface.members @__in_key
 
     module.exports = Reference

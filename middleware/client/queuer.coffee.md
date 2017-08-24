@@ -17,7 +17,6 @@
     now = (tz = 'UTC') ->
       Moment().tz(tz).format()
 
-    API = require 'black-metal/api'
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
     RedisInterface = require 'normal-key/interface'
 
@@ -105,23 +104,32 @@ Downstream/upstream pair for egress-pool retrieval.
       local_redis = @cfg.local_redis_client
       prov = @cfg.prov
       profile = @cfg.session?.profile
-      api = API @cfg
       host = @cfg.host
+      {api} = @cfg
       p = @cfg.profiles?[profile]
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
 
-      unless local_redis? and prov? and profile? and host? and port?
+      unless local_redis? and prov? and profile? and host? and port? and api?
         @debug.dev 'Missing configuration'
         return
 
       HugePlayReference = @cfg.Reference
-      local_redis_interface = new RedisInterface [local_redis]
+
+How long should we keep the state of a call after the last update?
+
+      call_timeout = 8*3600
+
+How long should we keep the state of an agent after the last update?
+
+      agent_timeout = 12*3600
 
       class HugePlayCall extends TaggedCall
 
-        redis: local_redis_interface
-        api: api
+        interface: new RedisInterface local_redis, call_timeout
+        api: api.truthy
+        monitor_api: api.monitor
+
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference
 
@@ -153,7 +161,7 @@ Downstream/upstream pair for egress-pool retrieval.
 
       class HugePlayAgent extends TaggedAgent
 
-        redis: local_redis_interface
+        interface: new RedisInterface local_redis, agent_timeout
 
         new_call: (data) -> new HugePlayCall data
 

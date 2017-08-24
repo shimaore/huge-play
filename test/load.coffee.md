@@ -54,6 +54,7 @@
         it "should load #{m}", seem ->
           cfg =
             prefix_admin: 'http://127.0.0.1:3987'
+            redis: {}
           ctx = {cfg}
 
           M = require "../#{m}"
