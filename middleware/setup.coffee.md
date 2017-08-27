@@ -214,14 +214,14 @@ Use a default client for generic / shared APIs
 
       UNIQUE_ID = 'Unique-ID'
 
+FIXME: Can only be called once on a given `id`. Add e.g. Redis support to store monitored events counters & ids.
+
       monitor_client = null
       monitored_events = {}
 
-FIXME: Can only be called once on a given `id`.
-
 Remember to always call `monitor.end()` when you are done with the monitor!
 
-      @cfg.api.monitor = seem (id,events...) ->
+      @cfg.api.monitor = seem (id,events) ->
         monitor_client ?= yield _client()
         monitor_client.filter UNIQUE_ID, id
 

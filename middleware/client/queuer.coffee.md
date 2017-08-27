@@ -107,6 +107,7 @@ Downstream/upstream pair for egress-pool retrieval.
       profile = @cfg.session?.profile
       api = API @cfg.api
       host = @cfg.host
+      {queuer} = @cfg
       p = @cfg.profiles?[profile]
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
@@ -164,12 +165,12 @@ How long should we keep the state of an agent after the last update?
 
         interface: new RedisInterface local_redis, agent_timeout
 
-        new_call: (data) -> new HugePlayCall data
+        new_call: (data) -> new HugePlayCall queuer, data
 
-        notify: seem (transition,data) ->
-          debug 'agent.notify', @key, transition
+        notify: seem (data) ->
+          debug 'agent.notify', @key, data
 
-          {old_state,new_state,event} = transition
+          {old_state,state,event} = data
 
           notification =
             _queuer: true
@@ -182,7 +183,7 @@ How long should we keep the state of an agent after the last update?
             host: host
             now: Date.now()
 
-            state: new_state
+            state: state
             old_state: old_state
             event: event
             agent: @key
@@ -318,8 +319,7 @@ This probably not necessary, since the destination number is actually retrieved 
 The queuer's Redis is used for call pools and the agents pool.
 Since we're bound to a server for domains it's OK to use the local Redis.
 
-      Queuer = queuer
-        redis: local_redis_interface
+      Queuer = queuer local_redis_interface,
         Agent: HugePlayAgent
         Call: HugePlayCall
       @cfg.queuer_Agent = HugePlayAgent
@@ -344,7 +344,7 @@ Middleware
 Queuer Call object
 ------------------
 
-      @queuer_call = new Call
+      @queuer_call = new Call queuer,
         id: @call.uuid
 
       yield @queuer_call.save()
