@@ -29,7 +29,7 @@
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "nimble-direction": "^6.2.2",
-    "normal-key": "^2.0.1",
+    "normal-key": "^3.0.0",
     "request": "^2.81.0",
     "seem": "^2.0.0",
     "solid-gun": "^1.0.0",

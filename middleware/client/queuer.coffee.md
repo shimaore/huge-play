@@ -116,11 +116,18 @@ Downstream/upstream pair for egress-pool retrieval.
         return
 
       HugePlayReference = @cfg.Reference
-      local_redis_interface = new RedisInterface [local_redis]
+
+How long should we keep the state of a call after the last update?
+
+      call_timeout = 8*3600
+
+How long should we keep the state of an agent after the last update?
+
+      agent_timeout = 12*3600
 
       class HugePlayCall extends TaggedCall
 
-        redis: local_redis_interface
+        interface: new RedisInterface local_redis, call_timeout
         api: api.truthy
         monitor_api: api.monitor
 
@@ -155,7 +162,7 @@ Downstream/upstream pair for egress-pool retrieval.
 
       class HugePlayAgent extends TaggedAgent
 
-        redis: local_redis_interface
+        interface: new RedisInterface local_redis, agent_timeout
 
         new_call: (data) -> new HugePlayCall data
 

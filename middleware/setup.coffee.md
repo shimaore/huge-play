@@ -48,10 +48,12 @@ Local and Global Redis
       if @cfg.local_redis?
         @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis
 
-      redis_interface = new RedisInterface [@cfg.global_redis_client,@cfg.local_redis_client]
+How long should we keep a reference after the last update?
+
+      call_timeout = 8*3600
 
       class HugePlayReference extends Reference
-        redis: redis_interface
+        interface: new RedisInterface @cfg.global_redis_client, call_timeout
 
       @cfg.Reference = HugePlayReference
 
