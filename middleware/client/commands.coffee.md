@@ -288,8 +288,8 @@ start: '18:00', end: '08:00'
         yield @tag "queue:#{queue}"
         true
 
-      multi: seem ->
-        yield @tag 'multi'
+      broadcast: seem ->
+        yield @tag 'broadcast'
         true
 
       has_tag: (tag) ->

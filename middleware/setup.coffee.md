@@ -187,9 +187,10 @@ Use a default client for generic / shared APIs
 
       _api = seem (cmd) ->
         default_client ?= yield _client()
-        res = yield default_client.api cmd
+        res = yield default_client.bgapi cmd
 
       @cfg.api = seem (cmd) =>
+        debug 'api', cmd
         res = yield _api cmd
         res?.body ? null
 
@@ -197,7 +198,9 @@ Use a default client for generic / shared APIs
       @cfg.api.create = _client
 
       @cfg.api.truthy = (cmd) =>
+        debug 'api.truthy', cmd
         on_success = (res) ->
+          debug 'api.truthy', cmd, res
           switch
             when res.uuid?
               res.uuid
@@ -205,45 +208,68 @@ Use a default client for generic / shared APIs
               true
             when res.body is 'false'
               false
+            when res.body[0] is '-'
+              false
             else
               true
         on_failure = (error) ->
+          debug 'api.truthy', cmd, error
           false
 
         _api cmd
-        .then on_success, on_resolve
+        .then on_success, on_failure
 
       UNIQUE_ID = 'Unique-ID'
+      EVENT_NAME = 'Event-Name'
+
+FIXME: Can only be called once on a given `id`. Add e.g. Redis support to store monitored events counters & ids.
 
       monitor_client = null
       monitored_events = {}
 
-FIXME: Can only be called once on a given `id`.
-
 Remember to always call `monitor.end()` when you are done with the monitor!
 
-      @cfg.api.monitor = seem (id,events...) ->
+      @cfg.api.monitor = seem (id,events) ->
+        debug 'api.monitor: start', {id,events}
         monitor_client ?= yield _client()
-        monitor_client.filter UNIQUE_ID, id
+
+        debug 'api.monitor: filtering', id
+        yield monitor_client.filter UNIQUE_ID, id
 
         ev = new EventEmitter()
         listener = (msg) ->
-          return unless msg?.headers?[UNIQUE_ID] is id
-          ev.emit event, msg
+          return unless msg?.body?
+          msg_id = msg.body[UNIQUE_ID]
+          msg_ev = msg.body[EVENT_NAME]
+          debug 'api.monitor received', msg_id, msg_ev
+          if msg_id is id and msg_ev in events
+            ev?.emit msg_ev, msg
 
-        for event in events
-          do (event) ->
-            monitored_events[event] ?= 0
-            monitor_client.event_json event if monitored_events[event]++ is 0
+        yield do seem ->
+          for event in events
             monitor_client.on event, listener
+            monitored_events[event] ?= 0
+            if monitored_events[event]++ is 0
+              debug 'Adding event json for', event
+              yield monitor_client.event_json event
 
-        ev.end = ->
-          monitor_client.filter_delete UNIQUE_ID, id
+        ev.end = seem ->
+          if not ev?
+            debug 'api.monitor.end: called more than once (ignored)', {id,events}
+            return
+
+          debug 'api.monitor.end', {id,events}
+          yield monitor_client.filter_delete UNIQUE_ID, id
           for event in events
             monitor_client.removeListener event, listener
-            monitor_client.nixevent event if --monitored_events[event] is 0
+            if --monitored_events[event] is 0
+              debug 'api.monitor.end: nixevent', event
+              yield monitor_client.nixevent event
           ev.removeAllListeners()
           ev = null
+          debug 'api.monitor.end: done'
+
+        debug 'api.monitor: ready', {id,events}
 
         ev
 

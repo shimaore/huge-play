@@ -51,7 +51,7 @@ Events received downstream.
         missed = yield agent.get_missed().catch -> 0
         count = yield agent.count().catch -> 0
         # async
-        agent.notify {new_state:state}, {missed,count}
+        agent.notify {state,missed,count}
 
         debug 'queuer:get-agent-state: done', key, state
         return
@@ -100,21 +100,16 @@ Downstream/upstream pair for egress-pool retrieval.
     @server_pre = ->
 
       cfg = @cfg
-
-      local_redis = @cfg.local_redis_client
-      prov = @cfg.prov
+      HugePlayReference = @cfg.Reference
+      {api,prov,host} = @cfg
       profile = @cfg.session?.profile
-      host = @cfg.host
-      {api} = @cfg
       p = @cfg.profiles?[profile]
       if p?
         port = p.egress_sip_port ? p.sip_port+10000
 
-      unless local_redis? and prov? and profile? and host? and port? and api?
+      unless cfg.local_redis_client? and prov? and profile? and host? and port? and api? and HugePlayReference?
         @debug.dev 'Missing configuration'
         return
-
-      HugePlayReference = @cfg.Reference
 
 How long should we keep the state of a call after the last update?
 
@@ -126,7 +121,7 @@ How long should we keep the state of an agent after the last update?
 
       class HugePlayCall extends TaggedCall
 
-        interface: new RedisInterface local_redis, call_timeout
+        interface: new RedisInterface cfg.local_redis_client, call_timeout
         api: api.truthy
         monitor_api: api.monitor
 
@@ -153,6 +148,9 @@ How long should we keep the state of an agent after the last update?
             tags: yield @tags().catch -> []
 
           for own k,v of data
+            switch k
+              when 'agent', 'agent_call'
+                v = v.key
             notification[k] ?= v
 
           cfg.statistics.emit 'queuer', notification
@@ -161,14 +159,14 @@ How long should we keep the state of an agent after the last update?
 
       class HugePlayAgent extends TaggedAgent
 
-        interface: new RedisInterface local_redis, agent_timeout
+        interface: new RedisInterface cfg.local_redis_client, agent_timeout
 
-        new_call: (data) -> new HugePlayCall data
+        new_call: (data) -> new HugePlayCall cfg.queuer, data
 
-        notify: seem (transition,data) ->
-          debug 'agent.notify', @key, transition
+        notify: seem (data) ->
+          debug 'agent.notify', @key, data
 
-          {old_state,new_state,event} = transition
+          {old_state,state,event} = data
 
           notification =
             _queuer: true
@@ -181,7 +179,7 @@ How long should we keep the state of an agent after the last update?
             host: host
             now: Date.now()
 
-            state: new_state
+            state: state
             old_state: old_state
             event: event
             agent: @key
@@ -296,6 +294,8 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
             host: host
             type: 'call'
 
+            event: 'create-egress-call'
+
           call = @new_call
             destination: _id
 
@@ -308,7 +308,7 @@ This probably not necessary, since the destination number is actually retrieved 
           yield call.set 'timezone', timezone
 
           # async
-          @notify {event:'create-egress-call'}, call_data
+          @notify call_data
 
           debug 'create_egress_call: complete'
 
@@ -317,8 +317,8 @@ This probably not necessary, since the destination number is actually retrieved 
 The queuer's Redis is used for call pools and the agents pool.
 Since we're bound to a server for domains it's OK to use the local Redis.
 
-      Queuer = queuer
-        redis: local_redis_interface
+      pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
+      Queuer = queuer pools_redis_interface,
         Agent: HugePlayAgent
         Call: HugePlayCall
       @cfg.queuer_Agent = HugePlayAgent
@@ -343,7 +343,7 @@ Middleware
 Queuer Call object
 ------------------
 
-      @queuer_call = new Call
+      @queuer_call = new Call queuer,
         id: @call.uuid
 
       yield @queuer_call.save()

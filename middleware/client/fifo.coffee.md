@@ -88,8 +88,8 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
       if fifo.priority?
         yield @tag "priority:#{fifo.priority}"
 
-      if fifo.multi
-        yield @tag 'multi'
+      if fifo.broadcast
+        yield @tag 'broadcast'
 
 If the call-group should use the queuer, then do that.
 
