@@ -45,6 +45,6 @@
     "mocha": "^3.5.0"
   },
   "publishConfig": {
-    "tag": "development"
+    "tag": "latest"
   }
 }
