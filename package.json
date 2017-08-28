@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "32.0.0",
+  "version": "32.0.1",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublish": "coffee -c middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
@@ -19,10 +19,10 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^10.0.0-0",
+    "black-metal": "^10.0.0",
     "bumpy-lawyer": "^2.5.2",
     "date-holidays": "^1.0.1",
-    "esl": "^6.0.0-0",
+    "esl": "^6.0.1",
     "flat-ornament": "^2.1.0",
     "ioredis": "^3.1.4",
     "lru-cache": "^4.1.1",
