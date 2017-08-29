@@ -1,6 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
+    debug = (require 'tangible') @name
 
     @include = ->
 
@@ -42,16 +43,16 @@ Eavesdrop registration
         when_done = seem (res) =>
           switch res?.body?.variable_transfer_disposition
             when 'recv_replace'
-              @debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
+              debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
               @call.emit 'inbound-transferred', attributes
             when 'replaced'
-              @debug 'Clear inbound eavesdrop: Attended Transfer on originating session', eavesdrop_key, attributes
+              debug 'Clear inbound eavesdrop: Attended Transfer on originating session', eavesdrop_key, attributes
               @call.emit 'inbound-transferred', attributes
             when 'bridge'
-              @debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
+              debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
               @call.emit 'inbound-transferred', attributes
             else
-              @debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes
+              debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes
               @call.emit 'inbound-end', attributes
           yield @local_redis?.del eavesdrop_key
           return

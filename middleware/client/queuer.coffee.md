@@ -384,6 +384,7 @@ Agent state monitoring
       @call.once 'outbound', start_of_call
       @call.once 'inbound-end', end_of_call
       @call.once 'outbound-end', end_of_call
+      @call.once 'inbound-transferred', end_of_call
 
 On-hook agent
 -------------
