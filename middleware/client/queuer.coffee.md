@@ -376,7 +376,7 @@ Agent state monitoring
 
         @report event:'end-of-call', agent:key
 
-        yield sleep 2*1000
+        yield sleep 500
         agent = new Agent queuer, key
         yield agent.del_call id
 

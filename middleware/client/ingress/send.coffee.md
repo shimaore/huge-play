@@ -39,9 +39,20 @@ Eavesdrop registration
 
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
-        when_done = seem =>
-          @debug 'Clear inbound eavesdrop', eavesdrop_key
-          @call.emit 'inbound-end', attributes
+        when_done = seem (res) =>
+          switch res?.body?.variable_transfer_disposition
+            when 'recv_replace'
+              @debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
+              @call.emit 'inbound-transferred', attributes
+            when 'replaced'
+              @debug 'Clear inbound eavesdrop: Attended Transfer on originating session', eavesdrop_key, attributes
+              @call.emit 'inbound-transferred', attributes
+            when 'bridge'
+              @debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
+              @call.emit 'inbound-transferred', attributes
+            else
+              @debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes
+              @call.emit 'inbound-end', attributes
           yield @local_redis?.del eavesdrop_key
           return
 
@@ -78,6 +89,7 @@ Post-attempt handling
       @session.bridge_data ?= []
       @session.bridge_data.push data
       @debug 'FreeSwitch response', res
+      when_done res
 
 Retrieve the FreeSwitch Cause Code description, and the SIP error code.
 
@@ -113,8 +125,8 @@ For example: `200`
 
 ### For transfers, we also get state information.
 
-- `variable_transfer_disposition: 'replaced'`
-- `variable_endpoint_disposition: 'ATTENDED_TRANSFER'`
+- `variable_transfer_disposition: 'replaced'` (Attended Transfer on originating session)
+- `variable_endpoint_disposition: 'ATTENDED_TRANSFER', 'BLIND_TRANSFER'
 
       @session.was_connected = cause in ['NORMAL_CALL_CLEARING', 'NORMAL_CLEARING', 'SUCCESS']
       @session.was_transferred = data.variable_transfer_history? or data.variable_endpoint_disposition is 'BLIND_TRANSFER' or data.variable_endpoint_disposition is 'ATTENDED_TRANSFER'

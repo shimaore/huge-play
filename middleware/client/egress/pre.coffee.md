@@ -171,7 +171,7 @@ Eavesdrop registration
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem =>
-          @debug 'Clear outbound eavesdrop', eavesdrop_key
+          @debug 'Clear outbound eavesdrop', eavesdrop_key, attributes
           @call.emit 'outbound-end', attributes
           yield @local_redis?.del eavesdrop_key
           return

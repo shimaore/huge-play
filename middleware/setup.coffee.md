@@ -570,7 +570,7 @@ Set the account so that if we redirect to an external number the egress module c
 
         clear_call_center_tags: seem ->
           tags = yield @reference.tags()
-          for tag in tags when tag.match /^(skill|priority|queue):/
+          for tag in tags when tag is 'broadcast' or tag.match /^(skill|priority|queue):/
             yield @reference.del_tag tag
           null
 

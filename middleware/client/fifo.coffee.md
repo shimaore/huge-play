@@ -113,7 +113,6 @@ If the call-group should use the queuer, then do that.
         yield call.set_remote_number @source
         yield call.set_alert_info @session.alert_info if @session.alert_info?
         yield call.clear()
-        yield call.del_tag 'bridged'
         yield queuer.queue_ingress_call call
 
 If the call is not processed (no agents are ready), attemp overflow.
@@ -135,7 +134,6 @@ desirable queues to a given call. (Adding more required skills would build a sma
           yield call.load()
           if yield queuer.ingress_pool.has call
             yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
-            yield queuer.reevaluate_idle_agents()
             true
           else
             false
