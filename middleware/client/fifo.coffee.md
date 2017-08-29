@@ -126,15 +126,18 @@ desirable queues to a given call. (Adding more required skills would build a sma
         call_tags = ref_tags.filter (tag) -> tag.match /^queue:/
 
         if call_tags.length is 0
-          @debug 'no queues, cannot overflow'
+          @debug 'no queues, no overflow'
           return
 
         attempt_overflow = seem (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
           yield call.load()
           if yield queuer.ingress_pool.has call
-            yield call.add_tags call_tags.map (tag) -> "#{tag}:#{suffix}"
-            true
+            ok = false
+            for tag in call_tags when yield call.has_tag tag
+              yield call.add_tag "#{tag}:#{suffix}"
+              ok = true
+            ok
           else
             false
 
