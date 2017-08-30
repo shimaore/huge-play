@@ -204,7 +204,8 @@ Monitor: call to listen (with notification beep), and whisper
           fifo = get 'fifos', 'fifo'
           yield @action 'answer'
           yield @sleep 2000
-          yield @queuer_login agent, agent_name, fifo, agent_tags()
+          @session.timezone ?= @session.number.timezone
+          yield @queuer_login agent, agent_name, fifo, agent_tags(), @session.number.login_ornaments
           yield @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           yield @action 'hangup'
           @direction 'completed'

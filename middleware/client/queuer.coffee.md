@@ -7,6 +7,8 @@
     queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
+    run = require 'flat-ornament'
+
     sleep = (timeout) ->
       new Promise (resolve) ->
         setTimeout resolve, timeout
@@ -389,12 +391,18 @@ Agent state monitoring
 On-hook agent
 -------------
 
-      @queuer_login = seem (source,name,fifo,tags = []) ->
+      @queuer_login = seem (source,name,fifo,tags = [],ornaments) ->
         @debug 'queuer_login', source
         agent = new Agent queuer, source
         yield agent.set 'name', name
         yield agent.add_tags tags
         yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+
+* doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
+
+        if ornaments?
+          yield run.call agent, ornaments, @ornaments_commands
+
         yield agent.accept_onhook()
         yield @report {state:'queuer-login',source,fifo,tags}
         agent
