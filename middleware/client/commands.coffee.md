@@ -298,17 +298,17 @@ start: '18:00', end: '08:00'
       has_user_tag: (tag) ->
         @has_user_tag tag
 
-      agent_skill: (skill) ->
+      agent_skill: seem (skill) ->
         return false unless typeof skill is 'string'
         yield @agent.add_tag "skill:#{skill}"
         true
 
-      agent_queue: (queue) ->
+      agent_queue: seem (queue) ->
         return false unless typeof queue is 'string'
         yield @agent.add_tag "queue:#{queue}"
         true
 
-      agent_broadcast: ->
+      agent_broadcast: seem ->
         yield @agent.add_tag "broadcast"
         true
 
