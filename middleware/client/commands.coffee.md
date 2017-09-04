@@ -298,6 +298,20 @@ start: '18:00', end: '08:00'
       has_user_tag: (tag) ->
         @has_user_tag tag
 
+      agent_skill: (skill) ->
+        return false unless typeof skill is 'string'
+        yield @agent.add_tag "skill:#{skill}"
+        true
+
+      agent_queue: (queue) ->
+        return false unless typeof queue is 'string'
+        yield @agent.add_tag "queue:#{queue}"
+        true
+
+      agent_broadcast: ->
+        yield @agent.add_tag "broadcast"
+        true
+
 Calendars
 
       in_calendars: (calendars...) ->

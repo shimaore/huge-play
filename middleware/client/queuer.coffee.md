@@ -401,7 +401,8 @@ On-hook agent
 * doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
 
         if ornaments?
-          yield run.call agent, ornaments, @ornaments_commands
+          @agent = agent
+          yield run.call this, ornaments, @ornaments_commands
 
         yield agent.accept_onhook()
         yield @report {state:'queuer-login',source,fifo,tags}
