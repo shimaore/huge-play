@@ -224,14 +224,16 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         @debug 'Call was transferred', xfer
         return
 
-      cause = data?.variable_last_bridge_hangup_cause
-      cause ?= data?.variable_originate_disposition
+      cause = data.variable_originate_disposition
 
       @debug "FIFO returned with cause #{cause}"
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
         @debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
         yield @action 'hangup'
+        return
+
+      if cause is 'ORIGINATOR_CANCEL'
         return
 
 * session.fifo.voicemail (string) If present, the call is redirected to this number's voicemail box if the FIFO failed (for example because no agents are available).
