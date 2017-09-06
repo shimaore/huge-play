@@ -175,6 +175,8 @@ Otherwise use the hunt-group behavior.
 
       fifo_timeout = fifo.timeout ? 0
       fifo_progress_timeout = fifo.progress_timeout ? 4
+
+      recipients = []
       for member,i in fifo.members
         # Backward-compatible
         if 'string' is typeof member
@@ -187,6 +189,8 @@ Otherwise use the hunt-group behavior.
           leg_delay_start = member.delay ? 0
           leg_progress_timeout = member.progress_timeout ? fifo_progress_timeout
           leg_timeout = member.timeout ? fifo_timeout
+
+        recipients.push "#{recipient}@#{@session.number_domain}"
 
         sofias.push yield @sofia_string recipient, ["#{k}=#{v}" for own k,v of {
           t38_passthru: false
@@ -201,6 +205,25 @@ Otherwise use the hunt-group behavior.
       @session.bridge_data ?= []
       @session.bridge_data.push data
       @debug 'Returned from FIFO', data
+
+Marking missed calls
+--------------------
+
+`variable_originated_legs: [ 'uuid:name:number', … ]`
+`variable_originate_causes: [ 'uuid:cause', … ]`
+
+Some causes:
+- `LOSE_RACE`
+- `NONE`
+- `ALLOTTED_TIMEOUT`
+- `NO_ROUTE_DESTINATION`
+- `ORIGINATOR_CANCEL`
+
+      causes = data.variable_originate_causes?.map (str) -> str.split(':')[1]
+      for cause,i in causes ? []
+        do (cause,agent = recipient[i]) =>
+          unless cause is 'NONE' # maybe `NO_ROUTE_DESTINATION` and other errors?
+            @notify {event: 'missed', agent, call:@queuer_call}
 
 Detecting transfer
 ------------------

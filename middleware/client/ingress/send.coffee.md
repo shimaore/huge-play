@@ -143,14 +143,16 @@ No further processing in case of success.
         @notify state: 'answered', agent: key
         return
 
-      if @session.was_picked
-        @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
-        @notify state: 'picked'
-        return
-
       if @session.was_transferred
         @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
-        @notify state: 'transferred'
+        @notify state: 'transferred', agent: key
+        return
+
+      @notify event: 'missed', agent: key, call: @queuer_call
+
+      if @session.was_picked
+        @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
+        @notify state: 'picked', from_agent: key
         return
 
 Note: we do not hangup since some centrex scenarios might want to do post-call processing (survey, ...).
