@@ -4,11 +4,8 @@
     seem = require 'seem'
     qs = require 'querystring'
 
-I'm having issues with FIFO and audio after the calls are connected.
-TBD: We'll be using some shared state (like Redis) with handlers on ingress/egress.
-
     @description = '''
-      Handles routing to a given ~~FIFO queue~~ACD~~hunt-group.
+      Handles routing to a given queue/ACD/hunt-group.
     '''
 
     sleep = (timeout) ->
@@ -57,8 +54,6 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 
       id = "number_domain:#{@session.number_domain}"
 
-FIXME: Clear X- headers + set ccnq_direction etc. (the same way it's done in middleware/client/ingress/post)
-
       @debug 'Send to FIFO'
       yield @set
         continue_on_fail: true
@@ -90,6 +85,9 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
 
       if fifo.broadcast
         yield @tag 'broadcast'
+
+Call-center
+===========
 
 If the call-group should use the queuer, then do that.
 
@@ -158,6 +156,9 @@ Attempt overflow after a delay
 
         return
 
+Hunt-group
+==========
+
 Otherwise use the hunt-group behavior.
 
       @notify state:'group', name:fifo.full_name
@@ -200,6 +201,9 @@ Otherwise use the hunt-group behavior.
       @session.bridge_data ?= []
       @session.bridge_data.push data
       @debug 'Returned from FIFO', data
+
+Detecting transfer
+------------------
 
 Available parameters related to transfer are (in the case `bridge` is used):
 - `variable_transfer_source` (string)
@@ -250,35 +254,3 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       @debug 'Hangup'
       yield @action 'hangup'
-
-Backup notes
-------------
-
-FreeSwitch functions to use:
-
-`fifo_member` -- API to load members (from DB)
-
-`fifo` -- application
-  -- `<queue> in <exit-msg> <moh>` -- for callers
-  -- `<queue> out wait` for consumers (off-hook agents)
-  -- `<queue> out nowait <found> <moh>` -- for agents that call into the queue to pick one customer
-Not: when calling with 'out', there may be multiple 'queue' names separated by commas.
-
-- member: agent will be called when a caller comes in
-  log-in = fifo_member add
-  log-out = fifo_member del
-- consumer: agent calls "into the queue" and is put on hold until a caller comes in (off-hook agent)
-  fifo_consumer_exit_key '*' disconnects a caller
-  '0' puts the caller on/off hold
-  fifo_consumer_wrapup_sound
-  fifo_consumer_wrapup_key
-  fifo_consumer_wrapup_time
-- nowait consumer: agents calls "into the queue" and receives one call
-
-https://wiki.freeswitch.org/wiki/Simple_call_center_using_mod_fifo
-https://wiki.freeswitch.org/wiki/Mod_fifo
-
-Vars:
-
-fifo_announce
-fifo_caller_consumer_import
