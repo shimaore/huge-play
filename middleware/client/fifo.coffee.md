@@ -95,6 +95,9 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
       if fifo.broadcast
         yield @tag 'broadcast'
 
+      if fifo.msg?
+        yield @prompt.play @prompt.uri 'master-prov', 'prov', id, fifo.msg
+
 Call-center
 ===========
 
