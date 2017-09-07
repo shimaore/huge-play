@@ -149,10 +149,10 @@ How long should we keep the state of an agent after the last update?
             presenting: yield @count().catch -> null
             tags: yield @tags().catch -> []
 
-          for own k,v of data
+          for own k,v of data when v?
             switch k
               when 'agent', 'agent_call'
-                v = v.key
+                v = v.key if typeof v isnt 'string'
             notification[k] ?= v
 
           cfg.statistics.emit 'queuer', notification
