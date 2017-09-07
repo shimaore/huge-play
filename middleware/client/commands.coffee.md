@@ -186,6 +186,16 @@ Other actions must return `true`.
         yield @action 'playback', url
         true
 
+      message: seem (number) ->
+        @debug 'message', number
+        return true unless @session.number_domain_data?.msg?[number]?.active
+        file = "msg-#{number}.mp3"
+        url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
+        yield @action 'answer'
+        yield @unset 'playback_terminators'
+        yield @action 'playback', url
+        true
+
 `menu_play`: play a file, stop playing when a key is pressed
 
       menu_play: seem (file) ->

@@ -11,7 +11,7 @@
         @debug 'No number domain'
         return
 
-      return unless m = @destination.match /^(81\d|82|83|84|87|88)(\d*)$/
+      return unless m = @destination.match /^(80\d\d|81\d|82|83|84|87|88)(\d*)$/
 
       action = m[1]
       if m[2] is ''
@@ -32,6 +32,11 @@ The destination matched.
       ACTION_INTERCEPT = '84'
       ACTION_MONITOR = '87'
       ACTION_EAVESDROP = '88'
+
+      ACTION_MSG_RECORD = '8011'
+      ACTION_MSG_ACTIVATE = '8012'
+      ACTION_MSG_DEACTIVATE = '8013'
+      ACTION_MSG_LISTEN = '8014'
 
       @debug 'Routing', action, number
 
@@ -255,6 +260,66 @@ Monitor: call to listen (with notification beep), and whisper
           @session.voicemail_user_database = fifo.user_database
           @session.voicemail_user_id = fifo.full_name
           @direction 'voicemail'
+
+Menu messages
+
+        when ACTION_MSG_DEACTIVATE
+          @debug 'deactivate message'
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          doc.msg ?= {}
+          doc.msg[number] ?= {}
+          doc.msg[number].active = false
+          yield @cfg.master_push doc
+
+          yield @action 'gentones', '%(200,20,600);%(200,20,450)'
+          @direction 'completed'
+
+        when ACTION_MSG_ACTIVATE
+          @debug 'activate message'
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          doc.msg ?= {}
+          doc.msg[number] ?= {}
+          doc.msg[number].active = true
+          yield @cfg.master_push doc
+
+          yield @action 'gentones', '%(200,20,450);%(200,20,600)'
+          @direction 'completed'
+
+        when ACTION_MSG_RECORD
+          @debug 'record message'
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          file = "msg-#{number}.mp3"
+          uri = @prompt.uri 'master-prov', 'ignore', doc._id, file, doc._rev
+          yield @prompt.record uri
+
+          yield @action 'hangup'
+          @direction 'completed'
+
+        when ACTION_MSG_LISTEN
+          @debug 'listen to message'
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          file = "msg-#{number}.mp3"
+          uri = @prompt.uri 'prov', 'ignore', doc._id, file
+          yield @action 'playback', uri
+
+          yield @action 'hangup'
+          @direction 'completed'
 
         else
           @debug 'Unknown action', action
