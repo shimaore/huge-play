@@ -398,6 +398,8 @@ This version is meant to be used in-call.
           report.country ?= @session.country
           report.number_domain ?= @session.number_domain
           report.number_domain_dialplan ?= @session.number_domain_data?.dialplan
+          report.agent ?= @session.agent
+          report.agent_name ?= @session.agent_name
 
           report.call = @call.uuid
           report.session = @session._id

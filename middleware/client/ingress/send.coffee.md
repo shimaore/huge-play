@@ -28,6 +28,8 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       intercept_key = "inbound_call:#{key}"
       yield @local_redis?.set intercept_key, @call.uuid
 
+      @session.agent = key
+
 Eavesdrop registration
 ----------------------
 
@@ -140,15 +142,15 @@ No further processing in case of success.
 
       if @session.was_connected
         @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
-        @notify state: 'answered', agent: key
+        @notify state: 'answered'
         return
 
       if @session.was_transferred
         @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
-        @notify state: 'transferred', agent: key
+        @notify state: 'transferred'
         return
 
-      @notify event: 'missed', agent: key, call: @queuer_call
+      @notify event: 'missed', call: @queuer_call
 
       if @session.was_picked
         @debug "Picked call when routing #{@destination} through #{sofia.join ','}"

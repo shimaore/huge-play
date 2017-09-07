@@ -213,17 +213,26 @@ Marking missed calls
 `variable_originate_causes: [ 'uuid:cause', … ]`
 
 Some causes:
-- `LOSE_RACE`
-- `NONE`
-- `ALLOTTED_TIMEOUT`
-- `NO_ROUTE_DESTINATION`
-- `ORIGINATOR_CANCEL`
+- `NONE` -- race winner
+- `LOSE_RACE` -- race loser
+- `ALLOTTED_TIMEOUT` -- all losers
+- `NO_ROUTE_DESTINATION` -- technical difficulty
+- `ORIGINATOR_CANCEL` -- caller hung up, all losers
+
+FIXME: what is the `cause` when a call was not presented? (esp. if there was a winner)
 
       causes = data.variable_originate_causes?.map (str) -> str.split(':')[1]
       for cause,i in causes ? []
         do (cause,agent = recipient[i]) =>
-          unless cause is 'NONE' # maybe `NO_ROUTE_DESTINATION` and other errors?
-            @notify {event: 'missed', agent, call:@queuer_call}
+          switch cause
+            when 'NONE'
+              @notify {state: 'hunt-bridging', agent}
+              @notify {state: 'answered', agent}
+            when 'NO_ROUTE_DESTINATION'
+              no
+            else
+              @notify {state: 'hunt-bridging', agent}
+              @notify {event: 'missed', agent}
 
 Detecting transfer
 ------------------
