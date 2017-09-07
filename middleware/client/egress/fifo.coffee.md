@@ -11,7 +11,7 @@
         @debug 'No number domain'
         return
 
-      return unless m = @destination.match /^(81\d|82|83|84|87|88)(\d*)$/
+      return unless m = @destination.match /^(81[012379]|814\d|82|83|84|87|88)(\d*)$/
 
       action = m[1]
       if m[2] is ''
@@ -27,6 +27,9 @@ The destination matched.
       ACTION_QUEUER_OFFHOOK = '813'
       ACTION_FIFO_VOICEMAIL = '817'
       ACTION_QUEUER_LOGOUT = '819'
+      ACTION_FIFO_MSG_DEACTIVATE = '8143'
+      ACTION_FIFO_MSG_ACTIVATE = '8141'
+      ACTION_FIFO_MSG_RECORD = '8140'
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
       ACTION_INTERCEPT = '84'
@@ -255,6 +258,55 @@ Monitor: call to listen (with notification beep), and whisper
           @session.voicemail_user_database = fifo.user_database
           @session.voicemail_user_id = fifo.full_name
           @direction 'voicemail'
+
+FIFO message
+
+        when ACTION_FIFO_MSG_DEACTIVATE
+          @debug 'FIFO: deactivate message'
+          fifo = get 'fifos', 'fifo'
+          return failed() unless fifo?
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          doc.fifos[number].msg = null
+          yield @cfg.master_push doc
+
+          yield @action 'gentones', '%(200,20,600);%(200,20,450)'
+          @direction 'completed'
+
+        when ACTION_FIFO_MSG_ACTIVATE
+          @debug 'FIFO: activate message'
+          fifo = get 'fifos', 'fifo'
+          return failed() unless fifo?
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          name = "msgfifo#{number}.mp3"
+          doc.fifos[number].msg = name
+          yield @cfg.master_push doc
+
+          yield @action 'gentones', '%(200,20,450);%(200,20,600)'
+          @direction 'completed'
+
+        when ACTION_FIFO_MSG_RECORD
+          @debug 'FIFO: record message'
+          fifo = get 'fifos', 'fifo'
+          return failed() unless fifo?
+
+          yield @action 'answer'
+          yield @sleep 2000
+
+          doc = @session.number_domain_data
+          name = "msgfifo#{number}.mp3"
+          uri = @prompt.uri 'master-prov', 'prov', doc._id, name, doc._rev
+          yield @prompt.record uri
+
+          yield @action 'hangup'
+          @direction 'completed'
 
         else
           @debug 'Unknown action', action

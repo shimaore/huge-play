@@ -211,6 +211,16 @@ A translator for the local provisioning database (the `db` database name is igno
           base: cfg.provisioning
           uri: "#{id}/#{file}"
 
+        'master-prov': (db,id,file) =>
+          id = qs.escape id
+          file = qs.escape file
+          masters = cfg.prov_master_admin
+          if masters?
+            if typeof masters is 'string'
+              masters = [masters]
+          base: masters[0] # fixme: pick one at random
+          uri: "#{id}/#{file}"
+
       @get '/:domain/:db/:id/:rev/:file', ->
         translator = translators[@params.domain]
         unless translator?
