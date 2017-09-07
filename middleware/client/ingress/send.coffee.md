@@ -150,7 +150,7 @@ No further processing in case of success.
         @notify state: 'transferred'
         return
 
-      @notify event: 'missed', call: @queuer_call
+      @notify event: 'missed'
 
       if @session.was_picked
         @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
