@@ -237,6 +237,12 @@ Remember to always call `monitor.end()` when you are done with the monitor!
         yield monitor_client.filter UNIQUE_ID, id
 
         ev = new EventEmitter()
+
+Don't show the warning for 10 concurrent calls!
+The number should really be an estimate of our maximum number of concurrent, monitored calls.
+
+        ev.setMaxListeners 200
+
         listener = (msg) ->
           return unless msg?.body?
           msg_id = msg.body[UNIQUE_ID]
