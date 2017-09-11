@@ -58,11 +58,20 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
       yield @set
         continue_on_fail: true
 
+      if @session.ringback?
+        announce_uri = @session.ringback
+      if @session.announce?
+        announce_uri = @session.announce
       if fifo.announce?
         announce_uri = fifo_uri id, fifo.announce
+      if announce_uri?
         yield @set ringback: announce_uri
+
+      if @session.music?
+        music_uri = @session.music
       if fifo.music?
         music_uri = fifo_uri id, fifo.music
+      if music_uri?
         yield @export hold_music: music_uri
 
 FIXME: This is taken from the centrex-{country} code, but really it should be more generic.
@@ -102,10 +111,10 @@ If the call-group should use the queuer, then do that.
         yield call.set_tags ref_tags
         yield call.add_tag "number_domain:#{@session.number_domain}"
 
-        if fifo.music?
+        if music_uri?
           yield call.set_music music_uri
 
-        if fifo.announce?
+        if announce_uri?
           @action 'endless_playback', announce_uri # async
 
         yield call.set_remote_number @source

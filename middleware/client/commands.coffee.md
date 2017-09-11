@@ -195,6 +195,18 @@ Other actions must return `true`.
         yield @dtmf.playback url
         true
 
+`music`: set the music-on-hold
+
+      music: (file) ->
+        @session.music = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
+        true
+
+`ringback`: set the ringback
+
+      ringback: (file) ->
+        @session.ringback = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
+        true
+
       wait: seem (ms) ->
         @debug 'wait', ms
         yield @dtmf.playback "silence_stream://#{ms}"
