@@ -49,7 +49,7 @@ If we already collected enough digits, simply return them.
 Otherwise we'll have to wait a little bit longer.
 
           set_timer = ->
-            debug 'set timer'
+            debug 'set_timer'
             clear_timer()
 
 First we wait for the inter-digit timeout.
@@ -143,7 +143,7 @@ Typical pattern is:
 ```
 # start menu, clear DTMF buffer
 @dtmf.clear()
-# choice is a Promise that will get resolve once the criteria are met
+# play the prompt
 await @dtmf.playback prompt_file
 # expect between one and two digits
 switch await @dtmf.expect 1, 2
@@ -152,4 +152,3 @@ switch await @dtmf.expect 1, 2
 ```
 
       null
-

@@ -451,13 +451,13 @@ Menus
 
 `menu_start`: start collecting digits for a menu; digits received before this command are discarded.
 
-      menu: seem ( min = 1, max = min, itd ) ->
+      menu: seem ( min = 1, max = min, itd, fin ) ->
         @debug 'menu_start'
         yield @action 'answer'
         @dtmf.clear()
         @menu =
           expect: seem =>
-            @menu.value ?= yield @dtmf.expect min, max, itd
+            @menu.value ?= yield @dtmf.expect min, max, itd, fin
         true
 
 `menu_on`: true if the user keyed the choice
