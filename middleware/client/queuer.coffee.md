@@ -387,36 +387,6 @@ Agent state monitoring
 
       local_server = [@session.local_server,@session.client_server].join '/'
 
-      start_of_call = hand ({key,id,dialplan}) =>
-        @debug 'Start of call', key, id, dialplan
-
-        return unless dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote (domain_of key), local_server
-        return if is_remote isnt false
-
-        @report event:'start-of-call', agent:key
-
-        agent = new Agent queuer, key
-        yield agent.add_call id
-
-      end_of_call = hand ({key,id,dialplan}) =>
-        @debug 'End of call', key, id, dialplan
-
-        return unless dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote (domain_of key), local_server
-        return if is_remote isnt false
-
-        @report event:'end-of-call', agent:key
-
-        yield sleep 500
-        agent = new Agent queuer, key
-        yield agent.del_call id
-
-      @once 'inbound', start_of_call
-      @once 'outbound', start_of_call
-      @once 'inbound-end', end_of_call
-      @once 'outbound-end', end_of_call
-
 On-hook agent
 -------------
 

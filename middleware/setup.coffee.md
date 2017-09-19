@@ -251,13 +251,13 @@ The number should really be an estimate of our maximum number of concurrent, mon
           if msg_id is id and msg_ev in events
             ev?.emit msg_ev, msg
 
-        yield do seem ->
-          for event in events
+        for event in events
+          yield do (event) ->
             monitor_client.on event, listener
             monitored_events[event] ?= 0
             if monitored_events[event]++ is 0
               debug 'Adding event json for', event
-              yield monitor_client.event_json event
+              monitor_client.event_json event
 
         ev.end = seem ->
           if not ev?
@@ -267,10 +267,11 @@ The number should really be an estimate of our maximum number of concurrent, mon
           debug 'api.monitor.end', {id,events}
           yield monitor_client.filter_delete UNIQUE_ID, id
           for event in events
-            monitor_client.removeListener event, listener
-            if --monitored_events[event] is 0
-              debug 'api.monitor.end: nixevent', event
-              yield monitor_client.nixevent event
+            yield do (event) ->
+              monitor_client.removeListener event, listener
+              if --monitored_events[event] is 0
+                debug 'api.monitor.end: nixevent', event
+                monitor_client.nixevent event
           ev.removeAllListeners()
           ev = null
           debug 'api.monitor.end: done'

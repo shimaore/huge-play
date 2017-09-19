@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
-    debug = (require 'tangible') @name
+    {debug,hand} = (require 'tangible') @name
 
     @include = ->
 
@@ -34,41 +34,58 @@ Eavesdrop registration
 ----------------------
 
       eavesdrop_key = "inbound:#{key}"
+      {queuer} = @cfg
 
-      unless @call.closed
+Transfer-disposition values:
+- `recv_replace`: we transfered the call out (blind transfer). (REFER To)
+- `replaced`: we accepted an inbound, supervised-transfer call. (Attended Transfer on originating session.)
+- `bridge`: we transfered the call out (supervised transfer).
+
+      unless @call.closed or @session.dialplan isnt 'centrex'
 
         @debug 'Set inbound eavesdrop', eavesdrop_key
         yield @local_redis?.set eavesdrop_key, @call.uuid
 
-        attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
+        yield queuer?.track key, @call.uuid
+        yield queuer?.on_present @call.uuid
+        @report event:'start-of-call', agent:key
 
-        when_done = seem (res) =>
-          disposition = res?.body?.variable_transfer_disposition
-          switch disposition
-            when 'recv_replace'
-              # We transfered the call out (blind transfer).
-              debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
-              @emit 'inbound-end', attributes
-            when 'replaced'
-              # We accepted an inbound, supervised-transfer call.
-              debug 'Clear inbound eavesdrop: Attended Transfer on originating session (accepted transfer)', eavesdrop_key, attributes
-              return
-            when 'bridge'
-              # We transfered the call out (supervised transfer).
-              debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
-              @emit 'inbound-end', attributes
-            else
-              debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes, disposition
-              @emit 'inbound-end', attributes
-          yield @local_redis?.del eavesdrop_key
+        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE'
+
+Bridge on called side of a call.
+
+        @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
+          # assert @call.uuid is a_uuid
+
+          yield queuer?.track key, a_uuid
+          yield queuer?.on_bridge a_uuid
           return
 
-        @call.once 'socket-close', when_done
+Unbridge on called side of a call.
+On attended-transfer we need to track the remote leg of the call, so that the (forthcoming) BRIDGE can locate the agent.
 
-        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
-        @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
+        @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          disposition = body?.variable_transfer_disposition
+          debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
+          # assert @call.uuid is a_uuid
 
-        @emit 'inbound', attributes
+          if disposition is 'replaced'
+            # expect body.variable_endpoint_disposition is 'ATTENDED_TRANSFER'
+            yield queuer?.track key, b_uuid
+            yield @local_redis?.set eavesdrop_key, b_uuid
+          else
+            yield @local_redis?.del eavesdrop_key
+
+          yield queuer?.on_unbridge a_uuid
+          yield queuer?.untrack key, a_uuid
+
+          @report event:'end-of-call', agent:key
+          return
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
@@ -95,8 +112,6 @@ Post-attempt handling
       data = res.body
       @session.bridge_data ?= []
       @session.bridge_data.push data
-      @debug 'FreeSwitch response', res
-      when_done res
 
 Retrieve the FreeSwitch Cause Code description, and the SIP error code.
 

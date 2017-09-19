@@ -19,7 +19,7 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^10.1.1",
+    "black-metal": "^11.0.0",
     "bumpy-lawyer": "^2.5.2",
     "date-holidays": "^1.1.0",
     "esl": "^6.0.1",
@@ -45,6 +45,6 @@
     "mocha": "^3.5.3"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "dev"
   }
 }

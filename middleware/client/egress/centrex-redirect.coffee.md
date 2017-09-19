@@ -1,6 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:centrex-redirect"
+    {debug,hand,heal} = (require 'tangible') @name
 
     @include = seem ->
 
@@ -42,3 +43,56 @@ Centrex Handling
 ----------------
 
       @debug 'Handling is local'
+
+Eavesdrop registration
+----------------------
+
+      key = "#{@source}@#{@session.number_domain}"
+      eavesdrop_key = "outbound:#{key}"
+      {queuer} = @cfg
+
+      unless @session.transfer or @call.closed
+
+        @debug 'Set outbound eavesdrop', eavesdrop_key
+        yield @local_redis?.set eavesdrop_key, @call.uuid
+
+        yield queuer?.track key, @call.uuid
+        yield queuer?.on_present @call.uuid
+        @report event:'start-of-call', agent:key
+
+        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE'
+
+Bridge on calling side of call.
+
+        @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
+          # assert @call.uuid is a_uuid
+
+          yield queuer?.track key, a_uuid
+          yield queuer?.on_bridge a_uuid
+          return
+
+Unbridge on calling side of call.
+
+        @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          disposition = body?.variable_transfer_disposition
+          debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
+          # assert @call.uuid is a_uuid
+
+          if disposition is 'replaced'
+            yield queuer?.track key, b_uuid
+            yield @local_redis?.set eavesdrop_key, b_uuid
+          else
+            yield @local_redis?.del eavesdrop_key
+
+          yield queuer?.on_unbridge a_uuid
+          yield queuer?.untrack key, a_uuid
+
+          @report event:'end-of-call', agent:key
+          return
+
+      @debug 'Ready'
