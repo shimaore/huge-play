@@ -48,8 +48,9 @@ Eavesdrop registration
               debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
               @call.emit 'inbound-transferred', attributes
             when 'replaced'
-              debug 'Clear inbound eavesdrop: Attended Transfer on originating session', eavesdrop_key, attributes
-              @call.emit 'inbound-transferred', attributes
+              debug 'Clear inbound eavesdrop: Attended Transfer on originating session (accepted transfer)', eavesdrop_key, attributes
+              @call.emit 'inbound-accepted-transfer', attributes
+              return
             when 'bridge'
               debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
               @call.emit 'inbound-transferred', attributes
