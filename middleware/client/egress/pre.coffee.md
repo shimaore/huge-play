@@ -4,6 +4,7 @@ First-line handler for outbound calls
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
+    debug = (require 'tangible') @name
 
     @include = seem ->
 
@@ -171,18 +172,18 @@ Eavesdrop registration
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem =>
-          @debug 'Clear outbound eavesdrop', eavesdrop_key, attributes
-          @call.emit 'outbound-end', attributes
+          debug 'Clear outbound eavesdrop', eavesdrop_key, attributes
+          @emit 'outbound-end', attributes
           yield @local_redis?.del eavesdrop_key
           return
 
         @call.once 'socket-close', when_done
-        @call.once 'tough-rate-hangup', when_done
+        @once 'tough-rate-hangup', when_done
 
         yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
 
-        @call.emit 'outbound', attributes
+        @emit 'outbound', attributes
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name

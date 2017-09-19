@@ -412,11 +412,10 @@ Agent state monitoring
         agent = new Agent queuer, key
         yield agent.del_call id
 
-      @call.once 'inbound', start_of_call
-      @call.once 'outbound', start_of_call
-      @call.once 'inbound-end', end_of_call
-      @call.once 'outbound-end', end_of_call
-      @call.once 'inbound-transferred', end_of_call
+      @once 'inbound', start_of_call
+      @once 'outbound', start_of_call
+      @once 'inbound-end', end_of_call
+      @once 'outbound-end', end_of_call
 
 On-hook agent
 -------------

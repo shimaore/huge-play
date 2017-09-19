@@ -43,20 +43,23 @@ Eavesdrop registration
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem (res) =>
-          switch res?.body?.variable_transfer_disposition
+          disposition = res?.body?.variable_transfer_disposition
+          switch disposition
             when 'recv_replace'
+              # We transfered the call out (blind transfer).
               debug 'Clear inbound eavesdrop: REFER To', eavesdrop_key, attributes
-              @call.emit 'inbound-transferred', attributes
+              @emit 'inbound-end', attributes
             when 'replaced'
+              # We accepted an inbound, supervised-transfer call.
               debug 'Clear inbound eavesdrop: Attended Transfer on originating session (accepted transfer)', eavesdrop_key, attributes
-              @call.emit 'inbound-accepted-transfer', attributes
               return
             when 'bridge'
+              # We transfered the call out (supervised transfer).
               debug 'Clear inbound eavesdrop: Attended Transfer', eavesdrop_key, attributes
-              @call.emit 'inbound-transferred', attributes
+              @emit 'inbound-end', attributes
             else
-              debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes
-              @call.emit 'inbound-end', attributes
+              debug 'Clear inbound eavesdrop: end of call', eavesdrop_key, attributes, disposition
+              @emit 'inbound-end', attributes
           yield @local_redis?.del eavesdrop_key
           return
 
@@ -65,7 +68,7 @@ Eavesdrop registration
         yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
 
-        @call.emit 'inbound', attributes
+        @emit 'inbound', attributes
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"

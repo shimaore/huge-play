@@ -333,7 +333,13 @@ Context Extension
 
     @include = (ctx) ->
 
+      _bus = new EventEmitter()
+
       ctx[k] = v for own k,v of {
+        on: (ev,cb) -> _bus.on ev, cb
+        once: (ev,cb) -> _bus.once ev, cb
+        emit: (ev,data) -> _bus.emit ev, data
+
         statistics: @cfg.statistics
 
         sleep: (timeout) ->
@@ -342,7 +348,7 @@ Context Extension
 
         direction: (direction) ->
           @session.direction = direction
-          @call.emit 'direction', direction
+          @emit 'direction', direction
           @report {event:'direction', direction}
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
