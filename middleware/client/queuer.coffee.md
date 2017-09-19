@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:client:queuer'
-    debug = (require 'tangible') @name
+    {debug,hand} = (require 'tangible') @name
     seem = require 'seem'
     pkg = name:'huge-play'
     Moment = require 'moment-timezone'
@@ -42,7 +42,7 @@ Events received downstream.
       @register 'queuer:get-agent-state', 'dial_calls'
       @register 'queuer:log-agent-out', 'dial_calls'
 
-      @socket.on 'queuer:get-agent-state', seem (key) =>
+      @socket.on 'queuer:get-agent-state', hand (key) =>
         is_remote = yield @cfg.is_remote domain_of key
         return if is_remote isnt false
 
@@ -58,7 +58,7 @@ Events received downstream.
         debug 'queuer:get-agent-state: done', key, state
         return
 
-      @socket.on 'queuer:log-agent-out', seem (key) =>
+      @socket.on 'queuer:log-agent-out', hand (key) =>
         is_remote = yield @cfg.is_remote domain_of key
         return if is_remote isnt false
 
@@ -76,7 +76,7 @@ Downstream/upstream pair for egress-pool retrieval.
       @register 'queuer:get-egress-pool', 'dial_calls'
       @register 'queuer:egress-pool', 'calls'
 
-      @socket.on 'queuer:get-egress-pool', seem (domain) =>
+      @socket.on 'queuer:get-egress-pool', hand (domain) =>
         debug 'queuer:get-egress-pool', domain
 
         is_remote = yield @cfg.is_remote domain
@@ -357,7 +357,7 @@ Agent state monitoring
 
       local_server = [@session.local_server,@session.client_server].join '/'
 
-      start_of_call = seem ({key,id,dialplan}) =>
+      start_of_call = hand ({key,id,dialplan}) =>
         @debug 'Start of call', key, id, dialplan
 
         return unless dialplan is 'centrex'
@@ -369,7 +369,7 @@ Agent state monitoring
         agent = new Agent queuer, key
         yield agent.add_call id
 
-      end_of_call = seem ({key,id,dialplan}) =>
+      end_of_call = hand ({key,id,dialplan}) =>
         @debug 'End of call', key, id, dialplan
 
         return unless dialplan is 'centrex'
