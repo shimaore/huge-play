@@ -1,7 +1,7 @@
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
-    debug = (require 'tangible') @name
+    {debug,hand} = (require 'tangible') @name
 
     @include = ->
 
@@ -43,6 +43,7 @@ Eavesdrop registration
         attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
 
         when_done = seem (res) =>
+          debug 'when_done', res
           disposition = res?.body?.variable_transfer_disposition
           switch disposition
             when 'recv_replace'
@@ -65,8 +66,20 @@ Eavesdrop registration
 
         @call.once 'socket-close', when_done
 
-        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
+        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE', 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE'
         @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
+
+        @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_BRIDGE', eavesdrop_key, call.uuid, a_uuid, b_uuid
+          yield null
+
+        @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_UNBRIDGE', eavesdrop_key, call.uuid, a_uuid, b_uuid
+          yield null
 
         @emit 'inbound', attributes
 
@@ -95,7 +108,6 @@ Post-attempt handling
       data = res.body
       @session.bridge_data ?= []
       @session.bridge_data.push data
-      @debug 'FreeSwitch response', res
       when_done res
 
 Retrieve the FreeSwitch Cause Code description, and the SIP error code.
