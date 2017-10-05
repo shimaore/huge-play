@@ -52,6 +52,7 @@ Transfer-disposition values:
         @debug 'Set inbound eavesdrop', eavesdrop_key
         yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
 
+        debug 'CHANNEL_PRESENT', key, @call.uuid
         yield queuer?.track key, @call.uuid
         yield queuer?.on_present @call.uuid
         @report event:'start-of-call', agent:key
@@ -60,11 +61,7 @@ Transfer-disposition values:
 
 Bridge on called side of a call.
 
-        bridged_once = false
-
         @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
-          bridged_once = true
-
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
           debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
@@ -102,7 +99,7 @@ This is to handle the case of calls that never get bridged (since in this case w
         @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
-          unless bridged_once or disposition is 'replaced'
+          unless disposition is 'replaced'
             yield @local_redis?.del eavesdrop_key
             yield queuer?.on_unbridge @call.uuid
             yield queuer?.untrack key, @call.uuid
