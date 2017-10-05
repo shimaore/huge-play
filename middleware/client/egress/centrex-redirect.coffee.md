@@ -3,10 +3,14 @@
     @name = "#{pkg.name}:middleware:client:egress:centrex-redirect"
     {debug,hand,heal} = (require 'tangible') @name
 
+    default_eavesdrop_timeout = 8*3600 # 8h
+
     @include = seem ->
 
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'centrex'
+
+      {eavesdrop_timeout = default_eavesdrop_timeout} = @cfg
 
 Transfer Workaround
 -------------------
@@ -54,7 +58,7 @@ Eavesdrop registration
       unless @session.transfer or @call.closed
 
         @debug 'Set outbound eavesdrop', eavesdrop_key
-        yield @local_redis?.set eavesdrop_key, @call.uuid
+        yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
 
         yield queuer?.track key, @call.uuid
         yield queuer?.on_present @call.uuid
@@ -85,7 +89,7 @@ Unbridge on calling side of call.
 
           if disposition is 'replaced'
             yield queuer?.track key, b_uuid
-            yield @local_redis?.set eavesdrop_key, b_uuid
+            yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, b_uuid
           else
             yield @local_redis?.del eavesdrop_key
 

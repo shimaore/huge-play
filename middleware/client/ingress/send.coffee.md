@@ -3,9 +3,15 @@
     @name = "#{pkg.name}:middleware:client:ingress:send"
     {debug,hand} = (require 'tangible') @name
 
+    default_eavesdrop_timeout = 8*3600 # 8h
+    default_intercept_timeout = 8*3600 # 8h
+
     @include = ->
 
       return unless @session.direction is 'ingress'
+
+      {eavesdrop_timeout = default_eavesdrop_timeout} = @cfg
+      {intercept_timeout = default_intercept_timeout} = @cfg
 
       @debug 'Ready'
 
@@ -26,7 +32,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis?.set intercept_key, @call.uuid
+      yield @local_redis?.setex intercept_key, intercept_timeout, @call.uuid
 
       @session.agent = key
 
@@ -44,7 +50,7 @@ Transfer-disposition values:
       unless @call.closed or @session.dialplan isnt 'centrex'
 
         @debug 'Set inbound eavesdrop', eavesdrop_key
-        yield @local_redis?.set eavesdrop_key, @call.uuid
+        yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
 
         yield queuer?.track key, @call.uuid
         yield queuer?.on_present @call.uuid
@@ -77,7 +83,7 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
           if disposition is 'replaced'
             # expect body.variable_endpoint_disposition is 'ATTENDED_TRANSFER'
             yield queuer?.track key, b_uuid
-            yield @local_redis?.set eavesdrop_key, b_uuid
+            yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, b_uuid
           else
             yield @local_redis?.del eavesdrop_key
 
