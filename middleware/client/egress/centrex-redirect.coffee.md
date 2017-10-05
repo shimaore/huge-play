@@ -124,7 +124,10 @@ This is to handle the case of calls that never get bridged (since in this case w
         @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
-          unless disposition is 'replaced' or disposition is 'recv_replace'
+
+No need to do it on `recv_replace` since it was preceded by UNBRIDGE.
+
+          unless disposition is 'recv_replace'
             yield @local_redis?.del eavesdrop_key
             yield queuer?.on_unbridge @call.uuid
             yield queuer?.untrack key, @call.uuid
