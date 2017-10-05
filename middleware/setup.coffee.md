@@ -247,8 +247,8 @@ The number should really be an estimate of our maximum number of concurrent, mon
           return unless msg?.body?
           msg_id = msg.body[UNIQUE_ID]
           msg_ev = msg.body[EVENT_NAME]
-          debug 'api.monitor received', msg_id, msg_ev
           if msg_id is id and msg_ev in events
+            debug 'api.monitor received', msg_id, msg_ev
             ev?.emit msg_ev, msg
 
         for event in events

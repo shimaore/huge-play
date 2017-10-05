@@ -66,6 +66,32 @@ Transfer-disposition values:
         yield queuer?.on_present new_uuid
         @report event:'start-of-call', agent:key, call:new_uuid
 
+        monitor_far = yield @cfg.api.monitor @call.uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
+
+        monitor_far.on 'CHANNEL_BRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_BRIDGE (far)', key, a_uuid, b_uuid
+          return unless b_uuid is new_uuid
+
+          yield queuer?.track key, b_uuid
+          yield queuer?.on_bridge b_uuid
+          return
+
+        monitor_far.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+          a_uuid = body['Bridge-A-Unique-ID']
+          b_uuid = body['Bridge-B-Unique-ID']
+          debug 'CHANNEL_UNBRIDGE (far)', key, a_uuid, b_uuid
+          return unless b_uuid is new_uuid
+
+          yield queuer?.on_unbridge b_uuid
+          yield queuer?.untrack key, b_uuid
+          return
+
+        monitor_far.on 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
+          yield monitor?.end()
+          monitor = null
+
         monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
 
 Bridge on called side of a call.
