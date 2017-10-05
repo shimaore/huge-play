@@ -10,9 +10,6 @@
 
       return unless @session.direction is 'ingress'
 
-      {eavesdrop_timeout = default_eavesdrop_timeout} = @cfg
-      {intercept_timeout = default_intercept_timeout} = @cfg
-
       @debug 'Ready'
 
 * session.initial_destinations (array) On ingress, client-side calls, list of target routes for `mod_sofia`, each route consisting of an object containing a `to_uri` URI (to be used with the standard SIP profile defined in session.sip_profile ) and an optional `parameters` array of per-leg parameter strings.
@@ -28,6 +25,10 @@ send
 Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
     @send = send = seem (destinations) ->
+
+      {eavesdrop_timeout,intercept_timeout} = @cfg
+      eavesdrop_timeout ?= default_eavesdrop_timeout
+      intercept_timeout ?= default_intercept_timeout
 
       key = "#{@destination}@#{@session.number_domain}"
 

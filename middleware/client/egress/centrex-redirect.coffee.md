@@ -10,8 +10,6 @@
       return unless @session.direction is 'egress'
       return unless @session.dialplan is 'centrex'
 
-      {eavesdrop_timeout = default_eavesdrop_timeout} = @cfg
-
 Transfer Workaround
 -------------------
 
@@ -50,6 +48,9 @@ Centrex Handling
 
 Eavesdrop registration
 ----------------------
+
+      {eavesdrop_timeout} = @cfg
+      eavesdrop_timeout ?= default_eavesdrop_timeout
 
       key = "#{@source}@#{@session.number_domain}"
       eavesdrop_key = "outbound:#{key}"
