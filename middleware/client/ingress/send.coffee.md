@@ -56,11 +56,15 @@ Transfer-disposition values:
         yield queuer?.on_present @call.uuid
         @report event:'start-of-call', agent:key
 
-        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE'
+        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE', 'CHANNEL_HANGUP_COMPLETE'
 
 Bridge on called side of a call.
 
+        bridged_once = false
+
         @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+          bridged_once = true
+
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
           debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
@@ -91,6 +95,18 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
           yield queuer?.untrack key, a_uuid
 
           @report event:'end-of-call', agent:key
+          return
+
+This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
+
+        @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
+          disposition = body?.variable_transfer_disposition
+          debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
+          unless bridged_once or disposition is 'replaced'
+            yield @local_redis?.del eavesdrop_key
+            yield queuer?.on_unbridge @call.uuid
+            yield queuer?.untrack key, @call.uuid
+            @report event:'end-of-call', agent:key
           return
 
       sofia = destinations.map ({ parameters = [], to_uri }) =>
