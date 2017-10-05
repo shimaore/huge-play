@@ -5,7 +5,7 @@
   "scripts": {
     "prepublish": "coffee -c middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
     "pretest": "npm install",
-    "test": "mocha"
+    "test": "mocha 'test/*.coffee.md'"
   },
   "repository": {
     "type": "git",
