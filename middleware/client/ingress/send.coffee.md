@@ -106,9 +106,8 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
 Send the call(s)
 ----------------
 
-      parameters.push "origination_uuid=#{new_uuid}"
       sofia = destinations.map ({ parameters = [], to_uri }) =>
-        "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
+        "[origination_uuid=#{new_uuid},#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
       @debug 'send', sofia
 
