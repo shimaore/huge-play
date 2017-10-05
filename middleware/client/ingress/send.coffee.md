@@ -64,7 +64,7 @@ Transfer-disposition values:
         debug 'CHANNEL_PRESENT', key, new_uuid
         yield queuer?.track key, new_uuid
         yield queuer?.on_present new_uuid
-        @report event:'start-of-call', agent:key
+        @report event:'start-of-call', agent:key, call:@call.uuid
 
         monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
 
@@ -73,7 +73,6 @@ Bridge on called side of a call.
         monitor.on 'CHANNEL_BRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
-          return unless new_uuid is a_uuid
           debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
 
           yield queuer?.track key, a_uuid
@@ -86,7 +85,6 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
         monitor.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
-          return unless new_uuid is a_uuid
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
 
@@ -110,14 +108,13 @@ This is to handle the case of calls that never get bridged (since in this case w
           monitor = null
 
           a_uuid = body[Unique_ID] # or 'Channel-Call-UUID'
-          return unless new_uuid is a_uuid
           disposition = body?.variable_transfer_disposition
-          debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
+          debug 'CHANNEL_HANGUP_COMPLETE', key, a_uuid, disposition, body.variable_endpoint_disposition
           unless disposition is 'replaced'
             yield @local_redis?.del eavesdrop_key
-            yield queuer?.on_unbridge new_uuid
-            yield queuer?.untrack key, new_uuid
-            @report event:'end-of-call', agent:key
+            yield queuer?.on_unbridge a_uuid
+            yield queuer?.untrack key, a_uuid
+            @report event:'end-of-call', agent:key, call:a_uuid
           return
 
 Send the call(s)

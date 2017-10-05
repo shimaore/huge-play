@@ -85,16 +85,15 @@ CHANNEL_HANGUP_COMPLETE 34@test 0_179807936@192.168.4.66 recv_replace ANSWER
         debug 'CHANNEL_PRESENT', key, @call.uuid
         yield queuer?.track key, @call.uuid
         yield queuer?.on_present @call.uuid
-        @report event:'start-of-call', agent:key
+        @report event:'start-of-call', agent:key, call:@call.uuid
 
-        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE', 'CHANNEL_HANGUP_COMPLETE'
+        monitor = yield @cfg.api.monitor @call.uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
 
 Bridge on calling side of call.
 
-        @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+        monitor.on 'CHANNEL_BRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
-          return unless @call.uuid is a_uuid
           debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
 
           yield queuer?.track key, a_uuid
@@ -103,10 +102,9 @@ Bridge on calling side of call.
 
 Unbridge on calling side of call.
 
-        @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+        monitor.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
-          return unless @call.uuid is a_uuid
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
 
@@ -125,18 +123,20 @@ Unbridge on calling side of call.
 This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
 
         @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
-          a_uuid = body[Unique_ID]
-          return unless @call.uuid is a_uuid
+          yield monitor?.end()
+          monitor = null
+
+          a_uuid = body[Unique_ID] # or 'Channel-Call-UUID'
           disposition = body?.variable_transfer_disposition
-          debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
+          debug 'CHANNEL_HANGUP_COMPLETE', key, a_uuid, disposition, body.variable_endpoint_disposition
 
 No need to do it on `recv_replace` since it was preceded by UNBRIDGE.
 
           unless disposition is 'recv_replace'
             yield @local_redis?.del eavesdrop_key
-            yield queuer?.on_unbridge @call.uuid
-            yield queuer?.untrack key, @call.uuid
-            @report event:'end-of-call', agent:key
+            yield queuer?.on_unbridge a_uuid
+            yield queuer?.untrack key, a_uuid
+            @report event:'end-of-call', agent:key, call:a_uuid
           return
 
       @debug 'Ready'
