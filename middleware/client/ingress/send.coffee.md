@@ -66,7 +66,7 @@ Transfer-disposition values:
         yield queuer?.on_present new_uuid
         @report event:'start-of-call', agent:key
 
-        monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE']
+        monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
 
 Bridge on called side of a call.
 
@@ -103,6 +103,23 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
           @report event:'end-of-call', agent:key
           return
 
+This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
+
+        monitor.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
+          yield monitor?.end()
+          monitor = null
+
+          a_uuid = body[Unique_ID] # or 'Channel-Call-UUID'
+          return unless new_uuid is a_uuid
+          disposition = body?.variable_transfer_disposition
+          debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
+          unless disposition is 'replaced'
+            yield @local_redis?.del eavesdrop_key
+            yield queuer?.on_unbridge new_uuid
+            yield queuer?.untrack key, new_uuid
+            @report event:'end-of-call', agent:key
+          return
+
 Send the call(s)
 ----------------
 
@@ -121,12 +138,6 @@ Send the call(s)
       res = yield @action 'bridge', sofia.join ','
 
       yield @local_redis?.del intercept_key
-
-      unless @session.dialplan isnt 'centrex'
-        yield monitor?.end()
-        yield queuer?.on_unbridge new_uuid
-        yield queuer?.untrack key, new_uuid
-        @report event:'end-of-call', agent:key
 
 Post-attempt handling
 ---------------------
