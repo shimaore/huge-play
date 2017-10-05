@@ -3,6 +3,8 @@
     @name = "#{pkg.name}:middleware:client:egress:centrex-redirect"
     {debug,hand,heal} = (require 'tangible') @name
 
+    Unique_ID = 'Unique-ID'
+
     default_eavesdrop_timeout = 8*3600 # 8h
 
     @include = seem ->
@@ -92,8 +94,8 @@ Bridge on calling side of call.
         @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
+          return unless @call.uuid is a_uuid
           debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
-          # assert @call.uuid is a_uuid
 
           yield queuer?.track key, a_uuid
           yield queuer?.on_bridge a_uuid
@@ -104,9 +106,9 @@ Unbridge on calling side of call.
         @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
+          return unless @call.uuid is a_uuid
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
-          # assert @call.uuid is a_uuid
 
           if disposition is 'replaced'
             yield queuer?.track key, b_uuid
@@ -123,6 +125,8 @@ Unbridge on calling side of call.
 This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
 
         @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
+          a_uuid = body[Unique_ID]
+          return unless @call.uuid is a_uuid
           disposition = body?.variable_transfer_disposition
           debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
 
