@@ -41,7 +41,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis?.setex intercept_key, intercept_timeout, @call.uuid
+      yield @local_redis?.setex intercept_key, intercept_timeout, new_uuid
 
       @session.agent = key
 
@@ -59,12 +59,12 @@ Transfer-disposition values:
       unless @call.closed or @session.dialplan isnt 'centrex'
 
         @debug 'Set inbound eavesdrop', eavesdrop_key
-        yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
+        yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
 
         debug 'CHANNEL_PRESENT', key, new_uuid
         yield queuer?.track key, new_uuid
         yield queuer?.on_present new_uuid
-        @report event:'start-of-call', agent:key, call:@call.uuid
+        @report event:'start-of-call', agent:key, call:new_uuid
 
         monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
 

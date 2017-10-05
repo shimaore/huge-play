@@ -122,7 +122,7 @@ Unbridge on calling side of call.
 
 This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
 
-        @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
+        monitor.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
           yield monitor?.end()
           monitor = null
 
