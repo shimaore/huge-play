@@ -32,8 +32,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
     @send = send = seem (destinations) ->
 
-      @call.new_uuid = new_uuid = make_id()
-      @call.filter Unique_ID, new_uuid
+      new_uuid = make_id()
 
       {eavesdrop_timeout,intercept_timeout} = @cfg
       eavesdrop_timeout ?= default_eavesdrop_timeout
@@ -67,11 +66,11 @@ Transfer-disposition values:
         yield queuer?.on_present new_uuid
         @report event:'start-of-call', agent:key
 
-        yield @call.event_json 'CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE', 'CHANNEL_HANGUP_COMPLETE'
+        monitor = @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE']
 
 Bridge on called side of a call.
 
-        @call.on 'CHANNEL_BRIDGE', hand ({body}) =>
+        monitor.on 'CHANNEL_BRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
           return unless new_uuid is a_uuid
@@ -84,7 +83,7 @@ Bridge on called side of a call.
 Unbridge on called side of a call.
 On attended-transfer we need to track the remote leg of the call, so that the (forthcoming) BRIDGE can locate the agent.
 
-        @call.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
+        monitor.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
           a_uuid = body['Bridge-A-Unique-ID']
           b_uuid = body['Bridge-B-Unique-ID']
           return unless new_uuid is a_uuid
@@ -104,25 +103,11 @@ On attended-transfer we need to track the remote leg of the call, so that the (f
           @report event:'end-of-call', agent:key
           return
 
-This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
-
-        @call.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
-          a_uuid = body[Unique_ID] # or 'Channel-Call-UUID'
-          return unless new_uuid is a_uuid
-          disposition = body?.variable_transfer_disposition
-          debug 'CHANNEL_HANGUP_COMPLETE', key, @call.uuid, disposition, body.variable_endpoint_disposition
-          unless disposition is 'replaced'
-            yield @local_redis?.del eavesdrop_key
-            yield queuer?.on_unbridge new_uuid
-            yield queuer?.untrack key, new_uuid
-            @report event:'end-of-call', agent:key
-          return
-
 Send the call(s)
 ----------------
 
+      parameters.push "origination_uuid=#{new_uuid}"
       sofia = destinations.map ({ parameters = [], to_uri }) =>
-        parameters.origination_uuid = new_uuid
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
       @debug 'send', sofia
@@ -137,6 +122,12 @@ Send the call(s)
       res = yield @action 'bridge', sofia.join ','
 
       yield @local_redis?.del intercept_key
+
+      unless @session.dialplan isnt 'centrex'
+        monitor?.end()
+        yield queuer?.on_unbridge new_uuid
+        yield queuer?.untrack key, new_uuid
+        @report event:'end-of-call', agent:key
 
 Post-attempt handling
 ---------------------
