@@ -109,13 +109,13 @@ This is to handle the case of calls that never get bridged (since in this case w
             @report event:'end-of-call', agent:key
           return
 
+Send the call(s)
+----------------
+
       sofia = destinations.map ({ parameters = [], to_uri }) =>
         "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
       @debug 'send', sofia
-
-Send the call(s)
-----------------
 
       yield @set
         continue_on_fail: true
