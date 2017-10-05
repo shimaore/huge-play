@@ -66,7 +66,7 @@ Transfer-disposition values:
         yield queuer?.on_present new_uuid
         @report event:'start-of-call', agent:key
 
-        monitor = @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE']
+        monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE']
 
 Bridge on called side of a call.
 
@@ -124,7 +124,7 @@ Send the call(s)
       yield @local_redis?.del intercept_key
 
       unless @session.dialplan isnt 'centrex'
-        monitor?.end()
+        yield monitor?.end()
         yield queuer?.on_unbridge new_uuid
         yield queuer?.untrack key, new_uuid
         @report event:'end-of-call', agent:key
