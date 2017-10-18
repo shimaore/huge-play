@@ -146,8 +146,11 @@ This is to handle the case of calls that never get bridged (since in this case w
 Send the call(s)
 ----------------
 
-      sofia = destinations.map ({ parameters = [], to_uri }) =>
-        "[origination_uuid=#{new_uuid},#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
+      sofia = destinations.map ({ parameters = [], to_uri },index) =>
+        if index is 0
+          "[origination_uuid=#{new_uuid},#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
+        else
+          "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
       @debug 'send', sofia
 

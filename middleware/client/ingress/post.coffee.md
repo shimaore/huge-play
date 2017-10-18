@@ -255,8 +255,100 @@ Note the different alternatives for routing:
         ## How we've been doing it:
         to_uri = "sip:#{@destination}@#{@session.number.endpoint_via}"
 
+Convergence
+-----------
+
+* doc.local_number.convergence_active (boolean) If true, the convergence feature is active.
+* doc.local_number.convergence (array of objects) Convergence destinations and options.
+* doc.local_number.convergence[].number (string) destination number (as dialed from the endpoint)
+* doc.local_number.convergence[].confirm (boolean) whether to ask for confirmation after the call is answered
+* doc.local_number.convergence[].confirm (string) whether to ask for confirmation after the call is answered, and which digit should be used to confirm
+* doc.local_number.convergence[].delay (integer) number of seconds to wait before dialing this destination
+* doc.local_number.convergence[].timeout (integer) number of seconds to wait before considering the destination as not responding
+
+The convergence function returns a list of optional, additional targets (e.g. mobile phone destinations) which are called at the same time as the original number, or with a slight delay. This is used to implement "Follow-Me"/"Mobile Convergence"-type scenarios.
+
+      convergence = seem =>
+
+If the feature is not enabled on this line just skip.
+
+        return [] unless @session.number.convergence? and @session.number.convergence_active
+
+Following code lifted from place-call (esp. the conference code).
+
+The additional calls will be sent back to ourselves, we need to figure out our host and port.
+
+        return [] unless @cfg.session?.profile? and @cfg.profiles?
+
+        profile = @cfg.session.profile
+        {host} = @cfg
+        p = @cfg.profiles[profile]
+        return [] unless host and p?
+
+        port = p.egress_sip_port ? p.sip_port+10000
+
+Call confirmation
+
+        confirm = @session.number.convergence_confirm
+        if confirm?
+
+The `confirm` field can be a boolean or a string.
+
+          key = '5'
+          if typeof confirm is 'string' and confirm.match /^\d$/
+            key = confirm
+
+Try hard to figure out what language we should use.
+
+          language = @session.language
+          language ?= @session.number.language
+          language ?= @cfg.announcement_language
+          language ?= ''
+
+The `call_options` are used by tough-rate.
+
+          yield @reference.set_call_options
+            group_confirm_key: key
+            group_confirm_file: "phrase:confirm:#{key}"
+            group_confirm_error_file: "phrase:confirm:#{key}"
+            group_confirm_read_timeout: 15000 # defaults to 5000
+            group_confirm_cancel_timeout: false
+            language: language
+
+Define parameters and targets.
+
+        @session.number.convergence
+        .filter (o) -> o.number?
+        .map (o) =>
+
+Normally the x-ref parameters are already defined in `middleware/client/setup`.
+(The `call-to-conference` function needs to define them but we should not need to.)
+
+          # xref = "xref:#{@session.reference}"
+          params = {}
+              # sip_invite_params: xref
+              # sip_invite_to_params: xref
+              # sip_invite_contact_params: xref
+              # sip_invite_from_params: xref
+              # origination_caller_id_number: @session.number.number
+
+Delay ("Follow-Me" application)
+
+          if o.delay
+            params.leg_delay_start = o.delay
+
+Timeout
+
+          if o.timeout
+            params.leg_timeout = o.timeout
+
+          parameters: Object.keys(params).map (k) -> "#{k}=#{params[k]}"
+          to_uri: "sip:#{o.number}@#{host}:#{port}"
+
+      converged = yield convergence()
       @session.initial_destinations ?= [
         { parameters, to_uri }
+        converged...
       ]
 
       @notify
