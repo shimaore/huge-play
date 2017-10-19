@@ -4,6 +4,7 @@ First-line handler for outbound calls
     seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
+    debug = (require 'tangible') @name
 
     @include = seem ->
 
@@ -156,33 +157,6 @@ Contrarily to established practices, our code uses lowercase country names.
 
       if @session.country?
         @session.country = @session.country.toLowerCase()
-
-Eavesdrop registration
-----------------------
-
-      key = src_number
-      eavesdrop_key = "outbound:#{key}"
-
-      unless @session.transfer or @call.closed
-
-        @debug 'Set outbound eavesdrop', eavesdrop_key
-        yield @local_redis?.set eavesdrop_key, @call.uuid
-
-        attributes = {key,id:@call.uuid,dialplan:@session.dialplan}
-
-        when_done = seem =>
-          @debug 'Clear outbound eavesdrop', eavesdrop_key, attributes
-          @call.emit 'outbound-end', attributes
-          yield @local_redis?.del eavesdrop_key
-          return
-
-        @call.once 'socket-close', when_done
-        @call.once 'tough-rate-hangup', when_done
-
-        yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
-        @call.once 'CHANNEL_HANGUP_COMPLETE', when_done
-
-        @call.emit 'outbound', attributes
 
       @debug 'Ready',
         endpoint_name: @session.endpoint_name

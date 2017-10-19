@@ -41,6 +41,7 @@ Events received downstream.
 
       @register 'queuer:get-agent-state', 'dial_calls'
       @register 'queuer:log-agent-out', 'dial_calls'
+      @register 'queuer:log-agent-in', 'dial_calls'
 
       @socket.on 'queuer:get-agent-state', hand (key) =>
         is_remote = yield @cfg.is_remote domain_of key
@@ -69,6 +70,35 @@ Events received downstream.
         yield agent.transition 'logout'
 
         debug 'queue:log-agent-out: done', key
+        return
+
+      @socket.on 'queuer:log-agent-in', hand (key) =>
+        is_remote = yield @cfg.is_remote domain_of key
+        return if is_remote isnt false
+
+        debug 'queue:log-agent-in', key
+
+        tags = []
+        {skills,queues,broadcast,timezone} = yield @cfg.prov.get "number:#{key}"
+        if skills?
+          for skill in skills
+            tags.push "skill:#{skill}"
+        if queues?
+          for queue in queues
+            tags.push "queue:#{queue}"
+        if broadcast
+          tags.push 'broadcast'
+
+        agent = new Agent queuer, key
+        yield agent.add_tags tags
+        if ornaments?
+          ctx = {agent,timezone}
+          yield run.call ctx, ornaments, @ornaments_commands
+
+        yield agent.accept_onhook()
+        yield @report {state:'queuer-login',source,fifo,tags}
+
+        debug 'queue:log-agent-in: done', key
         return
 
 Downstream/upstream pair for egress-pool retrieval.
@@ -356,37 +386,6 @@ Agent state monitoring
 ----------------------
 
       local_server = [@session.local_server,@session.client_server].join '/'
-
-      start_of_call = hand ({key,id,dialplan}) =>
-        @debug 'Start of call', key, id, dialplan
-
-        return unless dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote (domain_of key), local_server
-        return if is_remote isnt false
-
-        @report event:'start-of-call', agent:key
-
-        agent = new Agent queuer, key
-        yield agent.add_call id
-
-      end_of_call = hand ({key,id,dialplan}) =>
-        @debug 'End of call', key, id, dialplan
-
-        return unless dialplan is 'centrex'
-        is_remote = yield @cfg.is_remote (domain_of key), local_server
-        return if is_remote isnt false
-
-        @report event:'end-of-call', agent:key
-
-        yield sleep 500
-        agent = new Agent queuer, key
-        yield agent.del_call id
-
-      @call.once 'inbound', start_of_call
-      @call.once 'outbound', start_of_call
-      @call.once 'inbound-end', end_of_call
-      @call.once 'outbound-end', end_of_call
-      @call.once 'inbound-transferred', end_of_call
 
 On-hook agent
 -------------

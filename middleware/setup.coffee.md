@@ -247,17 +247,17 @@ The number should really be an estimate of our maximum number of concurrent, mon
           return unless msg?.body?
           msg_id = msg.body[UNIQUE_ID]
           msg_ev = msg.body[EVENT_NAME]
-          debug 'api.monitor received', msg_id, msg_ev
           if msg_id is id and msg_ev in events
+            debug 'api.monitor received', msg_id, msg_ev
             ev?.emit msg_ev, msg
 
-        yield do seem ->
-          for event in events
+        for event in events
+          yield do (event) ->
             monitor_client.on event, listener
             monitored_events[event] ?= 0
             if monitored_events[event]++ is 0
               debug 'Adding event json for', event
-              yield monitor_client.event_json event
+              monitor_client.event_json event
 
         ev.end = seem ->
           if not ev?
@@ -267,10 +267,11 @@ The number should really be an estimate of our maximum number of concurrent, mon
           debug 'api.monitor.end', {id,events}
           yield monitor_client.filter_delete UNIQUE_ID, id
           for event in events
-            monitor_client.removeListener event, listener
-            if --monitored_events[event] is 0
-              debug 'api.monitor.end: nixevent', event
-              yield monitor_client.nixevent event
+            yield do (event) ->
+              monitor_client.removeListener event, listener
+              if --monitored_events[event] is 0
+                debug 'api.monitor.end: nixevent', event
+                monitor_client.nixevent event
           ev.removeAllListeners()
           ev = null
           debug 'api.monitor.end: done'
@@ -333,7 +334,13 @@ Context Extension
 
     @include = (ctx) ->
 
+      _bus = new EventEmitter()
+
       ctx[k] = v for own k,v of {
+        on: (ev,cb) -> _bus.on ev, cb
+        once: (ev,cb) -> _bus.once ev, cb
+        emit: (ev,data) -> _bus.emit ev, data
+
         statistics: @cfg.statistics
 
         sleep: (timeout) ->
@@ -342,7 +349,7 @@ Context Extension
 
         direction: (direction) ->
           @session.direction = direction
-          @call.emit 'direction', direction
+          @emit 'direction', direction
           @report {event:'direction', direction}
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
