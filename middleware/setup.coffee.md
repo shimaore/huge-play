@@ -42,8 +42,9 @@ Local and Global Redis
         a_redis.on 'warning',       => debug "#{label}: warning"
         a_redis
 
-      if @cfg.redis?
-        @cfg.global_redis_client = make_a_redis 'global redis', @cfg.redis
+      assert @cfg.redis?, 'cfg.redis (global redis) is required for Reference'
+
+      @cfg.global_redis_client = make_a_redis 'global redis', @cfg.redis
 
       if @cfg.local_redis?
         @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis

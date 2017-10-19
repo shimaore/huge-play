@@ -29,11 +29,11 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
       @call.once 'cleanup_linger'
       .then seem =>
-        @debug "CDR: Linger: pausing"
+        debug "CDR: Linger: pausing"
         yield @sleep 4000
-        @debug "CDR: Linger: exit"
+        debug "CDR: Linger: exit"
         yield @call.exit().catch (error) =>
-          @debug.dev "exit: #{error}"
+          debug.dev "exit: #{error}"
 
       yield @call.linger()
 
@@ -46,7 +46,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
       @call.once 'CHANNEL_HANGUP_COMPLETE'
       .then (res) =>
-        @debug "Channel Hangup Complete"
+        debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
 
@@ -122,9 +122,9 @@ Update the (existing) call data
             .format()
 
         @notify {state:'end', call_data, cdr_report}
-        @debug "CDR: Channel Hangup Complete", cdr_report
+        debug "CDR: Channel Hangup Complete", cdr_report
       .catch (error) =>
-        @debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
+        debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
 
       @debug 'Ready'
       return
