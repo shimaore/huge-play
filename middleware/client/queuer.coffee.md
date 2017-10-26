@@ -244,8 +244,8 @@ This avoids sending two messages for the same event (one with incomplete data, t
           debug 'agent.notify: done', @key, notification
           return
 
-        create_egress_call: seem ->
-          debug 'create_egress_call', @domain
+        create_egress_call: seem (body) ->
+          debug 'create_egress_call', @domain, body
 
           @number_domain_data ?= yield prov
             .get "number_domain:#{@domain}"
@@ -265,16 +265,17 @@ This avoids sending two messages for the same event (one with incomplete data, t
             debug 'create_egress_call: no account', @domain
             return null
 
-          unless queuer_webhook?
-            debug 'create_egress_call: no queuer_webhook', @domain
-            return null
+          if not body?
+            unless queuer_webhook?
+              debug 'create_egress_call: no queuer_webhook', @domain
+              return null
 
-          tags = yield @tags()
-          options = {@key,@number,@domain,tags}
-          debug 'create_egress_call: send request', options
-          {body} = yield request
-            .post queuer_webhook
-            .send options
+            tags = yield @tags()
+            options = {@key,@number,@domain,tags}
+            debug 'create_egress_call: send request', options
+            {body} = yield request
+              .post queuer_webhook
+              .send options
 
           body.tags ?= []
           unless body.destination? and body.tags? and body.tags.length?

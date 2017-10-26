@@ -286,12 +286,50 @@ Call it out
 
         debug "Conference returned", res
 
+Queuer place call
+-----------------
+
+The `body` should contains:
+- `agent` (string)
+- `destination` (string)
+- `tags` (array)
+
+      ev.on 'create-queuer-call', hand (body) =>
+        queuer = cfg.queuer
+        Agent = cfg.queuer_Agent
+
+        unless queuer? and Agent?
+          debug 'create-queuer-call: no queuer'
+          return
+
+        unless body? and body.agent? and body.destination?
+          debug 'create-queuer-call: invalid content', body
+          return
+
+        agent = new Agent queuer, body.agent
+
+        is_remote = yield cfg.is_remote(agent.domain, [local_server,client_server].join '/').catch -> true
+        if is_remote
+          debug 'create-queuer-call: not handled on this server', body
+          return
+
+        return unless yield elected _id
+
+        yield queuer.create_egress_call_for agent, body
+        return
+
+      return
+
+Notify
+======
+
     @notify = ({cfg,socket}) ->
 
       handler cfg, socket
 
       @register 'place-call', 'dial_calls'
       @register 'call-to-conference', 'dial_calls'
+      @register 'create-queuer-call', 'dial_calls'
       @configure dial_calls: true
 
       debug 'Module Ready'
