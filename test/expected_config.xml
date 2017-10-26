@@ -1429,6 +1429,14 @@
 </match>
 </input>
 </macro>
+<macro name="confirm">
+<input pattern="^(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="voicemail/vm-press.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
+</match>
+</input>
+</macro>
 </language>
 <language name="en-US" sound-path="/opt/freeswitch/share/freeswitch/sounds/en/us/callie">
 <macro name="say-single">
@@ -2464,6 +2472,14 @@
 <input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="voicemail/vm-press.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
+</match>
+</input>
+</macro>
+<macro name="confirm">
+<input pattern="^(\d)$" break_on_match="true">
+<match>
 <action function="play-file" data="voicemail/vm-press.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
 </match>
@@ -3583,6 +3599,15 @@
 </match>
 </input>
 </macro>
+<macro name="confirm">
+<input pattern="^(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
+</macro>
 </language>
 <language name="fr-FR" sound-path="/opt/freeswitch/share/freeswitch/sounds/fr/fr/sibylle">
 <macro name="say-single">
@@ -4691,6 +4716,15 @@
 <input pattern="^confirm:(\d)$" break_on_match="true">
 <match>
 <action function="play-file" data="conference/conf-welcome.wav"/>
+<action function="play-file" data="more/please-type.wav"/>
+<action function="play-file" data="digits/$1.wav"/>
+<action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
+</macro>
+<macro name="confirm">
+<input pattern="^(\d)$" break_on_match="true">
+<match>
 <action function="play-file" data="more/please-type.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
