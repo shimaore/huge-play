@@ -321,6 +321,14 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
         if account?
           yield @export 'sip_h_P-Charge-Info': "sip:#{account}@#{@cfg.host}"
 
+        @set
+          ringback: @session.ringback ? '%(3000,3000,437,1317)'
+          instant_ringback: true
+
+"Tonalité d'acheminement", for nostalgia's sake.
+
+        @action 'playback', 'tone_stream://%(50,50,437,1317);loops=-1'
+
 Options might be provided for either `place-call` or `call-to-conference`.
 They are used in `tough-rate/middleware/call-handler`.
 
