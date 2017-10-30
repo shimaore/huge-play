@@ -30,4 +30,5 @@
                 }
               ]
         in_calendars.call(self, '0').should.be.true
+        in_calendars.call(self,  0 ).should.be.true
         in_calendars.call(self, '1').should.be.false

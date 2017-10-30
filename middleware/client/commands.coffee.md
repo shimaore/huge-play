@@ -355,7 +355,7 @@ Legacy format: only one argument and that argument is an array.
         for calendar in calendars
           switch
 
-            when m = calendar.match /^_holidays_(.*)$/
+            when m = calendar.toString().match /^_holidays_(.*)$/
               hd = new Holidays()
               hd.init.apply hd, m[1].split '_'
               res = hd.isHoliday now_date
