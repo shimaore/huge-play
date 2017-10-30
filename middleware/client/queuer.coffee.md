@@ -154,8 +154,7 @@ How long should we keep the state of an agent after the last update?
       class HugePlayCall extends TaggedCall
 
         interface: new RedisInterface cfg.local_redis_client, call_timeout
-        api: api.truthy
-        monitor_api: api.monitor
+        __api: api
 
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference

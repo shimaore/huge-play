@@ -190,13 +190,20 @@ Use a default client for generic / shared APIs
         default_client ?= yield _client()
         res = yield default_client.bgapi cmd
 
+* cfg.api(command) returns (a Promise for) the body of the response for a FreeSwitch `api` command.
+
       @cfg.api = seem (cmd) =>
         debug 'api', cmd
         res = yield _api cmd
         res?.body ? null
 
+* cfg.api.send(command) returns (a Promise for) the `esl` response to the command.
+* cfg.api.create() returns (a Promise for) an `esl` client.
+
       @cfg.api.send = _api
       @cfg.api.create = _client
+
+* cfg.api.truthy(command) returns (a Promise for) a boolean indicating the success of the command.
 
       @cfg.api.truthy = (cmd) =>
         debug 'api.truthy', cmd
@@ -230,19 +237,21 @@ FIXME: Can only be called once on a given `id`. Add e.g. Redis support to store 
 
 Remember to always call `monitor.end()` when you are done with the monitor!
 
+* cfg.api.monitor(unique_id,events) returns an EventEmitter that emits the requested events when they are triggered by FreeSwitch on the given Unique-ID. You MUST call `.end` once the EventEmitter is no longer needed.
+
       @cfg.api.monitor = seem (id,events) ->
         debug 'api.monitor: start', {id,events}
         monitor_client ?= yield _client()
+
+Don't show the warning for 10 concurrent calls!
+The number should really be an estimate of our maximum number of concurrent, monitored calls.
+
+        monitor_client.setMaxListeners 200
 
         debug 'api.monitor: filtering', id
         yield monitor_client.filter UNIQUE_ID, id
 
         ev = new EventEmitter()
-
-Don't show the warning for 10 concurrent calls!
-The number should really be an estimate of our maximum number of concurrent, monitored calls.
-
-        ev.setMaxListeners 200
 
         listener = (msg) ->
           return unless msg?.body?
