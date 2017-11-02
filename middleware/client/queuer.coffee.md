@@ -25,12 +25,11 @@
     @notify = ->
 
       queuer = @cfg.queuer
-      Agent = @cfg.queuer_Agent
-
       unless queuer?
         debug.dev 'queuer is not available'
         return
 
+      {Agent} = @cfg.queuer
       unless Agent?
         debug.dev 'Agent is not available'
         return
@@ -352,8 +351,6 @@ Since we're bound to a server for domains it's OK to use the local Redis.
       Queuer = queuer pools_redis_interface,
         Agent: HugePlayAgent
         Call: HugePlayCall
-      @cfg.queuer_Agent = HugePlayAgent
-      @cfg.queuer_Call = HugePlayCall
       @cfg.queuer = new Queuer @cfg
       return
 
@@ -366,10 +363,10 @@ Middleware
         yield @action 'block_dtmf'
 
       queuer = @cfg.queuer
-      Agent = @cfg.queuer_Agent
-      Call = @cfg.queuer_Call
+      return unless queuer?
 
-      return unless queuer? and Agent? and Call?
+      {Agent,Call} = @cfg.queuer
+      return unless Agent? and Call?
 
 Queuer Call object
 ------------------
