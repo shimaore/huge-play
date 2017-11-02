@@ -246,7 +246,7 @@ Remember to always call `monitor.end()` when you are done with the monitor!
 Don't show the warning for 10 concurrent calls!
 The number should really be an estimate of our maximum number of concurrent, monitored calls.
 
-        monitor_client.setMaxListeners 200
+        monitor_client.__ev.setMaxListeners 200
 
         debug 'api.monitor: filtering', id
         yield monitor_client.filter UNIQUE_ID, id
