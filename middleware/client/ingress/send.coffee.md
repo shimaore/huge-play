@@ -61,87 +61,29 @@ Transfer-disposition values:
         @debug 'Set inbound eavesdrop', eavesdrop_key
         yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
 
+The new call will always be bound to this agent.
+
         debug 'CHANNEL_PRESENT', key, new_uuid
-        yield queuer?.track key, new_uuid
-        yield queuer?.on_present new_uuid
+
+        if queuer?
+          new_call = new queuer.Call queuer, id: new_uuid
+          agent = new queuer.Agent queuer, key
+
+Bind the agent to the call.
+
+          yield new_call.set_agent key
+
+Add the call to the agent.
+
+          yield agent.add_call new_uuid
+
+Monitor the b-leg.
+
+          yield queuer.monitor_local_call new_call
+
+Note: inside the queuer, these calls are never pooled, so their state does not evolve.
+
         @report event:'start-of-call', agent:key, call:new_uuid
-
-        monitor_far = yield @cfg.api.monitor @call.uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
-
-        monitor_far.on 'CHANNEL_BRIDGE', hand ({body}) =>
-          a_uuid = body['Bridge-A-Unique-ID']
-          b_uuid = body['Bridge-B-Unique-ID']
-          debug 'CHANNEL_BRIDGE (far)', key, a_uuid, b_uuid
-          return unless b_uuid is new_uuid
-
-          yield queuer?.track key, b_uuid
-          yield queuer?.on_bridge b_uuid
-          return
-
-        monitor_far.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
-          a_uuid = body['Bridge-A-Unique-ID']
-          b_uuid = body['Bridge-B-Unique-ID']
-          debug 'CHANNEL_UNBRIDGE (far)', key, a_uuid, b_uuid
-          return unless b_uuid is new_uuid
-
-          yield queuer?.on_unbridge b_uuid
-          yield queuer?.untrack key, b_uuid
-          return
-
-        monitor_far.on 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
-          yield monitor?.end()
-          monitor = null
-
-        monitor = yield @cfg.api.monitor new_uuid, ['CHANNEL_BRIDGE', 'CHANNEL_UNBRIDGE','CHANNEL_HANGUP_COMPLETE']
-
-Bridge on called side of a call.
-
-        monitor.on 'CHANNEL_BRIDGE', hand ({body}) =>
-          a_uuid = body['Bridge-A-Unique-ID']
-          b_uuid = body['Bridge-B-Unique-ID']
-          debug 'CHANNEL_BRIDGE', key, a_uuid, b_uuid
-
-          yield queuer?.track key, a_uuid
-          yield queuer?.on_bridge a_uuid
-          return
-
-Unbridge on called side of a call.
-On attended-transfer we need to track the remote leg of the call, so that the (forthcoming) BRIDGE can locate the agent.
-
-        monitor.on 'CHANNEL_UNBRIDGE', hand ({body}) =>
-          a_uuid = body['Bridge-A-Unique-ID']
-          b_uuid = body['Bridge-B-Unique-ID']
-          disposition = body?.variable_transfer_disposition
-          debug 'CHANNEL_UNBRIDGE', key, a_uuid, b_uuid, disposition, body.variable_endpoint_disposition
-
-          if disposition is 'replaced'
-            # expect body.variable_endpoint_disposition is 'ATTENDED_TRANSFER'
-            yield queuer?.track key, b_uuid
-            yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, b_uuid
-          else
-            yield @local_redis?.del eavesdrop_key
-
-          yield queuer?.on_unbridge a_uuid
-          yield queuer?.untrack key, a_uuid
-
-          @report event:'end-of-call', agent:key
-          return
-
-This is to handle the case of calls that never get bridged (since in this case we never get to `CHANNEL_UNBRIDGE, and the above call to `on_present` is never cancelled).
-
-        monitor.once 'CHANNEL_HANGUP_COMPLETE', hand ({body}) =>
-          yield monitor?.end()
-          monitor = null
-
-          a_uuid = body[Unique_ID] # or 'Channel-Call-UUID'
-          disposition = body?.variable_transfer_disposition
-          debug 'CHANNEL_HANGUP_COMPLETE', key, a_uuid, disposition, body.variable_endpoint_disposition
-          unless disposition is 'replaced'
-            yield @local_redis?.del eavesdrop_key
-            yield queuer?.on_unbridge a_uuid
-            yield queuer?.untrack key, a_uuid
-            @report event:'end-of-call', agent:key, call:a_uuid
-          return
 
 Send the call(s)
 ----------------
