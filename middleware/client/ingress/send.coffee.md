@@ -67,6 +67,10 @@ The new call will always be bound to this agent.
 
         if queuer?
           new_call = new queuer.Call queuer, id: new_uuid
+          yield new_call.save()
+          yield new_call.set_session @session._id
+          yield new_call.set_reference @session.reference
+
           agent = new queuer.Agent queuer, key
 
 Bind the agent to the call.
