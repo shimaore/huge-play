@@ -145,6 +145,7 @@ variable_pre_transfer_caller_id_number
         sip_referred_by = @req.variable 'sip_h_Referred-By'
 
         if sip_refer_to? and sip_referred_by?
+          @debug 'source', @source
           m = sip_refer_to.match /sip:(\d+)@/
           @debug 'refer_to', m[1]
           @destination = m[1]
