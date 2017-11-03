@@ -35,6 +35,6 @@ Centrex Handling
 Monitor the a-leg.
 
       if @cfg.queuer? and @queuer_call?
-        yield queuer.monitor_remote_call @queuer_call
+        yield @cfg.queuer.monitor_remote_call @queuer_call
 
       @debug 'Handling is local'
