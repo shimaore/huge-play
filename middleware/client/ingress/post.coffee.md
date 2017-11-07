@@ -202,6 +202,34 @@ Call Forward All
         return
       @session.reason = null
 
+Do Not Disturb
+--------------
+
+* local_number.dnd (boolean) If true, considers the line is in Do Not Disturb and use the CFB indications to handle the call.
+
+      @debug 'DND?'
+
+      if @session.number.dnd
+        @session.reason = 'do-not-disturb' # RFC5806
+        if @session.cfb_voicemail
+          @debug 'dnd:voicemail'
+          @notify state: 'dnd:voicemail'
+          @destination = @session.cfb_voicemail_number
+          @direction 'voicemail'
+          return
+        if @session.cfb_number?
+          @debug 'dnd:forward'
+          @notify state: 'dnd:forward'
+          @session.destination = @session.cfb_number
+          @direction 'forward'
+          return
+        if @session.cfb?
+          @debug 'dnd:fallback'
+          @notify state: 'dnd:fallback'
+          @session.initial_destinations = [ to_uri: @session.cfb ]
+          return
+        @session.reason = null
+
 Ringback for other Call Forward
 -------------------------------
 
