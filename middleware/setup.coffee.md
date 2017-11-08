@@ -44,10 +44,16 @@ Local and Global Redis
 
       assert @cfg.redis?, 'cfg.redis (global redis) is required for Reference'
 
+* @cfg.redis (Required) Configuration for a global redis server shared by all instances.
+
       @cfg.global_redis_client = make_a_redis 'global redis', @cfg.redis
+
+* @cfg.local_redis (Optional, recommended) If present, used as the configuration for a local redis server. Default: use the global redis server defined in @cfg.redis
 
       if @cfg.local_redis?
         @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis
+      else
+        @cfg.local_redis_client = @cfg.global_redis_client
 
 How long should we keep a reference after the last update?
 
@@ -230,7 +236,7 @@ Use a default client for generic / shared APIs
       UNIQUE_ID = 'Unique-ID'
       EVENT_NAME = 'Event-Name'
 
-FIXME: Can only be called once on a given `id`. Add e.g. Redis support to store monitored events counters & ids.
+      store = @cfg.local_redis_client
 
       monitor_client = null
       monitored_events = {}
@@ -249,7 +255,12 @@ The number should really be an estimate of our maximum number of concurrent, mon
         monitor_client.__ev.setMaxListeners 200
 
         debug 'api.monitor: filtering', id
-        yield monitor_client.filter UNIQUE_ID, id
+        key = "filter-#{id}"
+        filter = -> yield monitor_client.filter UNIQUE_ID, id
+        unfilter = -> yield monitor_client.filter_delete UNIQUE_ID, id
+
+        if 1 is yield store.incr key
+          yield filter()
 
         ev = new EventEmitter()
 
@@ -275,7 +286,10 @@ The number should really be an estimate of our maximum number of concurrent, mon
             return
 
           debug 'api.monitor.end', {id,events}
-          yield monitor_client.filter_delete UNIQUE_ID, id
+          if 0 is yield store.decr key
+            yield unfilter()
+            yield store.expire key, 10
+
           for event in events
             yield do (event) ->
               monitor_client.removeListener event, listener
