@@ -173,7 +173,7 @@ How long should we keep the state of an agent after the last update?
             alert_info: yield @get_alert_info().catch -> null
             reference: yield @get_reference().catch -> null
             session: yield @get_session().catch -> null
-            bridged: yield @bridged().catch -> null
+            answered: yield @answered().catch -> null
             presenting: yield @count().catch -> null
             tags: yield @tags().catch -> []
 
