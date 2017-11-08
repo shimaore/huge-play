@@ -58,7 +58,7 @@ Eavesdrop registration
       eavesdrop_key = "outbound:#{key}"
       {queuer} = @cfg
 
-      unless @call.closed
+      unless @session.transfer or @call.closed
 
         @debug 'Set outbound eavesdrop', eavesdrop_key
         yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
