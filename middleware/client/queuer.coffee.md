@@ -179,7 +179,7 @@ How long should we keep the state of an agent after the last update?
 
           for own k,v of data when v?
             switch k
-              when 'agent', 'agent_call', 'remote_call'
+              when 'agent', 'call', 'agent_call', 'remote_call'
                 v = v.key if typeof v isnt 'string'
             notification[k] ?= v
 
