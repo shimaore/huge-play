@@ -54,11 +54,11 @@ Eavesdrop registration
       {eavesdrop_timeout} = @cfg
       eavesdrop_timeout ?= default_eavesdrop_timeout
 
-      key = "#{@source}@#{@session.number_domain}"
+      key = @session.agent
       eavesdrop_key = "outbound:#{key}"
       {queuer} = @cfg
 
-      unless @session.transfer or @call.closed
+      unless @call.closed
 
         @debug 'Set outbound eavesdrop', eavesdrop_key
         yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
