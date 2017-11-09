@@ -150,7 +150,7 @@ variable_pre_transfer_caller_id_number
           @debug 'refer_to', m[1]
           @session.refer_to = m[1]
           @destination = m[1]
-          m = sip_referred_by.match /sip:(\d+)@[^;]+/
+          m = sip_referred_by.match /sip:(\d+@[^;]+)/
           @debug 'referred_by', m[1]
           referred_by = m[1]
           @session.referred_by = m[1]
