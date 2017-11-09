@@ -74,6 +74,8 @@ The new call will always be bound to this agent.
 Bind the agent to the call.
 
           yield queuer.set_agent new_call, key
+          yield @reference.set_endpoint key
+          yield @reference.add_in key
 
 Monitor the b-leg.
 
@@ -142,7 +144,9 @@ For example: `200`
 
       code ?= data?.variable_sip_term_status
 
-      @debug 'Outcome', {cause,code}
+      disposition = data?.variable_transfer_disposition
+
+      @debug 'Outcome', {cause,code,disposition}
 
 ### For transfers, we also get state information.
 
