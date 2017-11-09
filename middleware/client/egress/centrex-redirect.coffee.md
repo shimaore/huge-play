@@ -65,22 +65,18 @@ Eavesdrop registration
 
         debug 'CHANNEL_PRESENT', key, @call.uuid
 
-        if queuer?
-          agent = new queuer.Agent queuer, key
+        if queuer? and @queuer_call?
 
 Bind the agent to the call.
 
-          yield @queuer_call?.set_agent key
-
-Add the call to the agent.
-
-          yield agent.add_call @call.uuid
+          yield queuer.set_agent @queuer_call, key
 
 Monitor the a-leg.
 
-          yield queuer.monitor_local_call @queuer_call if @queuer_call?
-
-Note: inside the queuer, since these calls are never pooled, so their state does not evolve.
+          if @session.transfer
+            yield queuer.monitor_remote_call @queuer_call
+          else
+            yield queuer.monitor_local_call @queuer_call
 
         @report event:'start-of-call', agent:key, call:@call.uuid
 
