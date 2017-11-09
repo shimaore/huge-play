@@ -65,25 +65,15 @@ The new call will always be bound to this agent.
 
         debug 'CHANNEL_PRESENT', key, new_uuid
 
-        if queuer?
-          new_call = new queuer.Call queuer, id: new_uuid
-          yield new_call.save()
-          yield new_call.set_session @session._id
-          yield new_call.set_reference @session.reference
-
-          agent = new queuer.Agent queuer, key
+        if queuer? and @queuer_call?
 
 Bind the agent to the call.
 
-          yield new_call.set_agent key
-
-Add the call to the agent.
-
-          yield agent.add_call new_uuid
+          yield queuer.set_agent @queuer_call, key
 
 Monitor the b-leg.
 
-          yield queuer.monitor_local_call new_call
+          yield queuer.monitor_local_call @queuer_call
 
 Note: inside the queuer, these calls are never pooled, so their state does not evolve.
 
