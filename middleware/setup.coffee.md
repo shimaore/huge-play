@@ -245,6 +245,10 @@ Remember to always call `monitor.end()` when you are done with the monitor!
 
 * cfg.api.monitor(unique_id,events) returns an EventEmitter that emits the requested events when they are triggered by FreeSwitch on the given Unique-ID. You MUST call `.end` once the EventEmitter is no longer needed.
 
+      @cfg.api.is_monitored = seem (id) ->
+        key = "filter-#{id}"
+        0 < yield store.get key
+
       @cfg.api.monitor = seem (id,events) ->
         debug 'api.monitor: start', {id,events}
         monitor_client ?= yield _client()
