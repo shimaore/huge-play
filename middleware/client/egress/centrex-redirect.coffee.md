@@ -69,7 +69,10 @@ Eavesdrop registration
 
 Bind the agent to the call.
 
-          yield queuer.set_agent @queuer_call, key
+          if @session.referred_by is key
+            @debug 'Agent is the one doing the transfer, not forcing agent back to busy.', key
+          else
+            yield queuer.set_agent @queuer_call, key
 
 Monitor the a-leg.
 
