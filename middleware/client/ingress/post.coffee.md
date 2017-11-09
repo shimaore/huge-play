@@ -383,6 +383,8 @@ Timeout
         state: 'ingress-call'
         endpoint: @session.endpoint_name
 
+      yield @reference.set_endpoint @session.endpoint_name
+
 ### Build the set of `_in` targets for notifications of the reference data.
 
       if @session.dev_logger
