@@ -74,8 +74,6 @@ The new call will always be bound to this agent.
 Bind the agent to the call.
 
           yield queuer.set_agent new_call, key
-          yield @reference.set_endpoint key
-          yield @reference.add_in key
 
 Monitor the b-leg.
 
