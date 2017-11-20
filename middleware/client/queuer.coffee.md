@@ -196,7 +196,7 @@ How long should we keep the state of an agent after the last update?
         notify: seem (data) ->
           debug 'agent.notify', @key, data
 
-          {old_state,state,event} = data
+          {old_state,state,event,reason} = data
 
           notification =
             _queuer: true
@@ -212,6 +212,7 @@ How long should we keep the state of an agent after the last update?
             state: state
             old_state: old_state
             event: event
+            reason: reason
             agent: @key
             number: @number
             number_domain: @domain
