@@ -136,7 +136,9 @@ Eavesdrop: call to listen (no notification, no whisper).
 
           inbound_uuid = yield @local_redis.get "inbound:#{number}@#{@session.number_domain}"
           outbound_uuid = yield @local_redis.get "outbound:#{number}@#{@session.number_domain}"
-          @debug 'Eavesdrop', inbound_uuid, outbound_uuid
+          onhook_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'onhook-call'
+          remote_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'remote-call'
+          @debug 'Eavesdrop', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
             when inbound_uuid?
               uuid = inbound_uuid
@@ -145,8 +147,8 @@ Eavesdrop: call to listen (no notification, no whisper).
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: false
                 eavesdrop_whisper_bleg: false
-            when outbound_uuid?
-              uuid = outbound_uuid
+            when outbound_uuid? or onhook_uuid?
+              uuid = onhook_uuid ? outbound_uuid
               yield @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
@@ -173,7 +175,9 @@ Monitor: call to listen (with notification beep), and whisper
 
           inbound_uuid = yield @local_redis.get "inbound:#{number}@#{@session.number_domain}"
           outbound_uuid = yield @local_redis.get "outbound:#{number}@#{@session.number_domain}"
-          @debug 'Monitor', inbound_uuid, outbound_uuid
+          onhook_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'onhook-call'
+          remote_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'remote-call'
+          @debug 'Monitor', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
             when inbound_uuid?
               uuid = inbound_uuid
@@ -182,8 +186,8 @@ Monitor: call to listen (with notification beep), and whisper
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: true
                 eavesdrop_whisper_bleg: false
-            when outbound_uuid?
-              uuid = outbound_uuid
+            when outbound_uuid? or onhook_uuid?
+              uuid = onhook_uuid ? outbound_uuid
               yield @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
