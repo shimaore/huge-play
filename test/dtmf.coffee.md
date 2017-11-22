@@ -43,7 +43,7 @@
         @timeout 3000
         ctx.dtmf.clear()
         yield sleep 500
-        p = ctx.dtmf.expect 1, 1, 500, 1000
+        p = ctx.dtmf.expect 1, 1, 500
         v = yield p
         v.should.eql ''
 
@@ -53,7 +53,7 @@
         submit 'B'
         submit 'C'
         submit 'D'
-        p = ctx.dtmf.expect 1, 1, 500, 1000
+        p = ctx.dtmf.expect 1, 10, 500
         v = yield p
         v.should.eql 'ABCD'
 
@@ -61,7 +61,7 @@
         @timeout 3000
         ctx.dtmf.clear()
         submit 'A'
-        p = ctx.dtmf.expect 2, 5, 250, 1000
+        p = ctx.dtmf.expect 2, 5, 250
         yield sleep 100
         submit 'B'
 
@@ -80,14 +80,15 @@ The last one will arrive too late, so it is not counted.
         yield sleep 50
         submit 'A'
         yield sleep 50
-        p = ctx.dtmf.expect 2, 5, 250, 2000
-        yield sleep 100
+        p = ctx.dtmf.expect 2, 5, 250
+        yield sleep 50
         submit 'B'
 
 The last one arrives before timeout.
 
-        yield sleep 100
+        yield sleep 50
         submit 'C'
+        yield sleep 50
         v = yield p
         v.should.eql 'ABC'
 
@@ -100,7 +101,7 @@ The last one arrives before timeout.
         submit 'B'
         yield sleep 50
         submit '#'
-        p = ctx.dtmf.expect 4, 4, 250, 1000
+        p = ctx.dtmf.expect 1, 4, 250
         yield sleep 50
         submit 'C'
         v = yield p
@@ -115,7 +116,7 @@ The last one arrives before timeout.
         yield sleep 50
         submit '#'
         yield sleep 10
-        p = ctx.dtmf.expect 4, 4, 250, 1000
+        p = ctx.dtmf.expect 1, 4, 250
         v = yield p
         yield sleep 50
         submit 'C'
@@ -123,7 +124,7 @@ The last one arrives before timeout.
 
       it 'should handle # afterwards', seem ->
         ctx.dtmf.clear()
-        p = ctx.dtmf.expect 4, 4, 250, 1000
+        p = ctx.dtmf.expect 1, 4, 250, 1000
         yield sleep 50
         submit 'A'
         yield sleep 50
@@ -134,3 +135,25 @@ The last one arrives before timeout.
         submit 'C'
         v = yield p
         v.should.eql 'AB'
+
+      it 'should respect maximum length (before)', seem ->
+        ctx.dtmf.clear()
+        submit 'A'
+        submit 'B'
+        submit 'C'
+        submit 'D'
+        submit 'E'
+        p = ctx.dtmf.expect 4, 4, 250
+        v = yield p
+        v.should.eql 'ABCD'
+
+      it 'should respect maximum length (after)', seem ->
+        ctx.dtmf.clear()
+        submit 'A'
+        submit 'B'
+        p = ctx.dtmf.expect 4, 4, 250
+        submit 'C'
+        submit 'D'
+        submit 'E'
+        v = yield p
+        v.should.eql 'ABCD'

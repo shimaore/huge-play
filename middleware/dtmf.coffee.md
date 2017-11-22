@@ -7,106 +7,79 @@
       timer = null
       handler = null
 
-      clear_timer = ->
-        debug 'clear_timer'
-        if timer?
-          clearTimeout timer
-        timer = null
-
-      clear_handler = =>
-        debug 'clear_handler'
-        handler = null
-
       dtmf_buffer = ''
 
-      clear = ->
-        debug 'clear'
-        clear_handler()
-        clear_timer()
-        r = dtmf_buffer
-        dtmf_buffer = ''
-        r
-
-      expect = (min_length, max_length = 16, inter_digit = 3*1000, final = inter_digit) =>
-        @debug 'expect', min_length, max_length
-        clear_timer()
-
-        new Promise (resolve) =>
-
-Clean any post-`#` digits that might be present before we start our timers.
-
-          if m = dtmf_buffer.match /^([^#]*)#/
-            clear()
-            resolve m[1]
-            return
-
-If we already collected enough digits, simply return them.
-
-          if dtmf_buffer.length >= max_length
-            resolve clear()
-            return
-
-Otherwise we'll have to wait a little bit longer.
-
-          set_timer = ->
-            debug 'set_timer'
-            clear_timer()
-
-First we wait for the inter-digit timeout.
-
-            timer = setTimeout ->
-              debug 'inter-digit timer expired'
-              clear_timer()
-
-If we waited and the user did not enter a new digit, stop waiting if we already collected the minimum number of digits we needed.
-
-              if dtmf_buffer.length >= min_length
-                resolve clear()
-                return
-
-Otherwise wait a little longer. If the user does not enter any new digit in the period, return what we have so far (including, possibly, an empty buffer).
-
-              timer = setTimeout ->
-                debug 'final timer expired'
-                resolve clear()
-              , final
-
-              return
-
-            , inter_digit
-            return
-
-We start handling new digits arrival.
-
-          handler = ->
-            debug 'handler', dtmf_buffer
-            clear_timer()
-
-Use `#` as a terminator
-
-            if m = dtmf_buffer.match /^([^#]*)#/
-              clear()
-              resolve m[1]
-              return
-
-When we receive a new digit, if the maximum length is reached we do not wait for another digit.
-
-            if dtmf_buffer.length >= max_length
-              resolve clear()
-              return
-
-However if we aren't done just yet, simply re-set the timers.
-
-            set_timer()
-
-          set_timer()
-          return
+      on_change = null
 
       yield @call.event_json 'DTMF'
       @call.on 'DTMF', (res) =>
+        c = res.body['DTMF-Digit']
+        debug "Received #{c}"
         dtmf_buffer ?= ''
-        dtmf_buffer += res.body['DTMF-Digit']
-        handler? dtmf_buffer
+        dtmf_buffer += c
+        on_change?()
+        return
+
+      wait_for_digit = (timeout) =>
+        if on_change?
+          debug.dev "wait_for_digit called while already active (ignore)"
+          return Promise.reject new Error 'recursive'
+
+        new Promise (resolve,reject) =>
+
+          on_timeout = =>
+            on_change = null
+            reject new Error 'timeout'
+
+          timer = setTimeout on_timeout, timeout
+
+          on_change = ->
+            on_change = null
+            clearTimeout timer
+            resolve()
+
+          return
+
+      expect = seem (min_length = 1, max_length = min_length, inter_digit = 3*1000) =>
+        debug 'expect', min_length, max_length, inter_digit
+
+        clear = (r = dtmf_buffer) ->
+          debug 'clear'
+          dtmf_buffer = ''
+          if r.length < min_length
+            ''
+          else
+            r.substr 0, max_length
+
+        while true
+
+If the user already provide a value, terminated with `#`,
+
+          if m = dtmf_buffer.match /^([^#]*)#/
+
+then use that value.
+
+            return clear m[1]
+
+Make sure we don't overflow.
+
+          if dtmf_buffer.length >= max_length
+            return clear()
+
+Wait for a digit
+
+          try
+
+            yield wait_for_digit inter_digit
+
+If we didn't collect a digit,
+
+          catch error
+
+do we already have enough?
+
+            return clear()
+
         return
 
       present = ->
@@ -119,9 +92,11 @@ Public API
 
 `@dtmf.clear`: resets all fields. If the buffer was not empty, returns the content of the buffer.
 
-        clear: clear
+        clear: ->
+          [r,dtmf_buffer] = [dtmf_buffer,'']
+          r
 
-`@dtmf.expect min, max, inter_digit, final`: Returns a Promise that will resolve once at least `min` (default: 1) and at most `max` (default: 16) digits have been received, with an inter-digit timeout of `inter_digit` (in ms, default: 3000) and a final timeout `final` (in ms, default: 7000). Note that the total waiting time is `inter_digit+final`.
+`@dtmf.expect min, max, inter_digit`: Returns a Promise that will resolve once at least `min` (default: 1) and at most `max` (default: `min`) digits have been received, with an inter-digit timeout of `inter_digit` (in ms, default: 3000). If the number of collected digits is not enough, return the empty string.
 
         expect: expect
 
