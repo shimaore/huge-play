@@ -19,6 +19,9 @@
       else
         number = parseInt m[2], 10
         key = "#{number}@#{@session.number_domain}"
+        {groups} = number_data = yield @cfg
+          .prov.get "number:#{key}"
+          .catch -> {}
         inbound_uuid = yield @local_redis.get "inbound:#{key}"
         outbound_uuid = yield @local_redis.get "outbound:#{key}"
         onhook_uuid = yield @local_redis.hget "agent-#{key}-P", 'onhook-call'
@@ -50,6 +53,13 @@ The destination matched.
         .catch (error) =>
           @debug.csr "number_domain #{number_domain}: #{error}"
           {}
+
+* doc.local_number:allowed_groups (array of string) Contains prefixes for which the given user may eavesdrop. The convention is to use `:` as a separator. For example: ['sales','support:modems']
+
+      is_allowed = (allowed_groups,target_groups) ->
+        target_groups?.some (name) ->
+          allowed_groups?.some (prefix) ->
+            name.substr(0,prefix.length) is prefix
 
       get = (name,type) =>
 
@@ -96,6 +106,9 @@ This works only for centrex.
 
       agent = @session.agent ? "#{@source}@#{@session.number_domain}"
       agent_name = @session.agent_name ? @source
+      {allowed_groups} = agent_data = yield @cfg
+        .prov.get "number:#{agent}"
+        .catch -> {}
 
       failed = =>
         @debug 'Failed'
@@ -137,7 +150,9 @@ This works only for centrex.
 Eavesdrop: call to listen (no notification, no whisper).
 
         when ACTION_EAVESDROP
+          @debug 'Eavesdrop', number, allowed_groups, groups
           return failed() unless number?
+          return failed() unless is_allowed allowed_groups, groups
 
           @debug 'Eavesdrop', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
@@ -172,7 +187,9 @@ Eavesdrop: call to listen (no notification, no whisper).
 Monitor: call to listen (with notification beep), and whisper
 
         when ACTION_MONITOR
+          @debug 'Monitor', number, allowed_groups, groups
           return failed() unless number?
+          return failed() unless is_allowed allowed_groups, groups
 
           @debug 'Monitor', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
