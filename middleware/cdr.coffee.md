@@ -1,6 +1,6 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:cdr"
-    debug = (require 'tangible') @name
+    {debug,hand} = (require 'tangible') @name
     seem = require 'seem'
     Moment = require 'moment-timezone'
 
@@ -27,13 +27,12 @@ A record of the (original, pre-processing) source and destination.
 
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
-      @call.once 'cleanup_linger'
-      .then seem =>
+      @call.once 'cleanup_linger', hand =>
         debug "CDR: Linger: pausing"
         yield @sleep 4000
         debug "CDR: Linger: exit"
-        yield @call.exit().catch (error) =>
-          debug.dev "exit: #{error}"
+        yield @call.exit()
+        return
 
       yield @call.linger()
 
@@ -44,8 +43,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       @statistics.add 'incoming-calls'
 
       yield @call.event_json 'CHANNEL_HANGUP_COMPLETE'
-      @call.once 'CHANNEL_HANGUP_COMPLETE'
-      .then (res) =>
+      @call.once 'CHANNEL_HANGUP_COMPLETE', hand (res) =>
         debug "Channel Hangup Complete"
 
 * session.cdr_direction (string) original call direction, before it is modified for example into `lcr` or `voicemail`.
@@ -106,7 +104,7 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
               @statistics.add k, v
 
         @session.cdr_report = cdr_report
-        @call.emit 'cdr_report', cdr_report
+        @emit 'cdr_report', cdr_report
 
 Update the (existing) call data
 
@@ -121,10 +119,9 @@ Update the (existing) call data
             .tz @session.timezone
             .format()
 
-        @notify {state:'end', call_data, cdr_report}
+        yield @notify {state:'end', call_data, cdr_report}
         debug "CDR: Channel Hangup Complete", cdr_report
-      .catch (error) =>
-        debug "On CHANNEL_HANGUP_COMPLETE, #{error.stack ? error}"
+        return
 
       @debug 'Ready'
       return
