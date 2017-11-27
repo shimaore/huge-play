@@ -18,6 +18,11 @@
         number = null
       else
         number = parseInt m[2], 10
+        key = "#{number}@#{@session.number_domain}"
+        inbound_uuid = yield @local_redis.get "inbound:#{key}"
+        outbound_uuid = yield @local_redis.get "outbound:#{key}"
+        onhook_uuid = yield @local_redis.hget "agent-#{key}-P", 'onhook-call'
+        remote_uuid = yield @local_redis.hget "agent-#{key}-P", 'remote-call'
 
 The destination matched.
 
@@ -134,10 +139,6 @@ Eavesdrop: call to listen (no notification, no whisper).
         when ACTION_EAVESDROP
           return failed() unless number?
 
-          inbound_uuid = yield @local_redis.get "inbound:#{number}@#{@session.number_domain}"
-          outbound_uuid = yield @local_redis.get "outbound:#{number}@#{@session.number_domain}"
-          onhook_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'onhook-call'
-          remote_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'remote-call'
           @debug 'Eavesdrop', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
             when inbound_uuid?
@@ -173,10 +174,6 @@ Monitor: call to listen (with notification beep), and whisper
         when ACTION_MONITOR
           return failed() unless number?
 
-          inbound_uuid = yield @local_redis.get "inbound:#{number}@#{@session.number_domain}"
-          outbound_uuid = yield @local_redis.get "outbound:#{number}@#{@session.number_domain}"
-          onhook_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'onhook-call'
-          remote_uuid = yield @local_redis.hget "agent-#{number}@#{@session.number_domain}-P", 'remote-call'
           @debug 'Monitor', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
           switch
             when inbound_uuid?
