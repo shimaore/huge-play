@@ -387,6 +387,11 @@
 </profile>
 </profiles>
 </configuration>
+<configuration name="msrp.conf">
+<settings>
+<param name="listen-ip" value="::1"/>
+</settings>
+</configuration>
 </section>
 <section name="phrases">
 <macros>

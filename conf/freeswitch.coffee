@@ -210,6 +210,11 @@ module.exports = renderable (cfg) ->
             param 'exit-sound', 'tone_stream://%(500,0,300,200,100,50,25)'
             param 'sound-prefix', ''
 
+      # See RFC4975, RFC4976, RFC7701, RFC7977.
+      configuration name:'msrp.conf', ->
+        settings ->
+          param 'listen-ip', '::1'
+
     # cfg.sound_dir (string) Location of the sound files (default: `/opt/freeswitch/share/freeswitch/sounds`)
     sound_dir = cfg.sound_dir ? '/opt/freeswitch/share/freeswitch/sounds'
     if process.env.WITH_SOUNDS is 'true' or not process.env.WITH_SOUNDS?
