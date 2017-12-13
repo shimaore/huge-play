@@ -41,7 +41,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis?.setex intercept_key, intercept_timeout, new_uuid
+      yield @local_redis?.setex intercept_key, intercept_timeout, @call.uuid
 
       @session.agent = key
 
