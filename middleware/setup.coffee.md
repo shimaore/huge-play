@@ -1,7 +1,7 @@
     seem = require 'seem'
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
-    EventEmitter = require 'events'
+    {EventEmitter2} = require 'eventemitter2'
     Moment = require 'moment-timezone'
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
@@ -19,6 +19,13 @@
 
     now = (tz = 'UTC') ->
       Moment().tz(tz).format()
+
+    default_wrapper = null
+    monitor_wrapper = null
+
+    @end = ->
+      default_wrapper.end()
+      monitor_wrapper.end()
 
     @config = seem ->
       yield nimble @cfg
@@ -167,34 +174,33 @@ Eventually the two should be merged.
 
 Create a new socket client
 
-      _client = =>
-        new Promise (resolve) =>
-          try
-            client = FS.client ->
-              resolve this
-            client.keepConnected (@cfg.socket_port ? 5722), '127.0.0.1'
-          catch error
-            debug '_client: error', error
-            resolve null
-          return
+      _wrapper = =>
+        options =
+          host: '127.0.0.1'
+          port: @cfg.socket_port ? 5722
+
+        FS.createClient options
 
 Create a new socket client bound to a given UUID
 
-      @cfg.uuid_client = seem (uuid) ->
-        client = yield _client()
-        yield client.send "myevents #{uuid} json"
-        yield client.event_json 'ALL'
-        yield client.linger()
+      ###
+      @cfg.uuid_wrapper = seem (uuid) ->
+        wrapper = yield _wrapper()
+        register = ->
+          yield wrapper.client.send "myevents #{uuid} json"
+          yield wrapper.client.event_json 'ALL'
+          yield wrapper.client.linger()
+        wrapper.on 'client-changed', register
         # yield client.auto_cleanup() # Already done by esl
-        client
+        wrapper
+      ###
 
 Use a default client for generic / shared APIs
 
-      default_client = null
+      default_wrapper = yield _wrapper()
 
       _api = seem (cmd) ->
-        default_client ?= yield _client()
-        res = yield default_client.bgapi cmd
+        res = yield default_wrapper.client.bgapi cmd
 
 * cfg.api(command) returns (a Promise for) the body of the response for a FreeSwitch `api` command.
 
@@ -204,10 +210,8 @@ Use a default client for generic / shared APIs
         res?.body ? null
 
 * cfg.api.send(command) returns (a Promise for) the `esl` response to the command.
-* cfg.api.create() returns (a Promise for) an `esl` client.
 
       @cfg.api.send = _api
-      @cfg.api.create = _client
 
 * cfg.api.truthy(command) returns (a Promise for) a boolean indicating the success of the command.
 
@@ -238,7 +242,7 @@ Use a default client for generic / shared APIs
 
       store = @cfg.local_redis_client
 
-      monitor_client = null
+      monitor_wrapper = yield _wrapper()
       monitored_events = {}
 
 Remember to always call `monitor.end()` when you are done with the monitor!
@@ -251,22 +255,18 @@ Remember to always call `monitor.end()` when you are done with the monitor!
 
       @cfg.api.monitor = seem (id,events) ->
         debug 'api.monitor: start', {id,events}
-        monitor_client ?= yield _client()
 
 Don't show the warning for 10 concurrent calls!
 The number should really be an estimate of our maximum number of concurrent, monitored calls.
 
-        monitor_client.__ev.setMaxListeners 200
+        monitor_wrapper.client.setMaxListeners 200
 
         debug 'api.monitor: filtering', id
         key = "filter-#{id}"
-        filter = -> yield monitor_client.filter UNIQUE_ID, id
-        unfilter = -> yield monitor_client.filter_delete UNIQUE_ID, id
+        filter = -> yield monitor_wrapper.client.filter UNIQUE_ID, id
+        unfilter = -> yield monitor_wrapper.client.filter_delete UNIQUE_ID, id
 
-        if 1 is yield store.incr key
-          yield filter()
-
-        ev = new EventEmitter()
+        ev = new EventEmitter2()
 
         listener = (msg) ->
           return unless msg?.body?
@@ -276,15 +276,32 @@ The number should really be an estimate of our maximum number of concurrent, mon
             debug 'api.monitor received', msg_id, msg_ev
             ev?.emit msg_ev, msg
 
-        for event in events
-          yield do (event) ->
-            monitor_client.on event, listener
-            monitored_events[event] ?= 0
-            if monitored_events[event]++ is 0
-              debug 'Adding event json for', event
-              monitor_client.event_json event
+        register = seem ->
+          if 1 is yield store.incr key
+            yield filter()
+
+          for event in events
+            yield do (event) ->
+              monitor_wrapper.client.on event, listener
+              monitored_events[event] ?= 0
+              if monitored_events[event]++ is 0
+                debug 'Adding event json for', event
+                monitor_wrapper.client.event_json event
+
+        re_register = hand ->
+          yield filter()
+          for event in events
+            yield do (event) ->
+              monitor_wrapper.client.on event, listener
+              if monitored_events[event] > 0
+                monitor_wrapper.client.event_json event
+
+        monitor_wrapper.on 'client-changed', re_register
+        yield register()
 
         ev.end = seem ->
+          monitor_wrapper.off 'client-changed', re_register
+
           if not ev?
             debug 'api.monitor.end: called more than once (ignored)', {id,events}
             return
@@ -296,10 +313,10 @@ The number should really be an estimate of our maximum number of concurrent, mon
 
           for event in events
             yield do (event) ->
-              monitor_client.removeListener event, listener
+              monitor_wrapper.client.off event, listener
               if --monitored_events[event] is 0
                 debug 'api.monitor.end: nixevent', event
-                monitor_client.nixevent event
+                monitor_wrapper.client.nixevent event
           ev.removeAllListeners()
           ev = null
           debug 'api.monitor.end: done'
@@ -362,7 +379,7 @@ Context Extension
 
     @include = (ctx) ->
 
-      _bus = new EventEmitter()
+      _bus = new EventEmitter2()
 
       ctx[k] = v for own k,v of {
         on: (ev,cb) -> _bus.on ev, cb

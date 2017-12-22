@@ -109,10 +109,12 @@
             add: ->
 
           C = require '../middleware/cdr.coffee.md'
+
           yield L.include.call call_ctx, call_ctx
           yield S.include.call call_ctx, call_ctx
           yield C.include.call call_ctx, call_ctx
           yield M.include.call call_ctx, call_ctx
+          S.end()
 
           cfg.global_redis_client.end()
 
