@@ -12,7 +12,7 @@
     RedisInterface = require 'normal-key/interface'
 
     Reference = require './reference'
-    debug = (require 'tangible') @name
+    {debug,hand} = (require 'tangible') @name
 
     seconds = 1000
     minutes = 60*seconds
