@@ -256,11 +256,12 @@ Remember to always call `monitor.end()` when you are done with the monitor!
       @cfg.api.monitor = seem (id,events) ->
         debug 'api.monitor: start', {id,events}
 
-        debug 'api.monitor: filtering', id
         key = "filter-#{id}"
         filter = ->
+          debug 'api.monitor: filtering', id
           monitor_wrapper.client.filter UNIQUE_ID, id
         unfilter = ->
+          debug 'api.monitor: un-filtering', id
           monitor_wrapper.client.filter_delete UNIQUE_ID, id
 
         ev = new EventEmitter2()
