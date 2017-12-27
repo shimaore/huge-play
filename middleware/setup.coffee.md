@@ -272,6 +272,7 @@ Remember to always call `monitor.end()` when you are done with the monitor!
             ev?.emit msg_ev, msg
 
         register = seem ->
+          debug 'api.monitor: register'
 
 Don't show the warning for 10 concurrent calls!
 The number should really be an estimate of our maximum number of concurrent, monitored calls.
@@ -286,17 +287,24 @@ The number should really be an estimate of our maximum number of concurrent, mon
               monitor_wrapper.client.on event, listener
               monitored_events[event] ?= 0
               if monitored_events[event]++ is 0
-                debug 'Adding event json for', event
+                debug 'api.monitor: register: Adding event json for', event
                 monitor_wrapper.client.event_json event
 
+          debug 'api.monitor: register complete'
+          return
+
         re_register = hand ->
+          debug 'api.monitor: re-register'
           monitor_wrapper.client.setMaxListeners 200
           yield filter()
           for event in events
             yield do (event) ->
               monitor_wrapper.client.on event, listener
               if monitored_events[event] > 0
+                debug 'api.monitor: re-register: Adding event json for', event
                 monitor_wrapper.client.event_json event
+          debug 'api.monitor: re-register complete'
+          return
 
         monitor_wrapper.on 'client-changed', re_register
         yield register()
