@@ -100,7 +100,7 @@ Events received downstream.
         debug 'queue:log-agent-in: done', key
         return
 
-Downstream/upstream pair for egress-pool retrieval.
+Downstream/upstream pair for egress/ingress-pool retrieval.
 
       @register 'queuer:get-egress-pool', 'dial_calls'
       @register 'queuer:egress-pool', 'calls'
@@ -111,21 +111,43 @@ Downstream/upstream pair for egress-pool retrieval.
         is_remote = yield @cfg.is_remote domain
         return if is_remote isnt false
 
-        tag = "number_domain:#{domain}"
-        calls = yield queuer.egress_pool.calls()
+        calls = yield queuer.egress_pool(domain).calls()
         result = []
         for call in calls
-          if yield call.has_tag(tag).catch( -> null )
-            result.push
-              key: call.key
-              destination: call.destination
-              tags: yield call.tags().catch -> []
+          result.push
+            key: call.key
+            destination: call.destination
+            tags: yield call.tags().catch -> []
 
         notification =
           _in: [ tag ]
           calls: result
         @socket.emit 'queuer:egress-pool', notification
         debug 'queuer:get-egress-pool: done', domain, notification
+        return
+
+      @register 'queuer:get-ingress-pool', 'dial_calls'
+      @register 'queuer:ingress-pool', 'calls'
+
+      @socket.on 'queuer:get-ingress-pool', hand (domain) =>
+        debug 'queuer:get-ingress-pool', domain
+
+        is_remote = yield @cfg.is_remote domain
+        return if is_remote isnt false
+
+        calls = yield queuer.ingress_pool(domain).calls()
+        result = []
+        for call in calls
+          result.push
+            key: call.key
+            destination: call.destination
+            tags: yield call.tags().catch -> []
+
+        notification =
+          _in: [ tag ]
+          calls: result
+        @socket.emit 'queuer:ingress-pool', notification
+        debug 'queuer:get-ingress-pool: done', domain, notification
         return
 
     @server_pre = ->
