@@ -256,11 +256,6 @@ Remember to always call `monitor.end()` when you are done with the monitor!
       @cfg.api.monitor = seem (id,events) ->
         debug 'api.monitor: start', {id,events}
 
-Don't show the warning for 10 concurrent calls!
-The number should really be an estimate of our maximum number of concurrent, monitored calls.
-
-        monitor_wrapper.client.setMaxListeners 200
-
         debug 'api.monitor: filtering', id
         key = "filter-#{id}"
         filter = -> yield monitor_wrapper.client.filter UNIQUE_ID, id
@@ -277,6 +272,12 @@ The number should really be an estimate of our maximum number of concurrent, mon
             ev?.emit msg_ev, msg
 
         register = seem ->
+
+Don't show the warning for 10 concurrent calls!
+The number should really be an estimate of our maximum number of concurrent, monitored calls.
+
+          monitor_wrapper.client.setMaxListeners 200
+
           if 1 is yield store.incr key
             yield filter()
 
@@ -289,6 +290,7 @@ The number should really be an estimate of our maximum number of concurrent, mon
                 monitor_wrapper.client.event_json event
 
         re_register = hand ->
+          monitor_wrapper.client.setMaxListeners 200
           yield filter()
           for event in events
             yield do (event) ->
