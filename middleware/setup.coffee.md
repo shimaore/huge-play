@@ -258,8 +258,10 @@ Remember to always call `monitor.end()` when you are done with the monitor!
 
         debug 'api.monitor: filtering', id
         key = "filter-#{id}"
-        filter = -> yield monitor_wrapper.client.filter UNIQUE_ID, id
-        unfilter = -> yield monitor_wrapper.client.filter_delete UNIQUE_ID, id
+        filter = ->
+          monitor_wrapper.client.filter UNIQUE_ID, id
+        unfilter = ->
+          monitor_wrapper.client.filter_delete UNIQUE_ID, id
 
         ev = new EventEmitter2()
 
