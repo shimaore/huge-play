@@ -191,7 +191,7 @@ How long should we keep the state of an agent after the last update?
 
         interface: new RedisInterface cfg.local_redis_client, agent_timeout
 
-        new_call: (data) -> new HugePlayCall cfg.queuer, data
+        new_call: (data) -> new HugePlayCall cfg.queuer, @domain, data
 
         notify: seem (data) ->
           debug 'agent.notify', @key, data
@@ -373,12 +373,15 @@ Middleware
 Queuer Call object
 ------------------
 
-      @queuer_call = new Call queuer,
-        id: @call.uuid
+      {uuid} = @call
 
-      yield @queuer_call.save()
-      yield @queuer_call.set_session @session._id
-      yield @queuer_call.set_reference @session.reference
+      @queuer_call = seem (domain) ->
+        queuer_call = new Call queuer, domain, id: uuid
+
+        yield queuer_call.save()
+        yield queuer_call.set_session @session._id
+        yield queuer_call.set_reference @session.reference
+        queuer_call
 
 Agent state monitoring
 ----------------------

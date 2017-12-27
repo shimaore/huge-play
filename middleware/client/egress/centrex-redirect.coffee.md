@@ -67,19 +67,21 @@ Eavesdrop registration
 
         if queuer? and @queuer_call?
 
+          queuer_call = yield @queuer_call @session.number_domain
+
 Bind the agent to the call.
 
           if @session.referred_by is key
             @debug 'Agent is the one doing the transfer, not forcing agent back to busy.', key
           else
-            yield queuer.set_agent @queuer_call, key
+            yield queuer.set_agent queuer_call, key
 
 Monitor the a-leg.
 
           if @session.transfer
-            yield queuer.monitor_remote_call @queuer_call
+            yield queuer.monitor_remote_call queuer_call
           else
-            yield queuer.monitor_local_call @queuer_call
+            yield queuer.monitor_local_call queuer_call
 
         @report event:'start-of-call', agent:key, call:@call.uuid
 
