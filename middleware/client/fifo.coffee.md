@@ -136,10 +136,12 @@ desirable queues to a given call. (Adding more required skills would build a sma
           @debug 'no queues, no overflow'
           return
 
+        ingress_pool = queuer.ingress_pool @session.number_domain
+
         attempt_overflow = seem (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
           yield call.load()
-          if yield queuer.ingress_pool.has call
+          if yield ingress_pool.has call
             ok = false
             for tag in call_tags when yield call.has_tag tag
               yield call.add_tag "#{tag}:#{suffix}"
