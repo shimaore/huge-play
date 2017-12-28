@@ -73,7 +73,7 @@ In all other cases, look (very hard) for a `xref` parameter.
         if m? and m[1]?
           @session.reference ?= m[1]
         else
-          @debug.dev "#{name} #{v} has no xref"
+          @debug "#{name} #{v} has no xref"
 
       reference_in 'sip_from_params'
       reference_in 'sip_to_params'
