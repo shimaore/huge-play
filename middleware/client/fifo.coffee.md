@@ -105,7 +105,7 @@ If the call-group should use the queuer, then do that.
         @notify state:'queue', name:fifo.full_name, queue: fifo.queue
 
         {queuer} = @cfg
-        call = yield @queuer_call @session.number_domain
+        call = yield @queuer_call()
 
         ref_tags = yield @reference.tags()
         yield call.set_tags ref_tags

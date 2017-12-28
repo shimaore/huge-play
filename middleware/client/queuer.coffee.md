@@ -397,8 +397,10 @@ Queuer Call object
 
       {uuid} = @call
 
-      @queuer_call = seem (domain) ->
-        queuer_call = new Call queuer, domain, id: uuid
+      @queuer_call = seem (id) ->
+        domain = @session.number_domain
+        id ?= uuid
+        queuer_call = new Call queuer, domain, {id}
 
         yield queuer_call.save()
         yield queuer_call.set_session @session._id

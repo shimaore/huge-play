@@ -67,7 +67,7 @@ Eavesdrop registration
 
         if queuer? and @queuer_call?
 
-          queuer_call = yield @queuer_call @session.number_domain
+          queuer_call = yield @queuer_call()
 
 Bind the agent to the call.
 
