@@ -49,7 +49,7 @@ Events received downstream.
         debug 'queuer:get-agent-state', key
 
         agent = new Agent queuer, key
-        state = yield agent.get_state().catch -> null
+        state = yield agent.state().catch -> null
         missed = yield agent.get_missed().catch -> 0
         count = yield agent.count().catch -> 0
         # async
