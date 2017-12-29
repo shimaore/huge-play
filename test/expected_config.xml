@@ -1408,6 +1408,18 @@
 <action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1" phrase="say"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -1431,6 +1443,18 @@
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
+</match>
+</input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1" phrase="say"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
 </match>
 </input>
 </macro>
@@ -2456,6 +2480,18 @@
 <action function="play-file" data="digits/$1.wav"/>
 </match>
 </input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1" phrase="say"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -2479,6 +2515,18 @@
 <action function="play-file" data="conference/conf-welcome.wav"/>
 <action function="play-file" data="voicemail/vm-press.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
+</match>
+</input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1" phrase="say"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
 </match>
 </input>
 </macro>
@@ -3577,6 +3625,18 @@
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1f" phrase="say-number"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -3601,6 +3661,18 @@
 <action function="play-file" data="more/please-type.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1f" phrase="say-number"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
 </match>
 </input>
 </macro>
@@ -4700,6 +4772,18 @@
 <action function="play-file" data="more/to-continue.wav"/>
 </match>
 </input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1f" phrase="say-number"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
+</match>
+</input>
 </macro>
 <macro name="/conference">
 <input pattern="^pin$" break_on_match="true">
@@ -4724,6 +4808,18 @@
 <action function="play-file" data="more/please-type.wav"/>
 <action function="play-file" data="digits/$1.wav"/>
 <action function="play-file" data="more/to-continue.wav"/>
+</match>
+</input>
+<input pattern="^count:0$" break_on_match="true">
+<match>
+<action function="play-file" data="conference/conf-alone"/>
+</match>
+</input>
+<input pattern="^count:(\d)$" break_on_match="true">
+<match>
+<action function="play-file" data="queue/queue-there-are"/>
+<action function="phrase" data="$1f" phrase="say-number"/>
+<action function="play-file" data="queue/queue-persons-before-you"/>
 </match>
 </input>
 </macro>

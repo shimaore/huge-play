@@ -182,6 +182,15 @@ This uses `playback`, but `@action 'phrase', 'voicemail_record_name'` (separator
         @debug 'record'
         yield @action 'record', "#{namefile} 2"
 
+Announce number of persons in conference
+----------------------------------------
+
+        {count} = macros @cfg
+
+        currently = yield count conf_name
+        currently ?= 0
+        yield @action 'playback', "phrase:conference:count:#{currently}"
+
 Play in conference
 ------------------
 
