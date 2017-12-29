@@ -19,6 +19,9 @@
       else
         number = parseInt m[2], 10
         key = "#{number}@#{@session.number_domain}"
+
+* doc.local_number:groups (array of string) Contains groups the user belong too. The convention is to use `:` as a separator. For example: ['sales:internal','support:modems']
+
         {groups} = number_data = yield @cfg
           .prov.get "number:#{key}"
           .catch -> {}
@@ -54,7 +57,7 @@ The destination matched.
           @debug.csr "number_domain #{number_domain}: #{error}"
           {}
 
-* doc.local_number:allowed_groups (array of string) Contains prefixes for which the given user may eavesdrop. The convention is to use `:` as a separator. For example: ['sales','support:modems']
+* doc.local_number:allowed_groups (array of string) Contains group prefixes that the given user may eavesdrop/monitor. The convention is to use `:` as a path separator. For example: ['sales','support:modems']. See doc.local_number.groups for the groups assigned to a target.
 
       is_allowed = (allowed_groups,target_groups) ->
         target_groups?.some (name) ->
