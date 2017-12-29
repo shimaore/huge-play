@@ -33,20 +33,20 @@
 
         {still_running} = macros @cfg
 
-        @debug 'conference:record', name
+        debug 'conference:record', name
         recording = yield @cfg.api "conference #{name} chkrecord"
 
 Do not start a new recording if one is already active.
 
-        @debug 'conference:record: recording', name, recording
+        debug 'conference:record: recording', name, recording
         unless recording?.match /is not being recorded/
-          @debug 'Already recording or not ready'
+          debug 'conference:record: Already recording or not ready', name, recording
           return
 
 Get a URL for recording
 
         unless @cfg.recording_uri?
-          @debug.dev 'Missing recording_uri', name
+          debug.dev 'conference:record: Missing recording_uri', name
           return
 
         uri = yield @cfg.recording_uri name
