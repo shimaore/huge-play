@@ -143,6 +143,18 @@ Conference is handled locally
 
       @notify state:'conference', name:conf_name
 
+      conf_uri = (id,name) =>
+        @prompt.uri 'prov', 'prov', id, name
+
+      id = "number_domain:#{@session.number_domain}"
+
+      if @session.music?
+        music_uri = @session.music
+      if @session.conf.music?
+        music_uri = conf_uri id, @session.conf.music
+      if music_uri?
+        yield @set conference_moh_sound: music_uri
+
 Validate passcode if any.
 
       language = @session.conf.language
