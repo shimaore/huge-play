@@ -11,12 +11,27 @@
     seconds = 1000
     minutes = 60*seconds
 
+    macros = (cfg) ->
+      __count = (name) ->
+        cfg.api "conference #{name} get count"
+
+      count = seem (name) ->
+        value = yield __count name
+        if value.match /^\d+/
+          parseInt value, 10
+        else
+          null
+
+      still_running = seem (name) ->
+        (yield count name) is not null
+
+      {count,still_running}
+
     @init = ->
 
       @cfg.statistics.on 'conference:record', seem (name) =>
 
-        still_running = seem =>
-          (yield @cfg.api "conference #{name} get count")?.match /^\d+/
+        {still_running} = macros @cfg
 
         @debug 'conference:record', name
         recording = yield @cfg.api "conference #{name} chkrecord"
@@ -39,7 +54,7 @@ Get a URL for recording
         yield @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
         last_uri = uri
 
-        while yield still_running()
+        while yield still_running name
           yield sleep 29*minutes
           uri = yield @cfg.recording_uri name
           yield @cfg.api "conference #{name} recording start #{uri}"
