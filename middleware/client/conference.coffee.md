@@ -151,7 +151,10 @@ Conference is handled locally
       if @session.music?
         music_uri = @session.music
       if @session.conf.music?
-        music_uri = conf_uri id, @session.conf.music
+        if @session.conf.music is false
+          music_uri = null
+        else
+          music_uri = conf_uri id, @session.conf.music
       if music_uri?
         yield @set conference_moh_sound: music_uri
 
