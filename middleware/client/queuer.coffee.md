@@ -120,7 +120,9 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
             tags: yield call.tags().catch -> []
 
         notification =
-          _in: [ tag ]
+          _in: [
+            "number_domain:#{domain}"
+          ]
           calls: result
         @socket.emit 'queuer:egress-pool', notification
         debug 'queuer:get-egress-pool: done', domain, notification
@@ -144,7 +146,9 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
             tags: yield call.tags().catch -> []
 
         notification =
-          _in: [ tag ]
+          _in: [
+            "number_domain:#{domain}"
+          ]
           calls: result
         @socket.emit 'queuer:ingress-pool', notification
         debug 'queuer:get-ingress-pool: done', domain, notification
