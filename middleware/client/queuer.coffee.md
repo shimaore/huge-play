@@ -172,6 +172,7 @@ How long should we keep the state of an agent after the last update?
             id: @id
             destination: @destination
 
+            call_state: yield @state().catch -> null
             remote_number: yield @get_remote_number().catch -> null
             alert_info: yield @get_alert_info().catch -> null
             reference: yield @get_reference().catch -> null
