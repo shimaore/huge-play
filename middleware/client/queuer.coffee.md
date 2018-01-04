@@ -24,7 +24,7 @@
 
     @notify = ->
 
-      queuer = @cfg.queuer
+      {host,queuer} = @cfg
       unless queuer?
         debug.dev 'queuer is not available'
         return
