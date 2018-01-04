@@ -102,57 +102,35 @@ Events received downstream.
 
 Downstream/upstream pair for egress/ingress-pool retrieval.
 
-      @register 'queuer:get-egress-pool', 'dial_calls'
-      @register 'queuer:egress-pool', 'calls'
+      get_pool = (name,pool) =>
+        @register "queuer:get-#{name}-pool", 'dial_calls'
+        @register "queuer:#{name}-pool", 'calls'
 
-      @socket.on 'queuer:get-egress-pool', hand (domain) =>
-        debug 'queuer:get-egress-pool', domain
+        @socket.on "queuer:get-#{name}-pool", hand (domain) =>
+          debug "queuer:get-#{name}-pool", domain
 
-        is_remote = yield @cfg.is_remote domain
-        return if is_remote isnt false
+          is_remote = yield @cfg.is_remote domain
+          return if is_remote isnt false
 
-        calls = yield queuer.egress_pool(domain).calls()
-        result = []
-        for call in calls
-          result.push
-            key: call.key
-            destination: call.destination
-            tags: yield call.tags().catch -> []
+          calls = yield pool(domain).calls()
+          result = yield Promise.all calls.map (call) -> call.build_notification {}
 
-        notification =
-          _in: [
-            "number_domain:#{domain}"
-          ]
-          calls: result
-        @socket.emit 'queuer:egress-pool', notification
-        debug 'queuer:get-egress-pool: done', domain, notification
-        return
+          notification =
+            _queuer: true
+            host: host
+            now: Date.now()
 
-      @register 'queuer:get-ingress-pool', 'dial_calls'
-      @register 'queuer:ingress-pool', 'calls'
+            _in: [
+              "number_domain:#{domain}"
+            ]
+            calls: result
 
-      @socket.on 'queuer:get-ingress-pool', hand (domain) =>
-        debug 'queuer:get-ingress-pool', domain
+          @socket.emit "queuer:#{name}-pool", notification
+          debug "queuer:get-#{name}-pool: done", domain, notification
+          return
 
-        is_remote = yield @cfg.is_remote domain
-        return if is_remote isnt false
-
-        calls = yield queuer.ingress_pool(domain).calls()
-        result = []
-        for call in calls
-          result.push
-            key: call.key
-            destination: call.destination
-            tags: yield call.tags().catch -> []
-
-        notification =
-          _in: [
-            "number_domain:#{domain}"
-          ]
-          calls: result
-        @socket.emit 'queuer:ingress-pool', notification
-        debug 'queuer:get-ingress-pool: done', domain, notification
-        return
+      get_pool 'egress', (domain) -> queuer.egress_pool domain
+      get_pool 'ingress', (domain) -> queuer.ingress_pool domain
 
     @server_pre = ->
 
@@ -184,8 +162,7 @@ How long should we keep the state of an agent after the last update?
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference
 
-        report: seem (data) ->
-          debug 'call.report', data
+        build_notification: seem (data) ->
           notification =
             _queuer: true
             host: host
@@ -209,6 +186,11 @@ How long should we keep the state of an agent after the last update?
                 v = v.key if typeof v isnt 'string'
             notification[k] ?= v
 
+          notification
+
+        report: seem (data) ->
+          debug 'call.report', data
+          notification = yield @build_notification data
           cfg.statistics.emit 'queuer', notification
           debug 'call.report: send', notification
           return
