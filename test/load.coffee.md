@@ -114,7 +114,7 @@
           yield S.include.call call_ctx, call_ctx
           yield C.include.call call_ctx, call_ctx
           yield M.include.call call_ctx, call_ctx
-          S.end()
+          S.end.call call_ctx, call_ctx
 
           cfg.global_redis_client.end()
 

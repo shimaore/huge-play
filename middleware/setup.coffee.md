@@ -26,6 +26,9 @@
     @end = ->
       default_wrapper.end()
       monitor_wrapper.end()
+      @cfg.global_redis_client.end()
+      if @cfg.local_redis_client isnt @cfg.global_redis_client
+        @cfg.local_redis_client.end()
 
     @config = seem ->
       yield nimble @cfg
