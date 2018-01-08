@@ -28,12 +28,13 @@ https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_record
         silence_hits = 3
         yield @action 'set', 'playback_terminators=any'
         yield @action 'gentones', '%(500,0,800)'
-        {body} = yield @action 'record', [
+        res = yield @action 'record', [
             file
             time_limit
             silence_thresh
             silence_hits
           ].join ' '
+        body = res?.body ? {}
 
 The documentation says:
 - record_ms
@@ -91,7 +92,8 @@ Promise resolves into the selected digit or `null`.
         o.var_name ?= 'choice'
         o.regexp ?= '\\d'
         o.digit_timeout ?= 1000
-        {body} = yield prompt.play_and_get_digits o
+        res = yield prompt.play_and_get_digits o
+        body = res?.body ? {}
         name = "variable_#{o.var_name}"
         debug "Got #{body[name]} for #{name}"
         body[name] ? null
@@ -158,7 +160,7 @@ Promise resolves into the new PIN or `null`.
         yield @action 'phrase', phrase
 
       prompt.error = seem (id) ->
-        @debug 'error', {id}
+        debug 'error', {id}
         yield prompt.phrase "spell,#{id}" if id?
         yield prompt.goodbye()
         Promise.reject new Error "error #{id}"
