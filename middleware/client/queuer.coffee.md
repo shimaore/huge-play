@@ -168,6 +168,7 @@ How long should we keep the state of an agent after the last update?
             host: host
             now: Date.now()
 
+            domain: @domain
             key: @key
             id: @id
             destination: @destination
@@ -387,6 +388,7 @@ Queuer Call object
       @queuer_call = seem (id) ->
         domain = @session.number_domain
         id ?= uuid
+        @debug 'queuer_call', id, domain
         queuer_call = new Call queuer, domain, {id}
 
         yield queuer_call.save()
