@@ -227,8 +227,7 @@ Really we should just barge on the channel if we need anything more complex than
           .catch (error) =>
             @debug "error: #{error.stack ? error}"
 
-        @call.once 'cleanup_linger'
-        .then =>
+        @call.once 'cleanup_linger', =>
           yield play_in_conference 'tone_stream://%(125,0,600);%(125,0,450);%(125,0,300)'
           yield play_in_conference namefile
 
