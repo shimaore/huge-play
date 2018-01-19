@@ -402,6 +402,13 @@ Context Extension
         once: (ev,cb) -> _bus.once ev, cb
         emit: (ev,data) -> _bus.emit ev, data
 
+        end: ->
+          _bus.removeAllListeners()
+          @call = null
+          @session = null
+          @reference = null
+          return
+
         statistics: @cfg.statistics
 
         sleep: (timeout) ->

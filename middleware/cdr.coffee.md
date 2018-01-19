@@ -32,6 +32,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
         yield @sleep 4000
         debug "CDR: Linger: exit"
         yield @call.exit()
+        @end()
         return
 
       yield @call.linger()
