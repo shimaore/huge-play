@@ -50,10 +50,8 @@ Events received downstream.
 
         agent = new Agent queuer, key
         state = yield agent.state().catch -> null
-        missed = yield agent.get_missed().catch -> 0
-        count = yield agent.count().catch -> 0
         # async
-        agent.notify {state,missed,count}
+        agent.notify {state}
 
         debug 'queuer:get-agent-state: done', key, state
         return
@@ -230,6 +228,8 @@ How long should we keep the state of an agent after the last update?
 The dialplan is used e.g. to know which messages to forward to the socket.io bus.
 
             dialplan: 'centrex'
+            missed: yield @get_missed().catch -> 0
+            count: yield @count().catch -> 0
 
           notification.tags = yield @tags().catch -> []
           agent_name = yield (@get 'name').catch -> null
