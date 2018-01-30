@@ -5,7 +5,7 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     @name = "#{pkg.name}:middleware:client:ingress:pre"
     debug = (require 'tangible') @name
     @include = seem ->
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
 
       yield @reference.set_endpoint null
 

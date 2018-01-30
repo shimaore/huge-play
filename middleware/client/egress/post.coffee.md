@@ -10,7 +10,7 @@
     default_music = tones.loop tones.fr.waiting
 
     @include = seem ->
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
 
       @debug 'Ready'
 

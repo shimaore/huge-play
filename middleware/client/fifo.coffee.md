@@ -21,7 +21,7 @@ FIFO handling
 
       @debug 'Starting'
 
-      return unless @session.direction is 'fifo'
+      return unless @session?.direction is 'fifo'
 
       fifo_uri = (id,name) =>
         @prompt.uri 'prov', 'prov', id, name

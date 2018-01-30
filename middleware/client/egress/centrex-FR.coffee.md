@@ -4,7 +4,7 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'centrex'
       return unless @session.country is 'fr'
 

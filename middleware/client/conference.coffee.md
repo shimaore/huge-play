@@ -103,7 +103,7 @@ Get a URL for recording
 
     @include = seem ->
 
-      return unless @session.direction is 'conf'
+      return unless @session?.direction is 'conf'
 
       unless @cfg.host?
         @debug.dev 'Missing cfg.host'

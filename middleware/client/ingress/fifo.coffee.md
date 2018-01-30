@@ -7,7 +7,7 @@
     '''
     @include = seem ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
 
       music_uri = (doc) =>
         return null unless doc.music?

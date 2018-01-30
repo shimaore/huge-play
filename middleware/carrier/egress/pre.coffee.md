@@ -3,7 +3,7 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:carrier:egress:pre"
     @include = seem ->
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       ccnq_username = @req.header 'X-RU'
 
       @session.cdr_direction = @session.direction

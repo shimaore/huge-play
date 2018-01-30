@@ -8,7 +8,7 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'menu'
+      return unless @session?.direction is 'menu'
 
       unless @session.menu?
         @debug 'Missing menu data.'

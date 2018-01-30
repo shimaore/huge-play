@@ -7,7 +7,7 @@ Send a call out using carrier-side rules.
 
     @include = seem ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
 
       @debug 'Ready'
 

@@ -19,7 +19,7 @@ Call-Handler
 
     @include = seem ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
 
       @debug 'Ready',
         dialplan: @session.dialplan

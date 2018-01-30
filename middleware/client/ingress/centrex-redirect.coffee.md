@@ -4,7 +4,7 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
       return unless @session.dialplan is 'centrex'
 
 Transfer Workaround

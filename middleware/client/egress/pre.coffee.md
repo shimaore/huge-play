@@ -8,7 +8,7 @@ First-line handler for outbound calls
 
     @include = seem ->
 
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
 
       music_uri = (doc) =>
         return null unless doc.music?

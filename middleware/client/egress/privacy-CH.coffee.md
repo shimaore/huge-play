@@ -3,7 +3,7 @@
     debug = (require 'tangible') @name
     @include = ->
 
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'national'
       return unless @session.country is 'ch'
       return if @session.forwarding is true

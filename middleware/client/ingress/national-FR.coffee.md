@@ -3,7 +3,7 @@
     debug = (require 'tangible') @name
     @include = ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
       return unless @session.dialplan is 'e164'
 
       debug 'Ready',

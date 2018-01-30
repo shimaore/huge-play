@@ -2,7 +2,7 @@
     @name = "#{pkg.name}:middleware:carrier:ingress:post"
     seem = require 'seem'
     @include = seem ->
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
 
       @session.cdr_direction = @session.direction
 

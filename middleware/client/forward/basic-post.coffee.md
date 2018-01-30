@@ -5,7 +5,8 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'egress' and @session.forwarding is true
+      return unless @session?.direction is 'egress'
+      return unless @session.forwarding is true
 
       yield @action 'hangup'
       return

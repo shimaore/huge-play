@@ -3,7 +3,7 @@
     seem = require 'seem'
 
     @include = seem ->
-      return unless @session.direction is 'egress'
+      return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'centrex'
       return if @session.forwarding is true
 

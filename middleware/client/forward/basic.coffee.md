@@ -6,7 +6,7 @@
 
     @include = seem ->
 
-      return unless @session.direction is 'forward'
+      return unless @session?.direction is 'forward'
 
       @report state:'forward'
 

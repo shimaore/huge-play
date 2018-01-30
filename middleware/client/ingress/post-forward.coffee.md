@@ -12,7 +12,7 @@ All attributes set on the initial call are kept as much as possible.
 
     @include = seem ->
 
-      return unless @session.direction is 'ingress'
+      return unless @session?.direction is 'ingress'
       return unless @session.forwarding is true
 
       @debug 'Ready',
