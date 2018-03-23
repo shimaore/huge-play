@@ -11,6 +11,7 @@
       @debug 'Start', @destination
 
       @session.centrex_external_line_prefix = '9'
+      @session.VOICEMAIL = '786'
 
       switch
 
