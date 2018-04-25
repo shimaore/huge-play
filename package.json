@@ -20,7 +20,7 @@
   "dependencies": {
     "acoustic-line": "^1.9.0",
     "black-metal": "^19.0.0",
-    "bumpy-lawyer": "^2.7.1",
+    "bumpy-lawyer": "^2.7.2",
     "date-holidays": "^1.2.0",
     "esl": "^9.0.0",
     "flat-ornament": "^3.1.0",
