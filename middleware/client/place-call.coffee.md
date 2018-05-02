@@ -6,11 +6,11 @@ It ensures data is retrieved and injected in the call.
 
 This module also triggers calls from within a conference.
 
-    seem = require 'seem'
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:place-call"
-    {debug,hand} = (require 'tangible') @name
+    {debug,foot} = (require 'tangible') @name
     Moment = require 'moment-timezone'
+    {UPDATE} = require 'red-rings/operations'
 
     escape = (v) ->
       "#{v}".replace ',', ','
@@ -21,16 +21,16 @@ This module also triggers calls from within a conference.
     now = (tz = 'UTC') ->
       Moment().tz(tz).format()
 
-    @handler = handler = (cfg,ev) ->
+    @handler = handler = (cfg) ->
 
       if cfg.local_redis_client?
-        elected = seem (key) ->
+        elected = (key) ->
           name = "elected-#{key}"
-          winner = yield cfg.local_redis_client
+          winner = await cfg.local_redis_client
             .setnx name, false
             .catch -> null
           if winner
-            yield cfg.local_redis_client
+            await cfg.local_redis_client
               .expire name, 60
               .catch -> yes
           else
@@ -78,19 +78,19 @@ This feature will call an extension (client-side number) and when the extension 
 Event parameters:
 - `_id` (YYYY-MM-UUID)
 - `endpoint`
-- 'caller' (with appropriate `endpoint_via` translations if necessary)
+- `caller` (with appropriate `endpoint_via` translations if necessary)
 - `destination`
 - `callee_name` (optional)
 - `callee_num` (optional)
 - `call_timeout` (optional)
 
-      ev.on 'place-call', seem (data) =>
+      place_call = foot (data) ->
         {endpoint,caller,_id} = data
 
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
 
-FIXME The data sender must do resolution of the endpoint_via and associated translations????
+FIXME The data sender must do resolution of the `endpoint_via` and associated translations????
 ANSWER: Yes. And store the result in the field `caller`.
 
         debug 'Received place-call', data
@@ -101,7 +101,7 @@ A proper reference is required.
 
 Load additional data from the endpoint.
 
-        endpoint_data = yield cfg.prov.get("endpoint:#{endpoint}").catch -> null
+        endpoint_data = await cfg.prov.get("endpoint:#{endpoint}").catch -> null
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
@@ -114,7 +114,7 @@ Ensure only one FreeSwitch server processes those.
 
 Note that Centrex-redirect uses both the local-server and the client-server.
 
-        is_remote = yield cfg.is_remote(domain, [local_server,client_server].join '/').catch -> true
+        is_remote = await cfg.is_remote(domain, [local_server,client_server].join '/').catch -> true
         return if is_remote
 
         debug 'place-call: Placing call'
@@ -123,13 +123,13 @@ Session Reference Data
 
         my_reference = new Reference _id
 
-        yield my_reference.add_in [
+        await my_reference.add_in [
           "endpoint:#{endpoint}"
           "account:#{account}"
           "number_domain:#{domain}"
         ]
-        yield my_reference.set_account account
-        yield my_reference.set_destination data.destination
+        await my_reference.set_account account
+        await my_reference.set_destination data.destination
 
         xref = "xref=#{_id}"
         params = make_params
@@ -178,11 +178,11 @@ timeout_sec
         ].join ' '
         cmd = "originate #{argv}"
 
-        return unless yield elected _id
+        return unless await elected _id
 
         debug "Calling #{cmd}"
 
-        res = yield cfg.api(cmd).catch (error) ->
+        res = await cfg.api(cmd).catch (error) ->
           msg = error.stack ? error.toString()
           debug "originate: #{msg}"
           msg
@@ -203,12 +203,14 @@ Call to conference
 Parameters:
 - `_id` (YYYY-MM-UUID)
 - `endpoint`
-- `name`
+- `conference` (was `name`)
 - `destination`
 
-      ev.on 'call-to-conference', seem (data) =>
-        {endpoint,name,destination,_id} = data
+      call_to_conference = foot (data) ->
+        {endpoint,destination,_id} = data
         debug 'Received call-to-conference', data, local_server
+
+        name = data.conference ? data.name
 
 A proper reference is required.
 
@@ -216,12 +218,12 @@ A proper reference is required.
 
 Ensure we are co-located with the FreeSwitch instance serving this conference.
 
-        is_remote = yield cfg.is_remote(name, local_server).catch -> true
+        is_remote = await cfg.is_remote(name, local_server).catch -> true
         return if is_remote
 
 Load additional data from the endpoint.
 
-        endpoint_data = yield cfg.prov.get("endpoint:#{endpoint}").catch -> null
+        endpoint_data = await cfg.prov.get("endpoint:#{endpoint}").catch -> null
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
@@ -229,7 +231,7 @@ Load additional data from the endpoint.
 
 Try to get the asserted number, assuming Centrex.
 
-        number_data = yield cfg.prov.get("number:#{endpoint}").catch -> {}
+        number_data = await cfg.prov.get("number:#{endpoint}").catch -> {}
         calling_number = number_data.asserted_number ? endpoint.split('@')[0]
 
         {language} = data
@@ -246,14 +248,14 @@ Session Reference Data
 
         my_reference = new Reference _id
 
-        yield my_reference.add_in [
+        await my_reference.add_in [
           "endpoint:#{endpoint}"
           "account:#{account}"
           "number_domain:#{endpoint.number_domain}"
         ]
-        yield my_reference.set_account account
-        yield my_reference.set_endpoint endpoint
-        yield my_reference.set_call_options
+        await my_reference.set_account account
+        await my_reference.set_endpoint endpoint
+        await my_reference.set_call_options
           group_confirm_key: '5' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
           group_confirm_file: 'phrase:conference:confirm:5' # defaults to `silence`
           group_confirm_error_file: 'phrase:conference:confirm:5'
@@ -276,10 +278,10 @@ Call it out
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
         cmd = "originate #{sofia} &conference(#{name}++flags{})"
 
-        return unless yield elected _id
+        return unless await elected _id
 
         debug "Calling #{cmd}"
-        res = yield cfg.api(cmd).catch (error) ->
+        res = await cfg.api(cmd).catch (error) ->
           msg = error.stack ? error.toString()
           debug "conference: #{msg}"
           msg
@@ -295,7 +297,7 @@ The `body` should contains:
 - `destination` (string)
 - `tags` (array)
 
-      ev.on 'create-queuer-call', hand (body) =>
+      create_queuer_call = foot (body) ->
         {queuer} = cfg
         {Agent} = queuer
 
@@ -309,24 +311,68 @@ The `body` should contains:
 
         agent = new Agent queuer, body.agent
 
-        is_remote = yield cfg.is_remote(agent.domain, [local_server,client_server].join '/').catch -> true
+        is_remote = await cfg.is_remote(agent.domain, [local_server,client_server].join '/').catch -> true
         if is_remote
           debug 'create-queuer-call: not handled on this server', body
           return
 
-        return unless yield elected body._id
+        return unless await elected body._id
 
-        yield queuer.create_egress_call_for agent, body
+        await queuer.create_egress_call_for agent, body
         return
 
-      return
+      {place_call,call_to_conference,create_queuer_call}
+
+    @server_pre ->
+
+      @cfg.rr
+      .receive 'call:*'
+      .filter ({op,doc,deleted}) -> op is UPDATE and doc? and not deleted
+      .forEach (msg) ->
+
+        switch
+
+`create_queuer_call`
+- `_id` (unique id for the request)
+- `agent` (string)
+- `destination` (string)
+- `tags` (array)
+
+          when msg.doc.agent?
+            create_queuer_call msg.doc
+
+`call_to_conference`
+- `_id` (YYYY-MM-UUID)
+- `endpoint`
+- `conference` (was `name`)
+- `destination`
+
+          when msg.doc.conference?
+            call_to_conference msg.doc
+
+`place_call`
+- `_id` (YYYY-MM-UUID)
+- `endpoint`
+- 'caller' (with appropriate `endpoint_via` translations if necessary)
+- `destination`
+- `callee_name` (optional)
+- `callee_num` (optional)
+- `call_timeout` (optional)
+
+          when msg.doc.endpoint?
+            place_call msg.doc
 
 Notify
 ======
 
+DEPRECATED
+
     @notify = ({cfg,socket}) ->
 
-      handler cfg, socket
+      H = handler cfg
+      socket.on 'place-call', H.place_call
+      socket.on 'call-to-conference', H.call_to_conference
+      socket.on 'create-queuer-call', H.create_queuer_call
 
       @register 'place-call', 'dial_calls'
       @register 'call-to-conference', 'dial_calls'
@@ -335,18 +381,20 @@ Notify
 
       debug 'Module Ready'
 
+/DEPRECATED
+
 Click-to-dial (`place-call`)
 ----------------------------
 
-    @include = seem ->
+    @include = ->
 
 Force the destination for `place-call` calls (`originate` sets `Channel-Destination-Number` to the value of `Channel-Caller-ID-Number`).
 
-      destination = yield @reference.get_destination()
+      destination = await @reference.get_destination()
       if destination?
 
         @destination = destination
-        yield @reference.set_destination null
+        await @reference.set_destination null
 
 Also, do not wait for an ACK, since we're calling out (to the "caller"),
 and therefor the call is already connected by the time we get here.
@@ -358,7 +406,7 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
 
         account = @reference.get_account()
         if account?
-          yield @export 'sip_h_P-Charge-Info': "sip:#{account}@#{@cfg.host}"
+          await @export 'sip_h_P-Charge-Info': "sip:#{account}@#{@cfg.host}"
 
         @set
           ringback: @session.ringback ? '%(3000,3000,437,1317)'
@@ -371,7 +419,7 @@ Finally, generate a P-Charge-Info header so that the SBCs will allow the call th
 Options might be provided for either `place-call` or `call-to-conference`.
 They are used in `tough-rate/middleware/call-handler`.
 
-      options = yield @reference.get_call_options()
+      options = await @reference.get_call_options()
       if options?
         @session.call_options = options
 

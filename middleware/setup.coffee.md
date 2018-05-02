@@ -7,6 +7,7 @@
     assert = require 'assert'
     FS = require 'esl'
     LRU = require 'lru-cache'
+    RedRingAxon = require 'red-rings-axon'
 
     Redis = require 'ioredis'
     RedisInterface = require 'normal-key/interface'
@@ -35,6 +36,11 @@
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
     @server_pre = seem ->
+
+Red-Rings Axon connexion
+
+      @cfg.rr = new RedRingAxon @cfg.axon ? {}
+
       yield nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
@@ -352,6 +358,8 @@ Web
 Inbound notifications
 ---------------------
 
+This entire section is DEPRECATED.
+
     @notify = ->
 
       @on_connexion = (init) =>
@@ -482,6 +490,11 @@ This version is meant to be used in-call.
           report.report_type = 'in-call'
 
           @cfg.statistics.emit 'report', report
+
+          if report.agent?
+            @cfg.rr.notify "agent:#{report.agent}", "call:#{report.call}", report
+          if report.endpoint?
+            @cfg.rr.notify "endpoint:#{report.endpoint}", "call:#{report.call}", report
           true
 
 Real-time notification (e.g. to show on a web panel).

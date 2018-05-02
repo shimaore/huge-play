@@ -3,6 +3,7 @@
     debug = (require 'tangible') @name
     seem = require 'seem'
     fs = require 'fs'
+    {SUBSCRIBE} = require 'red-rings/operations'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -25,7 +26,48 @@
       still_running = seem (name) ->
         (yield count name) is not null
 
-      {count,still_running}
+      notify = (domain,number) ->
+        return unless domain? and number?
+
+        conf_name = "#{domain}-conf-#{number}"
+
+        # FIXME only try if local
+
+        list = await cfg
+          .api "conference #{conf_name} json_list"
+          .catch -> null
+
+        return unless list?
+        # and list[0] is '['
+
+        content = try JSON.parse list
+        return unless content?
+
+        conf_data = content[0]
+        return unless conf_data?
+
+        key = "conference:#{domain}:#{number}"
+
+        cfg.rr.notify key, key, conf_data
+
+      {count,still_running,notify}
+
+    @server_pre = ->
+
+      {notify} = macros @cfg
+
+      @cfg.rr
+      .receive 'conference:*'
+      .filter ({op}) -> op is SUBSCRIBE
+      .forEach (msg) ->
+        return unless $ = msg.key?.match /^conference:(\S+):(\d+)$/
+
+        domain = $[1]
+        number = $[2]
+
+        notify cfg, domain, number
+
+      return
 
     @init = ->
 
@@ -65,11 +107,17 @@ Get a URL for recording
 
         return
 
+DEPRECATED
+
     @notify = ->
+
+DEPRECATED
 
       @configure dial_calls: true
       @register 'conference:get-participants', 'dial_calls'
       @register 'conference:participants', 'calls'
+
+DEPRECATED
 
       @socket.on 'conference:get-participants', seem (conf_name) =>
         debug 'conference:get-participants', conf_name
@@ -101,6 +149,8 @@ Get a URL for recording
 
         @socket.emit 'conference:participants', conf_data
 
+/DEPRECATED
+
     @include = seem ->
 
       return unless @session?.direction is 'conf'
@@ -114,6 +164,9 @@ Get a URL for recording
         return
 
       conf_name = @session.conf.full_name
+      if $ = conf_name.match /^(\S+)-conf-(\d+)$/
+        domain = $[1]
+        number = $[2]
 
       is_remote = yield @cfg.is_remote conf_name, @session.local_server
 
@@ -200,7 +253,7 @@ This uses `playback`, but `@action 'phrase', 'voicemail_record_name'` (separator
 Announce number of persons in conference
 ----------------------------------------
 
-        {count} = macros @cfg
+        {count,notify} = macros @cfg
 
         currently = yield count conf_name
         currently ?= 0
@@ -237,6 +290,8 @@ Really we should just barge on the channel if we need anything more complex than
           # We should ask FreeSwitch to do the `unlink` here.
           try fs.unlinkSync namefile
 
+          notify domain, number
+
         setTimeout announce, 1000
 
         yield @set
@@ -248,6 +303,8 @@ Log into the conference
         yield @reference.add_in "number_domain:#{@session.number_domain}"
         # yield @reference.add_in "conference:#{conf_name}"
         @notify state: 'conference:started', conference: conf_name
+
+        notify domain, number
 
 * doc.number_domain.conferences[].record (boolean) If true the conference calls will be recorded.
 

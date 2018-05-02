@@ -1,8 +1,8 @@
     @name = 'huge-play:middleware:client:queuer'
     {debug,hand} = (require 'tangible') @name
-    seem = require 'seem'
     pkg = name:'huge-play'
     Moment = require 'moment-timezone'
+    {SUBSCRIBE} = require 'red-rings/operations'
 
     queuer = require 'black-metal/queuer'
     request = require 'superagent'
@@ -21,6 +21,8 @@
 
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
     RedisInterface = require 'normal-key/interface'
+
+DEPRECATED
 
     @notify = ->
 
@@ -130,9 +132,94 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
       get_pool 'egress', (domain) -> queuer.egress_pool domain
       get_pool 'ingress', (domain) -> queuer.ingress_pool domain
 
-    @server_pre = ->
+/DEPRECATED
+
+    @server_pre ->
 
       cfg = @cfg
+
+      cfg.rr
+      .receive 'agent:*'
+      .forEach (msg) ->
+        switch
+          when msg.op is SUBSCRIBE
+            # get agent state
+            return unless $ = msg.key?.match /^agent:(\S+)$/
+            key = $[1]
+            is_remote = await cfg.is_remote domain_of key
+            return if is_remote isnt false
+
+            debug 'queuer:get-agent-state', key
+
+            agent = new Agent queuer, key
+            state = await agent.state().catch -> null
+            await agent.notify {state}
+
+          when msg.op is UPDATE
+            # log agent in or out; use redring.create() for login, redring.delete() for logout
+
+            return unless $ = msg.id?.match /^agent:(\S+)$/
+            key = $[1]
+            is_remote = await cfg.is_remote domain_of key
+            return if is_remote isnt false
+
+            if msg.deleted
+
+              debug 'queue:log-agent-out', key
+
+              agent = new Agent queuer, key
+              await agent.clear_tags()
+              await agent.transition 'logout'
+
+            else
+
+              tags = []
+              {skills,queues,broadcast,timezone} = await cfg.prov.get "number:#{key}"
+              if skills?
+                for skill in skills
+                  tags.push "skill:#{skill}"
+              if queues?
+                for queue in queues
+                  tags.push "queue:#{queue}"
+              if broadcast
+                tags.push 'broadcast'
+
+              agent = new Agent queuer, key
+              await agent.add_tags tags
+              if ornaments?
+                ctx = {agent,timezone}
+                await run.call ctx, ornaments, @ornaments_commands
+
+              await agent.accept_onhook()
+
+        return
+
+      cfg.rr
+      .receive 'pool:*'
+      .filter ({op}) -> op is SUBSCRIBE
+      .forEach (msg) ->
+
+        return unless $ = msg.key?.match /^pool:(\S+):(ingress|egress)$/
+
+        domain = $[1]
+        name = $[2}
+
+        is_remote = await cfg.is_remote domain
+        return if is_remote isnt false
+
+        calls = await pool(domain).calls()
+        result = await Promise.all calls.map (call) -> call.build_notification {}
+
+        notification =
+          host: host
+          now: Date.now()
+          calls: result
+
+        cfg.rr.notify msg.key, "number_domain:#{domain}", value
+
+        return
+
+
       HugePlayReference = @cfg.Reference
       {api,prov,host} = @cfg
       profile = @cfg.session?.profile
@@ -160,7 +247,7 @@ How long should we keep the state of an agent after the last update?
         profile: "#{pkg.name}-#{profile}-egress"
         Reference: HugePlayReference
 
-        build_notification: seem (data) ->
+        build_notification: (data) ->
           notification =
             _queuer: true
             host: host
@@ -171,14 +258,14 @@ How long should we keep the state of an agent after the last update?
             id: @id
             destination: @destination
 
-            call_state: yield @state().catch -> null
-            remote_number: yield @get_remote_number().catch -> null
-            alert_info: yield @get_alert_info().catch -> null
-            reference: yield @get_reference().catch -> null
-            session: yield @get_session().catch -> null
-            answered: yield @answered().catch -> null
-            presenting: yield @count().catch -> null
-            tags: yield @tags().catch -> []
+            call_state: await @state().catch -> null
+            remote_number: await @get_remote_number().catch -> null
+            alert_info: await @get_alert_info().catch -> null
+            reference: await @get_reference().catch -> null
+            session: await @get_session().catch -> null
+            answered: await @answered().catch -> null
+            presenting: await @count().catch -> null
+            tags: await @tags().catch -> []
 
           for own k,v of data when v?
             switch k
@@ -188,12 +275,14 @@ How long should we keep the state of an agent after the last update?
 
           notification
 
-        report: seem (data) ->
+        report: (data) ->
           debug 'call.report', data
-          notification = yield @build_notification data
-          cfg.statistics.emit 'queuer', notification
+          notification = await @build_notification data
+          cfg.statistics.emit 'queuer', notification # DEPRECATED
+          cfg.rr.notify "call:#{notification.id}", "call:#{notification.id}", notification
+
           debug 'call.report: send', notification
-          return
+          notification
 
       class HugePlayAgent extends TaggedAgent
 
@@ -201,7 +290,7 @@ How long should we keep the state of an agent after the last update?
 
         new_call: (data) -> new HugePlayCall cfg.queuer, @domain, data
 
-        notify: seem (data) ->
+        notify: (data) ->
           debug 'agent.notify', @key, data
 
           {old_state,state,event,reason} = data
@@ -228,15 +317,15 @@ How long should we keep the state of an agent after the last update?
 The dialplan is used e.g. to know which messages to forward to the socket.io bus.
 
             dialplan: 'centrex'
-            missed: yield @get_missed().catch -> 0
-            count: yield @count().catch -> 0
+            missed: await @get_missed().catch -> 0
+            count: await @count().catch -> 0
 
-          notification.tags = yield @tags().catch -> []
-          agent_name = yield (@get 'name').catch -> null
+          notification.tags = await @tags().catch -> []
+          agent_name = await (@get 'name').catch -> null
           if agent_name?
             notification.agent_name = agent_name
 
-          offhook = yield @get_offhook_call().catch -> null
+          offhook = await @get_offhook_call().catch -> null
           if offhook
             notification.offhook = true
           else
@@ -248,16 +337,18 @@ If `data.call` is present we notify using the call's process; if it isn't we not
 This avoids sending two messages for the same event (one with incomplete data, the other with complete data).
 
           if data.call?
-            yield data.call.report notification
+            notification = await data.call.report notification
           else
-            cfg.statistics.emit 'queuer', notification
+            cfg.statistics.emit 'queuer', notification # DEPRECATED
+
+          cfg.rr.notify "agent:#{notification.agent}", "agent:#{notification.agent}", notification
           debug 'agent.notify: done', @key, notification
           return
 
-        create_egress_call: seem (body) ->
+        create_egress_call: (body) ->
           debug 'create_egress_call', @domain, body
 
-          @number_domain_data ?= yield prov
+          @number_domain_data ?= await prov
             .get "number_domain:#{@domain}"
             .catch (error) -> null
 
@@ -269,7 +360,7 @@ This avoids sending two messages for the same event (one with incomplete data, t
 
           timezone ?= null
 
-          yield @set 'timezone', timezone
+          await @set 'timezone', timezone
 
           unless account?
             debug 'create_egress_call: no account', @domain
@@ -280,10 +371,10 @@ This avoids sending two messages for the same event (one with incomplete data, t
               debug 'create_egress_call: no queuer_webhook', @domain
               return null
 
-            tags = yield @tags()
+            tags = await @tags()
             options = {@key,@number,@domain,tags}
             debug 'create_egress_call: send request', options
-            {body} = yield request
+            {body} = await request
               .post queuer_webhook
               .send options
 
@@ -307,19 +398,19 @@ See `in_domain` in black-metal/tagged.
 
 FIXME This is highly inefficient, we should be able to create the structure at once.
 
-          yield reference.add_in [
+          await reference.add_in [
             "endpoint:#{endpoint}"
             "number:#{endpoint}" # Centrex-only
             "account:#{account}"
             "number_domain:#{@domain}"
           ]
-          yield reference.set_endpoint endpoint
-          yield reference.set_account account
-          yield reference.set_destination body.destination
-          yield reference.set_source @number
-          yield reference.set_domain "#{host}:#{port}"
-          # yield reference.set_tags body.tags # set_tags = clear_tags() + add_tags()
-          yield reference.set_block_dtmf true
+          await reference.set_endpoint endpoint
+          await reference.set_account account
+          await reference.set_destination body.destination
+          await reference.set_source @number
+          await reference.set_domain "#{host}:#{port}"
+          # await reference.set_tags body.tags # set_tags = clear_tags() + add_tags()
+          await reference.set_block_dtmf true
 
 This is a "fake" call-data entry, to record the data we used to trigger the call for call-reporting purposes.
 
@@ -341,13 +432,13 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
           call = @new_call
             destination: _id
 
-          yield call.save()
+          await call.save()
 
 This probably not necessary, since the destination number is actually retrieved from the reference-data.
 
-          yield call.set_remote_number body.destination
-          yield call.set_tags body.tags
-          yield call.set 'timezone', timezone
+          await call.set_remote_number body.destination
+          await call.set_tags body.tags
+          await call.set 'timezone', timezone
 
           # async
           @notify call_data
@@ -356,8 +447,8 @@ This probably not necessary, since the destination number is actually retrieved 
 
           return call
 
-The queuer's Redis is used for call pools and the agents pool.
-Since we're bound to a server for domains it's OK to use the local Redis.
+#The queuer's Redis is used for call pools and the agents pool.
+#Since we're bound to a server for domains it's OK to use the local Redis.
 
       pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
       Queuer = queuer pools_redis_interface,
@@ -369,10 +460,10 @@ Since we're bound to a server for domains it's OK to use the local Redis.
 Middleware
 ==========
 
-    @include = seem ->
+    @include = ->
 
-      if yield @reference.get_block_dtmf()
-        yield @action 'block_dtmf'
+      if await @reference.get_block_dtmf()
+        await @action 'block_dtmf'
 
       queuer = @cfg.queuer
       return unless queuer?
@@ -385,15 +476,15 @@ Queuer Call object
 
       {uuid} = @call
 
-      @queuer_call = seem (id) ->
+      @queuer_call = (id) ->
         domain = @session.number_domain
         id ?= uuid
         @debug 'queuer_call', id, domain
         queuer_call = new Call queuer, domain, {id}
 
-        yield queuer_call.save()
-        yield queuer_call.set_session @session._id
-        yield queuer_call.set_reference @session.reference
+        await queuer_call.save()
+        await queuer_call.set_session @session._id
+        await queuer_call.set_reference @session.reference
         queuer_call
 
 Agent state monitoring
@@ -404,51 +495,51 @@ Agent state monitoring
 On-hook agent
 -------------
 
-      @queuer_login = seem (source,name,fifo,tags = [],ornaments) ->
+      @queuer_login = (source,name,fifo,tags = [],ornaments) ->
         @debug 'queuer_login', source
         agent = new Agent queuer, source
-        yield agent.set 'name', name
-        yield agent.add_tags tags
-        yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        await agent.set 'name', name
+        await agent.add_tags tags
+        await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
 * doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
 
         if ornaments?
           @agent = agent
-          yield run.call this, ornaments, @ornaments_commands
+          await run.call this, ornaments, @ornaments_commands
 
-        yield agent.accept_onhook()
-        yield @report {state:'queuer-login',source,fifo,tags}
+        await agent.accept_onhook()
+        await @report {state:'queuer-login',source,fifo,tags}
         agent
 
-      @queuer_leave = seem (source,fifo) ->
+      @queuer_leave = (source,fifo) ->
         @debug 'queuer_leave', source
         agent = new Agent queuer, source
-        yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        yield @report {state:'queuer-leave',source,fifo}
+        await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        await @report {state:'queuer-leave',source,fifo}
         agent
 
-      @queuer_logout = seem (source,fifo) ->
+      @queuer_logout = (source,fifo) ->
         @debug 'queuer_logout', source
         agent = new Agent queuer, source
-        yield agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        yield agent.clear_tags()
-        yield agent.transition 'logout'
-        yield @report {state:'queuer-logout',source,fifo}
+        await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        await agent.clear_tags()
+        await agent.transition 'logout'
+        await @report {state:'queuer-logout',source,fifo}
         agent
 
 Off-hook agent
 --------------
 
-      @queuer_offhook = seem (source,name,{uuid},fifo,tags = []) ->
+      @queuer_offhook = (source,name,{uuid},fifo,tags = []) ->
         @debug 'queuer_offhook', source, uuid, fifo
         agent = new Agent queuer, source
-        yield agent.set 'name', name
+        await agent.set 'name', name
         agent.clear_tags()
-        yield agent.add_tags tags
-        yield agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        call = yield agent.accept_offhook uuid
+        await agent.add_tags tags
+        await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+        call = await agent.accept_offhook uuid
         return unless call?
-        yield call.set_session @session._id
-        yield @report {state:'queuer-offhook',source,fifo,tags}
+        await call.set_session @session._id
+        await @report {state:'queuer-offhook',source,fifo,tags}
         agent
