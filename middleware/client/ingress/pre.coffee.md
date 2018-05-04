@@ -1,13 +1,12 @@
 This module should be called before 'local/carrier-ingress' and before 'client-sbc/$${profile_type}-ingress'
 
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:pre"
     debug = (require 'tangible') @name
-    @include = seem ->
+    @include = ->
       return unless @session?.direction is 'ingress'
 
-      yield @reference.set_endpoint null
+      await @reference.set_endpoint null
 
 Do not process here if the dialplan is already known (e.g. because Centrex sent us here).
 
@@ -24,7 +23,7 @@ We retrieve the *global-number* record based on the destination.
 
 * session.e164_number (object) The doc.global_number record for of the destination of an inbound call.
 
-      @session.e164_number = yield @cfg.prov
+      @session.e164_number = await @cfg.prov
         .get "number:#{@destination}"
         .catch -> null
       return unless @session.e164_number?
@@ -38,8 +37,8 @@ All external ingress calls come in as E.164 (without plus sign).
       @session.ccnq_from_e164 = @source
       @session.ccnq_to_e164 = @destination
 
-      yield @reference.add_in @session.e164_number._id
-      yield @user_tags @session.e164_number.tags
+      await @reference.add_in @session.e164_number._id
+      await @user_tags @session.e164_number.tags
 
 The global number might contain additional FreeSwitch variables. Load these extra variables from the record.
 
@@ -48,7 +47,7 @@ The global number might contain additional FreeSwitch variables. Load these extr
 
       if @session.e164_number.fs_variables?
         @debug 'Using fs_variables'
-        yield @set @session.e164_number.fs_variables
+        await @set @session.e164_number.fs_variables
 
 * doc.global_number.trace (boolean) trace
 

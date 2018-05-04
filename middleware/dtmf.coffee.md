@@ -1,8 +1,7 @@
     @name = 'huge-play:middleware:dtmf'
-    seem = require 'seem'
     debug = (require 'tangible') @name
 
-    @include = seem ->
+    @include = ->
 
       timer = null
       handler = null
@@ -11,7 +10,7 @@
 
       on_change = null
 
-      yield @call.event_json 'DTMF'
+      await @call.event_json 'DTMF'
       @call.on 'DTMF', (res) =>
         c = res.body['DTMF-Digit']
         debug "Received #{c}"
@@ -40,7 +39,7 @@
 
           return
 
-      expect = seem (min_length = 1, max_length = min_length, inter_digit = 3*1000) =>
+      expect = (min_length = 1, max_length = min_length, inter_digit = 3*1000) =>
         debug 'expect', min_length, max_length, inter_digit
 
         clear = (r = dtmf_buffer) ->
@@ -70,7 +69,7 @@ Wait for a digit
 
           try
 
-            yield wait_for_digit inter_digit
+            await wait_for_digit inter_digit
 
 If we didn't collect a digit,
 
@@ -102,17 +101,17 @@ Public API
 
 `@dtmf.playback`: execute a playback command in FreeSwitch, unless a digit has already been entered.
 
-        playback: seem (url) =>
+        playback: (url) =>
           return if present()
-          yield @set playback_terminators: '1234567890#*'
-          yield @action 'playback', url
+          await @set playback_terminators: '1234567890#*'
+          await @action 'playback', url
 
 `@dtmf.phrase`: execute a phrase command in FreeSwitch, unless a digit has already been entered.
 
-        phrase: seem (phrase) =>
+        phrase: (phrase) =>
           return if present()
-          yield @set playback_terminators: '1234567890#*'
-          yield @action 'phrase', phrase
+          await @set playback_terminators: '1234567890#*'
+          await @action 'phrase', phrase
 
 Typical pattern is:
 ```

@@ -1,9 +1,8 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:local-number"
     debug = (require 'tangible') @name
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
 
@@ -21,7 +20,7 @@ Now, we have two cases:
 * doc.global_number.local_number (string) The identifier of the local-number into which this global-number gets translated for inbound calls. (The identifier must have the format `<number>@<number-domain>` and a `number:<number>@<number-domain>` record must exist.)
 
       return unless @session.e164_number?.local_number?
-      yield @reference.add_in "number:#{@session.e164_number.local_number}"
+      await @reference.add_in "number:#{@session.e164_number.local_number}"
 
 These are used e.g. for Centrex, and override the destination number and number-domain.
 
@@ -43,13 +42,13 @@ The dialplan and country (and other parameters) might also be available in the `
       @destination = number
       @session.number_domain = number_domain
 
-      @session.number_domain_data = yield @cfg.prov
+      @session.number_domain_data = await @cfg.prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
           @debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
-      yield @reference.add_in @session.number_domain_data._id
-      yield @user_tags @session.number_domain_data.tags
+      await @reference.add_in @session.number_domain_data._id
+      await @user_tags @session.number_domain_data.tags
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
 * doc.number_domain.country (optional) country used for ingress calls to this domain.

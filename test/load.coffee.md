@@ -1,73 +1,76 @@
-    seem = require 'seem'
+    most = require 'most'
     describe 'Normal modules', ->
       require '../middleware/client/commands'
     describe 'Modules', ->
       list = [
-          # 'middleware/setup.coffee.md'
-          'middleware/cdr.coffee.md'
-          'middleware/dtmf.coffee.md'
-          'middleware/prompt.coffee.md'
+          # 'middleware/setup'
+          'middleware/cdr'
+          'middleware/dtmf'
+          'middleware/prompt'
 
-          'middleware/client/setup.coffee.md'
-          'middleware/client/ornaments.coffee.md'
-          'middleware/client/queuer.coffee.md'
-          'middleware/client/place-call.coffee.md'
-          'middleware/handled.coffee.md'
+          'middleware/client/setup'
+          'middleware/client/ornaments'
+          'middleware/client/queuer'
+          'middleware/client/place-call'
+          'middleware/handled'
 
-          'middleware/client/menu.coffee.md'
-          'middleware/client/conference.coffee.md'
-          'middleware/client/fifo.coffee.md'
+          'middleware/client/menu'
+          'middleware/client/conference'
+          'middleware/client/fifo'
 
-          'middleware/client/egress/pre.coffee.md'
-          'middleware/client/egress/centrex-redirect.coffee.md'
-          'middleware/client/egress/centrex-CH.coffee.md'
-          'middleware/client/egress/centrex-FR.coffee.md'
-          'middleware/client/egress/fifo.coffee.md'
-          'middleware/client/egress/privacy-CH.coffee.md'
-          'middleware/client/egress/privacy-FR.coffee.md'
-          'middleware/client/egress/national-CH.coffee.md'
-          'middleware/client/egress/national-FR.coffee.md'
-          'middleware/client/egress/post.coffee.md'
-          'middleware/client/egress/post-send.coffee.md'
+          'middleware/client/egress/pre'
+          'middleware/client/egress/centrex-redirect'
+          'middleware/client/egress/centrex-CH'
+          'middleware/client/egress/centrex-FR'
+          'middleware/client/egress/fifo'
+          'middleware/client/egress/privacy-CH'
+          'middleware/client/egress/privacy-FR'
+          'middleware/client/egress/national-CH'
+          'middleware/client/egress/national-FR'
+          'middleware/client/egress/post'
+          'middleware/client/egress/post-send'
 
-          'middleware/client/ingress/pre.coffee.md'
-          'middleware/client/ingress/privacy.coffee.md'
-          'middleware/client/ingress/national-CH.coffee.md'
-          'middleware/client/ingress/national-FR.coffee.md'
-          'middleware/client/ingress/local-number.coffee.md'
-          'middleware/client/ingress/centrex-redirect.coffee.md'
-          'middleware/client/ingress/centrex-CH.coffee.md'
-          'middleware/client/ingress/centrex-FR.coffee.md'
-          'middleware/client/ingress/fifo.coffee.md'
-          'middleware/client/ingress/post.coffee.md'
-          'middleware/client/ingress/post-send.coffee.md'
-          'middleware/client/ingress/flat-ornament.coffee.md'
-          'middleware/client/ingress/send.coffee.md'
+          'middleware/client/ingress/pre'
+          'middleware/client/ingress/privacy'
+          'middleware/client/ingress/national-CH'
+          'middleware/client/ingress/national-FR'
+          'middleware/client/ingress/local-number'
+          'middleware/client/ingress/centrex-redirect'
+          'middleware/client/ingress/centrex-CH'
+          'middleware/client/ingress/centrex-FR'
+          'middleware/client/ingress/fifo'
+          'middleware/client/ingress/post'
+          'middleware/client/ingress/post-send'
+          'middleware/client/ingress/flat-ornament'
+          'middleware/client/ingress/send'
 
-          'middleware/client/forward/basic.coffee.md'
-          'middleware/client/ingress/post-forward.coffee.md'
-          'middleware/client/forward/basic-post.coffee.md'
+          'middleware/client/forward/basic'
+          'middleware/client/ingress/post-forward'
+          'middleware/client/forward/basic-post'
 
-          'middleware/carrier/setup.coffee.md'
-          'middleware/carrier/egress/pre.coffee.md'
-          'middleware/carrier/egress/send.coffee.md'
-          'middleware/carrier/ingress/post.coffee.md'
-          'middleware/carrier/ingress/send.coffee.md'
+          'middleware/carrier/setup'
+          'middleware/carrier/egress/pre'
+          'middleware/carrier/egress/send'
+          'middleware/carrier/ingress/post'
+          'middleware/carrier/ingress/send'
         ]
 
       unit = (m) ->
         L = require 'tangible/middleware'
-        S = require '../middleware/setup.coffee.md'
-        it "should load #{m}", seem ->
+        S = require '../middleware/setup'
+        it "should load #{m}", ->
           cfg =
             prefix_admin: 'http://127.0.0.1:3987'
             redis: {}
-          ctx = {cfg}
+          ctx = {
+            cfg
+            most_shutdown: most.just yes
+          }
 
           M = require "../#{m}"
-          yield L.server_pre.call ctx, ctx
-          yield S.server_pre.call ctx, ctx
-          yield M.server_pre?.call ctx, ctx
+          await L.server_pre.call ctx, ctx
+          await S.server_pre.call ctx, ctx
+          await M.server_pre?.call ctx, ctx
 
           cfg.statistics =
             on: ->
@@ -77,9 +80,9 @@
             on: ->
             emit: ->
           ctx = {cfg,socket}
-          yield L.notify.call ctx, ctx
-          yield S.notify.call ctx, ctx
-          yield M.notify?.call ctx, ctx
+          await L.notify.call ctx, ctx
+          await S.notify.call ctx, ctx
+          await M.notify?.call ctx, ctx
 
           call_ctx =
             cfg: ctx.cfg # useful-wind/router
@@ -108,12 +111,12 @@
             emit: ->
             add: ->
 
-          C = require '../middleware/cdr.coffee.md'
+          C = require '../middleware/cdr'
 
-          yield L.include.call call_ctx, call_ctx
-          yield S.include.call call_ctx, call_ctx
-          yield C.include.call call_ctx, call_ctx
-          yield M.include.call call_ctx, call_ctx
+          await L.include.call call_ctx, call_ctx
+          await S.include.call call_ctx, call_ctx
+          await C.include.call call_ctx, call_ctx
+          await M.include.call call_ctx, call_ctx
           S.end.call call_ctx, call_ctx
 
           cfg.global_redis_client.end()

@@ -1,4 +1,3 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:post-forward"
     debug = (require 'tangible') @name
@@ -10,7 +9,7 @@ This is a simplified version of the `middleware/client/ingress/post` handler.
 Its only purpose is to route Centrex internal forwarded calls.
 All attributes set on the initial call are kept as much as possible.
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
       return unless @session.forwarding is true
@@ -24,9 +23,9 @@ All attributes set on the initial call are kept as much as possible.
       if @session.dialplan is 'e164'
         return @respond '484'
 
-      dst_number = yield @validate_local_number()
+      dst_number = await @validate_local_number()
 
-      yield set_params.call this
+      await set_params.call this
 
 Build the destination FreeSwitch dialstring
 -------------------------------------------
@@ -45,7 +44,7 @@ Build the destination FreeSwitch dialstring
       ]
 
       if @session.dev_logger
-        yield @reference.set_dev_logger true
+        await @reference.set_dev_logger true
 
       @debug 'Done.'
       return
@@ -56,15 +55,15 @@ Build the destination FreeSwitch dialstring
 Most parameters have been set before the forwarding happened.
 We only tweak a few things for the actual destination endpoint.
 
-    set_params = seem ->
+    set_params = ->
       @debug 'set_params'
 
       dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
 
       @debug 'schedule hangup'
-      yield @action 'sched_hangup', "+#{dlg_timeout}"
+      await @action 'sched_hangup', "+#{dlg_timeout}"
 
-      yield @export
+      await @export
         'sip_h_X-En': @session.endpoint_name
 
       @debug 'set_params: done.'

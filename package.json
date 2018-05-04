@@ -3,9 +3,10 @@
   "version": "35.0.0",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
-    "prepublishOnly": "npm install --only=dev && rm package-lock.json && coffee -c conf/*.coffee middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
-    "pretest": "npm install",
-    "test": "mocha 'test/*.coffee.md'"
+    "prepublishOnly": "npm run build",
+    "build": "npm install --only=dev && rm package-lock.json && coffee -c conf/*.coffee middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
+    "pretest": "npm run build && coffee -c test/*.coffee.md",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -32,7 +33,6 @@
     "normal-key": "^3.1.0",
     "red-rings-axon": "^2.0.0",
     "request": "^2.83.0",
-    "seem": "^2.0.0",
     "solid-gun": "^1.0.0",
     "superagent": "^3.8.2",
     "tangible": "^2.0.0",
@@ -41,7 +41,7 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "coffee-script": "^1.12.7",
+    "coffeescript": "^2.3.0",
     "mocha": "^5.0.0"
   },
   "publishConfig": {

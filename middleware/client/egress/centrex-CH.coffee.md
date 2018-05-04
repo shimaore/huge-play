@@ -1,8 +1,7 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:centrex-CH"
-    seem = require 'seem'
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'centrex'
@@ -20,7 +19,7 @@ Keep @session.dialplan.
 
         when @destination.match /^[1-6]\d+$/
           @debug 'Internal call'
-          yield @action 'privacy', 'no'
+          await @action 'privacy', 'no'
           @session.centrex_internal = true
           @session.sip_profile = @session.sip_profile_client
           @direction 'ingress'

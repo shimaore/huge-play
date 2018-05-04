@@ -1,4 +1,3 @@
-    seem = require 'seem'
     url = require 'url'
 
     pkg = require '../../../package.json'
@@ -9,7 +8,7 @@
 
     default_music = tones.loop tones.fr.waiting
 
-    @include = seem ->
+    @include = ->
       return unless @session?.direction is 'egress'
 
       @debug 'Ready'
@@ -20,15 +19,15 @@
 
 * session.e164_number (object) The doc.global_number record for the source of an outbound call.
 
-      @session.e164_number = yield @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
-      yield @reference.add_in @session.e164_number._id
-      yield @user_tags @session.e164_number.tags
+      @session.e164_number = await @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
+      await @reference.add_in @session.e164_number._id
+      await @user_tags @session.e164_number.tags
 
 * session.e164_number.fs_variables See doc.global_number.fs_variables
 * doc.global_number (object, optional) Additional FreeSwitch variables to be set on egress calls (for the calling number). These will show up in CDRs on the client side.
 
       if @session.e164_number.fs_variables?
-        yield @set @session.e164_number.fs_variables
+        await @set @session.e164_number.fs_variables
 
 The URL module parses the SIP username as `auth`.
 
@@ -39,7 +38,7 @@ The URL module parses the SIP username as `auth`.
       if pci?
         @session.ccnq_account = (url.parse pci).auth
       else
-        @session.ccnq_account = yield @reference.get_account()
+        @session.ccnq_account = await @reference.get_account()
 
       @session.ccnq_account ?= null
 
@@ -47,8 +46,8 @@ The URL module parses the SIP username as `auth`.
         @debug 'Invalid Charge-Info', pci
         return @respond '403 Missing Charge-Info'
 
-      yield @reference.set_account @session.ccnq_account
-      yield @reference.add_in "account:#{@session.ccnq_account}"
+      await @reference.set_account @session.ccnq_account
+      await @reference.add_in "account:#{@session.ccnq_account}"
 
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 
@@ -78,7 +77,7 @@ Set parameters
 
       @session.cdr_direction = @session.direction
 
-      yield @set
+      await @set
 
 These are injected so that they may eventually show up in CDRs.
 
@@ -101,9 +100,9 @@ Codec negotiation with late-neg:
           inherit_codec: @session.inherit_codec ? true
 
       if @session.ringback?
-        yield @set ringback: @session.ringback
+        await @set ringback: @session.ringback
 
-      yield @export
+      await @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
 
@@ -112,10 +111,10 @@ Music
         hold_music: @session.music
 
       if @session.asserted?
-        yield @set effective_caller_id_number: @session.asserted
+        await @set effective_caller_id_number: @session.asserted
 
       if @session.dev_logger
-        yield @reference.set_dev_logger true
+        await @reference.set_dev_logger true
 
       @report
         state: 'client-egress-accepted'

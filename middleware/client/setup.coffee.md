@@ -1,4 +1,3 @@
-    seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:client:setup"
     debug = (require 'tangible') @name
@@ -17,7 +16,7 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
 Call-Processing
 ===============
 
-    @include = seem ->
+    @include = ->
 
 Session Context
 ---------------
@@ -92,7 +91,7 @@ in which case one is created.
 Logger
 ------
 
-      if yield @reference.get_dev_logger()
+      if await @reference.get_dev_logger()
         @session.dev_logger = true
 
       @notify state: 'incoming-call-client-side'
@@ -192,12 +191,12 @@ Set FreeSwitch variables
       sip_params = "xref=#{@session.reference}"
       our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
 
-      yield @set
+      await @set
         session_reference: @session.reference
         force_transfer_context: @session.default_transfer_context
         # force_transfer_dialplan: our_dialplan
 
-      yield @export
+      await @export
         session_reference: @session.reference
 
 Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is from `thinkable-ducks/server`.

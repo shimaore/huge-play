@@ -1,4 +1,3 @@
-    seem = require 'seem'
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
     debug = (require 'tangible') @name
@@ -14,7 +13,7 @@ Config
 Note that carrier-side the fields are called `sip_profiles` and are stored in the database.
 The FreeSwitch configuration uses the `profiles` field, which defaults to using port 5080.
 
-    @config = seem ->
+    @config = ->
 
 Create the proper profiles and ACLs
 
@@ -24,7 +23,7 @@ Create the proper profiles and ACLs
       @cfg.host_data =
         if @cfg.host?
           debug "Retrieving data for #{@cfg.host}"
-          yield @cfg.prov
+          await @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
               @debug.ops "Host #{@cfg.host}: #{error}"
@@ -54,11 +53,11 @@ Server
 
 Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
-    @server_pre = seem ->
+    @server_pre = ->
       @cfg.host_data =
         if @cfg.host?
           debug "Retrieving data for #{@cfg.host}"
-          yield @cfg.prov
+          await @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
               # @debug.ops "Host #{@cfg.host}: #{error}"
@@ -77,7 +76,7 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
 Call-Processing
 ===============
 
-    @include = seem ->
+    @include = ->
 
 Session Context
 ---------------
@@ -130,7 +129,7 @@ Otherwise, since the call is coming from a carrier we force the creation of a ne
 Logger
 ------
 
-      if yield @reference.get_dev_logger()
+      if await @reference.get_dev_logger()
         @session.dev_logger = true
 
       @notify state:'incoming-call-carrier-side'
@@ -178,9 +177,9 @@ Set FreeSwitch variables
       sip_params = "xref=#{@session.reference}"
       our_dialplan = "inline:'socket:127.0.0.1:#{@cfg.port ? 5702} async full'"
 
-      yield @set
+      await @set
         session_reference: @session.reference
-      yield @export
+      await @export
         session_reference: @session.reference
 
 Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is from `thinkable-ducks/server`.

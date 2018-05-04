@@ -1,12 +1,11 @@
     @name = "huge-play:middleware:client:menu"
-    seem = require 'seem'
     run = require 'flat-ornament'
 
     @description = '''
       Handles routing to a given menu.
     '''
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'menu'
 
@@ -16,20 +15,20 @@
 
       @report state:'menu'
 
-      yield @action 'answer'
+      await @action 'answer'
       call_is_answered = true
 
-      yield @export
+      await @export
         t38_passthru: false
         sip_wait_for_aleg_ack: not call_is_answered
-      yield @set
+      await @set
         sip_wait_for_aleg_ack: not call_is_answered
 
       @session.wait_for_aleg_ack = not call_is_answered
 
       @debug 'Menu starting.'
       @menu_depth = 0
-      yield run.call this, @session.menu, @ornaments_commands
+      await run.call this, @session.menu, @ornaments_commands
         .catch (error) => @debug.catch error
       @debug 'Menu completed.'
       return

@@ -1,7 +1,6 @@
     pkg = require '../../package'
     @name = "#{pkg.name}:middleware:client:fifo"
     debug = (require 'tangible') @name
-    seem = require 'seem'
     qs = require 'querystring'
 
     @description = '''
@@ -14,7 +13,7 @@
 
     second = 1000
 
-    @include = seem ->
+    @include = ->
 
 FIFO handling
 =============
@@ -39,10 +38,10 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 Ready to send, answer the call.
 
       @debug 'Answer'
-      yield @action 'answer'
+      await @action 'answer'
       call_is_answered = true
 
-      yield @export
+      await @export
         t38_passthru: false
 
 Basically if the pre_answer we should wait; once the call is answered we won't be getting any more ACK, though.
@@ -55,7 +54,7 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
       id = "number_domain:#{@session.number_domain}"
 
       @debug 'Send to FIFO'
-      yield @set
+      await @set
         continue_on_fail: true
 
       if @session.ringback?
@@ -65,14 +64,14 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
       if fifo.announce?
         announce_uri = fifo_uri id, fifo.announce
       if announce_uri?
-        yield @set ringback: announce_uri
+        await @set ringback: announce_uri
 
       if @session.music?
         music_uri = @session.music
       if fifo.music?
         music_uri = fifo_uri id, fifo.music
       if music_uri?
-        yield @export hold_music: music_uri
+        await @export hold_music: music_uri
 
 FIXME: This is taken from the centrex-{country} code, but really it should be more generic.
 
@@ -80,20 +79,20 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
         @source = "+#{@session.ccnq_from_e164}"
 
       if fifo.tags?
-        yield @user_tags fifo.tags
+        await @user_tags fifo.tags
 
       if fifo.required_skills?
         for skill in fifo.required_skills
-          yield @tag "skill:#{skill}"
+          await @tag "skill:#{skill}"
 
       if typeof fifo.queue is 'string'
-        yield @tag "queue:#{fifo.queue}"
+        await @tag "queue:#{fifo.queue}"
 
       if fifo.priority?
-        yield @tag "priority:#{fifo.priority}"
+        await @tag "priority:#{fifo.priority}"
 
       if fifo.broadcast
-        yield @tag 'broadcast'
+        await @tag 'broadcast'
 
 Call-center
 ===========
@@ -105,22 +104,22 @@ If the call-group should use the queuer, then do that.
         @notify state:'queue', name:fifo.full_name, queue: fifo.queue
 
         {queuer} = @cfg
-        call = yield @queuer_call()
+        call = await @queuer_call()
 
-        ref_tags = yield @reference.tags()
-        yield call.set_tags ref_tags
-        yield call.add_tag "number_domain:#{@session.number_domain}"
+        ref_tags = await @reference.tags()
+        await call.set_tags ref_tags
+        await call.add_tag "number_domain:#{@session.number_domain}"
 
         if music_uri?
-          yield call.set_music music_uri
+          await call.set_music music_uri
 
         if announce_uri?
           @action 'endless_playback', announce_uri # async
 
-        yield call.set_remote_number @source
-        yield call.set_alert_info @session.alert_info if @session.alert_info?
-        yield call.clear()
-        yield queuer.queue_ingress_call call
+        await call.set_remote_number @source
+        await call.set_alert_info @session.alert_info if @session.alert_info?
+        await call.clear()
+        await queuer.queue_ingress_call call
 
 If the call is not processed (no agents are ready), attemp overflow.
 
@@ -138,13 +137,13 @@ desirable queues to a given call. (Adding more required skills would build a sma
 
         ingress_pool = queuer.ingress_pool @session.number_domain
 
-        attempt_overflow = seem (suffix) =>
+        attempt_overflow = (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
-          yield call.load()
-          if yield ingress_pool.has call
+          await call.load()
+          if await ingress_pool.has call
             ok = false
-            for tag in call_tags when yield call.has_tag tag
-              yield call.add_tag "#{tag}:#{suffix}"
+            for tag in call_tags when await call.has_tag tag
+              await call.add_tag "#{tag}:#{suffix}"
               ok = true
             ok
           else
@@ -157,11 +156,11 @@ Attempt overflow immediately
 
 Attempt overflow after a delay
 
-        yield sleep 30*second
+        await sleep 30*second
         unless attempt_overflow 'overflow:30s'
           return
 
-        yield sleep 30*second
+        await sleep 30*second
         unless attempt_overflow 'overflow:60s'
           return
 
@@ -203,14 +202,14 @@ Otherwise use the hunt-group behavior.
 
         recipients.push "#{recipient}@#{@session.number_domain}"
 
-        sofias.push yield @sofia_string recipient, ["#{k}=#{v}" for own k,v of {
+        sofias.push await @sofia_string recipient, ["#{k}=#{v}" for own k,v of {
           t38_passthru: false
           leg_delay_start
           leg_progress_timeout
           leg_timeout
         }]
       @debug 'bridge', sofias
-      res = yield @action 'bridge', sofias.join ','
+      res = await @action 'bridge', sofias.join ','
 
       data = res.body
       @session.bridge_data ?= []
@@ -273,7 +272,7 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
         @debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
-        yield @action 'hangup'
+        await @action 'hangup'
         return
 
       if cause is 'ORIGINATOR_CANCEL'
@@ -286,7 +285,7 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         @debug 'Send to voicemail'
         @destination = fifo.voicemail
         @direction 'voicemail'
-        yield @validate_local_number()
+        await @validate_local_number()
         return
 
       if fifo.user_database?
@@ -298,4 +297,4 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
         return
 
       @debug 'Hangup'
-      yield @action 'hangup'
+      await @action 'hangup'

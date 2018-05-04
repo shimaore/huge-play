@@ -1,4 +1,3 @@
-    seem = require 'seem'
     nimble = require 'nimble-direction'
     pkg = require '../package.json'
     {EventEmitter2} = require 'eventemitter2'
@@ -13,7 +12,7 @@
     RedisInterface = require 'normal-key/interface'
 
     Reference = require './reference'
-    {debug,hand} = (require 'tangible') @name
+    {debug,foot} = (require 'tangible') @name
 
     seconds = 1000
     minutes = 60*seconds
@@ -31,17 +30,17 @@
       if @cfg.local_redis_client isnt @cfg.global_redis_client
         @cfg.local_redis_client.end()
 
-    @config = seem ->
-      yield nimble @cfg
+    @config = ->
+      await nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
-    @server_pre = seem ->
+    @server_pre = ->
 
 Red-Rings Axon connexion
 
       @cfg.rr = new RedRingAxon @cfg.axon ? {}
 
-      yield nimble @cfg
+      await nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
 Local and Global Redis
@@ -106,7 +105,7 @@ If the `local_server` parameter is not provided (it normally should), only the p
         max: 2000
         maxAge: 1*minutes
 
-      @cfg.is_remote = seem (name,local_server) =>
+      @cfg.is_remote = (name,local_server) =>
 
         unless name?
           return null
@@ -122,7 +121,7 @@ Just probing (this is only useful when retrieving data, never when handling call
         if not local_server?
           server = is_remote_cache.get name
           if server is undefined
-            server = yield @cfg.global_redis_client
+            server = await @cfg.global_redis_client
               .get key
               .catch (error) ->
                 debug.ops "error #{error.stack ? error}"
@@ -144,14 +143,14 @@ Probe-and-update
 Set if not exists, [setnx](https://redis.io/commands/setnx)
 (Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
 
-        first_time = yield @cfg.global_redis_client
+        first_time = await @cfg.global_redis_client
           .setnx key, server
           .catch (error) ->
             debug.ops "error #{error.stack ? error}, forcing local server"
             1
 
         if not first_time
-          server = yield @cfg.global_redis_client
+          server = await @cfg.global_redis_client
             .get key
             .catch (error) ->
               debug.ops "error #{error.stack ? error}"
@@ -193,29 +192,29 @@ Create a new socket client
 Create a new socket client bound to a given UUID
 
       ###
-      @cfg.uuid_wrapper = seem (uuid) ->
-        wrapper = yield _wrapper()
+      @cfg.uuid_wrapper = (uuid) ->
+        wrapper = await _wrapper()
         register = ->
-          yield wrapper.client.send "myevents #{uuid} json"
-          yield wrapper.client.event_json 'ALL'
-          yield wrapper.client.linger()
+          await wrapper.client.send "myevents #{uuid} json"
+          await wrapper.client.event_json 'ALL'
+          await wrapper.client.linger()
         wrapper.on 'client-changed', register
-        # yield client.auto_cleanup() # Already done by esl
+        # await client.auto_cleanup() # Already done by esl
         wrapper
       ###
 
 Use a default client for generic / shared APIs
 
-      default_wrapper = yield _wrapper()
+      default_wrapper = await _wrapper()
 
-      _api = seem (cmd) ->
-        res = yield default_wrapper.client.bgapi cmd
+      _api = (cmd) ->
+        res = await default_wrapper.client.bgapi cmd
 
 * cfg.api(command) returns (a Promise for) the body of the response for a FreeSwitch `api` command.
 
-      @cfg.api = seem (cmd) =>
+      @cfg.api = (cmd) =>
         debug 'api', cmd
-        res = yield _api cmd
+        res = await _api cmd
         res?.body ? null
 
 * cfg.api.send(command) returns (a Promise for) the `esl` response to the command.
@@ -251,18 +250,18 @@ Use a default client for generic / shared APIs
 
       store = @cfg.local_redis_client
 
-      monitor_wrapper = yield _wrapper()
+      monitor_wrapper = await _wrapper()
       monitored_events = {}
 
 Remember to always call `monitor.end()` when you are done with the monitor!
 
 * cfg.api.monitor(unique_id,events) returns an EventEmitter that emits the requested events when they are triggered by FreeSwitch on the given Unique-ID. You MUST call `.end` once the EventEmitter is no longer needed.
 
-      @cfg.api.is_monitored = seem (id) ->
+      @cfg.api.is_monitored = (id) ->
         key = "filter-#{id}"
-        0 < yield store.get key
+        0 < await store.get key
 
-      @cfg.api.monitor = seem (id,events) ->
+      @cfg.api.monitor = (id,events) ->
         debug 'api.monitor: start', {id,events}
 
         key = "filter-#{id}"
@@ -283,7 +282,7 @@ Remember to always call `monitor.end()` when you are done with the monitor!
             debug 'api.monitor received', msg_id, msg_ev
             ev?.emit msg_ev, msg
 
-        register = seem ->
+        register = ->
           debug 'api.monitor: register'
 
 Don't show the warning for 10 concurrent calls!
@@ -291,11 +290,11 @@ The number should really be an estimate of our maximum number of concurrent, mon
 
           monitor_wrapper.client.setMaxListeners 200
 
-          if 1 is yield store.incr key
-            yield filter()
+          if 1 is await store.incr key
+            await filter()
 
           for event in events
-            yield do (event) ->
+            await do (event) ->
               monitor_wrapper.client.on event, listener
               monitored_events[event] ?= 0
               if monitored_events[event]++ is 0
@@ -305,12 +304,12 @@ The number should really be an estimate of our maximum number of concurrent, mon
           debug 'api.monitor: register complete'
           return
 
-        re_register = hand ->
+        re_register = foot ->
           debug 'api.monitor: re-register'
           monitor_wrapper.client.setMaxListeners 200
-          yield filter()
+          await filter()
           for event in events
-            yield do (event) ->
+            await do (event) ->
               monitor_wrapper.client.on event, listener
               if monitored_events[event] > 0
                 debug 'api.monitor: re-register: Adding event json for', event
@@ -319,9 +318,9 @@ The number should really be an estimate of our maximum number of concurrent, mon
           return
 
         monitor_wrapper.on 'client-changed', re_register
-        yield register()
+        await register()
 
-        ev.end = seem ->
+        ev.end = ->
           monitor_wrapper.off 'client-changed', re_register
 
           if not ev?
@@ -329,12 +328,12 @@ The number should really be an estimate of our maximum number of concurrent, mon
             return
 
           debug 'api.monitor.end', {id,events}
-          if 0 is yield store.decr key
-            yield unfilter()
-            yield store.expire key, 10
+          if 0 is await store.decr key
+            await unfilter()
+            await store.expire key, 10
 
           for event in events
-            yield do (event) ->
+            await do (event) ->
               monitor_wrapper.client.off event, listener
               if --monitored_events[event] is 0
                 debug 'api.monitor.end: nixevent', event
@@ -430,7 +429,7 @@ Context Extension
 
 `@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
 
-        _in: seem (_in = [])->
+        _in: (_in = [])->
 
 Add any endpoint- or number- specific dispatch room (this allows end-users to receive events for endpoints and numbers they are authorized to monitor).
 
@@ -449,7 +448,7 @@ We assume the room names match record IDs.
             push_in @session.number_domain_data._id
 
           if @reference?
-            tags = yield @reference.get_in().catch -> []
+            tags = await @reference.get_in().catch -> []
             for tag in tags
               push_in tag
 
@@ -459,7 +458,7 @@ Data reporting (e.g. to save for managers reports).
 Typically `@report({state,…})` for calls state changes / progress, `@report({event,…})` for non-calls.
 This version is meant to be used in-call.
 
-        report: seem (report) ->
+        report: (report) ->
           unless @call? and @session?
             debug.dev 'report: improper environment'
             return false
@@ -470,7 +469,7 @@ This version is meant to be used in-call.
           report.timezone ?= @session.timezone
           report.timestamp ?= now report.timezone
           report.now = Date.now()
-          report._in = yield @_in report._in
+          report._in = await @_in report._in
           report.host ?= @cfg.host
           report.type ?= 'report'
 
@@ -503,39 +502,39 @@ Real-time notification (e.g. to show on a web panel).
           report._notify = true
           @report report
 
-        set: seem (name,value) ->
+        set: (name,value) ->
           return unless name?
 
           if typeof name is 'string'
-            yield @res.set name, value
+            await @res.set name, value
             return
 
           for own k,v of name
-            yield @res.set k, v
+            await @res.set k, v
 
           return
 
-        unset: seem (name) ->
+        unset: (name) ->
           return unless name?
 
           if typeof name is 'string'
-            yield @res.set name, null
+            await @res.set name, null
             return
 
           for k in name
-            yield @res.set k, null
+            await @res.set k, null
 
           return
 
-        export: seem (name,value) ->
+        export: (name,value) ->
           return unless name?
 
           if typeof name is 'string'
-            yield @res.export name, value
+            await @res.export name, value
             return
 
           for own k,v of name
-            yield @res.export k, v
+            await @res.export k, v
 
           return
 
@@ -553,13 +552,13 @@ Prevent extraneous processing of this call.
           else
             ctx.action 'respond', response
 
-        sofia_string: seem (number, extra_params = []) ->
+        sofia_string: (number, extra_params = []) ->
 
           debug 'sofia_string', number, extra_params
 
           id = "number:#{number}@#{@session.number_domain}"
 
-          number_data = yield @cfg.prov
+          number_data = await @cfg.prov
             .get id
             .catch (error) ->
               debug.ops "#{id} #{error.stack ? error}"
@@ -590,7 +589,7 @@ This is a simplified version of the sofia-string building code found in middlewa
 
           "[#{params.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
-        validate_local_number: seem ->
+        validate_local_number: ->
 
 Retrieve number data.
 
@@ -598,11 +597,11 @@ Retrieve number data.
 * doc.local_number.disabled (boolean) If true the record is not used.
 
           dst_number = "#{@destination}@#{@session.number_domain}"
-          @session.number = yield @cfg.prov
+          @session.number = await @cfg.prov
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
-          yield @reference.add_in @session.number._id
-          yield @user_tags @session.number.tags
+          await @reference.add_in @session.number._id
+          await @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
           if @session.number.music?
@@ -611,7 +610,7 @@ Retrieve number data.
           if @session.number.error?
             @debug.dev "Could not locate destination number #{dst_number}"
             @notify state: 'invalid-local-number', number: @session.number._id
-            yield @respond '486 Not Found'
+            await @respond '486 Not Found'
             return
 
           @debug "validate_local_number: Got dst_number #{dst_number}", @session.number
@@ -619,19 +618,19 @@ Retrieve number data.
           if @session.number.disabled
             @debug.ops "Number #{dst_number} is disabled"
             @notify state:'disabled-local-number', number: @session.number._id
-            yield @respond '486 Administratively Forbidden' # was 403
+            await @respond '486 Administratively Forbidden' # was 403
             return
 
 Set the endpoint name so that if we redirect to voicemail the voicemail module can locate the endpoint.
 
           @session.endpoint_name = @session.number.endpoint
-          yield @reference.set_endpoint @session.number.endpoint
-          yield @reference.add_in "endpoint:#{@session.number.endpoint}"
+          await @reference.set_endpoint @session.number.endpoint
+          await @reference.add_in "endpoint:#{@session.number.endpoint}"
 
 Set the account so that if we redirect to an external number the egress module can find it.
 
-          yield @reference.set_account @session.number.account
-          yield @reference.add_in "account:#{@session.number.account}"
+          await @reference.set_account @session.number.account
+          await @reference.add_in "account:#{@session.number.account}"
           @report
             state: 'validated-local-number'
             number: @session.number._id
@@ -643,37 +642,37 @@ Set the account so that if we redirect to an external number the egress module c
         global_redis: @cfg.global_redis_client
         local_redis: @cfg.local_redis_client
 
-        tag: seem (tag) ->
+        tag: (tag) ->
           if tag?
-            yield @reference.add_tag tag
+            await @reference.add_tag tag
             @report {event:'tag', tag}
 
-        user_tag: seem (tag) ->
+        user_tag: (tag) ->
           if tag?
-            yield @reference.add_tag "user-tag:#{tag}"
+            await @reference.add_tag "user-tag:#{tag}"
             @report {event:'user-tag', tag}
 
-        user_tags: seem (tags) ->
+        user_tags: (tags) ->
           return unless tags?
           for tag in tags
-            yield @user_tag tag
+            await @user_tag tag
 
-        has_tag: seem (tag) ->
-          tag? and yield @reference.has_tag tag
+        has_tag: (tag) ->
+          tag? and await @reference.has_tag tag
 
-        has_user_tag: seem (tag) ->
-          tag? and yield @has_tag "user-tag:#{tag}"
+        has_user_tag: (tag) ->
+          tag? and await @has_tag "user-tag:#{tag}"
 
-        clear_call_center_tags: seem ->
-          tags = yield @reference.tags()
+        clear_call_center_tags: ->
+          tags = await @reference.tags()
           for tag in tags when tag is 'broadcast' or tag.match /^(skill|priority|queue):/
-            yield @reference.del_tag tag
+            await @reference.del_tag tag
           null
 
-        clear_user_tags: seem ->
-          tags = yield @reference.tags()
+        clear_user_tags: ->
+          tags = await @reference.tags()
           for tag in tags when tag.match /^user-tag:/
-            yield @reference.del_tag tag
+            await @reference.del_tag tag
           null
 
         record_call: (name) ->
@@ -683,11 +682,11 @@ Set the account so that if we redirect to an external number the egress module c
 
 Keep recording (async)
 
-          keep_recording = seem =>
+          keep_recording = =>
             @report event:'recording'
-            uri = yield @cfg.recording_uri name
+            uri = await @cfg.recording_uri name
             @debug 'Recording', @call.uuid, uri
-            outcome = yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+            outcome = await @cfg.api "uuid_record #{@call.uuid} start #{uri}"
             @debug 'Recording', @call.uuid, uri, outcome
 
             last_uri = uri
@@ -697,14 +696,14 @@ Keep recording (async)
               still_running = false
 
             while still_running
-              yield @sleep 29*minutes
-              uri = yield @cfg.recording_uri name
+              await @sleep 29*minutes
+              uri = await @cfg.recording_uri name
               @debug 'Recording next segment', @call.uuid, uri
-              yield @cfg.api "uuid_record #{@call.uuid} start #{uri}"
+              await @cfg.api "uuid_record #{@call.uuid} start #{uri}"
               @report event:'recording'
-              yield @sleep 1*minutes
+              await @sleep 1*minutes
               @debug 'Stopping previous segment', @call.uuid, last_uri
-              yield @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
+              await @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
               last_uri = uri
 
             return

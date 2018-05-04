@@ -1,4 +1,3 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
     {debug,hand} = (require 'tangible') @name
@@ -30,7 +29,7 @@ send
 
 Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
-    @send = send = seem (destinations) ->
+    @send = send = (destinations) ->
 
       new_uuid = make_id()
 
@@ -41,7 +40,7 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
       key = "#{@destination}@#{@session.number_domain}"
 
       intercept_key = "inbound_call:#{key}"
-      yield @local_redis?.setex intercept_key, intercept_timeout, @call.uuid
+      await @local_redis?.setex intercept_key, intercept_timeout, @call.uuid
 
       @session.agent = key
 
@@ -59,22 +58,22 @@ Transfer-disposition values:
       unless @call.closed or @session.dialplan isnt 'centrex'
 
         @debug 'Set inbound eavesdrop', eavesdrop_key
-        yield @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
+        await @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
 
 The new call will always be bound to this agent.
 
         debug 'CHANNEL_PRESENT', key, new_uuid
 
         if queuer? and @queuer_call?
-          new_call = yield @queuer_call new_uuid
+          new_call = await @queuer_call new_uuid
 
 Bind the agent to the call.
 
-          yield queuer.set_agent new_call, key
+          await queuer.set_agent new_call, key
 
 Monitor the b-leg.
 
-          yield queuer.monitor_local_call new_call
+          await queuer.monitor_local_call new_call
 
 Note: inside the queuer, these calls are never pooled, so their state does not evolve.
 
@@ -91,16 +90,16 @@ Send the call(s)
 
       @debug 'send', sofia
 
-      yield @set
+      await @set
         continue_on_fail: true
 
       @debug 'Bridging', sofia
 
       @report state: 'ingress-bridging'
 
-      res = yield @action 'bridge', sofia.join ','
+      res = await @action 'bridge', sofia.join ','
 
-      yield @local_redis?.del intercept_key
+      await @local_redis?.del intercept_key
 
 Post-attempt handling
 ---------------------
@@ -182,7 +181,7 @@ Not Registered
 OpenSIPS marker for not registered
 
       if code is '604'
-        yield @debug.csr 'not-registered',
+        await @debug.csr 'not-registered',
           destination: @destination
           enpoint: @session.endpoint_name
           tried_cfnr: @session.tried_cfnr

@@ -1,4 +1,3 @@
-    seem = require 'seem'
     Solid = require 'solid-gun'
     RedisClient = require 'normal-key/client'
 
@@ -13,8 +12,10 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       -> @get name
 
     class Reference extends RedisClient
-      constructor: (@id = reference_id()) ->
-        super 'xref', @id
+      constructor: (id) ->
+        id ?= reference_id()
+        super 'xref', id
+        @id = id
         @__in_key = "#{@class_name}-#{@key}-i"
 
       set_endpoint: SET 'endpoint'
@@ -33,8 +34,8 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       get_domain: GET 'domain'
       get_dev_logger: GET 'dev_logger'
       get_account: GET 'account'
-      get_call_options: seem ->
-        options = yield @get 'call_options'
+      get_call_options: ->
+        options = await @get 'call_options'
         if options?
           JSON.parse options
         else

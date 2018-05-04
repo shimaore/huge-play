@@ -4,7 +4,6 @@
 
     request = require 'request'
     qs = require 'querystring'
-    seem = require 'seem'
 
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
@@ -22,13 +21,13 @@ Record using the given file or uri.
 
 https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_record
 
-      prompt.record = seem (file,time_limit = 300) =>
+      prompt.record = (file,time_limit = 300) =>
         @debug 'record', {file,time_limit}
         silence_thresh = 20
         silence_hits = 3
-        yield @action 'set', 'playback_terminators=any'
-        yield @action 'gentones', '%(500,0,800)'
-        res = yield @action 'record', [
+        await @action 'set', 'playback_terminators=any'
+        await @action 'gentones', '%(500,0,800)'
+        res = await @action 'record', [
             file
             time_limit
             silence_thresh
@@ -84,7 +83,7 @@ https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_play_and_get_digits
 Play a file and optionnally record a single digit.
 Promise resolves into the selected digit or `null`.
 
-      prompt.play = seem (file,o={}) ->
+      prompt.play = (file,o={}) ->
         o.file = file
         o.min ?= 1
         o.max ?= 1
@@ -92,7 +91,7 @@ Promise resolves into the selected digit or `null`.
         o.var_name ?= 'choice'
         o.regexp ?= '\\d'
         o.digit_timeout ?= 1000
-        res = yield prompt.play_and_get_digits o
+        res = await prompt.play_and_get_digits o
         body = res?.body ? {}
         name = "variable_#{o.var_name}"
         debug "Got #{body[name]} for #{name}"
@@ -149,20 +148,20 @@ Promise resolves into the new PIN or `null`.
         o.invalid_file = 'silence_stream://250'
         prompt.get_pin o
 
-      prompt.goodbye = seem =>
+      prompt.goodbye = =>
         @debug 'goodbye'
-        yield prompt.phrase 'voicemail_goodbye'
-        yield @action 'hangup'
+        await prompt.phrase 'voicemail_goodbye'
+        await @action 'hangup'
         @debug 'goodbye done'
 
-      prompt.phrase = seem (phrase) =>
+      prompt.phrase = (phrase) =>
         @debug 'phrase'
-        yield @action 'phrase', phrase
+        await @action 'phrase', phrase
 
-      prompt.error = seem (id) ->
+      prompt.error = (id) ->
         debug 'error', {id}
-        yield prompt.phrase "spell,#{id}" if id?
-        yield prompt.goodbye()
+        await prompt.phrase "spell,#{id}" if id?
+        await prompt.goodbye()
         Promise.reject new Error "error #{id}"
 
 `uri`

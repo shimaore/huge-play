@@ -1,4 +1,3 @@
-    seem = require 'seem'
     chai = require 'chai'
     chai.should()
     debug = (require 'tangible') 'huge-play:test:dtmf'
@@ -20,123 +19,123 @@
         debug: ->
       m.include.call ctx
 
-      it 'should receive a single digit', seem ->
+      it 'should receive a single digit', ->
         @timeout 1000
         ctx.dtmf.clear()
         p = ctx.dtmf.expect 1, 1
-        yield sleep 400
+        await sleep 400
         submit 'A'
-        yield sleep 100
-        v = yield p
+        await sleep 100
+        v = await p
         v.should.eql 'A'
 
-      it 'should buffer a single digit', seem ->
+      it 'should buffer a single digit', ->
         @timeout 1000
         ctx.dtmf.clear()
-        yield sleep 500
+        await sleep 500
         submit 'A'
         p = ctx.dtmf.expect 1, 1
-        v = yield p
+        v = await p
         v.should.eql 'A'
 
-      it 'should timeout', seem ->
+      it 'should timeout', ->
         @timeout 3000
         ctx.dtmf.clear()
-        yield sleep 500
+        await sleep 500
         p = ctx.dtmf.expect 1, 1, 500
-        v = yield p
+        v = await p
         v.should.eql ''
 
-      it 'should report multiple digits', seem ->
+      it 'should report multiple digits', ->
         ctx.dtmf.clear()
         submit 'A'
         submit 'B'
         submit 'C'
         submit 'D'
         p = ctx.dtmf.expect 1, 10, 500
-        v = yield p
+        v = await p
         v.should.eql 'ABCD'
 
-      it 'should report minimum number of digits', seem ->
+      it 'should report minimum number of digits', ->
         @timeout 3000
         ctx.dtmf.clear()
         submit 'A'
         p = ctx.dtmf.expect 2, 5, 250
-        yield sleep 100
+        await sleep 100
         submit 'B'
 
 The last one will arrive too late, so it is not counted.
 
-        yield sleep 300
+        await sleep 300
         submit 'C'
         debug 'boo'
-        v = yield p
+        v = await p
         debug v
         v.should.eql 'AB'
 
-      it 'should report fast digits', seem ->
+      it 'should report fast digits', ->
         @timeout 3000
         ctx.dtmf.clear()
-        yield sleep 50
+        await sleep 50
         submit 'A'
-        yield sleep 50
+        await sleep 50
         p = ctx.dtmf.expect 2, 5, 250
-        yield sleep 50
+        await sleep 50
         submit 'B'
 
 The last one arrives before timeout.
 
-        yield sleep 50
+        await sleep 50
         submit 'C'
-        yield sleep 50
-        v = yield p
+        await sleep 50
+        v = await p
         v.should.eql 'ABC'
 
-      it 'should handle # beforehand', seem ->
+      it 'should handle # beforehand', ->
         @timeout 3000
         ctx.dtmf.clear()
-        yield sleep 50
+        await sleep 50
         submit 'A'
-        yield sleep 50
+        await sleep 50
         submit 'B'
-        yield sleep 50
+        await sleep 50
         submit '#'
         p = ctx.dtmf.expect 1, 4, 250
-        yield sleep 50
+        await sleep 50
         submit 'C'
-        v = yield p
+        v = await p
         v.should.eql 'AB'
 
-      it 'should handle # beforehand and skip afterwards', seem ->
+      it 'should handle # beforehand and skip afterwards', ->
         ctx.dtmf.clear()
-        yield sleep 50
+        await sleep 50
         submit 'A'
-        yield sleep 50
+        await sleep 50
         submit 'B'
-        yield sleep 50
+        await sleep 50
         submit '#'
-        yield sleep 10
+        await sleep 10
         p = ctx.dtmf.expect 1, 4, 250
-        v = yield p
-        yield sleep 50
+        v = await p
+        await sleep 50
         submit 'C'
         v.should.eql 'AB'
 
-      it 'should handle # afterwards', seem ->
+      it 'should handle # afterwards', ->
         ctx.dtmf.clear()
         p = ctx.dtmf.expect 1, 4, 250, 1000
-        yield sleep 50
+        await sleep 50
         submit 'A'
-        yield sleep 50
+        await sleep 50
         submit 'B'
-        yield sleep 50
+        await sleep 50
         submit '#'
-        yield sleep 50
+        await sleep 50
         submit 'C'
-        v = yield p
+        v = await p
         v.should.eql 'AB'
 
-      it 'should respect maximum length (before)', seem ->
+      it 'should respect maximum length (before)', ->
         ctx.dtmf.clear()
         submit 'A'
         submit 'B'
@@ -144,10 +143,10 @@ The last one arrives before timeout.
         submit 'D'
         submit 'E'
         p = ctx.dtmf.expect 4, 4, 250
-        v = yield p
+        v = await p
         v.should.eql 'ABCD'
 
-      it 'should respect maximum length (after)', seem ->
+      it 'should respect maximum length (after)', ->
         ctx.dtmf.clear()
         submit 'A'
         submit 'B'
@@ -155,5 +154,5 @@ The last one arrives before timeout.
         submit 'C'
         submit 'D'
         submit 'E'
-        v = yield p
+        v = await p
         v.should.eql 'ABCD'

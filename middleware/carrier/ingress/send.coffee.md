@@ -1,11 +1,10 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:carrier:ingress:send"
     debug = (require 'tangible') @name
 
 Send a call out using carrier-side rules.
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
 
@@ -18,7 +17,7 @@ Send a call out using carrier-side rules.
         destination: @destination
         ingress_target: ingress_target
 
-      res = yield @action 'bridge', "sofia/#{@session.sip_profile}/sip:#{@destination}@#{ingress_target}"
+      res = await @action 'bridge', "sofia/#{@session.sip_profile}/sip:#{@destination}@#{ingress_target}"
 
       data = res.body
       @session.bridge_data ?= []

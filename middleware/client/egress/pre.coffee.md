@@ -1,12 +1,11 @@
 First-line handler for outbound calls
 -------------------------------------
 
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
     debug = (require 'tangible') @name
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'egress'
 
@@ -22,21 +21,21 @@ Endpoint
 
 Endpoint might be provided in the reference data for example for an `originate` call (in exultant-songs).
 
-      @session.endpoint_name ?= yield @reference.get_endpoint()
+      @session.endpoint_name ?= await @reference.get_endpoint()
 
       unless @session.endpoint_name?
         @debug.dev 'Missing endpoint_name', @call.data
         return @respond '485 Missing Endpoint Header'
 
       @debug 'endpoint', @session.endpoint_name
-      yield @reference.set_endpoint @session.endpoint_name
+      await @reference.set_endpoint @session.endpoint_name
 
-      yield @unset 'sip_h_X-En'
+      await @unset 'sip_h_X-En'
 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
-      @session.endpoint = yield @cfg.prov.get "endpoint:#{@session.endpoint_name}"
-      yield @reference.add_in @session.endpoint._id
+      @session.endpoint = await @cfg.prov.get "endpoint:#{@session.endpoint_name}"
+      await @reference.add_in @session.endpoint._id
       if @session.endpoint.timezone?
         @session.timezone = @session.endpoint.timezone
       if @session.endpoint.music?
@@ -82,15 +81,15 @@ The `number_domain` field is required, but the number-domain record is optional.
 
 * session.number_domain_data Data record of the number-domain (egress calls).
 
-      @session.number_domain_data = yield @cfg.prov
+      @session.number_domain_data = await @cfg.prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
           @debug "number_domain #{number_domain}: #{error}"
           {}
 
       @debug 'number_domain', number_domain
-      yield @reference.add_in @session.number_domain_data._id
-      yield @user_tags @session.number_domain_data.tags
+      await @reference.add_in @session.number_domain_data._id
+      await @user_tags @session.number_domain_data.tags
 
 Number-domain is less specific than endpoint, so do not override.
 
@@ -108,7 +107,7 @@ Source (calling) number
       if @session.transfer
         @session.number = {}
       else
-        @session.number = yield @cfg.prov
+        @session.number = await @cfg.prov
           .get "number:#{src_number}"
 
 On a static trunk, the number might not be present.
@@ -118,7 +117,7 @@ On a static trunk, the number might not be present.
             {}
 
       if @session.number._id?
-        yield @reference.add_in @session.number._id
+        await @reference.add_in @session.number._id
 
 Number is more specific than endpoint or number-domain, override.
 
@@ -189,9 +188,9 @@ Enforce configurable privacy settings.
       privacy = @session.number.privacy
       privacy ?= @session.endpoint.privacy
       if privacy
-        yield @action 'privacy', 'number'
+        await @action 'privacy', 'number'
       else
-        yield @action 'privacy', 'no'
+        await @action 'privacy', 'no'
 
 Asserted-Number
 ---------------
@@ -221,7 +220,7 @@ ICE
 
 For backward-compatibility we currently ignore ICE proposals.
 
-      yield @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
+      await @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
       @report
         state:'egress-received'

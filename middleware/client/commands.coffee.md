@@ -4,7 +4,6 @@
     Holidays = require 'date-holidays'
     request = require 'superagent'
     run = require 'flat-ornament'
-    seem = require 'seem'
     serialize = require 'useful-wind-serialize'
 
     max_menu_depth = 42
@@ -19,8 +18,8 @@ Note: list IDs are always `<list-name>@<interesting-number>` where the `interest
 
 List ID for an ingress call.
 
-    local_ingress = seem ->
-      list = yield @validate_local_number()
+    local_ingress = ->
+      list = await @validate_local_number()
       pid = @req.header 'P-Asserted-Identity'
       interesting_number = if pid? then url.parse(pid).auth else @source
       list_id = "list:#{list}@#{interesting_number}"
@@ -54,9 +53,9 @@ Global egress
 List retriever
 --------------
 
-    get_list = seem (list_id) ->
+    get_list = (list_id) ->
       if list_id
-        list = yield @cfg.prov.get(list_id).catch -> {}
+        list = await @cfg.prov.get(list_id).catch -> {}
         if list.disabled
           null
         else
@@ -78,9 +77,9 @@ Commands builder
 ----------------
 
     chain = (test,selector) ->
-      seem ->
-        list_id = yield selector.call this
-        list = yield get_list.call this, list_id
+      ->
+        list_id = await selector.call this
+        list = await get_list.call this, list_id
         test.call this, list
 
 Commands
@@ -120,41 +119,41 @@ These actions are terminal for the statement.
         @debug 'accept'
         'over'
 
-      hangup: seem ->
+      hangup: ->
         @debug 'hangup'
-        yield @action 'hangup'
+        await @action 'hangup'
         @direction 'hangup'
         'over'
 
-      send: seem (destination) ->
+      send: (destination) ->
         @debug 'send'
         @session.direction = 'ingress'
         @destination = destination
-        yield serialize.modules ingress_modules, this, 'include'
+        await serialize.modules ingress_modules, this, 'include'
         'over'
 
 `menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
 
-      menu_send: seem ->
+      menu_send: ->
         @debug 'menu_send'
         return false unless @menu?
-        yield @menu.expect()
+        await @menu.expect()
         @debug 'menu_send', @menu.value
         @session.direction = 'ingress'
         @destination = @menu.value
-        yield serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
+        await serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
         'over'
 
-      reject: seem ->
+      reject: ->
         @debug 'reject'
-        yield @respond '486 Decline'
+        await @respond '486 Decline'
         'over'
 
-      announce: seem (message) ->
+      announce: (message) ->
         @debug 'announce', message
-        yield @action 'answer'
-        yield @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
-        yield @action 'hangup'
+        await @action 'answer'
+        await @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
+        await @action 'hangup'
         'over'
 
       voicemail: ->
@@ -178,31 +177,31 @@ Other actions must return `true`.
 
 `play`: play a file, uninterrupted (should be used for short prompts)
 
-      play: seem (file) ->
+      play: (file) ->
         @debug 'play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
-        yield @action 'answer'
-        yield @unset 'playback_terminators'
-        yield @action 'playback', url
+        await @action 'answer'
+        await @unset 'playback_terminators'
+        await @action 'playback', url
         true
 
-      message: seem (number) ->
+      message: (number) ->
         @debug 'message', number
         return true unless @session.number_domain_data?.msg?[number]?.active
         file = "msg-#{number}.mp3"
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
-        yield @action 'answer'
-        yield @unset 'playback_terminators'
-        yield @action 'playback', url
+        await @action 'answer'
+        await @unset 'playback_terminators'
+        await @action 'playback', url
         true
 
 `menu_play`: play a file, stop playing when a key is pressed
 
-      menu_play: seem (file) ->
+      menu_play: (file) ->
         @debug 'menu_play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
-        yield @action 'answer'
-        yield @dtmf.playback url
+        await @action 'answer'
+        await @dtmf.playback url
         true
 
 `music`: set the music-on-hold
@@ -217,9 +216,9 @@ Other actions must return `true`.
         @session.ringback = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
         true
 
-      wait: seem (ms) ->
+      wait: (ms) ->
         @debug 'wait', ms
-        yield @dtmf.playback "silence_stream://#{ms}"
+        await @dtmf.playback "silence_stream://#{ms}"
         @debug 'wait over', ms
         true
 
@@ -285,33 +284,33 @@ start: '18:00', end: '08:00'
         @notify state:'menu', user_tag:tag
         true
 
-      alert_info: seem (alert_info) ->
-        yield @export {alert_info}
+      alert_info: (alert_info) ->
+        await @export {alert_info}
         @session.alert_info = alert_info
         true
 
-      clear_call_center_tags: seem ->
-        yield @clear_call_center_tags()
+      clear_call_center_tags: ->
+        await @clear_call_center_tags()
         true
 
-      clear_user_tags: seem ->
-        yield @clear_user_tags()
+      clear_user_tags: ->
+        await @clear_user_tags()
         true
 
-      required_skill: seem (skill) ->
-        yield @tag "skill:#{skill}"
+      required_skill: (skill) ->
+        await @tag "skill:#{skill}"
         true
 
-      priority: seem (priority) ->
-        yield @tag "priority:#{priority}"
+      priority: (priority) ->
+        await @tag "priority:#{priority}"
         true
 
-      queue: seem (queue) ->
-        yield @tag "queue:#{queue}"
+      queue: (queue) ->
+        await @tag "queue:#{queue}"
         true
 
-      broadcast: seem ->
-        yield @tag 'broadcast'
+      broadcast: ->
+        await @tag 'broadcast'
         true
 
       has_tag: (tag) ->
@@ -320,18 +319,18 @@ start: '18:00', end: '08:00'
       has_user_tag: (tag) ->
         @has_user_tag tag
 
-      agent_skill: seem (skill) ->
+      agent_skill: (skill) ->
         return false unless typeof skill is 'string'
-        yield @agent.add_tag "skill:#{skill}"
+        await @agent.add_tag "skill:#{skill}"
         true
 
-      agent_queue: seem (queue) ->
+      agent_queue: (queue) ->
         return false unless typeof queue is 'string'
-        yield @agent.add_tag "queue:#{queue}"
+        await @agent.add_tag "queue:#{queue}"
         true
 
-      agent_broadcast: seem ->
-        yield @agent.add_tag "broadcast"
+      agent_broadcast: ->
+        await @agent.add_tag "broadcast"
         true
 
 Calendars
@@ -380,18 +379,18 @@ Legacy format: only one argument and that argument is an array.
         @debug 'anonymous'
         @session.caller_privacy
 
-      webhook: seem (uri) ->
+      webhook: (uri) ->
         @debug 'webhook'
         try
-          {body} = yield request
+          {body} = await request
             .post uri
             .send
-              tags: yield @reference.tags()
+              tags: await @reference.tags()
               ccnq_from_e164: @session.ccnq_from_e164
               ccnq_to_e164: @session.ccnq_to_e164
               _in: @_in()
           if body?
-            yield @user_tags body.tags
+            await @user_tags body.tags
           true
         catch
           @debug 'webhook: error'
@@ -451,26 +450,26 @@ Menus
 
 `menu_start`: start collecting digits for a menu; digits received before this command are discarded.
 
-      menu: seem ( min = 1, max = min, itd ) ->
+      menu: ( min = 1, max = min, itd ) ->
         @debug 'menu_start'
-        yield @action 'answer'
+        await @action 'answer'
         @dtmf.clear()
         @menu =
-          expect: seem =>
-            @menu.value ?= yield @dtmf.expect min, max, itd
+          expect: =>
+            @menu.value ?= await @dtmf.expect min, max, itd
         true
 
 `menu_on`: true if the user keyed the choice
 
-      menu_on: seem (choice) ->
+      menu_on: (choice) ->
         choice = "#{choice}"
         @debug 'menu_on', choice
         return false unless @menu?
-        yield @menu.expect()
+        await @menu.expect()
         @debug 'menu_on', choice, @menu.value
         @menu.value is choice
 
-      goto_menu: seem (number) ->
+      goto_menu: (number) ->
         @debug 'goto_menu', number
 
 Copying the logic from middleware/client/ingress/fifo
@@ -497,8 +496,8 @@ Copying the logic from middleware/client/ingress/fifo
         if @menu_depth > max_menu_depth
           return false
 
-        yield @sleep 200
-        yield run.call this, item, @ornaments_commands
+        await @sleep 200
+        await run.call this, item, @ornaments_commands
         'over'
 
 Pattern

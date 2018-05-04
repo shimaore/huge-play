@@ -325,8 +325,11 @@ The `body` should contains:
 
     @server_pre = ->
 
+      H = handler @cfg
+      return unless H?
+
       @cfg.rr
-      .receive 'call:*'
+      .receive 'call:*', @most_shutdown
       .filter ({op,doc,deleted}) -> op is UPDATE and doc? and not deleted
       .forEach (msg) ->
 
@@ -339,7 +342,7 @@ The `body` should contains:
 - `tags` (array)
 
           when msg.doc.agent?
-            create_queuer_call msg.doc
+            H.create_queuer_call msg.doc
 
 `call_to_conference`
 - `_id` (YYYY-MM-UUID)
@@ -348,7 +351,7 @@ The `body` should contains:
 - `destination`
 
           when msg.doc.conference?
-            call_to_conference msg.doc
+            H.call_to_conference msg.doc
 
 `place_call`
 - `_id` (YYYY-MM-UUID)
@@ -360,7 +363,9 @@ The `body` should contains:
 - `call_timeout` (optional)
 
           when msg.doc.endpoint?
-            place_call msg.doc
+            H.place_call msg.doc
+
+      return
 
 Notify
 ======
@@ -370,6 +375,8 @@ DEPRECATED
     @notify = ({cfg,socket}) ->
 
       H = handler cfg
+      return unless H?
+
       socket.on 'place-call', H.place_call
       socket.on 'call-to-conference', H.call_to_conference
       socket.on 'create-queuer-call', H.create_queuer_call

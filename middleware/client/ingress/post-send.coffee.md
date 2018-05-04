@@ -1,7 +1,6 @@
-    seem = require 'seem'
     @name = "huge-play:middleware:client:ingress:post-send"
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
 
@@ -17,7 +16,7 @@ Rewrite error response code.
         when @session.call_failed
           @debug 'Call Failed'
           @notify state:'call-failed'
-          yield @respond '486 Call Failed'
+          await @respond '486 Call Failed'
 
         when @session.was_transferred
           @notify state:'call-was-transferred'
@@ -30,4 +29,4 @@ Rewrite error response code.
         else
           @debug 'Hangup'
           @notify state:'hangup'
-          yield @action 'hangup'
+          await @action 'hangup'

@@ -1,9 +1,8 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:privacy"
     debug = (require 'tangible') @name
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
 
@@ -17,8 +16,8 @@ Privacy: id or other requested privacy
       if @data['Caller-Privacy-Hide-Number'] is 'true'
         @debug 'Privacy requested'
         @source = 'anonymous'
-        yield @action 'privacy', 'full'
-        yield @set
+        await @action 'privacy', 'full'
+        await @set
           effective_caller_id_name: '_undef_'
           effective_caller_id_number: 'anonymous'
           origination_privacy: 'screen+hide_name+hide_number'

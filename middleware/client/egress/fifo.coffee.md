@@ -1,8 +1,7 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:egress:fifo"
-    seem = require 'seem'
 
-    @include = seem ->
+    @include = ->
       return unless @session?.direction is 'egress'
       return unless @session.dialplan is 'centrex'
       return if @session.forwarding is true
@@ -22,13 +21,13 @@
 
 * doc.local_number:groups (array of string) Contains groups the user belong too. The convention is to use `:` as a separator. For example: ['sales:internal','support:modems']
 
-        {groups} = number_data = yield @cfg
+        {groups} = number_data = await @cfg
           .prov.get "number:#{key}"
           .catch -> {}
-        inbound_uuid = yield @local_redis.get "inbound:#{key}"
-        outbound_uuid = yield @local_redis.get "outbound:#{key}"
-        onhook_uuid = yield @local_redis.hget "agent-#{key}-P", 'onhook-call'
-        remote_uuid = yield @local_redis.hget "agent-#{key}-P", 'remote-call'
+        inbound_uuid = await @local_redis.get "inbound:#{key}"
+        outbound_uuid = await @local_redis.get "outbound:#{key}"
+        onhook_uuid = await @local_redis.hget "agent-#{key}-P", 'onhook-call'
+        remote_uuid = await @local_redis.hget "agent-#{key}-P", 'remote-call'
 
 The destination matched.
 
@@ -51,7 +50,7 @@ The destination matched.
 
       @debug 'Routing', action, number
 
-      @session.number_domain_data ?= yield @cfg.prov
+      @session.number_domain_data ?= await @cfg.prov
         .get "number_domain:#{@session.number_domain}"
         .catch (error) =>
           @debug.csr "number_domain #{number_domain}: #{error}"
@@ -109,7 +108,7 @@ This works only for centrex.
 
       agent = @session.agent ? "#{@source}@#{@session.number_domain}"
       agent_name = @session.agent_name ? @source
-      {allowed_groups} = agent_data = yield @cfg
+      {allowed_groups} = agent_data = await @cfg
         .prov.get "number:#{agent}"
         .catch -> {}
 
@@ -141,12 +140,12 @@ This works only for centrex.
         when ACTION_INTERCEPT
           return failed() unless number?
 
-          uuid = yield @local_redis.get "inbound_call:#{number}@#{@session.number_domain}"
+          uuid = await @local_redis.get "inbound_call:#{number}@#{@session.number_domain}"
           @debug 'Intercept', uuid
           return failed() unless uuid?
 
-          yield @set intercept_unbridged_only: true
-          yield @action 'intercept', uuid
+          await @set intercept_unbridged_only: true
+          await @action 'intercept', uuid
           @direction 'intercepted' # Really `intercepting`, but oh well
           return
 
@@ -161,14 +160,14 @@ Eavesdrop: call to listen (no notification, no whisper).
           switch
             when inbound_uuid?
               uuid = inbound_uuid
-              yield @set
+              await @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: false
                 eavesdrop_whisper_bleg: false
             when outbound_uuid? or onhook_uuid?
               uuid = onhook_uuid ? outbound_uuid
-              yield @set
+              await @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: false
@@ -176,14 +175,14 @@ Eavesdrop: call to listen (no notification, no whisper).
             else
               return failed()
 
-          yield @set
+          await @set
             eavesdrop_indicate_failed: 'silence_stream://125'
             eavesdrop_indicate_new: 'silence_stream://125'
             eavesdrop_indicate_idle: 'silence_stream://125'
             eavesdrop_enable_dtmf: true
-          yield @action 'answer'
-          yield @sleep 200
-          yield @action 'eavesdrop', uuid
+          await @action 'answer'
+          await @sleep 200
+          await @action 'eavesdrop', uuid
           @direction 'eavesdropping'
           return
 
@@ -198,14 +197,14 @@ Monitor: call to listen (with notification beep), and whisper
           switch
             when inbound_uuid?
               uuid = inbound_uuid
-              yield @set
+              await @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: true
                 eavesdrop_whisper_bleg: false
             when outbound_uuid? or onhook_uuid?
               uuid = onhook_uuid ? outbound_uuid
-              yield @set
+              await @set
                 eavesdrop_bridge_aleg: true
                 eavesdrop_bridge_bleg: true
                 eavesdrop_whisper_aleg: false
@@ -213,39 +212,39 @@ Monitor: call to listen (with notification beep), and whisper
             else
               return failed()
 
-          yield @set
+          await @set
             eavesdrop_indicate_failed: 'tone_stream://%(125,0,300)'
             eavesdrop_indicate_new: 'tone_stream://%(125,0,600);%(125,0,450)'
             eavesdrop_indicate_idle: 'tone_stream://%(125,125,450);%(125,0,450)'
             eavesdrop_enable_dtmf: true
-          yield @action 'answer'
-          yield @sleep 200
-          yield @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)"
-          yield @action 'eavesdrop', uuid
+          await @action 'answer'
+          await @sleep 200
+          await @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)"
+          await @action 'eavesdrop', uuid
           @direction 'eavesdropping'
           return
 
         when ACTION_QUEUER_LOGIN
           @debug 'Queuer: log in'
           fifo = get 'fifos', 'fifo'
-          yield @action 'answer'
-          yield @sleep 2000
+          await @action 'answer'
+          await @sleep 2000
           @session.timezone ?= @session.number.timezone
-          yield @queuer_login agent, agent_name, fifo, agent_tags(), @session.number.login_ornaments
-          yield @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
-          yield @action 'hangup'
+          await @queuer_login agent, agent_name, fifo, agent_tags(), @session.number.login_ornaments
+          await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
+          await @action 'hangup'
           @direction 'completed'
           return
 
         when ACTION_QUEUER_OFFHOOK
           @debug 'Queuer: off-hook agent'
           fifo = get 'fifos', 'fifo'
-          yield @action 'answer'
-          yield @sleep 2000
-          yield @set
+          await @action 'answer'
+          await @sleep 2000
+          await @set
             hangup_after_bridge: false
             park_after_bridge: true
-          yield @queuer_offhook agent, agent_name, @call, fifo, agent_tags()
+          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags()
           @direction 'queuer-offhook'
           return
 
@@ -253,22 +252,22 @@ Monitor: call to listen (with notification beep), and whisper
           @debug 'Queuer: leave queue'
           fifo = get 'fifos', 'fifo'
           return failed() unless fifo?
-          yield @action 'answer'
-          yield @sleep 2000
-          yield @queuer_leave agent, fifo
-          yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
-          yield @action 'hangup'
+          await @action 'answer'
+          await @sleep 2000
+          await @queuer_leave agent, fifo
+          await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
+          await @action 'hangup'
           @direction 'completed'
           return
 
         when ACTION_QUEUER_LOGOUT
           @debug 'Queuer: log out'
           fifo = get 'fifos', 'fifo'
-          yield @action 'answer'
-          yield @sleep 2000
-          yield @queuer_logout agent, fifo
-          yield @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
-          yield @action 'hangup'
+          await @action 'answer'
+          await @sleep 2000
+          await @queuer_logout agent, fifo
+          await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
+          await @action 'hangup'
           @direction 'completed'
           return
 
@@ -287,59 +286,59 @@ Menu messages
         when ACTION_MSG_DEACTIVATE
           @debug 'deactivate message'
 
-          yield @action 'answer'
-          yield @sleep 2000
+          await @action 'answer'
+          await @sleep 2000
 
           doc = @session.number_domain_data
           doc.msg ?= {}
           doc.msg[number] ?= {}
           doc.msg[number].active = false
-          yield @cfg.master_push doc
+          await @cfg.master_push doc
 
-          yield @action 'gentones', '%(200,20,600);%(200,20,450)'
+          await @action 'gentones', '%(200,20,600);%(200,20,450)'
           @direction 'completed'
 
         when ACTION_MSG_ACTIVATE
           @debug 'activate message'
 
-          yield @action 'answer'
-          yield @sleep 2000
+          await @action 'answer'
+          await @sleep 2000
 
           doc = @session.number_domain_data
           doc.msg ?= {}
           doc.msg[number] ?= {}
           doc.msg[number].active = true
-          yield @cfg.master_push doc
+          await @cfg.master_push doc
 
-          yield @action 'gentones', '%(200,20,450);%(200,20,600)'
+          await @action 'gentones', '%(200,20,450);%(200,20,600)'
           @direction 'completed'
 
         when ACTION_MSG_RECORD
           @debug 'record message'
 
-          yield @action 'answer'
-          yield @sleep 2000
+          await @action 'answer'
+          await @sleep 2000
 
           doc = @session.number_domain_data
           file = "msg-#{number}.mp3"
           uri = @prompt.uri 'master-prov', 'ignore', doc._id, file, doc._rev
-          yield @prompt.record uri
+          await @prompt.record uri
 
-          yield @action 'hangup'
+          await @action 'hangup'
           @direction 'completed'
 
         when ACTION_MSG_LISTEN
           @debug 'listen to message'
 
-          yield @action 'answer'
-          yield @sleep 2000
+          await @action 'answer'
+          await @sleep 2000
 
           doc = @session.number_domain_data
           file = "msg-#{number}.mp3"
           uri = @prompt.uri 'prov', 'ignore', doc._id, file
-          yield @action 'playback', uri
+          await @action 'playback', uri
 
-          yield @action 'hangup'
+          await @action 'hangup'
           @direction 'completed'
 
         else

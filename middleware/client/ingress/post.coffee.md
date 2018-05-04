@@ -1,4 +1,3 @@
-    seem = require 'seem'
     pkg = require '../../../package.json'
     assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
@@ -17,7 +16,7 @@ See https://freeswitch.org/jira/browse/FS-9776
 Call-Handler
 ============
 
-    @include = seem ->
+    @include = ->
 
       return unless @session?.direction is 'ingress'
 
@@ -39,7 +38,7 @@ One of the national translations should have mapped us to a different dialplan (
 
 Retrieve number data.
 
-      dst_number = yield @validate_local_number()
+      dst_number = await @validate_local_number()
 
       unless dst_number?
         @debug 'Number not found'
@@ -63,11 +62,11 @@ Call rejection: reject anonymous caller
           @debug 'reject anonymous'
           @notify state: 'reject-anonymous'
           # return @respond '603 Decline (anonymous)'
-          yield @action 'answer'
+          await @action 'answer'
 
 `provisioning` is a `nimble-direction` convention.
 
-          yield @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
+          await @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
           return @action 'hangup'
 
 * doc.local_number.use_blacklist (boolean) If true and a `list:<destination-number>@<calling-number>` record exists, where `<destination-number>` is the identifier of a local-number (in the format `<number>@<number-domain>`), use that record to decide whether to reject the inbound call based on the calling number.
@@ -83,7 +82,7 @@ Call rejection: reject anonymous caller
         caller = if pid? then url.parse(pid).auth else @source
         list_id = "list:#{dst_number}@#{caller}"
         @debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
-        list = yield @cfg.prov.get(list_id).catch -> {}
+        list = await @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
             @notify state: 'blacklisted'
@@ -140,7 +139,7 @@ Call rejection: reject anonymous caller
 
 So far we have no reason to reject the call.
 
-      yield set_params.call this
+      await set_params.call this
 
 `CF...` can be either configured as URIs (number.cfa etc. -- bypasses controls) or as plain numbers (will use the `forward` direction for access control).
 
@@ -244,16 +243,16 @@ Ringback for other Call Forward
       if @session.number.custom_ringback
         if @cfg.answer_for_ringback or @session.answer_for_ringback
           @debug 'answer for ringback'
-          yield @action 'answer' # 200
-          yield @set sip_wait_for_aleg_ack:false
+          await @action 'answer' # 200
+          await @set sip_wait_for_aleg_ack:false
           @session.wait_for_aleg_ack = false
         else
           @debug 'pre_answer for ringback'
-          yield @action 'pre_answer' # 183
+          await @action 'pre_answer' # 183
       else
         if @session.cf_active or @cfg.ready_for_ringback or @session.ready_for_ringback or @session.number.ring_ready
           @debug 'cf_active'
-          yield @action 'ring_ready' # 180
+          await @action 'ring_ready' # 180
 
 Build the destination FreeSwitch dialstring
 -------------------------------------------
@@ -296,7 +295,7 @@ Convergence
 
 The convergence function returns a list of optional, additional targets (e.g. mobile phone destinations) which are called at the same time as the original number, or with a slight delay. This is used to implement "Follow-Me"/"Mobile Convergence"-type scenarios.
 
-      convergence = seem =>
+      convergence = =>
 
 If the feature is not enabled on this line just skip.
 
@@ -335,7 +334,7 @@ Try hard to figure out what language we should use.
 
 The `call_options` are used by tough-rate.
 
-          yield @reference.set_call_options
+          await @reference.set_call_options
             group_confirm_key: key
             group_confirm_file: "phrase:confirm:#{key}"
             group_confirm_error_file: "phrase:confirm:#{key}"
@@ -373,7 +372,7 @@ Timeout
           parameters: Object.keys(params).map (k) -> "#{k}=#{params[k]}"
           to_uri: "sip:#{o.number}@#{host}:#{port}"
 
-      converged = yield convergence()
+      converged = await convergence()
       @session.initial_destinations ?= [
         { parameters, to_uri }
         converged...
@@ -383,12 +382,12 @@ Timeout
         state: 'ingress-call'
         endpoint: @session.endpoint_name
 
-      yield @reference.set_endpoint @session.endpoint_name
+      await @reference.set_endpoint @session.endpoint_name
 
 ### Build the set of `_in` targets for notifications of the reference data.
 
       if @session.dev_logger
-        yield @reference.set_dev_logger true
+        await @reference.set_dev_logger true
 
       if @session.number.record_ingress
         @record_call @session.number._id
@@ -401,7 +400,7 @@ Timeout
 
 Non-call-handling-specific parameters (these are set on all calls independently of call treatment).
 
-    set_params = seem ->
+    set_params = ->
       @debug 'set_params'
 
       if @session.country? and @session.country of tones
@@ -419,7 +418,7 @@ Non-call-handling-specific parameters (these are set on all calls independently 
         ringback: @session.ringback
         music: @session.music
 
-      yield @set
+      await @set
         ccnq_endpoint: @session.endpoint_name
 
 * doc.local_number.dialog_timer (number) Maximum duration of a call for this local-number.
@@ -434,12 +433,12 @@ Maximal call duration
 Note: tough-rate uses `dialog_timeout` for this (which isn't on the wiki).
 
       @debug 'schedule hangup'
-      yield @action 'sched_hangup', "+#{dlg_timeout}"
+      await @action 'sched_hangup', "+#{dlg_timeout}"
 
       @session.cdr_direction = @session.direction
 
       @debug 'set parameters'
-      yield @set
+      await @set
 
 These are injected so that they may eventually show up in CDRs.
 
@@ -490,7 +489,7 @@ Codec negotiation with late-neg:
 * hdr.X-En Set on inbound calls to the endpoint of the local-number.
 
       @debug 'export parameters'
-      yield @export
+      await @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
         'sip_h_X-En': @session.endpoint_name

@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:client:queuer'
-    {debug,hand} = (require 'tangible') @name
+    {debug,foot} = (require 'tangible') @name
     pkg = name:'huge-play'
     Moment = require 'moment-timezone'
     {SUBSCRIBE} = require 'red-rings/operations'
@@ -44,41 +44,41 @@ Events received downstream.
       @register 'queuer:log-agent-out', 'dial_calls'
       @register 'queuer:log-agent-in', 'dial_calls'
 
-      @socket.on 'queuer:get-agent-state', hand (key) =>
-        is_remote = yield @cfg.is_remote domain_of key
+      @socket.on 'queuer:get-agent-state', foot (key) =>
+        is_remote = await @cfg.is_remote domain_of key
         return if is_remote isnt false
 
         debug 'queuer:get-agent-state', key
 
         agent = new Agent queuer, key
-        state = yield agent.state().catch -> null
+        state = await agent.state().catch -> null
         # async
         agent.notify {state}
 
         debug 'queuer:get-agent-state: done', key, state
         return
 
-      @socket.on 'queuer:log-agent-out', hand (key) =>
-        is_remote = yield @cfg.is_remote domain_of key
+      @socket.on 'queuer:log-agent-out', foot (key) =>
+        is_remote = await @cfg.is_remote domain_of key
         return if is_remote isnt false
 
         debug 'queue:log-agent-out', key
 
         agent = new Agent queuer, key
-        yield agent.clear_tags()
-        yield agent.transition 'logout'
+        await agent.clear_tags()
+        await agent.transition 'logout'
 
         debug 'queue:log-agent-out: done', key
         return
 
-      @socket.on 'queuer:log-agent-in', hand (key) =>
-        is_remote = yield @cfg.is_remote domain_of key
+      @socket.on 'queuer:log-agent-in', foot (key) =>
+        is_remote = await @cfg.is_remote domain_of key
         return if is_remote isnt false
 
         debug 'queue:log-agent-in', key
 
         tags = []
-        {skills,queues,broadcast,timezone} = yield @cfg.prov.get "number:#{key}"
+        {skills,queues,broadcast,timezone} = await @cfg.prov.get "number:#{key}"
         if skills?
           for skill in skills
             tags.push "skill:#{skill}"
@@ -89,13 +89,13 @@ Events received downstream.
           tags.push 'broadcast'
 
         agent = new Agent queuer, key
-        yield agent.add_tags tags
+        await agent.add_tags tags
         if ornaments?
           ctx = {agent,timezone}
-          yield run.call ctx, ornaments, @ornaments_commands
+          await run.call ctx, ornaments, @ornaments_commands
 
-        yield agent.accept_onhook()
-        yield @report {state:'queuer-login',source,fifo,tags}
+        await agent.accept_onhook()
+        await @report {state:'queuer-login',source,fifo,tags}
 
         debug 'queue:log-agent-in: done', key
         return
@@ -106,14 +106,14 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
         @register "queuer:get-#{name}-pool", 'dial_calls'
         @register "queuer:#{name}-pool", 'calls'
 
-        @socket.on "queuer:get-#{name}-pool", hand (domain) =>
+        @socket.on "queuer:get-#{name}-pool", foot (domain) =>
           debug "queuer:get-#{name}-pool", domain
 
-          is_remote = yield @cfg.is_remote domain
+          is_remote = await @cfg.is_remote domain
           return if is_remote isnt false
 
-          calls = yield pool(domain).calls()
-          result = yield Promise.all calls.map (call) -> call.build_notification {}
+          calls = await pool(domain).calls()
+          result = await Promise.all calls.map (call) -> call.build_notification {}
 
           notification =
             _queuer: true

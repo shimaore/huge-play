@@ -1,12 +1,11 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:carrier:ingress:post"
-    seem = require 'seem'
-    @include = seem ->
+    @include = ->
       return unless @session?.direction is 'ingress'
 
       @session.cdr_direction = @session.direction
 
-      yield @set
+      await @set
         ccnq_direction: @session.direction
         ccnq_profile: @session.profile
         ccnq_from_e164: @source
@@ -16,7 +15,7 @@
         call_timeout: 300
         t38_passthru: true
 
-      yield @export
+      await @export
         sip_wait_for_aleg_ack: true
         t38_passthru: true
         sip_enable_soa: false

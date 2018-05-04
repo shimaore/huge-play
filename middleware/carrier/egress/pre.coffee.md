@@ -1,14 +1,13 @@
-    seem = require 'seem'
     url = require 'url'
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:carrier:egress:pre"
-    @include = seem ->
+    @include = ->
       return unless @session?.direction is 'egress'
       ccnq_username = @req.header 'X-RU'
 
       @session.cdr_direction = @session.direction
 
-      yield @set
+      await @set
         ccnq_direction: @session.direction
         ccnq_profile: @session.profile
         ccnq_from_e164: @source
@@ -32,9 +31,9 @@
         ccnq_username: ccnq_username
         ccnq_account: url.parse(@req.header 'P-Charge-Info').auth
 
-      yield @unset 'sip_h_p-charge-info'
+      await @unset 'sip_h_p-charge-info'
 
-      yield @export
+      await @export
         sip_wait_for_aleg_ack: true
         t38_passthru: true
         sip_enable_soa: false

@@ -1,5 +1,4 @@
     @name = 'huge-play:middleware:client:ornaments'
-    seem = require 'seem'
     commands = require './commands'
 
     @include = ->
