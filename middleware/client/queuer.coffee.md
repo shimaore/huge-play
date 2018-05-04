@@ -202,7 +202,7 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
         return unless $ = msg.key?.match /^pool:(\S+):(ingress|egress)$/
 
         domain = $[1]
-        name = $[2}
+        name = $[2]
 
         is_remote = await cfg.is_remote domain
         return if is_remote isnt false
