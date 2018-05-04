@@ -134,7 +134,7 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
 
 /DEPRECATED
 
-    @server_pre ->
+    @server_pre = ->
 
       cfg = @cfg
 

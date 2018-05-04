@@ -323,7 +323,7 @@ The `body` should contains:
 
       {place_call,call_to_conference,create_queuer_call}
 
-    @server_pre ->
+    @server_pre = ->
 
       @cfg.rr
       .receive 'call:*'
