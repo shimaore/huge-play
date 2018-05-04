@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "34.6.4",
+  "version": "35.0.0",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublishOnly": "npm install --only=dev && rm package-lock.json && coffee -c conf/*.coffee middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
