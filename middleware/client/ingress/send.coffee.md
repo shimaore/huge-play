@@ -31,6 +31,9 @@ Send call to (OpenSIPS or other) with processing for CFDA, CFNR, CFB.
 
     @send = send = (destinations) ->
 
+We must create a new call ID to differentiate the ingress call leg from the call leg towards
+the agent (for screetching-eggs/monitor and black-metal).
+
       new_uuid = make_id()
 
       {eavesdrop_timeout,intercept_timeout} = @cfg
@@ -60,20 +63,16 @@ Transfer-disposition values:
         @debug 'Set inbound eavesdrop', eavesdrop_key
         await @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
 
-The new call will always be bound to this agent.
+The new call leg will always be bound to this agent.
 
         debug 'CHANNEL_PRESENT', key, new_uuid
 
-        if queuer? and @queuer_call?
-          new_call = await @queuer_call new_uuid
-
 Bind the agent to the call.
 
+        if queuer? and @queuer_call?
+
+          new_call = await @queuer_call new_uuid
           await queuer.set_agent new_call, key
-
-Monitor the b-leg.
-
-          await queuer.monitor_local_call new_call
 
 Note: inside the queuer, these calls are never pooled, so their state does not evolve.
 
