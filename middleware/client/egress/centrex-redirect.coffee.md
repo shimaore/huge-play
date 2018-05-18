@@ -64,23 +64,12 @@ Eavesdrop registration
 
         debug 'CHANNEL_PRESENT', key, @call.uuid
 
+Bind the agent to the call.
+
         if queuer? and @queuer_call?
 
           queuer_call = await @queuer_call()
-
-Bind the agent to the call.
-
-          if @session.referred_by is key
-            @debug 'Agent is the one doing the transfer, not forcing agent back to busy.', key
-          else
-            await queuer.set_agent queuer_call, key
-
-Monitor the a-leg.
-
-          if @session.transfer
-            await queuer.monitor_remote_call queuer_call
-          else
-            await queuer.monitor_local_call queuer_call
+          await queuer.set_agent queuer_call, key
 
         @report event:'start-of-call', agent:key, call:@call.uuid
 

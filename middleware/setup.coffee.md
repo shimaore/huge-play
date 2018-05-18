@@ -21,11 +21,9 @@
       Moment().tz(tz).format()
 
     default_wrapper = null
-    monitor_wrapper = null
 
     @end = ->
       default_wrapper.end()
-      monitor_wrapper.end()
       @cfg.global_redis_client.end()
       if @cfg.local_redis_client isnt @cfg.global_redis_client
         @cfg.local_redis_client.end()
@@ -184,24 +182,10 @@ Create a new socket client
 
       _wrapper = =>
         options =
-          host: '127.0.0.1'
+          host: @cfg.socket_host ? '127.0.0.1'
           port: @cfg.socket_port ? 5722
 
         FS.createClient options
-
-Create a new socket client bound to a given UUID
-
-      ###
-      @cfg.uuid_wrapper = (uuid) ->
-        wrapper = await _wrapper()
-        register = ->
-          await wrapper.client.send "myevents #{uuid} json"
-          await wrapper.client.event_json 'ALL'
-          await wrapper.client.linger()
-        wrapper.on 'client-changed', register
-        # await client.auto_cleanup() # Already done by esl
-        wrapper
-      ###
 
 Use a default client for generic / shared APIs
 
@@ -244,107 +228,6 @@ Use a default client for generic / shared APIs
 
         _api cmd
         .then on_success, on_failure
-
-      UNIQUE_ID = 'Unique-ID'
-      EVENT_NAME = 'Event-Name'
-
-      store = @cfg.local_redis_client
-
-      monitor_wrapper = await _wrapper()
-      monitored_events = {}
-
-Remember to always call `monitor.end()` when you are done with the monitor!
-
-* cfg.api.monitor(unique_id,events) returns an EventEmitter that emits the requested events when they are triggered by FreeSwitch on the given Unique-ID. You MUST call `.end` once the EventEmitter is no longer needed.
-
-      @cfg.api.is_monitored = (id) ->
-        key = "filter-#{id}"
-        0 < await store.get key
-
-      @cfg.api.monitor = (id,events) ->
-        debug 'api.monitor: start', {id,events}
-
-        key = "filter-#{id}"
-        filter = ->
-          debug 'api.monitor: filtering', id
-          monitor_wrapper.client.filter UNIQUE_ID, id
-        unfilter = ->
-          debug 'api.monitor: un-filtering', id
-          monitor_wrapper.client.filter_delete UNIQUE_ID, id
-
-        ev = new EventEmitter2()
-
-        listener = (msg) ->
-          return unless msg?.body?
-          msg_id = msg.body[UNIQUE_ID]
-          msg_ev = msg.body[EVENT_NAME]
-          if msg_id is id and msg_ev in events
-            debug 'api.monitor received', msg_id, msg_ev
-            ev?.emit msg_ev, msg
-
-        register = ->
-          debug 'api.monitor: register'
-
-Don't show the warning for 10 concurrent calls!
-The number should really be an estimate of our maximum number of concurrent, monitored calls.
-
-          monitor_wrapper.client.setMaxListeners 200
-
-          if 1 is await store.incr key
-            await filter()
-
-          for event in events
-            await do (event) ->
-              monitor_wrapper.client.on event, listener
-              monitored_events[event] ?= 0
-              if monitored_events[event]++ is 0
-                debug 'api.monitor: register: Adding event json for', event
-                monitor_wrapper.client.event_json event
-
-          debug 'api.monitor: register complete'
-          return
-
-        re_register = foot ->
-          debug 'api.monitor: re-register'
-          monitor_wrapper.client.setMaxListeners 200
-          await filter()
-          for event in events
-            await do (event) ->
-              monitor_wrapper.client.on event, listener
-              if monitored_events[event] > 0
-                debug 'api.monitor: re-register: Adding event json for', event
-                monitor_wrapper.client.event_json event
-          debug 'api.monitor: re-register complete'
-          return
-
-        monitor_wrapper.on 'client-changed', re_register
-        await register()
-
-        ev.end = ->
-          monitor_wrapper.off 'client-changed', re_register
-
-          if not ev?
-            debug 'api.monitor.end: called more than once (ignored)', {id,events}
-            return
-
-          debug 'api.monitor.end', {id,events}
-          if 0 is await store.decr key
-            await unfilter()
-            await store.expire key, 10
-
-          for event in events
-            await do (event) ->
-              monitor_wrapper.client.off event, listener
-              if --monitored_events[event] is 0
-                debug 'api.monitor.end: nixevent', event
-                monitor_wrapper.client.nixevent event
-          ev.removeAllListeners()
-          ev = null
-          debug 'api.monitor.end: done'
-
-        debug 'api.monitor: ready', {id,events}
-
-        ev
 
       return
 

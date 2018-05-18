@@ -20,14 +20,15 @@
       Moment().tz(tz).format()
 
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
+    monitor = require 'screeching-eggs/monitor'
     RedisInterface = require 'normal-key/interface'
 
 DEPRECATED
 
     @notify = ->
 
-      {host,queuer} = @cfg
-      unless queuer?
+      {host} = @cfg
+      unless @cfg.queuer?
         debug.dev 'queuer is not available'
         return
 
@@ -50,7 +51,7 @@ Events received downstream.
 
         debug 'queuer:get-agent-state', key
 
-        agent = new Agent queuer, key
+        agent = new Agent key
         state = await agent.state().catch -> null
         # async
         agent.notify {state}
@@ -88,7 +89,7 @@ Events received downstream.
         if broadcast
           tags.push 'broadcast'
 
-        agent = new Agent queuer, key
+        agent = new Agent key
         await agent.add_tags tags
         if ornaments?
           ctx = {agent,timezone}
@@ -129,8 +130,8 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
           debug "queuer:get-#{name}-pool: done", domain, notification
           return
 
-      get_pool 'egress', (domain) -> queuer.egress_pool domain
-      get_pool 'ingress', (domain) -> queuer.ingress_pool domain
+      get_pool 'egress', (domain) => @cfg.queuer.egress_pool domain
+      get_pool 'ingress', (domain) => @cfg.queuer.ingress_pool domain
 
 /DEPRECATED
 
@@ -151,7 +152,7 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
 
             debug 'queuer:get-agent-state', key
 
-            agent = new Agent queuer, key
+            agent = new Agent key
             state = await agent.state().catch -> null
             await agent.notify {state}
 
@@ -167,7 +168,7 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
 
               debug 'queue:log-agent-out', key
 
-              agent = new Agent queuer, key
+              agent = new Agent key
               await agent.clear_tags()
               await agent.transition 'logout'
 
@@ -184,7 +185,7 @@ Downstream/upstream pair for egress/ingress-pool retrieval.
               if broadcast
                 tags.push 'broadcast'
 
-              agent = new Agent queuer, key
+              agent = new Agent key
               await agent.add_tags tags
               if ornaments?
                 ctx = {agent,timezone}
@@ -275,7 +276,7 @@ How long should we keep the state of an agent after the last update?
 
           notification
 
-        report: (data) ->
+        notify: (data) ->
           debug 'call.report', data
           notification = await @build_notification data
           cfg.statistics.emit 'queuer', notification # DEPRECATED
@@ -287,8 +288,6 @@ How long should we keep the state of an agent after the last update?
       class HugePlayAgent extends TaggedAgent
 
         interface: new RedisInterface cfg.local_redis_client, agent_timeout
-
-        new_call: (data) -> new HugePlayCall cfg.queuer, @domain, data
 
         notify: (data) ->
           debug 'agent.notify', @key, data
@@ -429,10 +428,10 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
 
             event: 'create-egress-call'
 
-          call = @new_call
-            destination: _id
-
-          await call.save()
+          call = new Call make_id()
+          await call.set_domain @domain
+          await call.set_started()
+          await call.set_destination _id # destination endpoint
 
 This probably not necessary, since the destination number is actually retrieved from the reference-data.
 
@@ -455,6 +454,13 @@ This probably not necessary, since the destination number is actually retrieved 
         Agent: HugePlayAgent
         Call: HugePlayCall
       @cfg.queuer = new Queuer @cfg
+
+      options =
+        host: @cfg.socket_host ? '127.0.0.1'
+        port: @cfg.socket_port ? 5722
+      client = FS.createClient options
+      monitor client, @cfg.queuer.Call
+
       return
 
 Middleware
@@ -480,9 +486,11 @@ Queuer Call object
         domain = @session.number_domain
         id ?= uuid
         @debug 'queuer_call', id, domain
-        queuer_call = new Call queuer, domain, {id}
+        queuer_call = new Call id
+        await queuer_call.set_domain domain
+        await queuer_call.set_started()
+        await queuer_call.set_id id
 
-        await queuer_call.save()
         await queuer_call.set_session @session._id
         await queuer_call.set_reference @session.reference
         queuer_call
