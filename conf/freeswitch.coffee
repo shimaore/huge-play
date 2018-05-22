@@ -13,7 +13,6 @@ module.exports = renderable (cfg) ->
       sip_port: 5080
       socket_port: 5721 # Outbound-Socket port
   modules_to_load = [
-    'mod_logfile'
     'mod_event_socket'
     'mod_commands'
     'mod_dptools'

@@ -15,7 +15,6 @@
 </configuration>
 <configuration name="modules.conf">
 <modules>
-<load module="mod_logfile"/>
 <load module="mod_event_socket"/>
 <load module="mod_commands"/>
 <load module="mod_dptools"/>
