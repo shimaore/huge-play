@@ -21,6 +21,7 @@
 
     {TaggedCall,TaggedAgent} = require 'black-metal/tagged'
     monitor = require 'screeching-eggs/monitor'
+    FS = require 'esl'
     RedisInterface = require 'normal-key/interface'
 
 DEPRECATED
