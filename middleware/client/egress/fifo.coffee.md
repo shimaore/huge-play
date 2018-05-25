@@ -24,10 +24,58 @@
         {groups} = number_data = await @cfg
           .prov.get "number:#{key}"
           .catch -> {}
-        inbound_uuid = await @local_redis.get "inbound:#{key}"
-        outbound_uuid = await @local_redis.get "outbound:#{key}"
-        onhook_uuid = await @local_redis.hget "agent-#{key}-P", 'onhook-call'
-        remote_uuid = await @local_redis.hget "agent-#{key}-P", 'remote-call'
+
+      events = @cfg.queuer?.Agent?.events
+
+      spy = (monitor) =>
+
+        unless events
+          @debug.dev 'No `events`, cannot spy'
+
+Which is a-leg or b-leg still needs to be confirmed, I have some suspicion this is wrong for some scenarios.
+
+        ours_is_aleg = =>
+          await @set
+            eavesdrop_bridge_aleg: true
+            eavesdrop_bridge_bleg: true
+            eavesdrop_whisper_aleg: monitor
+            eavesdrop_whisper_bleg: false
+
+        ours_is_bleg = =>
+          await @set
+            eavesdrop_bridge_aleg: true
+            eavesdrop_bridge_bleg: true
+            eavesdrop_whisper_aleg: false
+            eavesdrop_whisper_bleg: monitor
+
+        eavesdrop = (uuid,notify) =>
+          await @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)" if notify and monitor
+          await @action 'eavesdrop', uuid
+
+        events.on [key,'onhook','bridge'], (call) =>
+          uuid = await call.get_id()
+          await ours_is_aleg()
+          await eavesdrop uuid, true
+
+        events.on [key,'offhook','bridge'], (call) =>
+          uuid = await call.get_id()
+          await ours_is_aleg()
+          await eavesdrop uuid, true
+
+        events.on [key,'remote','bridge'], (call,disposition,our_call) =>
+          uuid = await our_call.get_id()
+          await ours_is_aleg()
+          await eavesdrop uuid, true
+
+        events.on [key,'external','bridge'], (call,disposition,our_call) =>
+          uuid = await our_call.get_id()
+          await ours_is_aleg()
+          await eavesdrop uuid, true
+
+        await @action 'answer'
+        await @sleep 200
+
+        return
 
 The destination matched.
 
@@ -156,33 +204,14 @@ Eavesdrop: call to listen (no notification, no whisper).
           return failed() unless number?
           return failed() unless is_allowed allowed_groups, groups
 
-          @debug 'Eavesdrop', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
-          switch
-            when inbound_uuid?
-              uuid = inbound_uuid
-              await @set
-                eavesdrop_bridge_aleg: true
-                eavesdrop_bridge_bleg: true
-                eavesdrop_whisper_aleg: false
-                eavesdrop_whisper_bleg: false
-            when outbound_uuid? or onhook_uuid?
-              uuid = onhook_uuid ? outbound_uuid
-              await @set
-                eavesdrop_bridge_aleg: true
-                eavesdrop_bridge_bleg: true
-                eavesdrop_whisper_aleg: false
-                eavesdrop_whisper_bleg: false
-            else
-              return failed()
-
+          @debug 'Eavesdrop'
           await @set
             eavesdrop_indicate_failed: 'silence_stream://125'
             eavesdrop_indicate_new: 'silence_stream://125'
             eavesdrop_indicate_idle: 'silence_stream://125'
             eavesdrop_enable_dtmf: true
-          await @action 'answer'
-          await @sleep 200
-          await @action 'eavesdrop', uuid
+
+          spy false
           @direction 'eavesdropping'
           return
 
@@ -193,34 +222,14 @@ Monitor: call to listen (with notification beep), and whisper
           return failed() unless number?
           return failed() unless is_allowed allowed_groups, groups
 
-          @debug 'Monitor', inbound_uuid, outbound_uuid, onhook_uuid, remote_uuid
-          switch
-            when inbound_uuid?
-              uuid = inbound_uuid
-              await @set
-                eavesdrop_bridge_aleg: true
-                eavesdrop_bridge_bleg: true
-                eavesdrop_whisper_aleg: true
-                eavesdrop_whisper_bleg: false
-            when outbound_uuid? or onhook_uuid?
-              uuid = onhook_uuid ? outbound_uuid
-              await @set
-                eavesdrop_bridge_aleg: true
-                eavesdrop_bridge_bleg: true
-                eavesdrop_whisper_aleg: false
-                eavesdrop_whisper_bleg: true
-            else
-              return failed()
-
+          @debug 'Monitor'
           await @set
             eavesdrop_indicate_failed: 'tone_stream://%(125,0,300)'
             eavesdrop_indicate_new: 'tone_stream://%(125,0,600);%(125,0,450)'
             eavesdrop_indicate_idle: 'tone_stream://%(125,125,450);%(125,0,450)'
             eavesdrop_enable_dtmf: true
-          await @action 'answer'
-          await @sleep 200
-          await @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)"
-          await @action 'eavesdrop', uuid
+
+          spy true
           @direction 'eavesdropping'
           return
 
