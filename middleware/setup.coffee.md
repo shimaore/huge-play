@@ -566,11 +566,12 @@ Set the account so that if we redirect to an external number the egress module c
 Keep recording (async)
 
           keep_recording = =>
+            {uuid} = @call
             @report event:'recording'
             uri = await @cfg.recording_uri name
-            @debug 'Recording', @call.uuid, uri
-            outcome = await @cfg.api "uuid_record #{@call.uuid} start #{uri}"
-            @debug 'Recording', @call.uuid, uri, outcome
+            @debug 'Recording', uuid, uri
+            outcome = await @cfg.api "uuid_record #{uuid} start #{uri}"
+            @debug 'Recording', uuid, uri, outcome
 
             last_uri = uri
 
@@ -580,13 +581,16 @@ Keep recording (async)
 
             while still_running
               await @sleep 29*minutes
-              uri = await @cfg.recording_uri name
-              @debug 'Recording next segment', @call.uuid, uri
-              await @cfg.api "uuid_record #{@call.uuid} start #{uri}"
-              @report event:'recording'
+
+              if still_running
+                uri = await @cfg.recording_uri name
+                @debug 'Recording next segment', uuid, uri
+                await @cfg.api "uuid_record #{uuid} start #{uri}"
+                @report event:'recording'
+
               await @sleep 1*minutes
-              @debug 'Stopping previous segment', @call.uuid, last_uri
-              await @cfg.api "uuid_record #{@call.uuid} stop #{last_uri}"
+              @debug 'Stopping previous segment', uuid, last_uri
+              await @cfg.api "uuid_record #{uuid} stop #{last_uri}"
               last_uri = uri
 
             return
