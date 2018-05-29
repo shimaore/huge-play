@@ -431,7 +431,7 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
 
           call = new Call make_id()
           await call.set_domain @domain
-          await call.set_started()
+          await call.set_started_at()
           await call.set_destination _id # destination endpoint
 
 This probably not necessary, since the destination number is actually retrieved from the reference-data.
@@ -489,7 +489,7 @@ Queuer Call object
         @debug 'queuer_call', id, domain
         queuer_call = new Call id
         await queuer_call.set_domain domain
-        await queuer_call.set_started()
+        await queuer_call.set_started_at()
         await queuer_call.set_id id
 
         await queuer_call.set_session @session._id
