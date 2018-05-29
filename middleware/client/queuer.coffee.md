@@ -278,12 +278,12 @@ How long should we keep the state of an agent after the last update?
           notification
 
         notify: (data) ->
-          debug 'call.report', data
+          debug 'call.notify', data
           notification = await @build_notification data
           cfg.statistics.emit 'queuer', notification # DEPRECATED
           cfg.rr.notify "call:#{notification.id}", "call:#{notification.id}", notification
 
-          debug 'call.report: send', notification
+          debug 'call.notify: send', notification
           notification
 
       class HugePlayAgent extends TaggedAgent
@@ -337,7 +337,7 @@ If `data.call` is present we notify using the call's process; if it isn't we not
 This avoids sending two messages for the same event (one with incomplete data, the other with complete data).
 
           if data.call?
-            notification = await data.call.report notification
+            notification = await data.call.notify notification
           else
             cfg.statistics.emit 'queuer', notification # DEPRECATED
 
