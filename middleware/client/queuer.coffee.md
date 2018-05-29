@@ -66,7 +66,7 @@ Events received downstream.
 
         debug 'queue:log-agent-out', key
 
-        agent = new Agent queuer, key
+        agent = new Agent key
         await agent.clear_tags()
         await agent.transition 'logout'
 
@@ -506,7 +506,7 @@ On-hook agent
 
       @queuer_login = (source,name,fifo,tags = [],ornaments) ->
         @debug 'queuer_login', source
-        agent = new Agent queuer, source
+        agent = new Agent source
         await agent.set 'name', name
         await agent.add_tags tags
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
@@ -523,14 +523,14 @@ On-hook agent
 
       @queuer_leave = (source,fifo) ->
         @debug 'queuer_leave', source
-        agent = new Agent queuer, source
+        agent = new Agent source
         await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         await @report {state:'queuer-leave',source,fifo}
         agent
 
       @queuer_logout = (source,fifo) ->
         @debug 'queuer_logout', source
-        agent = new Agent queuer, source
+        agent = new Agent source
         await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         await agent.clear_tags()
         await agent.transition 'logout'
@@ -542,7 +542,7 @@ Off-hook agent
 
       @queuer_offhook = (source,name,{uuid},fifo,tags = []) ->
         @debug 'queuer_offhook', source, uuid, fifo
-        agent = new Agent queuer, source
+        agent = new Agent source
         await agent.set 'name', name
         agent.clear_tags()
         await agent.add_tags tags
