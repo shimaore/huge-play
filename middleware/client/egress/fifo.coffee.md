@@ -1,5 +1,6 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:egress:fifo"
+    {foot} = (require 'tangible') @name
 
     @include = ->
       return unless @session?.direction is 'egress'
@@ -52,22 +53,22 @@ Which is a-leg or b-leg still needs to be confirmed, I have some suspicion this 
           await @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)" if notify and monitor
           await @action 'eavesdrop', uuid
 
-        events.on [key,'onhook','bridge'], (call) =>
+        events.on [key,'onhook','bridge'], foot (call) =>
           uuid = await call.get_id()
           await ours_is_aleg()
           await eavesdrop uuid, true
 
-        events.on [key,'offhook','bridge'], (call) =>
+        events.on [key,'offhook','bridge'], foot (call) =>
           uuid = await call.get_id()
           await ours_is_aleg()
           await eavesdrop uuid, true
 
-        events.on [key,'remote','bridge'], (call,disposition,our_call) =>
+        events.on [key,'remote','bridge'], foot (call,disposition,our_call) =>
           uuid = await our_call.get_id()
           await ours_is_aleg()
           await eavesdrop uuid, true
 
-        events.on [key,'external','bridge'], (call,disposition,our_call) =>
+        events.on [key,'external','bridge'], foot (call,disposition,our_call) =>
           uuid = await our_call.get_id()
           await ours_is_aleg()
           await eavesdrop uuid, true
