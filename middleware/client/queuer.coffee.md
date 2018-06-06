@@ -24,118 +24,6 @@
     FS = require 'esl'
     RedisInterface = require 'normal-key/interface'
 
-DEPRECATED
-
-    @notify = ->
-
-      {host} = @cfg
-      unless @cfg.queuer?
-        debug.dev 'queuer is not available'
-        return
-
-      {Agent} = @cfg.queuer
-      unless Agent?
-        debug.dev 'Agent is not available'
-        return
-
-      @configure dial_calls: true
-
-Events received downstream.
-
-      @register 'queuer:get-agent-state', 'dial_calls'
-      @register 'queuer:log-agent-out', 'dial_calls'
-      @register 'queuer:log-agent-in', 'dial_calls'
-
-      @socket.on 'queuer:get-agent-state', foot (key) =>
-        is_remote = await @cfg.is_remote domain_of key
-        return if is_remote isnt false
-
-        debug 'queuer:get-agent-state', key
-
-        agent = new Agent key
-        state = await agent.state().catch -> null
-        # async
-        agent.notify {state}
-
-        debug 'queuer:get-agent-state: done', key, state
-        return
-
-      @socket.on 'queuer:log-agent-out', foot (key) =>
-        is_remote = await @cfg.is_remote domain_of key
-        return if is_remote isnt false
-
-        debug 'queue:log-agent-out', key
-
-        agent = new Agent key
-        await agent.clear_tags()
-        await agent.transition 'logout'
-
-        debug 'queue:log-agent-out: done', key
-        return
-
-      @socket.on 'queuer:log-agent-in', foot (key) =>
-        is_remote = await @cfg.is_remote domain_of key
-        return if is_remote isnt false
-
-        debug 'queue:log-agent-in', key
-
-        tags = []
-        {skills,queues,broadcast,timezone} = await @cfg.prov.get "number:#{key}"
-        if skills?
-          for skill in skills
-            tags.push "skill:#{skill}"
-        if queues?
-          for queue in queues
-            tags.push "queue:#{queue}"
-        if broadcast
-          tags.push 'broadcast'
-
-        agent = new Agent key
-        await agent.add_tags tags
-        if ornaments?
-          ctx = {agent,timezone}
-          await run.call ctx, ornaments, @ornaments_commands
-
-        await agent.accept_onhook()
-        await @report {state:'queuer-login',source,fifo,tags}
-
-        debug 'queue:log-agent-in: done', key
-        return
-
-Downstream/upstream pair for egress/ingress-pool retrieval.
-
-      get_pool = (name,pool) =>
-        @register "queuer:get-#{name}-pool", 'dial_calls'
-        @register "queuer:#{name}-pool", 'calls'
-
-        @socket.on "queuer:get-#{name}-pool", foot (domain) =>
-          debug "queuer:get-#{name}-pool", domain
-
-          is_remote = await @cfg.is_remote domain
-          return if is_remote isnt false
-
-          calls = await pool(domain).calls()
-          result = await Promise.all calls.map (call) -> call.build_notification {}
-
-          notification =
-            _queuer: true
-            host: host
-            now: Date.now()
-
-            _in: [
-              "number_domain:#{domain}"
-            ]
-            calls: result
-
-          @socket.emit "queuer:#{name}-pool", notification
-          debug "queuer:get-#{name}-pool: done", domain, notification
-          return
-
-      get_pool 'egress', (domain) => @cfg.queuer.egress_pool domain
-      get_pool 'ingress', (domain) => @cfg.queuer.ingress_pool domain
-
-/DEPRECATED
-
     @server_pre = ->
 
       cfg = @cfg
@@ -297,11 +185,6 @@ How long should we keep the state of an agent after the last update?
 
           notification =
             _queuer: true
-            _in: [
-              "endpoint:#{@key}"
-              "number:#{@key}"
-              "number_domain:#{@domain}"
-            ]
             _notify: true
             host: host
             now: Date.now()
@@ -314,7 +197,7 @@ How long should we keep the state of an agent after the last update?
             number: @number
             number_domain: @domain
 
-The dialplan is used e.g. to know which messages to forward to the socket.io bus.
+The dialplan is used e.g. to know which messages to forward to the bus.
 
             dialplan: 'centrex'
             missed: await @get_missed().catch -> 0

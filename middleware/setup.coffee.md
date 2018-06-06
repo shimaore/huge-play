@@ -237,49 +237,6 @@ Web
     @web = ->
       @cfg.versions[pkg.name] = pkg.version
 
-Inbound notifications
----------------------
-
-This entire section is DEPRECATED.
-
-    @notify = ->
-
-      @on_connexion = (init) =>
-
-Run on re-connections (`welcome` is sent by spicy-action when we connect).
-
-        @socket.on 'welcome', init
-
-Run manually when we start (the `welcome` message has probably already been seen).
-
-        init()
-
-Register a new event on the bus.
-
-      @register = (event,default_room = null) =>
-        @on_connexion =>
-          debug 'Register', {event, default_room}
-          @socket.emit 'register', {event,default_room}
-
-Configure our client to receive specific queues.
-
-      @socket.on 'configured', (data) =>
-        debug 'Socket configured', data
-
-      @configure = (options) =>
-        @on_connexion =>
-          debug 'Configure', options
-          @socket.emit 'configure', options
-
-      @socket.on 'connect', =>
-        debug.ops 'connect'
-      @socket.on 'connect_error', =>
-        debug.ops 'connect_error'
-      @socket.on 'disconnect', =>
-        debug.ops 'disconnect'
-
-      return
-
 Context Extension
 -----------------
 
@@ -377,6 +334,8 @@ This version is meant to be used in-call.
             @cfg.rr.notify "agent:#{report.agent}", "call:#{report.call}", report
           if report.endpoint?
             @cfg.rr.notify "endpoint:#{report.endpoint}", "call:#{report.call}", report
+          if report.number_domain?
+            @cfg.rr.notify "number_domain:#{report.number_domain}", "call:#{report.call}", report
           true
 
 Real-time notification (e.g. to show on a web panel).

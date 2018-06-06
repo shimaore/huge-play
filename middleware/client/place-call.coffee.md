@@ -367,29 +367,6 @@ The `body` should contains:
 
       return
 
-Notify
-======
-
-DEPRECATED
-
-    @notify = ({cfg,socket}) ->
-
-      H = handler cfg
-      return unless H?
-
-      socket.on 'place-call', H.place_call
-      socket.on 'call-to-conference', H.call_to_conference
-      socket.on 'create-queuer-call', H.create_queuer_call
-
-      @register 'place-call', 'dial_calls'
-      @register 'call-to-conference', 'dial_calls'
-      @register 'create-queuer-call', 'dial_calls'
-      @configure dial_calls: true
-
-      debug 'Module Ready'
-
-/DEPRECATED
-
 Click-to-dial (`place-call`)
 ----------------------------
 

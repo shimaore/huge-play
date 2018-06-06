@@ -106,50 +106,6 @@ Get a URL for recording
 
         return
 
-DEPRECATED
-
-    @notify = ->
-
-DEPRECATED
-
-      @configure dial_calls: true
-      @register 'conference:get-participants', 'dial_calls'
-      @register 'conference:participants', 'calls'
-
-DEPRECATED
-
-      @socket.on 'conference:get-participants', (conf_name) =>
-        debug 'conference:get-participants', conf_name
-
-        # FIXME this is magic
-        return unless $ = conf_name.match /^(\S+)-conf-\d+$/
-
-        domain = $[1]
-
-        # FIXME only try if local
-
-        list = await @cfg
-          .api "conference #{conf_name} json_list"
-          .catch -> null
-
-        return unless list?
-        # and list[0] is '['
-
-        content = try JSON.parse list
-        return unless content?
-
-        conf_data = content[0]
-        return unless conf_data?
-
-        conf_data._in = [
-          "number_domain:#{domain}"
-          "conference:#{conf_name}"
-        ]
-
-        @socket.emit 'conference:participants', conf_data
-
-/DEPRECATED
-
     @include = ->
 
       return unless @session?.direction is 'conf'
