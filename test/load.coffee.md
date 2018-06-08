@@ -80,9 +80,6 @@
             on: ->
             emit: ->
           ctx = {cfg,socket}
-          await L.notify.call ctx, ctx
-          await S.notify.call ctx, ctx
-          await M.notify?.call ctx, ctx
 
           call_ctx =
             cfg: ctx.cfg # useful-wind/router
