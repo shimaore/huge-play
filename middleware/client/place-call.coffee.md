@@ -245,13 +245,9 @@ Session Reference Data
 
         my_reference = new Reference _id
 
-        await my_reference.add_in [
-          "endpoint:#{endpoint}"
-          "account:#{account}"
-          "number_domain:#{endpoint.number_domain}"
-        ]
         await my_reference.set_account account
         await my_reference.set_endpoint endpoint
+        await my_reference.set_number_domain endpoint.number_domain
         await my_reference.set_call_options
           group_confirm_key: '5' # if `exec`, `file` holds the application and parameters; otherwise, one or more chars to confirm
           group_confirm_file: 'phrase:conference:confirm:5' # defaults to `silence`

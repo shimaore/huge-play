@@ -88,7 +88,7 @@ The `number_domain` field is required, but the number-domain record is optional.
           {}
 
       @debug 'number_domain', number_domain
-      await @reference.add_in @session.number_domain_data._id
+      await @reference.set_number_domain number_domain
       await @user_tags @session.number_domain_data.tags
 
 Number-domain is less specific than endpoint, so do not override.
@@ -117,7 +117,7 @@ On a static trunk, the number might not be present.
             {}
 
       if @session.number._id?
-        await @reference.add_in @session.number._id
+        await @reference.set_number src_number
 
 Number is more specific than endpoint or number-domain, override.
 
