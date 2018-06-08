@@ -89,13 +89,12 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @debug '>>>> New call', @session.context, @data
 
-      unless m = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
+      unless C = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
         return @respond '500 Malformed context'
 
-      @session.profile = m[1]
-      @direction m[2]
-      @session.reference ?= m[3]
+      @session.profile = C[1]
+      @session.reference ?= C[3]
 
 Session Reference
 -----------------
@@ -110,8 +109,8 @@ In case of a transfer, the session identifier might be included in the context.
 In all other cases, look (very hard) for a `xref` parameter.
 
       reference_in = (name) =>
-        if m = @req.variable(name)?.match /xref[=:]([\w-]+)/
-          @session.reference ?= m[1]
+        if $ = @req.variable(name)?.match /xref[=:]([\w-]+)/
+          @session.reference ?= $[1]
 
       reference_in 'sip_from_params'
       reference_in 'sip_to_params'
@@ -132,6 +131,7 @@ Logger
       if await @reference.get_dev_logger()
         @session.dev_logger = true
 
+      @direction C[2]
       @notify state:'incoming-call-carrier-side'
 
 SIP Profile

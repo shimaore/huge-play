@@ -35,7 +35,7 @@ Endpoint might be provided in the reference data for example for an `originate` 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
       @session.endpoint = await @cfg.prov.get "endpoint:#{@session.endpoint_name}"
-      await @reference.add_in @session.endpoint._id
+      await @reference.set_endpoint @session.endpoint_name
       if @session.endpoint.timezone?
         @session.timezone = @session.endpoint.timezone
       if @session.endpoint.music?
