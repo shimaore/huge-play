@@ -2,7 +2,7 @@
     {debug,foot} = (require 'tangible') @name
     pkg = name:'huge-play'
     Moment = require 'moment-timezone'
-    {SUBSCRIBE} = require 'red-rings/operations'
+    {SUBSCRIBE,UPDATE} = require 'red-rings/operations'
 
     queuer = require 'black-metal/queuer'
     request = require 'superagent'
@@ -28,88 +28,6 @@
 
       cfg = @cfg
 
-      cfg.rr
-      .receive 'agent:*'
-      .forEach (msg) ->
-        switch
-          when msg.op is SUBSCRIBE
-            # get agent state
-            return unless $ = msg.key?.match /^agent:(\S+)$/
-            key = $[1]
-            is_remote = await cfg.is_remote domain_of key
-            return if is_remote isnt false
-
-            debug 'queuer:get-agent-state', key
-
-            agent = new Agent key
-            state = await agent.state().catch -> null
-            await agent.notify {state}
-
-          when msg.op is UPDATE
-            # log agent in or out; use redring.create() for login, redring.delete() for logout
-
-            return unless $ = msg.id?.match /^agent:(\S+)$/
-            key = $[1]
-            is_remote = await cfg.is_remote domain_of key
-            return if is_remote isnt false
-
-            if msg.deleted
-
-              debug 'queue:log-agent-out', key
-
-              agent = new Agent key
-              await agent.clear_tags()
-              await agent.transition 'logout'
-
-            else
-
-              tags = []
-              {skills,queues,broadcast,timezone} = await cfg.prov.get "number:#{key}"
-              if skills?
-                for skill in skills
-                  tags.push "skill:#{skill}"
-              if queues?
-                for queue in queues
-                  tags.push "queue:#{queue}"
-              if broadcast
-                tags.push 'broadcast'
-
-              agent = new Agent key
-              await agent.add_tags tags
-              if ornaments?
-                ctx = {agent,timezone}
-                await run.call ctx, ornaments, @ornaments_commands
-
-              await agent.accept_onhook()
-
-        return
-
-      cfg.rr
-      .receive 'pool:*'
-      .filter ({op}) -> op is SUBSCRIBE
-      .forEach (msg) ->
-
-        return unless $ = msg.key?.match /^pool:(\S+):(ingress|egress)$/
-
-        domain = $[1]
-        name = $[2]
-
-        is_remote = await cfg.is_remote domain
-        return if is_remote isnt false
-
-        calls = await pool(domain).calls()
-        result = await Promise.all calls.map (call) -> call.build_notification {}
-
-        notification =
-          host: host
-          now: Date.now()
-          calls: result
-
-        cfg.rr.notify msg.key, "number_domain:#{domain}", value
-
-        return
-
-
       HugePlayReference = @cfg.Reference
       {api,prov,host} = @cfg
       profile = @cfg.session?.profile
@@ -128,6 +46,9 @@ How long should we keep the state of a call after the last update?
 How long should we keep the state of an agent after the last update?
 
       agent_timeout = 12*3600
+
+HugePlayCall
+------------
 
       class HugePlayCall extends TaggedCall
 
@@ -173,6 +94,9 @@ How long should we keep the state of an agent after the last update?
 
           debug 'call.notify: send', notification
           notification
+
+HugePlayAgent
+-------------
 
       class HugePlayAgent extends TaggedAgent
 
@@ -312,7 +236,7 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
 
             event: 'create-egress-call'
 
-          call = new Call make_id()
+          call = new HugePlayCall make_id()
           await call.set_domain @domain
           await call.set_started_at()
           await call.set_destination _id # destination endpoint
@@ -330,8 +254,11 @@ This probably not necessary, since the destination number is actually retrieved 
 
           return call
 
-#The queuer's Redis is used for call pools and the agents pool.
-#Since we're bound to a server for domains it's OK to use the local Redis.
+Queuer
+------
+
+The queuer's Redis is used for call pools and the agents pool.
+Since we're bound to a server for domains it's OK to use the local Redis.
 
       pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
       Queuer = queuer pools_redis_interface,
@@ -344,6 +271,98 @@ This probably not necessary, since the destination number is actually retrieved 
         port: @cfg.socket_port ? 5722
       client = FS.createClient options
       monitor client, @cfg.queuer.Call
+
+RedRings
+--------
+
+RedRings for agents:
+
+      cfg.rr
+      .receive 'agent:*'
+      .forEach (msg) ->
+        switch
+          when msg.op is SUBSCRIBE
+            # get agent state
+            return unless $ = msg.key?.match /^agent:(\S+)$/
+            key = $[1]
+            is_remote = await cfg.is_remote domain_of key
+            return if is_remote isnt false
+
+            debug 'queuer:get-agent-state', key
+
+            agent = new HugePlayAgent key
+            state = await agent.state().catch -> null
+            await agent.notify {state}
+
+          when msg.op is UPDATE
+            # log agent in or out; use redring.create() for login, redring.delete() for logout
+
+            return unless $ = msg.id?.match /^agent:(\S+)$/
+            key = $[1]
+            is_remote = await cfg.is_remote domain_of key
+            return if is_remote isnt false
+
+            if msg.deleted
+
+              debug 'queue:log-agent-out', key
+
+              agent = new HugePlayAgent key
+              await agent.clear_tags()
+              await agent.transition 'logout'
+
+            else
+
+              tags = []
+              {skills,queues,broadcast,timezone} = await cfg.prov.get "number:#{key}"
+              if skills?
+                for skill in skills
+                  tags.push "skill:#{skill}"
+              if queues?
+                for queue in queues
+                  tags.push "queue:#{queue}"
+              if broadcast
+                tags.push 'broadcast'
+
+              agent = new HugePlayAgent key
+              await agent.add_tags tags
+              if ornaments?
+                ctx = {agent,timezone}
+                await run.call ctx, ornaments, @ornaments_commands
+
+              await agent.accept_onhook()
+
+        return
+
+Note: RedRings agent notifications are handled above (in the HugePlayCall and HugePlayAgent classes).
+
+RedRings for pools:
+
+      cfg.rr
+      .receive 'pool:*'
+      .filter ({op}) -> op is SUBSCRIBE
+      .forEach (msg) ->
+
+        return unless $ = msg.key?.match /^pool:(\S+):(ingress|egress)$/
+
+        domain = $[1]
+        name = $[2]
+
+        is_remote = await cfg.is_remote domain
+        return if is_remote isnt false
+
+        calls = await pool(domain).calls()
+        result = await Promise.all calls.map (call) -> call.build_notification {}
+
+        notification =
+          host: host
+          now: Date.now()
+          calls: result
+
+        cfg.rr.notify msg.key, "number_domain:#{domain}", value
+
+        return
+
+Note (FIXME): there are no notifications for pools, there should be.
 
       return
 
