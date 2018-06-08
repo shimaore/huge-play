@@ -108,7 +108,6 @@ If the call-group should use the queuer, then do that.
 
         ref_tags = await @reference.tags()
         await call.set_tags ref_tags
-        await call.add_tag "number_domain:#{@session.number_domain}"
 
         if music_uri?
           await call.set_music music_uri
@@ -118,6 +117,7 @@ If the call-group should use the queuer, then do that.
 
         await call.set_remote_number @source
         await call.set_alert_info @session.alert_info if @session.alert_info?
+        await call.set_domain @session.number_domain
         await call.clear()
         await queuer.queue_ingress_call call
 
