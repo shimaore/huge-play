@@ -66,8 +66,8 @@ HugePlayCall
 
             domain: @domain
             key: @key
-            id: @id
-            destination: @destination
+            id: @get_id()
+            destination: @get_destination()
 
             call_state: await @state().catch -> null
             remote_number: await @get_remote_number().catch -> null
