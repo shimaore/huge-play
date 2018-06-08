@@ -20,7 +20,7 @@ Now, we have two cases:
 * doc.global_number.local_number (string) The identifier of the local-number into which this global-number gets translated for inbound calls. (The identifier must have the format `<number>@<number-domain>` and a `number:<number>@<number-domain>` record must exist.)
 
       return unless @session.e164_number?.local_number?
-      await @reference.add_in "number:#{@session.e164_number.local_number}"
+      await @reference.set_number @session.e164_number.local_number
 
 These are used e.g. for Centrex, and override the destination number and number-domain.
 
@@ -47,7 +47,7 @@ The dialplan and country (and other parameters) might also be available in the `
         .catch (error) =>
           @debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
-      await @reference.add_in @session.number_domain_data._id
+      await @reference.set_number_domain number_domain
       await @user_tags @session.number_domain_data.tags
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.

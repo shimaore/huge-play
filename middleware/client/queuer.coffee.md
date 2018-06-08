@@ -205,14 +205,10 @@ See `in_domain` in black-metal/tagged.
 
 FIXME This is highly inefficient, we should be able to create the structure at once.
 
-          await reference.add_in [
-            "endpoint:#{endpoint}"
-            "number:#{endpoint}" # Centrex-only
-            "account:#{account}"
-            "number_domain:#{@domain}"
-          ]
           await reference.set_endpoint endpoint
           await reference.set_account account
+          await reference.set_number_domain @domain
+          await reference.set_number endpoint # Centrex-only
           await reference.set_destination body.destination
           await reference.set_source @number
           await reference.set_domain "#{host}:#{port}"

@@ -20,7 +20,7 @@
 * session.e164_number (object) The doc.global_number record for the source of an outbound call.
 
       @session.e164_number = await @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
-      await @reference.add_in @session.e164_number._id
+      await @reference.set_number @session.ccnq_from_e164
       await @user_tags @session.e164_number.tags
 
 * session.e164_number.fs_variables See doc.global_number.fs_variables
@@ -47,7 +47,6 @@ The URL module parses the SIP username as `auth`.
         return @respond '403 Missing Charge-Info'
 
       await @reference.set_account @session.ccnq_account
-      await @reference.add_in "account:#{@session.ccnq_account}"
 
 Settings for calling number (see middleware/client/ingress/post.coffee.md):
 

@@ -16,7 +16,6 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
         id ?= reference_id()
         super 'xref', id
         @id = id
-        @__in_key = "#{@class_name}-#{@key}-i"
 
       set_endpoint: SET 'endpoint'
       set_destination: SET 'destination'
@@ -27,6 +26,8 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       set_call_options: (options) ->
         @set 'call_options', JSON.stringify options
       set_block_dtmf: SET 'block_dtmf'
+      set_number: SET 'number'
+      set_number_domain: SET 'number_domain'
 
       get_endpoint: GET 'endpoint'
       get_destination: GET 'destination'
@@ -41,11 +42,7 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
         else
           {}
       get_block_dtmf: GET 'block_dtmf'
-
-      add_in: (role) ->
-        @interface.add @__in_key, role
-
-      get_in: ->
-        @interface.members @__in_key
+      get_number: GET 'number'
+      get_number_domain: GET 'number_domain'
 
     module.exports = Reference

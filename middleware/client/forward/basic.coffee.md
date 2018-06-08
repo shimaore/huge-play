@@ -18,7 +18,6 @@
         @source = @destination
       @destination = @session.destination
       @direction 'egress'
-      # await @reference.add_in @session.endpoint._id
       await @user_tags @session.endpoint.tags
 
 

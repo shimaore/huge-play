@@ -267,33 +267,6 @@ Context Extension
           @emit 'direction', direction
           @report {event:'direction', direction}
 
-`@_in()`: Build a list of target rooms for event reporting (as used by spicy-action).
-
-        _in: (_in = [])->
-
-Add any endpoint- or number- specific dispatch room (this allows end-users to receive events for endpoints and numbers they are authorized to monitor).
-
-          push_in = (room) ->
-            return if not room? or room in _in
-            _in.push room
-
-We assume the room names match record IDs.
-
-          push_in @session.endpoint?._id
-          if @session.number?.endpoint?
-            push_in ['endpoint',@session.number?.endpoint].join ':'
-          push_in @session.number?._id
-          push_in @session.e164_number?._id
-          if @session.number_domain_data?.dialplan is 'centrex'
-            push_in @session.number_domain_data._id
-
-          if @reference?
-            tags = await @reference.get_in().catch -> []
-            for tag in tags
-              push_in tag
-
-          _in
-
 Data reporting (e.g. to save for managers reports).
 Typically `@report({state,…})` for calls state changes / progress, `@report({event,…})` for non-calls.
 This version is meant to be used in-call.
@@ -309,7 +282,6 @@ This version is meant to be used in-call.
           report.timezone ?= @session.timezone
           report.timestamp ?= now report.timezone
           report.now = Date.now()
-          report._in = await @_in report._in
           report.host ?= @cfg.host
           report.type ?= 'report'
 
@@ -319,9 +291,15 @@ This version is meant to be used in-call.
           report.dialplan ?= @session.dialplan
           report.country ?= @session.country
           report.number_domain ?= @session.number_domain
+          report.number_domain ?= await @reference.get_number_domain()
           report.number_domain_dialplan ?= @session.number_domain_data?.dialplan
           report.agent ?= @session.agent
           report.agent_name ?= @session.agent_name
+
+          report.endpoint ?= @session.endpoint?.endpoint
+          report.endpoint ?= @session.number?.endpoint
+          report.endpoint ?= @session.endpoint_name
+          report.endpoint ?= await @reference.get_endpoint()
 
           report.call = @call.uuid
           report.session = @session._id
@@ -442,7 +420,6 @@ Retrieve number data.
           @session.number = await @cfg.prov
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
-          await @reference.add_in @session.number._id
           await @user_tags @session.number.tags
           if @session.number.timezone?
             @session.timezone ?= @session.number.timezone
@@ -467,12 +444,10 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
 
           @session.endpoint_name = @session.number.endpoint
           await @reference.set_endpoint @session.number.endpoint
-          await @reference.add_in "endpoint:#{@session.number.endpoint}"
 
 Set the account so that if we redirect to an external number the egress module can find it.
 
           await @reference.set_account @session.number.account
-          await @reference.add_in "account:#{@session.number.account}"
           @report
             state: 'validated-local-number'
             number: @session.number._id

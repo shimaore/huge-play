@@ -123,11 +123,8 @@ Session Reference Data
 
         my_reference = new Reference _id
 
-        await my_reference.add_in [
-          "endpoint:#{endpoint}"
-          "account:#{account}"
-          "number_domain:#{domain}"
-        ]
+        await my_reference.set_endpoint endpoint
+        await my_reference.set_number_domain domain
         await my_reference.set_account account
         await my_reference.set_destination data.destination
 

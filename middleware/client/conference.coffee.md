@@ -255,8 +255,7 @@ Really we should just barge on the channel if we need anything more complex than
 Log into the conference
 
         @debug 'conference'
-        await @reference.add_in "number_domain:#{@session.number_domain}"
-        # await @reference.add_in "conference:#{conf_name}"
+        await @reference.set_number_domain @session.number_domain
         @notify state: 'conference:started', conference: conf_name
 
         notify domain, number
