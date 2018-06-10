@@ -60,14 +60,14 @@ HugePlayCall
 
         build_notification: (data) ->
           notification =
-            _queuer: true
+            report_type: 'queuer'
             host: host
             now: Date.now()
 
-            domain: @domain
+            domain: @get_domain().catch -> null
             key: @key
-            id: await @get_id()
-            destination: await @get_destination()
+            id: await @get_id().catch -> null
+            destination: await @get_destination().catch -> null
 
             call_state: await @state().catch -> null
             remote_number: await @get_remote_number().catch -> null
@@ -89,8 +89,9 @@ HugePlayCall
         notify: (data) ->
           debug 'call.notify', data
           notification = await @build_notification data
-          cfg.statistics.emit 'queuer', notification # DEPRECATED
-          cfg.rr.notify "call:#{notification.id}", "call:#{notification.id}", notification
+
+          if notification.domain?
+            cfg.rr.notify "domain:#{notification.domain}", "call:#{notification.id}", notification
 
           debug 'call.notify: send', notification
           notification
@@ -108,8 +109,7 @@ HugePlayAgent
           {old_state,state,event,reason} = data
 
           notification =
-            _queuer: true
-            _notify: true
+            report_type: 'queuer'
             host: host
             now: Date.now()
 
@@ -120,10 +120,6 @@ HugePlayAgent
             agent: @key
             number: @number
             number_domain: @domain
-
-The dialplan is used e.g. to know which messages to forward to the bus.
-
-            dialplan: 'centrex'
             missed: await @get_missed().catch -> 0
             count: await @count().catch -> 0
 
@@ -145,10 +141,9 @@ This avoids sending two messages for the same event (one with incomplete data, t
 
           if data.call?
             notification = await data.call.notify notification
-          else
-            cfg.statistics.emit 'queuer', notification # DEPRECATED
 
           cfg.rr.notify "agent:#{notification.agent}", "agent:#{notification.agent}", notification
+          cfg.rr.notify "number_domain:#{notification.domain}", "agent:#{notification.agent}", notification
           debug 'agent.notify: done', @key, notification
           return
 

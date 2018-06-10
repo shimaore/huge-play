@@ -304,7 +304,7 @@ This version is meant to be used in-call.
           report.call = @call.uuid
           report.session = @session._id
           report.reference = @session.reference
-          report.report_type = 'in-call'
+          report.report_type = 'call'
 
           @cfg.statistics.emit 'report', report
 
