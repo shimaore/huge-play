@@ -251,10 +251,15 @@ The queuer's Redis is used for call pools and the agents pool.
 Since we're bound to a server for domains it's OK to use the local Redis.
 
       pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
-      Queuer = queuer pools_redis_interface,
-        Agent: HugePlayAgent
-        Call: HugePlayCall
-      @cfg.queuer = new Queuer @cfg
+
+      class HugePlayQueuer extends queuer pools_redis_interface, Agent: HugePlayAgent, Call: HugePlayCall
+        notify: (key,id,notification) ->
+          if data.call?
+            notification = await data.call.notify notification
+          cfg.rr.notify key, id, notification
+          return
+
+      @cfg.queuer = new HugePlayQueuer @cfg
 
       options =
         host: @cfg.socket_host ? '127.0.0.1'
@@ -340,7 +345,14 @@ RedRings for pools:
         is_remote = await cfg.is_remote domain
         return if is_remote isnt false
 
-        calls = await pool(domain).calls()
+        pool = switch name
+          when 'ingress'
+            queuer.ingress_pool domain
+
+          when 'egress'
+            queuer.egress_pool domain
+
+        calls = await pool.calls()
         result = await Promise.all calls.map (call) -> call.build_notification {}
 
         notification =
@@ -351,8 +363,6 @@ RedRings for pools:
         cfg.rr.notify msg.key, "number_domain:#{domain}", value
 
         return
-
-Note (FIXME): there are no notifications for pools, there should be.
 
       return
 
