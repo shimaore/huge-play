@@ -253,7 +253,15 @@ Since we're bound to a server for domains it's OK to use the local Redis.
       pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
 
       class HugePlayQueuer extends queuer pools_redis_interface, Agent: HugePlayAgent, Call: HugePlayCall
-        notify: (key,id,notification) ->
+        notify: (key,id,data) ->
+          notification =
+            report_type: 'queuer'
+            host: host
+            now: Date.now()
+
+          for own k,v of data when typeof v in ['number','string','boolean']
+            notification[k] = v
+
           if data.call?
             notification = await data.call.notify notification
           cfg.rr.notify key, id, notification
