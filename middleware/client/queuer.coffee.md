@@ -143,7 +143,6 @@ This avoids sending two messages for the same event (one with incomplete data, t
             notification = await data.call.notify notification
 
           cfg.rr.notify "agent:#{notification.agent}", "agent:#{notification.agent}", notification
-          cfg.rr.notify "number_domain:#{notification.domain}", "agent:#{notification.agent}", notification
           debug 'agent.notify: done', @key, notification
           return
 
