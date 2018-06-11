@@ -64,7 +64,7 @@ HugePlayCall
             host: host
             now: Date.now()
 
-            domain: @get_domain().catch -> null
+            domain: await @get_domain().catch -> null
             key: @key
             id: await @get_id().catch -> null
             destination: await @get_destination().catch -> null
