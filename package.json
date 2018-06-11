@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "gitlab.com/shimaore/huge-play"
+    "url": "gitlab:shimaore/huge-play"
   },
   "author": "Stéphane Alnet <stephane@shimaore.net> (http://stephane.shimaore.net/)",
   "license": "Unlicense",
