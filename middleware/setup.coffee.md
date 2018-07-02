@@ -501,10 +501,10 @@ Keep recording (async)
 
           keep_recording = =>
             {uuid} = @call
-            @report event:'recording'
             uri = await @cfg.recording_uri name
             @debug 'Recording', uuid, uri
             outcome = await @cfg.api "uuid_record #{uuid} start #{uri}"
+            @report {event:'recording', uri}
             @debug 'Recording', uuid, uri, outcome
 
             last_uri = uri
@@ -520,7 +520,7 @@ Keep recording (async)
                 uri = await @cfg.recording_uri name
                 @debug 'Recording next segment', uuid, uri
                 await @cfg.api "uuid_record #{uuid} start #{uri}"
-                @report event:'recording'
+                @report {event:'recording', uri}
 
               await @sleep 1*minutes
               @debug 'Stopping previous segment', uuid, last_uri
