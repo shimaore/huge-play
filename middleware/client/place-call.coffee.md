@@ -76,7 +76,7 @@ The calls are automatically sent back to ourselves so that they can be processed
 This feature will call an extension (client-side number) and when the extension picks the call up, it will call the destination number (either an internal or external destination).
 
 Event parameters:
-- `_id` (YYYY-MM-UUID)
+- `_id`
 - `endpoint`
 - `caller` (with appropriate `endpoint_via` translations if necessary)
 - `destination`
@@ -97,7 +97,8 @@ ANSWER: Yes. And store the result in the field `caller`.
 
 A proper reference is required.
 
-        return unless _id? and _id.match /^[\w-]+$/
+        return unless $ = _id?.match /^call:([\w-]+)$/
+        my_reference = new Reference $[1]
 
 Load additional data from the endpoint.
 
@@ -121,19 +122,18 @@ Note that Centrex-redirect uses both the local-server and the client-server.
 
 Session Reference Data
 
-        my_reference = new Reference _id
 
         await my_reference.set_endpoint endpoint
         await my_reference.set_number_domain domain
         await my_reference.set_account account
         await my_reference.set_destination data.destination
 
-        xref = "xref=#{_id}"
+        xref = "xref=#{my_reference.id}"
         params = make_params
 
 These are used by `huge-play/middleware/client/setup`.
 
-          session_reference: _id
+          session_reference: my_reference.id
           origination_context: context
           sip_invite_params: xref
           sip_invite_to_params: xref
@@ -175,7 +175,7 @@ timeout_sec
         ].join ' '
         cmd = "originate #{argv}"
 
-        return unless await elected _id
+        return unless await elected my_reference.id
 
         debug "Calling #{cmd}"
 
@@ -188,9 +188,9 @@ The `originate` command will return when the call is answered by the callee (or 
 
         debug "Originate returned", res
         if res[0] is '+'
-          debug 'caller-connected', _id
+          debug 'caller-connected', my_reference.id
         else
-          debug.dev 'caller-failed', _id
+          debug.dev 'caller-failed', my_reference.id
 
         debug 'Session state:', data.tags
 
@@ -198,7 +198,7 @@ Call to conference
 ------------------
 
 Parameters:
-- `_id` (YYYY-MM-UUID)
+- `_id`
 - `endpoint`
 - `conference` (was `name`)
 - `destination`
@@ -211,7 +211,8 @@ Parameters:
 
 A proper reference is required.
 
-        return unless _id? and _id.match /^[\w-]+$/
+        return unless $ = _id?.match /^call:([\w-]+)$/
+        my_reference = new Reference $[1]
 
 Ensure we are co-located with the FreeSwitch instance serving this conference.
 
@@ -243,8 +244,6 @@ Duplicated from exultant-song (FIXME)
 
 Session Reference Data
 
-        my_reference = new Reference _id
-
         await my_reference.set_account account
         await my_reference.set_endpoint endpoint
         await my_reference.set_number_domain endpoint.number_domain
@@ -258,7 +257,7 @@ Session Reference Data
 
 Call it out
 
-        xref = "xref:#{_id}"
+        xref = "xref:#{my_reference.id}"
         params = make_params
 
           sip_invite_params: xref
@@ -271,7 +270,7 @@ Call it out
         sofia = "{#{params}}sofia/#{sofia_profile}/sip:#{destination}@#{host}:#{port}"
         cmd = "originate #{sofia} &conference(#{name}++flags{})"
 
-        return unless await elected _id
+        return unless await elected my_reference.id
 
         debug "Calling #{cmd}"
         res = await cfg.api(cmd).catch (error) ->
@@ -309,6 +308,9 @@ The `body` should contains:
           debug 'create-queuer-call: not handled on this server', body
           return
 
+Note: `create_egress_call` does not use the `_id` provided (because the same call might be submitted to multiple agents, so it needs to generate a new one every time).
+So we're electing based on the complete `call:…` reference, and there's no need to rewrite the `_id` field.
+
         return unless await elected body._id
 
         await queuer.create_egress_call_for agent, body
@@ -329,7 +331,7 @@ The `body` should contains:
         switch
 
 `create_queuer_call`
-- `_id` (unique id for the request)
+- `_id` (unique id for the request: "call:<unique>")
 - `agent` (string)
 - `destination` (string)
 - `tags` (array)
@@ -338,7 +340,7 @@ The `body` should contains:
             H.create_queuer_call msg.doc
 
 `call_to_conference`
-- `_id` (YYYY-MM-UUID)
+- `_id` ("call:<xref>")
 - `endpoint`
 - `conference` (was `name`)
 - `destination`
@@ -347,7 +349,7 @@ The `body` should contains:
             H.call_to_conference msg.doc
 
 `place_call`
-- `_id` (YYYY-MM-UUID)
+- `_id` ("call:<xref>")
 - `endpoint`
 - 'caller' (with appropriate `endpoint_via` translations if necessary)
 - `destination`
