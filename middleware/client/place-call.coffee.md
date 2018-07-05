@@ -383,7 +383,7 @@ and therefor the call is already connected by the time we get here.
 
 Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
 
-        account = @reference.get_account()
+        account = await @reference.get_account()
         if account?
           await @export 'sip_h_P-Charge-Info': "sip:#{account}@#{@cfg.host}"
 
