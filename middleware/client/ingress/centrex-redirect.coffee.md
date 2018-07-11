@@ -35,6 +35,5 @@ Monitor the a-leg.
 
       if @cfg.queuer? and @queuer_call?
         queuer_call = await @queuer_call()
-        await @cfg.queuer.monitor_remote_call queuer_call
 
       @debug 'Handling is local'

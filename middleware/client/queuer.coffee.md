@@ -368,7 +368,7 @@ RedRings for pools:
           now: Date.now()
           calls: result
 
-        cfg.rr.notify msg.key, "number_domain:#{domain}", value
+        cfg.rr.notify msg.key, "number_domain:#{domain}", notification
 
         return
 
