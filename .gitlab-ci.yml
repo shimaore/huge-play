@@ -4,7 +4,7 @@ services:
 - redis
 
 test:
-  stage: test
   script:
   - npm install
+  - npm audit
   - npm test
