@@ -43,8 +43,11 @@ Endpoint might be provided in the reference data for example for an `originate` 
       if @session.endpoint.trace
         @session.dev_logger = true
 
-      @session.agent = @session.endpoint_name
-      @session.agent_name = @session.endpoint.display_name ? @source
+If the call was blind-transfered by the agent, it will appear in a `transfer` direction, as coming from the agent (e.g. `sip_h_X-En` is copied over) even though the call actually connects the original caller and the recipient of the transfer. The call-id is the call-id of the original call (before the transfer). In this case, we should _not_ bind that call-id and the agent, since the agent is no longer part of that call.
+
+      if not @session.transfer
+        @session.agent = @session.endpoint_name
+        @session.agent_name = @session.endpoint.display_name ? @source
 
       @set
         ccnq_endpoint: @session.endpoint_name
