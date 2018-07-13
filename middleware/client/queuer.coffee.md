@@ -4,7 +4,7 @@
     Moment = require 'moment-timezone'
     {SUBSCRIBE,UPDATE} = require 'red-rings/operations'
 
-    queuer = require 'black-metal/queuer'
+    Queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
     run = require 'flat-ornament'
@@ -252,7 +252,7 @@ Since we're bound to a server for domains it's OK to use the local Redis.
 
       pools_redis_interface = new RedisInterface cfg.local_redis_client, agent_timeout
 
-      class HugePlayQueuer extends queuer pools_redis_interface, Agent: HugePlayAgent, Call: HugePlayCall
+      class HugePlayQueuer extends Queuer pools_redis_interface, Agent: HugePlayAgent, Call: HugePlayCall
         notify: (key,id,data) ->
           notification =
             report_type: 'queuer'
@@ -355,10 +355,10 @@ RedRings for pools:
 
         pool = switch name
           when 'ingress'
-            queuer.ingress_pool domain
+            cfg.queuer.ingress_pool domain
 
           when 'egress'
-            queuer.egress_pool domain
+            cfg.queuer.egress_pool domain
 
         calls = await pool.calls()
         result = await Promise.all calls.map (call) -> call.build_notification {}
@@ -382,8 +382,7 @@ Middleware
       if await @reference.get_block_dtmf()
         await @action 'block_dtmf'
 
-      queuer = @cfg.queuer
-      return unless queuer?
+      return unless @cfg.queuer?
 
       {Agent,Call} = @cfg.queuer
       return unless Agent? and Call?
