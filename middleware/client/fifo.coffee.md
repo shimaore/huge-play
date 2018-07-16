@@ -139,7 +139,6 @@ desirable queues to a given call. (Adding more required skills would build a sma
 
         attempt_overflow = (suffix) =>
           @debug 'attempt overflow', call_tags, suffix
-          await call.load()
           if await ingress_pool.has call
             ok = false
             for tag in call_tags when await call.has_tag tag
