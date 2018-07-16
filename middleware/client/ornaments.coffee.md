@@ -8,7 +8,6 @@ Inject the commands defined in `./commands.coffee.md`
 
       @ornaments_commands ?= {}
 
-      for own k,v of commands
-        @ornaments_commands[k] = v
+      Object.assign @ornaments_commands, commands
 
       return

@@ -315,6 +315,8 @@ RedRings for agents:
 
             else
 
+              debug 'queue:log-agent-in', key
+
               tags = []
               {skills,queues,broadcast,timezone} = await cfg.prov.get "number:#{key}"
               if skills?
