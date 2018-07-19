@@ -67,7 +67,6 @@ HugePlayCall
             domain: await @get_domain().catch -> null
             key: @key
             id: await @get_id().catch -> null
-            destination: await @get_destination().catch -> null
 
             call_state: await @state().catch -> null
             remote_number: await @get_remote_number().catch -> null
@@ -226,13 +225,12 @@ This is a "fake" call-data entry, to record the data we used to trigger the call
 
             event: 'create-egress-call'
 
+Notice that for the new call we explicitely do _not_ `set_id` since this is how `originate_external` recognizes that the call needs to be set up.
+
           call = new HugePlayCall make_id()
           await call.set_domain @domain
           await call.set_started_at()
-          await call.set_destination _id # destination endpoint
-
-This probably not necessary, since the destination number is actually retrieved from the reference-data.
-
+          await call.set_reference _id
           await call.set_remote_number body.destination
           await call.set_tags body.tags
           await call.set 'timezone', timezone
