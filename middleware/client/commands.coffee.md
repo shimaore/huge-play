@@ -448,7 +448,7 @@ Notice: `failed` here means the call failed to be sent to the user *and* no othe
 Menus
 -----
 
-`menu_start`: start collecting digits for a menu; digits received before this command are discarded.
+`menu`: start collecting digits for a menu; digits received before this command are discarded.
 
       menu: ( min = 1, max = min, itd ) ->
         @debug 'menu_start'

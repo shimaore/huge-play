@@ -328,9 +328,12 @@ RedRings for agents:
 
               agent = new HugePlayAgent key
               await agent.add_tags tags
+
+              ### FIXME FIXME
               if ornaments?
                 ctx = {agent,timezone}
                 await run.call ctx, ornaments, @ornaments_commands
+              ###
 
               await agent.accept_onhook()
 
