@@ -3,7 +3,7 @@
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
     request = require 'superagent'
-    run = require 'flat-ornament'
+    compile = require 'flat-ornament/compile'
     serialize = require 'useful-wind-serialize'
 
     max_menu_depth = 42
@@ -497,7 +497,8 @@ Copying the logic from middleware/client/ingress/fifo
           return false
 
         await @sleep 200
-        await run.call this, item, @ornaments_commands
+        fun = compile item, @ornaments_commands
+        await fun.call this if fun?
         'over'
 
 Pattern

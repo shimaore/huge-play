@@ -1,5 +1,5 @@
     @name = "huge-play:middleware:client:menu"
-    run = require 'flat-ornament'
+    compile = require 'flat-ornament/compile'
 
     @description = '''
       Handles routing to a given menu.
@@ -28,7 +28,9 @@
 
       @debug 'Menu starting.'
       @menu_depth = 0
-      await run.call this, @session.menu, @ornaments_commands
-        .catch (error) => @debug.catch error
+      fun = compile @session.menu, @ornaments_commands
+      if fun?
+        await fun.call this
+          .catch (error) => @debug.catch error
       @debug 'Menu completed.'
       return

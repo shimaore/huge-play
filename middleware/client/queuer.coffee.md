@@ -7,7 +7,7 @@
     Queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
-    run = require 'flat-ornament'
+    compile = require 'flat-ornaments/compile'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -332,7 +332,8 @@ RedRings for agents:
               ### FIXME FIXME
               if ornaments?
                 ctx = {agent,timezone}
-                await run.call ctx, ornaments, @ornaments_commands
+                fun = compile ornaments
+                await fun.call ctx if fun?
               ###
 
               await agent.accept_onhook()
@@ -427,7 +428,8 @@ On-hook agent
 
         if ornaments?
           @agent = agent
-          await run.call this, ornaments, @ornaments_commands
+          fun = compile ornaments, @ornaments_commands
+          await fun.call this if fun?
 
         await agent.accept_onhook()
         await @report {state:'queuer-login',source,fifo,tags}
