@@ -90,14 +90,21 @@ Get a URL for recording
           debug.dev 'conference:record: Missing recording_uri', name
           return
 
-        uri = await @cfg.recording_uri name
+        metadata = {
+          name
+          conference_start: Date().toJSON()
+          recording_start: Date().toJSON()
+        }
+
+        uri = await @cfg.recording_uri name, metadata
         await @cfg.api "conference #{name} recording start #{uri}"
         await @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
         last_uri = uri
 
         while await still_running name
           await sleep 29*minutes
-          uri = await @cfg.recording_uri name
+          metadata.recording_start = Date().toJSON()
+          uri = await @cfg.recording_uri name, metadata
           await @cfg.api "conference #{name} recording start #{uri}"
           await @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
           await sleep  1*minutes

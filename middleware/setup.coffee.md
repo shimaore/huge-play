@@ -492,19 +492,29 @@ Set the account so that if we redirect to an external number the egress module c
             await @reference.del_tag tag
           null
 
-        record_call: (name) ->
+        record_call: (name,metadata = {}) ->
           unless @cfg.recording_uri?
             @debug.dev 'No recording_uri, call will not be recorded.'
             return false
+
+          Object.assign metadata,
+            name: name
+            number_domain: @session?.number_domain
+            number: @session?.number?._id
+            agent: @session?.agent
+            timezone: @session?.timezone
+            groups: @session?.number?.allowed_groups
+            call_start: Date().toJSON()
+            recording_start: Date().toJSON()
 
 Keep recording (async)
 
           keep_recording = =>
             {uuid} = @call
-            uri = await @cfg.recording_uri name
+            uri = await @cfg.recording_uri name, metadata
             @debug 'Recording', uuid, uri
             outcome = await @cfg.api "uuid_record #{uuid} start #{uri}"
-            @report {event:'recording', uri}
+            @report Object.assign {event:'recording', uri}, metadata
             @debug 'Recording', uuid, uri, outcome
 
             last_uri = uri
@@ -517,10 +527,11 @@ Keep recording (async)
               await @sleep 29*minutes
 
               if still_running
-                uri = await @cfg.recording_uri name
+                metadata.recording_start = Date().toJSON()
+                uri = await @cfg.recording_uri name, metadata
                 @debug 'Recording next segment', uuid, uri
                 await @cfg.api "uuid_record #{uuid} start #{uri}"
-                @report {event:'recording', uri}
+                @report Object.assign {event:'recording', uri}, metadata
 
               await @sleep 1*minutes
               @debug 'Stopping previous segment', uuid, last_uri

@@ -130,8 +130,6 @@ Number is more specific than endpoint or number-domain, override.
         @session.music = music_uri @session.number
       if @session.number.trace
         @session.dev_logger = true
-      if @session.number.record_egress
-        @record_call @session.number._id
 
 Dialplan
 --------
@@ -224,6 +222,12 @@ ICE
 For backward-compatibility we currently ignore ICE proposals.
 
       await @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
+
+Call-recording
+--------------
+
+      if @session.number.record_egress
+        @record_call @session.number._id
 
       @report
         state:'egress-received'
