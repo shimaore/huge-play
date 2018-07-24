@@ -7,7 +7,7 @@
     Queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
-    compile = require 'flat-ornaments/compile'
+    compile = require 'flat-ornament/compile'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
