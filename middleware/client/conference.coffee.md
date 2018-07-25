@@ -95,8 +95,8 @@ Get a URL for recording
         metadata = {
           name
           source
-          conference_start: Date().toJSON()
-          recording_start: Date().toJSON()
+          conference_start: new Date().toJSON()
+          recording_start: new Date().toJSON()
         }
 
         uri = await @cfg.recording_uri key, metadata
@@ -106,7 +106,7 @@ Get a URL for recording
 
         while await still_running name
           await sleep 29*minutes
-          metadata.recording_start = Date().toJSON()
+          metadata.recording_start = new Date().toJSON()
           uri = await @cfg.recording_uri key, metadata
           await @cfg.api "conference #{name} recording start #{uri}"
           await @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"

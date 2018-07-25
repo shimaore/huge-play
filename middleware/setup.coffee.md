@@ -505,8 +505,8 @@ Set the account so that if we redirect to an external number the egress module c
             groups: @session?.number?.allowed_groups
             source: @source
             destination: @destination
-            call_start: Date().toJSON()
-            recording_start: Date().toJSON()
+            call_start: new Date().toJSON()
+            recording_start: new Date().toJSON()
 
 Keep recording (async)
 
@@ -528,7 +528,7 @@ Keep recording (async)
               await @sleep 29*minutes
 
               if still_running
-                metadata.recording_start = Date().toJSON()
+                metadata.recording_start = new Date().toJSON()
                 uri = await @cfg.recording_uri name, metadata
                 @debug 'Recording next segment', uuid, uri
                 await @cfg.api "uuid_record #{uuid} start #{uri}"
