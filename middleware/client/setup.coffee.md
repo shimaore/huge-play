@@ -209,7 +209,6 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
       @debug 'Ready',
         reference: @session.reference
         call: @call.uuid
-        session: @session._id
         context: @session.context
         direction: @session.direction
         destination: @destination

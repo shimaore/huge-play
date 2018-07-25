@@ -254,9 +254,9 @@ Context Extension
           @call = null
           @session = null
           @reference = null
+          @global_redis = null
+          @local_redis = null
           return
-
-        statistics: @cfg.statistics
 
         sleep: (timeout) ->
           new Promise (resolve) ->
@@ -304,8 +304,6 @@ This version is meant to be used in-call.
           report.call = @call.uuid
           report.reference = @session.reference
           report.report_type = 'call'
-
-          @cfg.statistics.emit 'report', report
 
           if report.agent?
             @cfg.rr.notify "agent:#{report.agent}", "call:#{report.call}", report
@@ -358,7 +356,6 @@ Real-time notification (e.g. to show on a web panel).
           return
 
         respond: (response) ->
-          @statistics?.add ['immediate-response',response]
           @notify state: 'immediate-response', response: response
           @session.first_response_was ?= response
 

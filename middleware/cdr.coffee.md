@@ -22,21 +22,19 @@ A record of the (original, pre-processing) source and destination.
 
 Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
 
-      @call.once 'cleanup_linger', foot =>
+      @call.once 'cleanup_linger', =>
         debug "CDR: Linger: pausing"
         await @sleep 4000
-        debug "CDR: Linger: exit"
-        await @call.exit()
         @end()
+        debug "CDR: Linger: exit"
+        @call.exit().catch -> yes
         return
 
       await @call.linger()
 
-      unless @statistics? and @notify?
+      unless @notify?
         @debug.dev 'Error: Improper environment'
         return
-
-      @statistics.add 'incoming-calls'
 
       await @call.event_json 'CHANNEL_HANGUP_COMPLETE'
       @call.once 'CHANNEL_HANGUP_COMPLETE', foot (res) =>
@@ -85,19 +83,6 @@ even-numbered are hold 'on', odd-numbered are hold 'off'
           jitter_min_variance:  float data.variable_rtp_audio_in_jitter_min_variance
           jitter_max_variance:  float data.variable_rtp_audio_in_jitter_max_variance
           in_mos:               float data.variable_rtp_audio_in_mos
-
-        for own k,v of cdr_report
-          switch k
-            when 'direction'
-              @statistics.add "direction-#{v}", cdr_report.billable
-            when 'emergency'
-              @statistics.add "emergency" if v
-            when 'onnet'
-              @statistics.add "onnet" if v
-            when 'hold_times', 'end_time', 'start_time', 'answer_time', 'bridge_time', 'progress_time'
-              no
-            else
-              @statistics.add k, v
 
         @session.cdr_report = cdr_report
         @emit 'cdr_report', cdr_report
