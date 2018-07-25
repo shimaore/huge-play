@@ -72,7 +72,6 @@ HugePlayCall
             remote_number: await @get_remote_number().catch -> null
             alert_info: await @get_alert_info().catch -> null
             reference: await @get_reference().catch -> null
-            session: await @get_session().catch -> null
             answered: await @answered().catch -> null
             presenting: await @count().catch -> null
             tags: await @tags().catch -> []
@@ -405,7 +404,6 @@ Queuer Call object
         await queuer_call.set_started_at()
         await queuer_call.set_id id
 
-        await queuer_call.set_session @session._id
         await queuer_call.set_reference @session.reference
         queuer_call
 
@@ -463,6 +461,5 @@ Off-hook agent
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         call = await agent.accept_offhook uuid
         return unless call?
-        await call.set_session @session._id
         await @report {state:'queuer-offhook',source,fifo,tags}
         agent

@@ -15,10 +15,6 @@ The call UUID (managed by FreeSwitch).
 
       call_data.uuid = @call.uuid
 
-The session ID (managed by `tangible/middleware`).
-
-      call_data.session = @session._id
-
 A record of the (original, pre-processing) source and destination.
 
       call_data.source = @source

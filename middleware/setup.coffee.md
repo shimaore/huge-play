@@ -302,7 +302,6 @@ This version is meant to be used in-call.
           report.endpoint ?= await @reference.get_endpoint()
 
           report.call = @call.uuid
-          report.session = @session._id
           report.reference = @session.reference
           report.report_type = 'call'
 
