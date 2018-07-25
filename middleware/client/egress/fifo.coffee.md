@@ -32,49 +32,85 @@
 
         unless events
           @debug.dev 'No `events`, cannot spy'
+          @action 'hangup'
+          return
 
 Which is a-leg or b-leg still needs to be confirmed, I have some suspicion this is wrong for some scenarios.
 
-        ours_is_aleg = =>
+        agent_is_aleg = =>
           await @set
             eavesdrop_bridge_aleg: true
             eavesdrop_bridge_bleg: true
             eavesdrop_whisper_aleg: monitor
             eavesdrop_whisper_bleg: false
 
-        ours_is_bleg = =>
+        agent_is_bleg = =>
           await @set
             eavesdrop_bridge_aleg: true
             eavesdrop_bridge_bleg: true
             eavesdrop_whisper_aleg: false
             eavesdrop_whisper_bleg: monitor
 
+        no_whisper = =>
+          await @set
+            eavesdrop_bridge_aleg: true
+            eavesdrop_bridge_bleg: true
+            eavesdrop_whisper_aleg: false
+            eavesdrop_whisper_bleg: false
+
         eavesdrop = (uuid,notify) =>
           await @cfg.api "uuid_broadcast #{uuid} gentones::%(125,0,450)" if notify and monitor
           await @action 'eavesdrop', uuid
 
+`call` is the agent's on-hook call
+
         events.on [key,'onhook','bridge'], foot (call) =>
           uuid = await call.get_id()
-          await ours_is_aleg()
+          await agent_is_aleg()
           await eavesdrop uuid, true
+
+`call` is the agent's off-hook call
 
         events.on [key,'offhook','bridge'], foot (call) =>
           uuid = await call.get_id()
-          await ours_is_aleg()
+          await agent_is_aleg()
           await eavesdrop uuid, true
+
+`call` is the agent's remote-call
 
         events.on [key,'remote','bridge'], foot (call,disposition,our_call) =>
           uuid = await our_call.get_id()
-          await ours_is_aleg()
+          await agent_is_bleg()
+          # uuid = await call.get_id()
+          # await no_whisper()
           await eavesdrop uuid, true
+
+`call` is another (outside-of-call-center) call
 
         events.on [key,'external','bridge'], foot (call,disposition,our_call) =>
           uuid = await our_call.get_id()
-          await ours_is_aleg()
+          await agent_is_bleg()
+          # uuid = await call.get_id()
+          # await no_whisper()
           await eavesdrop uuid, true
 
         await @action 'answer'
         await @sleep 200
+
+        agent = new @cfg.queuer.Agent key
+        call = await agent.get_onhook_call()
+        if call?
+          uuid = await call.get_id()
+          await agent_is_bleg()
+          await eavesdrop uuid, true
+          return
+
+        call = await agent.get_offhook_call()
+        if call?
+          uuid = await call.get_id()
+          await agent_is_aleg()
+          await eavesdrop uuid, true
+          return
 
         return
 
