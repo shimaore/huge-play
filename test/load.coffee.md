@@ -72,10 +72,6 @@
           await S.server_pre.call ctx, ctx
           await M.server_pre?.call ctx, ctx
 
-          cfg.statistics =
-            on: ->
-            emit: ->
-            add: ->
           socket =
             on: ->
             emit: ->
@@ -104,9 +100,6 @@
               get_in: -> Promise.resolve []
               get_destination: -> Promise.resolve null
               get_call_options: -> Promise.resolve {}
-          call_ctx.cfg.statistics ?=  # thinkable-ducks/server
-            emit: ->
-            add: ->
 
           C = require '../middleware/cdr'
 
