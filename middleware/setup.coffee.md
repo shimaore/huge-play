@@ -504,6 +504,8 @@ Set the account so that if we redirect to an external number the egress module c
             agent: @session?.agent
             timezone: @session?.timezone
             groups: @session?.number?.allowed_groups
+            source: @source
+            destination: @destination
             call_start: Date().toJSON()
             recording_start: Date().toJSON()
 

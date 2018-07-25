@@ -25,6 +25,8 @@
       still_running = (name) ->
         (await count name) is not null
 
+Send NOTIFY messages back anytime the conference is updated.
+
       notify = (domain,number) ->
         return unless domain? and number?
 
@@ -70,7 +72,7 @@
 
     @init = ->
 
-      @cfg.statistics.on 'conference:record', (name) =>
+      @cfg.record_conference = (name,key,source) =>
 
         {still_running} = macros @cfg
 
@@ -92,11 +94,12 @@ Get a URL for recording
 
         metadata = {
           name
+          source
           conference_start: Date().toJSON()
           recording_start: Date().toJSON()
         }
 
-        uri = await @cfg.recording_uri name, metadata
+        uri = await @cfg.recording_uri key, metadata
         await @cfg.api "conference #{name} recording start #{uri}"
         await @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
         last_uri = uri
@@ -104,7 +107,7 @@ Get a URL for recording
         while await still_running name
           await sleep 29*minutes
           metadata.recording_start = Date().toJSON()
-          uri = await @cfg.recording_uri name, metadata
+          uri = await @cfg.recording_uri key, metadata
           await @cfg.api "conference #{name} recording start #{uri}"
           await @cfg.api "conference #{name} play tone_stream://%(125,0,400);%(125,0,450);%(125,0,400)"
           await sleep  1*minutes
@@ -112,6 +115,8 @@ Get a URL for recording
           last_uri = uri
 
         return
+
+      return
 
     @include = ->
 
@@ -129,6 +134,7 @@ Get a URL for recording
       if $ = conf_name.match /^(\S+)-conf-(\d+)$/
         domain = $[1]
         number = $[2]
+        key = "conference:#{domain}:#{number}"
 
       is_remote = await @cfg.is_remote conf_name, @session.local_server
 
@@ -156,7 +162,7 @@ Conference is handled locally
 
       @debug 'Conference is local'
 
-      @notify state:'conference', name:conf_name
+      @notify state:'conference', name:conf_name, key:key
 
       conf_uri = (id,name) =>
         @prompt.uri 'prov', 'prov', id, name
@@ -263,7 +269,7 @@ Log into the conference
 
         @debug 'conference'
         await @reference.set_number_domain @session.number_domain
-        @notify state: 'conference:started', conference: conf_name
+        @notify state: 'conference:started', name:conf_name, key:key
 
         notify domain, number
 
@@ -271,7 +277,7 @@ Log into the conference
 
         if @session.conf.record
           start_recording = =>
-            @cfg.statistics.emit 'conference:record', conf_name
+            @cfg.record_conference conf_name, key, @source
           setTimeout start_recording, 1000
 
         await @action 'conference', "#{conf_name}++flags{}"
