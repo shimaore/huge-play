@@ -361,9 +361,6 @@ Agent commands (only applicable in `login_ornaments`)
         await @agent.add_tag "queue:#{queue}"
         true
 
-      agent_broadcast: ->
-        await @agent.add_tag "broadcast"
-        true
       agent_has_skill: (skill) ->
         @agent.has_tag "skill:#{skill}"
 
