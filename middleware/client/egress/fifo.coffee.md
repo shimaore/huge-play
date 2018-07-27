@@ -120,6 +120,7 @@ The destination matched.
       ACTION_QUEUER_LOGIN = '811'
       ACTION_QUEUER_LEAVE = '812'
       ACTION_QUEUER_OFFHOOK = '813'
+      ACTION_QUEUER_LOGIN_SCRIPT = '814'
       ACTION_FIFO_VOICEMAIL = '817'
       ACTION_QUEUER_LOGOUT = '819'
       ACTION_CONF_ROUTE = '82'
@@ -277,6 +278,18 @@ Monitor: call to listen (with notification beep), and whisper
           await @sleep 2000
           @session.timezone ?= @session.number.timezone
           await @queuer_login agent, agent_name, fifo, agent_tags(), @session.number.login_ornaments
+          await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
+          await @action 'hangup'
+          @direction 'completed'
+          return
+
+        when ACTION_QUEUER_LOGIN_SCRIPT
+          @debug 'Queuer: log in with number in script'
+          await @action 'answer'
+          await @sleep 2000
+          @session.timezone ?= @session.number.timezone
+          @destination = number
+          await @queuer_login agent, agent_name, null, agent_tags(), @session.number.login_ornaments
           await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           await @action 'hangup'
           @direction 'completed'
