@@ -299,6 +299,9 @@ start: '18:00', end: '08:00'
         else
           start <= now or now <= end
 
+More call commands, mostly call-center
+--------------------------------------
+
       user_tag: (tag) ->
         @user_tag tag
         @notify state:'menu', user_tag:tag
@@ -339,6 +342,15 @@ start: '18:00', end: '08:00'
       has_user_tag: (tag) ->
         @has_user_tag tag
 
+      has_skill: (skill) ->
+        @has_tag "skill:#{skill}"
+
+      has_queue: (queue) ->
+        @has_tag "queue:#{queue}"
+
+Agent commands (only applicable in `login_ornaments`)
+--------------
+
       agent_skill: (skill) ->
         return false unless typeof skill is 'string'
         await @agent.add_tag "skill:#{skill}"
@@ -352,6 +364,11 @@ start: '18:00', end: '08:00'
       agent_broadcast: ->
         await @agent.add_tag "broadcast"
         true
+      agent_has_skill: (skill) ->
+        @agent.has_tag "skill:#{skill}"
+
+      agent_has_queue: (queue) ->
+        @agent.has_tag "queue:#{queue}"
 
 Calendars
 
