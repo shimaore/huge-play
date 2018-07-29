@@ -1,6 +1,6 @@
 {
   "name": "huge-play",
-  "version": "36.0.3",
+  "version": "36.1.2",
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublishOnly": "npm run build",
@@ -20,11 +20,11 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^20.0.1",
+    "black-metal": "^20.0.4",
     "bumpy-lawyer": "^2.7.2",
     "date-holidays": "^1.2.5",
     "esl": "^9.0.1",
-    "flat-ornament": "^4.0.1",
+    "flat-ornament": "^4.1.0",
     "ioredis": "^3.2.2",
     "lru-cache": "^4.1.3",
     "moment": "^2.22.2",

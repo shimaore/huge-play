@@ -229,22 +229,35 @@ Preconditions
 -------------
 
 These are best used after `post` is used but before `send` is used.
+These can also be used (in more recent script languages) to retrieve the named value.
 
       source: (source) ->
         @debug 'source', source
-        pattern source, @source
+        if source?
+          pattern source, @source
+        else
+          @source
 
       source_e164: (source) ->
         @debug 'source_e164', source
-        pattern source, @session.ccnq_from_e164
+        if source?
+          pattern source, @session.ccnq_from_e164
+        else
+          @session.ccnq_from_e164
 
       destination: (destination) ->
         @debug 'destination', destination
-        pattern destination, @destination
+        if destination?
+          pattern destination, @destination
+        else
+          @destination
 
       destination_e164: (destination) ->
         @debug 'destination_e164', destination
-        pattern destination, @session.ccnq_to_e164
+        if destination?
+          pattern destination, @session.ccnq_to_e164
+        else
+          @session.ccnq_to_e164
 
 So, time conditions.
 Maybe we first need to figure out in what timezone we are working.
@@ -257,7 +270,11 @@ Weekday condition
         now = Moment()
         if @session.timezone?
           now = now.tz @session.timezone
-        now.day() in days
+        now = now.day()
+        if days.length > 0
+          now in days
+        else
+          now
 
 Time condition
 
@@ -269,6 +286,9 @@ Time condition
 
         now = now.format 'HH:mm'
 
+        unless start? and end?
+          return now
+
 start: '09:00', end: '17:00'
 
         if start <= end
@@ -278,6 +298,9 @@ start: '18:00', end: '08:00'
 
         else
           start <= now or now <= end
+
+More call commands, mostly call-center
+--------------------------------------
 
       user_tag: (tag) ->
         @user_tag tag
@@ -319,6 +342,15 @@ start: '18:00', end: '08:00'
       has_user_tag: (tag) ->
         @has_user_tag tag
 
+      has_skill: (skill) ->
+        @has_tag "skill:#{skill}"
+
+      has_queue: (queue) ->
+        @has_tag "queue:#{queue}"
+
+Agent commands (only applicable in `login_ornaments`)
+--------------
+
       agent_skill: (skill) ->
         return false unless typeof skill is 'string'
         await @agent.add_tag "skill:#{skill}"
@@ -329,9 +361,11 @@ start: '18:00', end: '08:00'
         await @agent.add_tag "queue:#{queue}"
         true
 
-      agent_broadcast: ->
-        await @agent.add_tag "broadcast"
-        true
+      agent_has_skill: (skill) ->
+        @agent.has_tag "skill:#{skill}"
+
+      agent_has_queue: (queue) ->
+        @agent.has_tag "queue:#{queue}"
 
 Calendars
 
