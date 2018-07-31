@@ -89,7 +89,7 @@ HugePlayCall
           notification = await @build_notification data
 
           if notification.domain?
-            cfg.rr.notify "domain:#{notification.domain}", "call:#{notification.id}", notification
+            cfg.rr.notify "number_domain:#{notification.domain}", "call:#{notification.id}", notification
 
           debug 'call.notify: send', notification
           notification
