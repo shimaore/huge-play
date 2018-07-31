@@ -64,6 +64,6 @@ The dialplan and country (and other parameters) might also be available in the `
       @report
         state:'local-number'
         number: @session.e164_number.local_number
-        number_domain: @session.number_domain_data._id
+        number_domain: number_domain
       @debug 'OK'
       return
