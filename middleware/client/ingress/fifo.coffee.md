@@ -36,6 +36,8 @@ In this case the conference name is the number-domain and the conference name.
         number = m[2]
 
         @session.number_domain = number_domain
+        await @reference.set_number_domain number_domain
+
         @session.number_domain_data = await @cfg.prov
           .get "number_domain:#{number_domain}"
           .catch (error) =>
@@ -55,7 +57,6 @@ We won't be able to route if there is no number-domain data.
       unless @session.number_domain_data?
         @debug.dev 'Missing number_domain_data'
         return
-      await @reference.set_number_domain number_domain
 
 * doc.global_number.local_number To route to a FIFO, this field must contain `fifo-<fifo-number>@<number-domain>`. The fifo-number is typically between 0 and 9; it represents an index in doc.number_domain.fifos.
 * doc.number_domain.fifos (array) An array describing the FIFOs in this number-domain, indexed on the fifo-number. Typically the fifo-number is from 0 to 9. See session.fifo for a description of the contents.
@@ -105,7 +106,6 @@ These are also found in middleware/client/egress/fifo.
         state: type
         name: item.full_name
         number: number ? null
-        number_domain: @session.number_domain_data?._id ? null
 
       @debug "Using #{type} #{number}", item
       return

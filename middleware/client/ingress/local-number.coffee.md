@@ -41,13 +41,13 @@ The dialplan and country (and other parameters) might also be available in the `
       [number,number_domain] = @session.e164_number.local_number.split '@'
       @destination = number
       @session.number_domain = number_domain
+      await @reference.set_number_domain number_domain
 
       @session.number_domain_data = await @cfg.prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
           @debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
-      await @reference.set_number_domain number_domain
       await @user_tags @session.number_domain_data.tags
 
 * doc.number_domain.dialplan (optional) dialplan used for ingress calls to this domain.
@@ -64,6 +64,5 @@ The dialplan and country (and other parameters) might also be available in the `
       @report
         state:'local-number'
         number: @session.e164_number.local_number
-        number_domain: number_domain
       @debug 'OK'
       return
