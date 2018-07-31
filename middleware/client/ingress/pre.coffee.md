@@ -69,6 +69,6 @@ The global number might contain additional FreeSwitch variables. Load these extr
         @session.number_domain = @session.e164_number.voicemail_number_domain
         @direction 'voicemail'
 
-      @notify state:'ingress', e164_number: @session.e164_number._id
+      @notify state:'ingress', e164_number: @session.ccnq_to_e164
       @debug 'OK'
       return
