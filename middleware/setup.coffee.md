@@ -299,6 +299,10 @@ This version is meant to be used in-call.
           report.endpoint ?= @session.endpoint?.endpoint
           report.endpoint ?= @session.number?.endpoint
           report.endpoint ?= @session.endpoint_name
+
+_This_ is highly ambiguous since it could be _any_ endpoint along the chaing of forwardings, transfers, etc.
+We have no real way to know, though, and removing it (for example in middleware/client/ingress/pre) could lead to issues.
+
           report.endpoint ?= await @reference.get_endpoint()
 
           report.call = @call.uuid
