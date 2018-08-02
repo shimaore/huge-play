@@ -67,6 +67,7 @@ The global number might contain additional FreeSwitch variables. Load these extr
 * doc.global_number.voicemail_number_domain (string) the number-domain for access to voicemail (from an external number).
 
         @session.number_domain = @session.e164_number.voicemail_number_domain
+        await @reference.set_number_domain @session.number_domain
         @direction 'voicemail'
 
       @notify state:'ingress', e164_number: @session.ccnq_to_e164
