@@ -72,7 +72,13 @@ HugePlayCall
             remote_number: await @get_remote_number().catch -> null
             alert_info: await @get_alert_info().catch -> null
             reference: await @get_reference().catch -> null
-            answered: await @answered().catch -> null
+            answered: switch await @answered().catch -> null
+              when 'true', true
+                true
+              when 'false', false
+                false
+              else
+                null
             presenting: await @count().catch -> null
             tags: await @tags().catch -> []
 
