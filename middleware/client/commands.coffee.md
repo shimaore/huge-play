@@ -223,7 +223,7 @@ Other actions must return `true`.
         true
 
       record: (name) ->
-        @record_call name
+        @record_call "#{@session.number_domain_data._id}:#{name}"
 
 Preconditions
 -------------
