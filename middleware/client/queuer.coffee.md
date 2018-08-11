@@ -4,6 +4,10 @@
     Moment = require 'moment-timezone'
     {SUBSCRIBE,UPDATE} = require 'red-rings/operations'
 
+    Solid = require 'solid-gun'
+    make_id = ->
+      Solid.time() + Solid.uniqueness()
+
     Queuer = require 'black-metal/queuer'
     request = require 'superagent'
 
