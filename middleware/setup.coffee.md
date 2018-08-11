@@ -263,7 +263,7 @@ Context Extension
             setTimeout resolve, timeout
 
         direction: (direction) ->
-          @session.direction = direction
+          @session?.direction = direction
           @emit 'direction', direction
           @report {event:'direction', direction}
 
@@ -364,14 +364,14 @@ Real-time notification (e.g. to show on a web panel).
         respond: (response) ->
           @statistics?.add ['immediate-response',response]
           @notify state: 'immediate-response', response: response
-          @session.first_response_was ?= response
+          @session?.first_response_was ?= response
 
 Prevent extraneous processing of this call.
 
           @direction 'responded'
 
-          if @session.alternate_response?
-            @session.alternate_response response
+          if @session?.alternate_response?
+            @session?.alternate_response response
           else
             ctx.action 'respond', response
 
