@@ -84,8 +84,8 @@ Event parameters:
 - `callee_num` (optional)
 - `call_timeout` (optional)
 
-      place_call = foot (data) ->
-        {endpoint,caller,_id} = data
+      place_call = foot (_id,data) ->
+        {endpoint,caller} = data
 
         data.callee_name ?= pkg.name
         data.callee_num ?= data.destination
@@ -203,8 +203,8 @@ Parameters:
 - `conference` (was `name`)
 - `destination`
 
-      call_to_conference = foot (data) ->
-        {endpoint,destination,_id} = data
+      call_to_conference = foot (_id,data) ->
+        {endpoint,destination} = data
         debug 'Received call-to-conference', data, local_server
 
         name = data.conference ? data.name
@@ -289,7 +289,7 @@ The `body` should contains:
 - `destination` (string)
 - `tags` (array)
 
-      create_queuer_call = foot (body) ->
+      create_queuer_call = foot (_id,body) ->
         {queuer} = cfg
         {Agent} = queuer
 
@@ -311,7 +311,7 @@ The `body` should contains:
 Note: `create_egress_call` does not use the `_id` provided (because the same call might be submitted to multiple agents, so it needs to generate a new one every time).
 So we're electing based on the complete `call:…` reference, and there's no need to rewrite the `_id` field.
 
-        return unless await elected body._id
+        return unless await elected _id
 
         await queuer.create_egress_call_for agent, body
         return
@@ -337,7 +337,7 @@ So we're electing based on the complete `call:…` reference, and there's no nee
 - `tags` (array)
 
           when msg.doc.agent?
-            H.create_queuer_call msg.doc
+            H.create_queuer_call msg.id, msg.doc
 
 `call_to_conference`
 - `_id` ("call:<xref>")
@@ -346,7 +346,7 @@ So we're electing based on the complete `call:…` reference, and there's no nee
 - `destination`
 
           when msg.doc.conference?
-            H.call_to_conference msg.doc
+            H.call_to_conference msg.id, msg.doc
 
 `place_call`
 - `_id` ("call:<xref>")
@@ -358,7 +358,7 @@ So we're electing based on the complete `call:…` reference, and there's no nee
 - `call_timeout` (optional)
 
           when msg.doc.endpoint?
-            H.place_call msg.doc
+            H.place_call msg.id, msg.doc
 
       return
 
