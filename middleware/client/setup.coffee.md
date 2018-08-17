@@ -46,7 +46,8 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       unless C = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
         @debug.dev 'Malformed context', @session.context
-        return @respond '500 Malformed context'
+        await @respond '500 Malformed context'
+        return
 
       @session.profile = C[1]
       @session.reference ?= C[3]
