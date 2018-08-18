@@ -458,11 +458,17 @@ Set the account so that if we redirect to an external number the egress module c
         local_redis: @cfg.local_redis_client
 
         tag: (tag) ->
+          unless @reference?
+            debug.dev 'tag: missing @reference', tag
+            return
           if tag?
             await @reference.add_tag tag
             @report {event:'tag', tag}
 
         user_tag: (tag) ->
+          unless @reference?
+            debug.dev 'user_tag: missing @reference', tag
+            return
           if tag?
             await @reference.add_tag "user-tag:#{tag}"
             @report {event:'user-tag', tag}
@@ -473,18 +479,24 @@ Set the account so that if we redirect to an external number the egress module c
             await @user_tag tag
 
         has_tag: (tag) ->
-          tag? and await @reference.has_tag tag
+          tag? and await @reference?.has_tag tag
 
         has_user_tag: (tag) ->
           tag? and await @has_tag "user-tag:#{tag}"
 
         clear_call_center_tags: ->
+          unless @reference?
+            debug.dev 'clear_call_center_tags: missing @reference'
+            return
           tags = await @reference.tags()
           for tag in tags when tag is 'broadcast' or tag.match /^(skill|priority|queue):/
             await @reference.del_tag tag
           null
 
         clear_user_tags: ->
+          unless @reference?
+            debug.dev 'clear_user_tags: missing @reference'
+            return
           tags = await @reference.tags()
           for tag in tags when tag.match /^user-tag:/
             await @reference.del_tag tag
