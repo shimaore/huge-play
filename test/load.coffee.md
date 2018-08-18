@@ -72,14 +72,7 @@
           await S.server_pre.call ctx, ctx
           await M.server_pre?.call ctx, ctx
 
-          cfg.statistics =
-            on: ->
-            emit: ->
-            add: ->
-          socket =
-            on: ->
-            emit: ->
-          ctx = {cfg,socket}
+          ctx = {cfg}
 
           call_ctx =
             cfg: ctx.cfg # useful-wind/router

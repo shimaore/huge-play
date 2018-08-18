@@ -20,8 +20,6 @@
         prov:
           get: (id) ->
             return Promise.resolve docs[id]
-        statistics:
-          emit: ->
         Reference: Foo
 
       docs =

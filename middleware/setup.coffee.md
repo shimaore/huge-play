@@ -256,8 +256,6 @@ Context Extension
           @reference = null
           return
 
-        statistics: @cfg.statistics
-
         sleep: (timeout) ->
           new Promise (resolve) ->
             setTimeout resolve, timeout
@@ -272,7 +270,7 @@ Typically `@report({state,…})` for calls state changes / progress, `@report({e
 This version is meant to be used in-call.
 
         report: (report) ->
-          unless @call? and @session?
+          unless @call? and @session? and @reference?
             debug.dev 'report: improper environment'
             return false
 
@@ -308,8 +306,6 @@ We have no real way to know, though, and removing it (for example in middleware/
           report.call = @call.uuid
           report.reference = @session.reference
           report.report_type = 'call'
-
-          @cfg.statistics.emit 'report', report
 
           if report.agent?
             @cfg.rr.notify "agent:#{report.agent}", "call:#{report.call}", report
@@ -362,7 +358,6 @@ Real-time notification (e.g. to show on a web panel).
           return
 
         respond: (response) ->
-          @statistics?.add ['immediate-response',response]
           @notify state: 'immediate-response', response: response
           @session?.first_response_was ?= response
 
