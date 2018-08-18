@@ -69,7 +69,10 @@ module.exports = renderable (cfg) ->
       configuration name:'event_socket.conf', ->
         settings ->
           param name:'nat-map', value:false
-          param name:'listen-ip', value:'127.0.0.1'
+          # Inbound-Socket IP
+          # cfg.socket_ip (string) IP to bind to for the event socket (defaults to `127.0.0.1`)
+          socket_ip = cfg.socket_ip ? '127.0.0.1'
+          param name:'listen-ip', value: socket_ip
           # Inbound-Socket port
           # cfg.socket_port (integer) Port for the event socket for FreeSwitch (defaults to 5722)
           socket_port = cfg.socket_port ? 5722
