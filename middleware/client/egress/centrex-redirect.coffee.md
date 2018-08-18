@@ -1,6 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:centrex-redirect"
-    {debug,hand,heal} = (require 'tangible') @name
+    {debug,heal} = (require 'tangible') @name
 
     Unique_ID = 'Unique-ID'
 
@@ -21,7 +21,7 @@ Transfer Workaround
         @report {state:'centrex-redirect', server}
 
         uri = "<sip:#{@destination}@#{server};xref=#{@session.reference}>"
-        @debug 'Handling is remote', uri
+        debug 'Handling is remote', uri
 
 Send a REFER to a call which is already answered. (Typically, coming from `exultant-songs`.)
 
@@ -35,7 +35,7 @@ send a 302 back to OpenSIPS; OpenSIPS interprets the 302 and submits to the remo
         else
           res = await @action 'redirect', uri
 
-        @debug 'Redirection returned', uri, res
+        debug 'Redirection returned', uri, res
 
 Make sure there is no further processing.
 
@@ -45,7 +45,7 @@ Make sure there is no further processing.
 Centrex Handling
 ----------------
 
-      @debug 'Handling is local'
+      debug 'Handling is local'
 
 Eavesdrop registration
 ----------------------
@@ -59,7 +59,7 @@ Eavesdrop registration
 
       unless @call.closed
 
-        @debug 'Set outbound eavesdrop', eavesdrop_key
+        debug 'Set outbound eavesdrop', eavesdrop_key
         await @local_redis?.setex eavesdrop_key, eavesdrop_timeout, @call.uuid
 
         debug 'CHANNEL_PRESENT', key, @call.uuid
@@ -73,4 +73,4 @@ Bind the agent to the call.
 
         @report event:'start-of-call', agent:key, call:@call.uuid
 
-      @debug 'Ready'
+      debug 'Ready'

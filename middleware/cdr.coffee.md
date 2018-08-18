@@ -33,7 +33,7 @@ Replacement for `esl/src/esl:auto_cleanup`'s `freeswitch_linger` handler.
       await @call.linger()
 
       unless @notify?
-        @debug.dev 'Error: Improper environment'
+        debug.dev 'Error: Improper environment'
         return
 
       await @call.event_json 'CHANNEL_HANGUP_COMPLETE'
@@ -104,5 +104,5 @@ Update the (existing) call data
         debug "CDR: Channel Hangup Complete", cdr_report
         return
 
-      @debug 'Ready'
+      debug 'Ready'
       return

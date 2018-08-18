@@ -42,10 +42,10 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>>> New call', @session.context, @data
+      debug '>>>> New call', @session.context, @data
 
       unless C = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
-        @debug.dev 'Malformed context', @session.context
+        debug.dev 'Malformed context', @session.context
         await @respond '500 Malformed context'
         return
 
@@ -140,13 +140,13 @@ variable_pre_transfer_caller_id_number
         sip_referred_by = @req.variable 'sip_h_Referred-By'
 
         if sip_refer_to? and sip_referred_by?
-          @debug 'source', @source
+          debug 'source', @source
           m = sip_refer_to.match /sip:(\d+)@/
-          @debug 'refer_to', m[1]
+          debug 'refer_to', m[1]
           @session.refer_to = m[1]
           @destination = m[1]
           m = sip_referred_by.match /sip:(\d+@[^;]+)/
-          @debug 'referred_by', m[1]
+          debug 'referred_by', m[1]
           referred_by = m[1]
           @session.referred_by = m[1]
           @session.wait_for_aleg_ack = false      # in huge-play
@@ -179,7 +179,7 @@ Note that client-side the fields are called `profiles` and are stored in the JSO
         @session.local_server = "#{@cfg.host}:#{p.ingress_sip_port ? p.sip_port}"
         @session.client_server = "#{@cfg.host}:#{p.egress_sip_port ? p.sip_port+10000}"
       else
-        @debug.dev 'Missing profile', @session.profile
+        debug.dev 'Missing profile', @session.profile
 
 Set FreeSwitch variables
 ------------------------
@@ -207,7 +207,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
         sip_invite_contact_params: sip_params
         sip_invite_from_params: sip_params
 
-      @debug 'Ready',
+      debug 'Ready',
         reference: @session.reference
         call: @call.uuid
         session: @session._id

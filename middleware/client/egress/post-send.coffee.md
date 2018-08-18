@@ -1,10 +1,11 @@
     @name = "huge-play:middleware:client:egress:post-send"
+    debug = (require 'tangible') @name
 
     @include = ->
 
       return unless @session?.direction is 'egress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
 Make sure the call isn't processed any further.
 
@@ -12,6 +13,6 @@ Make sure the call isn't processed any further.
 
 The only post-call action currently is to hangup the call.
 
-      @debug 'Hangup'
+      debug 'Hangup'
       @notify state: 'hangup'
       await @action 'hangup'

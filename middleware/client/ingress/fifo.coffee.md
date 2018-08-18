@@ -1,5 +1,6 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:ingress:fifo"
+    debug = (require 'tangible') @name
 
     @description = '''
       Maps an ingress call (which already went through the `local-number` middleware) to a FIFO/conference/menu.
@@ -12,7 +13,7 @@
         return null unless doc.music?
         @prompt.uri 'prov', 'prov', doc._id, doc.music
 
-      @debug "Testing for FIFO/conference/menu in #{@destination}"
+      debug "Testing for FIFO/conference/menu in #{@destination}"
 
       m = @destination.match /^(fifo|conf|menu|localconf)-(.+)$/
       return unless m?
@@ -28,7 +29,7 @@ In this case the conference name is the number-domain and the conference name.
         conf_name = number
         m = conf_name.match /^(.+)-([^-]+)$/
         unless m?
-          @debug.dev "localconf #{m} is not properly formatted"
+          debug.dev "localconf #{m} is not properly formatted"
           return
 
         type = 'conf'
@@ -41,7 +42,7 @@ In this case the conference name is the number-domain and the conference name.
         @session.number_domain_data = await @cfg.prov
           .get "number_domain:#{number_domain}"
           .catch (error) =>
-            @debug.dev "number_domain #{number_domain}: #{error}"
+            debug.dev "number_domain #{number_domain}: #{error}"
             null
         await @user_tags @session.number_domain_data?.tags
 
@@ -55,7 +56,7 @@ In this case the conference name is the number-domain and the conference name.
 We won't be able to route if there is no number-domain data.
 
       unless @session.number_domain_data?
-        @debug.dev 'Missing number_domain_data'
+        debug.dev 'Missing number_domain_data'
         return
 
 * doc.global_number.local_number To route to a FIFO, this field must contain `fifo-<fifo-number>@<number-domain>`. The fifo-number is typically between 0 and 9; it represents an index in doc.number_domain.fifos.
@@ -76,7 +77,7 @@ We won't be able to route if there is no number-domain data.
           null
 
       unless items?
-        @debug.csr "Number domain has no data for #{type}."
+        debug.csr "Number domain has no data for #{type}."
         return
 
 Move handling to `fifo` middleware.
@@ -85,12 +86,12 @@ Move handling to `fifo` middleware.
 * session.fifo (object) The element of doc.number_domain.fifos describing the current FIFO in use.
 
       unless items.hasOwnProperty number
-        @debug.dev "No property #{number} in #{type} of #{@session.number_domain}."
+        debug.dev "No property #{number} in #{type} of #{@session.number_domain}."
         return
 
       item = items[number]
       unless item?
-        @debug.csr "Number domain has no data #{number} for #{type}."
+        debug.csr "Number domain has no data #{number} for #{type}."
         return
 
 These are also found in middleware/client/egress/fifo.
@@ -107,5 +108,5 @@ These are also found in middleware/client/egress/fifo.
         name: item.full_name
         number: number ? null
 
-      @debug "Using #{type} #{number}", item
+      debug "Using #{type} #{number}", item
       return

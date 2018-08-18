@@ -22,7 +22,7 @@ Record using the given file or uri.
 https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_record
 
       prompt.record = (file,time_limit = 300) =>
-        @debug 'record', {file,time_limit}
+        debug 'record', {file,time_limit}
         silence_thresh = 20
         silence_hits = 3
         await @action 'set', 'playback_terminators=any'
@@ -41,7 +41,7 @@ The documentation says:
 - playback_terminator_used
 
         duration = body.variable_record_seconds
-        @debug 'record', {duration}
+        debug 'record', {duration}
         duration
 
 `play_and_get_digits`
@@ -62,7 +62,7 @@ Required options:
 https://wiki.freeswitch.org/wiki/Misc._Dialplan_Tools_play_and_get_digits
 
       prompt.play_and_get_digits = (o) =>
-        @debug 'play_and_get_digits', o
+        debug 'play_and_get_digits', o
         @action 'play_and_get_digits', [
           o.min
           o.max
@@ -149,13 +149,13 @@ Promise resolves into the new PIN or `null`.
         prompt.get_pin o
 
       prompt.goodbye = =>
-        @debug 'goodbye'
+        debug 'goodbye'
         await prompt.phrase 'voicemail_goodbye'
         await @action 'hangup'
-        @debug 'goodbye done'
+        debug 'goodbye done'
 
       prompt.phrase = (phrase) =>
-        @debug 'phrase'
+        debug 'phrase'
         await @action 'phrase', phrase
 
       prompt.error = (id) ->

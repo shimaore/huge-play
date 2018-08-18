@@ -26,10 +26,10 @@ Create the proper profiles and ACLs
           await @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
-              @debug.ops "Host #{@cfg.host}: #{error}"
+              debug.ops "Host #{@cfg.host}: #{error}"
               {}
         else
-          @debug.dev 'No cfg.host'
+          debug.dev 'No cfg.host'
           {}
 
       @cfg.sip_profiles ?= @cfg.host_data.sip_profiles ? {}
@@ -60,11 +60,11 @@ Load the host record so that we can retrieve the `sip_profiles` at runtime.
           await @cfg.prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
-              # @debug.ops "Host #{@cfg.host}: #{error}"
+              # debug.ops "Host #{@cfg.host}: #{error}"
               debug "Host #{@cfg.host}: #{error}"
               {}
         else
-          # @debug.dev 'No cfg.host'
+          # debug.dev 'No cfg.host'
           debug 'No cfg.host'
           {}
 
@@ -87,10 +87,10 @@ The channel-context is set (for calls originating from sofia-sip) by the `contex
 
       @session.context ?= @data['Channel-Context']
 
-      @debug '>>>> New call', @session.context, @data
+      debug '>>>> New call', @session.context, @data
 
       unless C = @session.context?.match /^(\S+)-(ingress|egress|transfer|handled)(?:-(\S+))?$/
-        @debug.dev 'Malformed context', @session.context
+        debug.dev 'Malformed context', @session.context
         await @respond '500 Malformed context'
         return
 
@@ -195,7 +195,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
         sip_invite_contact_params: sip_params
         sip_invite_from_params: sip_params
 
-      @debug 'Ready',
+      debug 'Ready',
         reference: @session.reference
         call: @call.uuid
         context: @session.context

@@ -8,7 +8,6 @@
 
       it 'in calendars for a specific calendar', ->
         self =
-          debug: debug
           session:
             number_domain_data:
               calendars: [

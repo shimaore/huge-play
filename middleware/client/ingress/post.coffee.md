@@ -20,7 +20,7 @@ Call-Handler
 
       return unless @session?.direction is 'ingress'
 
-      @debug 'Ready',
+      debug 'Ready',
         dialplan: @session.dialplan
         country: @session.country
         destination: @destination
@@ -41,7 +41,7 @@ Retrieve number data.
       dst_number = await @validate_local_number()
 
       unless dst_number?
-        @debug 'Number not found'
+        debug 'Number not found'
         return
 
 Call rejection: reject anonymous caller
@@ -54,12 +54,12 @@ Call rejection: reject anonymous caller
       if @session.number.reject_anonymous
         if @session.caller_privacy
           if @session.number.reject_anonymous_to_voicemail
-            @debug 'reject anonymous: send to voicemail'
+            debug 'reject anonymous: send to voicemail'
             # @destination unchanged
             @direction 'voicemail'
             return
 
-          @debug 'reject anonymous'
+          debug 'reject anonymous'
           @notify state: 'reject-anonymous'
           # return @respond '603 Decline (anonymous)'
           await @action 'answer'
@@ -81,7 +81,7 @@ Call rejection: reject anonymous caller
         pid = @req.header 'P-Asserted-Identity'
         caller = if pid? then url.parse(pid).auth else @source
         list_id = "list:#{dst_number}@#{caller}"
-        @debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
+        debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
         list = await @cfg.prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
@@ -101,7 +101,7 @@ Call rejection: reject anonymous caller
 
 * doc.local_number.custom_ringback (boolean,string) If present, a custom ringback is played while the call is being presented to the destination user. The ringback file is an attachment located in `doc.voicemail_settings`; its name is the value of `custom_ringback`, or `ringback.wav` if `custom_ringback` is `true`. Default: plays system-wide `cfg.ringback`, or a code-assigned default ringback.
 
-      @debug 'ringback', @session.ringback, @session.number.custom_ringback
+      debug 'ringback', @session.ringback, @session.number.custom_ringback
 
       if @session.number.custom_ringback is true
         @session.ringback ?= [
@@ -179,23 +179,23 @@ Call Forward All
 
 * session.reason (string) The RFC5806 `reason` field for call forwarding.
 
-      @debug 'CFA?'
+      debug 'CFA?'
 
       @session.reason = 'unconditional' # RFC5806
       if @session.cfa_voicemail
-        @debug 'cfa:voicemail'
+        debug 'cfa:voicemail'
         @notify state: 'cfa:voicemail'
         @destination = @session.cfa_voicemail_number
         @direction 'voicemail'
         return
       if @session.cfa_number?
-        @debug 'cfa:forward'
+        debug 'cfa:forward'
         @notify state: 'cfa:forward'
         @session.destination = @session.cfa_number
         @direction 'forward'
         return
       if @session.cfa?
-        @debug 'cfa:fallback'
+        debug 'cfa:fallback'
         @notify state: 'cfa:fallback'
         @session.initial_destinations = [ to_uri: @session.cfa ]
         return
@@ -206,24 +206,24 @@ Do Not Disturb
 
 * local_number.dnd (boolean) If true, considers the line is in Do Not Disturb and use the CFB indications to handle the call.
 
-      @debug 'DND?'
+      debug 'DND?'
 
       if @session.number.dnd
         @session.reason = 'do-not-disturb' # RFC5806
         if @session.cfb_voicemail
-          @debug 'dnd:voicemail'
+          debug 'dnd:voicemail'
           @notify state: 'dnd:voicemail'
           @destination = @session.cfb_voicemail_number
           @direction 'voicemail'
           return
         if @session.cfb_number?
-          @debug 'dnd:forward'
+          debug 'dnd:forward'
           @notify state: 'dnd:forward'
           @session.destination = @session.cfb_number
           @direction 'forward'
           return
         if @session.cfb?
-          @debug 'dnd:fallback'
+          debug 'dnd:fallback'
           @notify state: 'dnd:fallback'
           @session.initial_destinations = [ to_uri: @session.cfb ]
           return
@@ -238,20 +238,20 @@ Ringback for other Call Forward
 * session.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 * doc.local_number.ring_ready (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
 
-      @debug 'Ringback'
+      debug 'Ringback'
 
       if @session.number.custom_ringback
         if @cfg.answer_for_ringback or @session.answer_for_ringback
-          @debug 'answer for ringback'
+          debug 'answer for ringback'
           await @action 'answer' # 200
           await @set sip_wait_for_aleg_ack:false
           @session.wait_for_aleg_ack = false
         else
-          @debug 'pre_answer for ringback'
+          debug 'pre_answer for ringback'
           await @action 'pre_answer' # 183
       else
         if @session.cf_active or @cfg.ready_for_ringback or @session.ready_for_ringback or @session.number.ring_ready
-          @debug 'cf_active'
+          debug 'cf_active'
           await @action 'ring_ready' # 180
 
 Build the destination FreeSwitch dialstring
@@ -392,7 +392,7 @@ Timeout
       if @session.number.record_ingress
         @record_call @session.number._id
 
-      @debug 'Done.'
+      debug 'Done.'
       return
 
 `set_params`
@@ -401,7 +401,7 @@ Timeout
 Non-call-handling-specific parameters (these are set on all calls independently of call treatment).
 
     set_params = ->
-      @debug 'set_params'
+      debug 'set_params'
 
       if @session.country? and @session.country of tones
         @session.ringback ?= tones[@session.country].ringback
@@ -414,7 +414,7 @@ Non-call-handling-specific parameters (these are set on all calls independently 
       @session.music ?= @cfg.music
       @session.music ?= default_music
 
-      @debug 'set_params',
+      debug 'set_params',
         ringback: @session.ringback
         music: @session.music
 
@@ -432,12 +432,12 @@ Maximal call duration
 
 Note: tough-rate uses `dialog_timeout` for this (which isn't on the wiki).
 
-      @debug 'schedule hangup'
+      debug 'schedule hangup'
       await @action 'sched_hangup', "+#{dlg_timeout}"
 
       @session.cdr_direction = @session.direction
 
-      @debug 'set parameters'
+      debug 'set parameters'
       await @set
 
 These are injected so that they may eventually show up in CDRs.
@@ -488,7 +488,7 @@ Codec negotiation with late-neg:
 
 * hdr.X-En Set on inbound calls to the endpoint of the local-number.
 
-      @debug 'export parameters'
+      debug 'export parameters'
       await @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
@@ -500,5 +500,5 @@ Music
 
         hold_music: @session.music
 
-      @debug 'set_params: done.'
+      debug 'set_params: done.'
       return

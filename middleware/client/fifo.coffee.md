@@ -18,7 +18,7 @@
 FIFO handling
 =============
 
-      @debug 'Starting'
+      debug 'Starting'
 
       return unless @session?.direction is 'fifo'
 
@@ -26,7 +26,7 @@ FIFO handling
         @prompt.uri 'prov', 'prov', id, name
 
       unless @session.fifo?
-        @debug 'Missing FIFO data'
+        debug 'Missing FIFO data'
         return
 
       fifo = @session.fifo
@@ -37,7 +37,7 @@ Build the full fifo name (used inside FreeSwitch) from the short fifo-name and t
 
 Ready to send, answer the call.
 
-      @debug 'Answer'
+      debug 'Answer'
       await @action 'answer'
       call_is_answered = true
 
@@ -53,7 +53,7 @@ Basically if the pre_answer we should wait; once the call is answered we won't b
 
       id = "number_domain:#{@session.number_domain}"
 
-      @debug 'Send to FIFO'
+      debug 'Send to FIFO'
       await @set
         continue_on_fail: true
 
@@ -132,13 +132,13 @@ desirable queues to a given call. (Adding more required skills would build a sma
         call_tags = ref_tags.filter (tag) -> tag.match /^queue:/
 
         if call_tags.length is 0
-          @debug 'no queues, no overflow'
+          debug 'no queues, no overflow'
           return
 
         ingress_pool = queuer.ingress_pool @session.number_domain
 
         attempt_overflow = (suffix) =>
-          @debug 'attempt overflow', call_tags, suffix
+          debug 'attempt overflow', call_tags, suffix
           if await ingress_pool.has call
             ok = false
             for tag in call_tags when await call.has_tag tag
@@ -207,13 +207,13 @@ Otherwise use the hunt-group behavior.
           leg_progress_timeout
           leg_timeout
         }]
-      @debug 'bridge', sofias
+      debug 'bridge', sofias
       res = await @action 'bridge', sofias.join ','
 
       data = res.body
       @session.bridge_data ?= []
       @session.bridge_data.push data
-      @debug 'Returned from FIFO', data
+      debug 'Returned from FIFO', data
 
 Marking missed calls
 --------------------
@@ -262,15 +262,15 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 
       xfer = data.variable_transfer_history
       if xfer?
-        @debug 'Call was transferred', xfer
+        debug 'Call was transferred', xfer
         return
 
       cause = data.variable_originate_disposition
 
-      @debug "FIFO returned with cause #{cause}"
+      debug "FIFO returned with cause #{cause}"
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS', 'NORMAL_CLEARING']
-        @debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
+        debug "Successful call when routing FIFO #{fifo.full_name} through #{sofias.join ','}"
         await @action 'hangup'
         return
 
@@ -281,19 +281,19 @@ In the case of `uuid_br`, the UUID at the end is the `Other-Leg-Unique-ID`.
 * session.fifo.user_database (string) If present, the call is redirected to this voicemail box if the FIFO failed (for example because no agents are available). Default: use session.fifo.voicemail if present.
 
       if fifo.voicemail?
-        @debug 'Send to voicemail'
+        debug 'Send to voicemail'
         @destination = fifo.voicemail
         @direction 'voicemail'
         await @validate_local_number()
         return
 
       if fifo.user_database?
-        @debug 'Send to voicemail (user-database)'
+        debug 'Send to voicemail (user-database)'
         @destination = 'user-database'
         @session.voicemail_user_database = fifo.user_database
         @session.voicemail_user_id = fifo.full_name
         @direction 'voicemail'
         return
 
-      @debug 'Hangup'
+      debug 'Hangup'
       await @action 'hangup'

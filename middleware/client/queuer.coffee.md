@@ -40,7 +40,7 @@
         port = p.egress_sip_port ? p.sip_port+10000
 
       unless cfg.local_redis_client? and prov? and profile? and host? and port? and api? and HugePlayReference?
-        @debug.dev 'Missing configuration'
+        debug.dev 'Missing configuration'
         return
 
 How long should we keep the state of a call after the last update?
@@ -408,7 +408,7 @@ Queuer Call object
       @queuer_call = (id) ->
         domain = @session.number_domain
         id ?= uuid
-        @debug 'queuer_call', id, domain
+        debug 'queuer_call', id, domain
         queuer_call = new Call id
         await queuer_call.set_domain domain
         await queuer_call.set_started_at()
@@ -426,7 +426,7 @@ On-hook agent
 -------------
 
       @queuer_login = (source,name,fifo,tags = [],ornaments) ->
-        @debug 'queuer_login', source
+        debug 'queuer_login', source
         agent = new Agent source
         await agent.set 'name', name
         await agent.add_tags tags
@@ -444,14 +444,14 @@ On-hook agent
         agent
 
       @queuer_leave = (source,fifo) ->
-        @debug 'queuer_leave', source
+        debug 'queuer_leave', source
         agent = new Agent source
         await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         await @report {state:'queuer-leave',source,fifo}
         agent
 
       @queuer_logout = (source,fifo) ->
-        @debug 'queuer_logout', source
+        debug 'queuer_logout', source
         agent = new Agent source
         await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         await agent.clear_tags()
@@ -463,7 +463,7 @@ Off-hook agent
 --------------
 
       @queuer_offhook = (source,name,{uuid},fifo,tags = []) ->
-        @debug 'queuer_offhook', source, uuid, fifo
+        debug 'queuer_offhook', source, uuid, fifo
         agent = new Agent source
         await agent.set 'name', name
         agent.clear_tags()

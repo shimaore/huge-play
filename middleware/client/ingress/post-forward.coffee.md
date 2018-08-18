@@ -14,7 +14,7 @@ All attributes set on the initial call are kept as much as possible.
       return unless @session?.direction is 'ingress'
       return unless @session.forwarding is true
 
-      @debug 'Ready',
+      debug 'Ready',
         dialplan: @session.dialplan
         country: @session.country
         destination: @destination
@@ -46,7 +46,7 @@ Build the destination FreeSwitch dialstring
       if @session.dev_logger
         await @reference.set_dev_logger true
 
-      @debug 'Done.'
+      debug 'Done.'
       return
 
 `set_params`
@@ -56,15 +56,15 @@ Most parameters have been set before the forwarding happened.
 We only tweak a few things for the actual destination endpoint.
 
     set_params = ->
-      @debug 'set_params'
+      debug 'set_params'
 
       dlg_timeout = @session.number.dialog_timer ? 28000 # 8h
 
-      @debug 'schedule hangup'
+      debug 'schedule hangup'
       await @action 'sched_hangup', "+#{dlg_timeout}"
 
       await @export
         'sip_h_X-En': @session.endpoint_name
 
-      @debug 'set_params: done.'
+      debug 'set_params: done.'
       return

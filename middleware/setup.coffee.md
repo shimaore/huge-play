@@ -425,15 +425,15 @@ Retrieve number data.
             @session.music ?= @session.number.music
 
           if @session.number.error?
-            @debug.dev "Could not locate destination number #{dst_number}"
+            debug.dev "Could not locate destination number #{dst_number}"
             @notify state: 'invalid-local-number', number: @session.number._id
             await @respond '486 Not Found'
             return
 
-          @debug "validate_local_number: Got dst_number #{dst_number}", @session.number
+          debug "validate_local_number: Got dst_number #{dst_number}", @session.number
 
           if @session.number.disabled
-            @debug.ops "Number #{dst_number} is disabled"
+            debug.ops "Number #{dst_number} is disabled"
             @notify state:'disabled-local-number', number: @session.number._id
             await @respond '486 Administratively Forbidden' # was 403
             return
@@ -492,7 +492,7 @@ Set the account so that if we redirect to an external number the egress module c
 
         record_call: (name,metadata = {}) ->
           unless @cfg.recording_uri?
-            @debug.dev 'No recording_uri, call will not be recorded.'
+            debug.dev 'No recording_uri, call will not be recorded.'
             return false
 
           Object.assign metadata,
@@ -512,10 +512,10 @@ Keep recording (async)
           keep_recording = =>
             {uuid} = @call
             uri = await @cfg.recording_uri name, metadata
-            @debug 'Recording', uuid, uri
+            debug 'Recording', uuid, uri
             outcome = await @cfg.api "uuid_record #{uuid} start #{uri}"
             @report Object.assign {event:'recording', uri}, metadata
-            @debug 'Recording', uuid, uri, outcome
+            debug 'Recording', uuid, uri, outcome
 
             last_uri = uri
 
@@ -529,21 +529,21 @@ Keep recording (async)
               if still_running
                 metadata.recording_start = new Date().toJSON()
                 uri = await @cfg.recording_uri name, metadata
-                @debug 'Recording next segment', uuid, uri
+                debug 'Recording next segment', uuid, uri
                 await @cfg.api "uuid_record #{uuid} start #{uri}"
                 @report Object.assign {event:'recording', uri}, metadata
 
               await @sleep 1*minutes
-              @debug 'Stopping previous segment', uuid, last_uri
+              debug 'Stopping previous segment', uuid, last_uri
               await @cfg.api "uuid_record #{uuid} stop #{last_uri}"
               last_uri = uri
 
             return
 
           keep_recording().catch (error) =>
-            @debug "record_call: #{error.stack ? error}"
+            debug "record_call: #{error.stack ? error}"
 
-          @debug 'Going to record', name
+          debug 'Going to record', name
           return true
 
       }

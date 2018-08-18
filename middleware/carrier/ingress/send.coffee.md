@@ -8,11 +8,11 @@ Send a call out using carrier-side rules.
 
       return unless @session?.direction is 'ingress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
       {ingress_target} = @session.profile_data
 
-      @debug 'bridge',
+      debug 'bridge',
         sip_profile: @session.sip_profile
         destination: @destination
         ingress_target: ingress_target
@@ -22,12 +22,12 @@ Send a call out using carrier-side rules.
       data = res.body
       @session.bridge_data ?= []
       @session.bridge_data.push data
-      @debug 'FreeSwitch response', res
+      debug 'FreeSwitch response', res
 
       cause = data?.variable_last_bridge_hangup_cause ? data?.variable_originate_disposition
-      @debug 'Cause', cause
+      debug 'Cause', cause
 
       if cause in ['NORMAL_CALL_CLEARING', 'SUCCESS']
-        @debug "Successful call when routing #{@destination} through #{ingress_target}"
+        debug "Successful call when routing #{@destination} through #{ingress_target}"
       else
-        @debug "Call failed: #{cause} when routing #{@destination} through #{ingress_target}"
+        debug "Call failed: #{cause} when routing #{@destination} through #{ingress_target}"

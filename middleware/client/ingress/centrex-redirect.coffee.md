@@ -1,5 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:centrex-redirect"
+    debug = (require 'tangible') @name
 
     @include = ->
 
@@ -16,12 +17,12 @@ Transfer Workaround
         @report {state:'centrex-redirect', server}
 
         uri = "<sip:#{@session.ccnq_to_e164}@#{server};xref=#{@session.reference}>"
-        @debug 'Handling is remote', uri
+        debug 'Handling is remote', uri
 
 Send a REFER to the carrier-side SBC.
 
         res = await @action 'deflect', uri
-        @debug 'Redirection returned', uri, res
+        debug 'Redirection returned', uri, res
 
 Make sure there is no further processing.
 
@@ -36,4 +37,4 @@ Monitor the a-leg.
       if @cfg.queuer? and @queuer_call?
         queuer_call = await @queuer_call()
 
-      @debug 'Handling is local'
+      debug 'Handling is local'

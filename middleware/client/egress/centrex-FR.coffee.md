@@ -1,5 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:centrex-FR"
+    debug = (require 'tangible') @name
 
     @include = ->
 
@@ -7,7 +8,7 @@
       return unless @session.dialplan is 'centrex'
       return unless @session.country is 'fr'
 
-      @debug 'Start', @destination
+      debug 'Start', @destination
 
       @session.centrex_external_line_prefix = '9'
       @session.VOICEMAIL = '786'
@@ -18,7 +19,7 @@ Internal call: ring the phone, apply cfa/cfb/cfda/cfnr if applicable.
 Keep @session.dialplan.
 
         when @destination.match /^[1-6]\d+$/
-          @debug 'Internal call'
+          debug 'Internal call'
           await @action 'privacy', 'no'
           @session.centrex_internal = true
           @session.sip_profile = @session.sip_profile_client
@@ -31,23 +32,23 @@ For Centrex we use `asserted` as `egress calling number`, and only use it for ex
 Keep @session.direction and @session.country.
 
         when @destination[0] is @session.centrex_external_line_prefix and m = @destination.match /^\d(\d+)$/
-          @debug 'External call'
+          debug 'External call'
           @session.dialplan = 'national'
           @destination = m[1]
           @source = @session.asserted ? @session.number.asserted ? @source
-          @debug 'External call', {@source,@destination}
+          debug 'External call', {@source,@destination}
           return
 
         when @destination[0] is '+'
           @session.dialplan = 'national'
           @source = @session.asserted ? @session.number.asserted ? @source
-          @debug 'External call', {@source,@destination}
+          debug 'External call', {@source,@destination}
           return
 
 Voicemail.
 
         when @destination in ['vm','voicemail','*86','786']
-          @debug 'Voicemail'
+          debug 'Voicemail'
           @destination = 'inbox'
           @direction 'voicemail'
           return

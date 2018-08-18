@@ -23,7 +23,7 @@ List ID for an ingress call.
       pid = @req.header 'P-Asserted-Identity'
       interesting_number = if pid? then url.parse(pid).auth else @source
       list_id = "list:#{list}@#{interesting_number}"
-      @debug 'local_ingress', list, interesting_number
+      debug 'local_ingress', list, interesting_number
       list_id
 
 List ID for an egress call.
@@ -33,7 +33,7 @@ List ID for an egress call.
       list = "#{caller}@#{@session.number_domain}"
       interesting_number = @destination
       list_id = "list:#{list}@#{interesting_number}"
-      @debug 'local_egress', list, interesting_number
+      debug 'local_egress', list, interesting_number
       list_id
 
 Global ingress
@@ -112,21 +112,21 @@ Actions
 These actions are terminal for the statement.
 
       stop: ->
-        @debug 'stop'
+        debug 'stop'
         'over'
 
       accept: ->
-        @debug 'accept'
+        debug 'accept'
         'over'
 
       hangup: ->
-        @debug 'hangup'
+        debug 'hangup'
         await @action 'hangup'
         @direction 'hangup'
         'over'
 
       send: (destination) ->
-        @debug 'send'
+        debug 'send'
         @session.direction = 'ingress'
         @destination = destination
         await serialize.modules ingress_modules, this, 'include'
@@ -135,50 +135,43 @@ These actions are terminal for the statement.
 `menu_send`: send the call to the (ingress) destination keyed (must be a number in the current number-domain)
 
       menu_send: ->
-        @debug 'menu_send'
+        debug 'menu_send'
         return false unless @menu?
         await @menu.expect()
-        @debug 'menu_send', @menu.value
+        debug 'menu_send', @menu.value
         @session.direction = 'ingress'
         @destination = @menu.value
         await serialize.modules [menu_conference_module,ingress_modules...], this, 'include'
         'over'
 
       reject: ->
-        @debug 'reject'
+        debug 'reject'
         await @respond '486 Decline'
         'over'
 
       announce: (message) ->
-        @debug 'announce', message
+        debug 'announce', message
         await @action 'answer'
         await @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
         await @action 'hangup'
         'over'
 
       voicemail: ->
-        @debug 'voicemail'
+        debug 'voicemail'
         @direction 'voicemail'
         'over'
 
       forward: (destination) ->
-        @debug 'forward', destination
+        debug 'forward', destination
         @session.reason = 'unspecified'
         @session.destination = destination
         @direction 'forward'
         'over'
 
-Other actions must return `true`.
-
-      email: (recipient,template) ->
-        @debug 'email', recipient, template
-        # FIXME TODO
-        true
-
 `play`: play a file, uninterrupted (should be used for short prompts)
 
       play: (file) ->
-        @debug 'play', file
+        debug 'play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
         await @action 'answer'
         await @unset 'playback_terminators'
@@ -186,7 +179,7 @@ Other actions must return `true`.
         true
 
       message: (number) ->
-        @debug 'message', number
+        debug 'message', number
         return true unless @session.number_domain_data?.msg?[number]?.active
         file = "msg-#{number}.mp3"
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
@@ -198,7 +191,7 @@ Other actions must return `true`.
 `menu_play`: play a file, stop playing when a key is pressed
 
       menu_play: (file) ->
-        @debug 'menu_play', file
+        debug 'menu_play', file
         url = @prompt.uri 'prov', 'ignore', @session.number_domain_data._id, file
         await @action 'answer'
         await @dtmf.playback url
@@ -217,9 +210,9 @@ Other actions must return `true`.
         true
 
       wait: (ms) ->
-        @debug 'wait', ms
+        debug 'wait', ms
         await @dtmf.playback "silence_stream://#{ms}"
-        @debug 'wait over', ms
+        debug 'wait over', ms
         true
 
       record: (name) ->
@@ -232,28 +225,28 @@ These are best used after `post` is used but before `send` is used.
 These can also be used (in more recent script languages) to retrieve the named value.
 
       source: (source) ->
-        @debug 'source', source
+        debug 'source', source
         if source?
           pattern source, @source
         else
           @source
 
       source_e164: (source) ->
-        @debug 'source_e164', source
+        debug 'source_e164', source
         if source?
           pattern source, @session.ccnq_from_e164
         else
           @session.ccnq_from_e164
 
       destination: (destination) ->
-        @debug 'destination', destination
+        debug 'destination', destination
         if destination?
           pattern destination, @destination
         else
           @destination
 
       destination_e164: (destination) ->
-        @debug 'destination_e164', destination
+        debug 'destination_e164', destination
         if destination?
           pattern destination, @session.ccnq_to_e164
         else
@@ -266,7 +259,7 @@ Then get some Date object up and running.
 Weekday condition
 
       weekdays: (days...) ->
-        @debug 'weekdays', days...
+        debug 'weekdays', days...
         now = Moment()
         if @session.timezone?
           now = now.tz @session.timezone
@@ -279,7 +272,7 @@ Weekday condition
 Time condition
 
       time: (start,end) ->
-        @debug 'time', start, end
+        debug 'time', start, end
         now = Moment()
         if @session.timezone?
           now = now.tz @session.timezone
@@ -370,7 +363,7 @@ Agent commands (only applicable in `login_ornaments`)
 Calendars
 
       in_calendars: (calendars...) ->
-        @debug 'calendars', calendars
+        debug 'calendars', calendars
 
 Legacy format: only one argument and that argument is an array.
 
@@ -410,11 +403,11 @@ Legacy format: only one argument and that argument is an array.
         false
 
       anonymous: ->
-        @debug 'anonymous'
+        debug 'anonymous'
         @session.caller_privacy
 
       webhook: (uri) ->
-        @debug 'webhook'
+        debug 'webhook'
         try
           {body} = await request
             .post uri
@@ -427,7 +420,7 @@ Legacy format: only one argument and that argument is an array.
             await @user_tags body.tags
           true
         catch
-          @debug 'webhook: error'
+          debug 'webhook: error'
           false
 
 Postconditions
@@ -437,33 +430,33 @@ These really only apply after the call has gone through `send` (but probably bef
 They can be used to provide further call treatment, similar to the various `CF..` conditions.
 
       busy: ->
-        @debug 'busy'
+        debug 'busy'
         @session.reason is 'user-busy'
 
       unavailable: ->
-        @debug 'unavailable'
+        debug 'unavailable'
         @session.reason is 'unavailable'
 
       'no-answer': ->
-        @debug 'no-anwer'
+        debug 'no-anwer'
         @session.reason is 'no-answer'
 
 Notice: `failed` here means the call failed to be sent to the user *and* no other CF.. condition handled it (sending to voicemail using `cfnr_voicemail` is not considered a failure for example).
 
       failed: ->
-        @debug 'failed'
+        debug 'failed'
         @session.call_failed
 
       answered: ->
-        @debug 'answered'
+        debug 'answered'
         if @session.was_connected then true else false
 
       picked: ->
-        @debug 'picked'
+        debug 'picked'
         if @session.was_picked then true else false
 
       transferred: ->
-        @debug 'transferred'
+        debug 'transferred'
         if @session.was_transferred then true else false
 
       caller_blacklist:       chain is_blacklisted, local_ingress
@@ -485,7 +478,7 @@ Menus
 `menu`: start collecting digits for a menu; digits received before this command are discarded.
 
       menu: ( min = 1, max = min, itd ) ->
-        @debug 'menu_start'
+        debug 'menu_start'
         await @action 'answer'
         @dtmf.clear()
         @menu =
@@ -497,33 +490,33 @@ Menus
 
       menu_on: (choice) ->
         choice = "#{choice}"
-        @debug 'menu_on', choice
+        debug 'menu_on', choice
         return false unless @menu?
         await @menu.expect()
-        @debug 'menu_on', choice, @menu.value
+        debug 'menu_on', choice, @menu.value
         @menu.value is choice
 
       goto_menu: (number) ->
-        @debug 'goto_menu', number
+        debug 'goto_menu', number
 
 Copying the logic from middleware/client/ingress/fifo
 
         type = 'menu'
         items = @session.number_domain_data.menus
         unless items?
-          @debug.csr "Number domain has no data for #{type}."
+          debug.csr "Number domain has no data for #{type}."
           return
         unless items.hasOwnProperty number
-          @debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
+          debug.dev "No property #{number} in #{type} of #{@session.number_domain}"
           return
         item = items[number]
         unless item?
-          @debug.csr "Number domain as no data #{number} for #{type}."
+          debug.csr "Number domain as no data #{number} for #{type}."
           return
         @session[type] = item
         @direction type
 
-        @debug "Using #{type} #{number}", item
+        debug "Using #{type} #{number}", item
 
         @menu_depth ?= 0
         @menu_depth++

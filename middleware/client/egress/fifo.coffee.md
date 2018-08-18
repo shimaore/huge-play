@@ -1,6 +1,6 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:egress:fifo"
-    {foot} = (require 'tangible') @name
+    {debug,foot} = (require 'tangible') @name
 
     @include = ->
       return unless @session?.direction is 'egress'
@@ -8,7 +8,7 @@
       return if @session.forwarding is true
 
       unless @session.number_domain
-        @debug 'No number domain'
+        debug 'No number domain'
         return
 
       return unless m = @destination.match /^(80\d\d|81\d|82|83|84|87|88)(\d*)$/
@@ -31,7 +31,7 @@
       spy = (monitor) =>
 
         unless events
-          @debug.dev 'No `events`, cannot spy'
+          debug.dev 'No `events`, cannot spy'
           @action 'hangup'
           return
 
@@ -134,12 +134,12 @@ The destination matched.
       ACTION_MSG_DEACTIVATE = '8013'
       ACTION_MSG_LISTEN = '8014'
 
-      @debug 'Routing', action, number
+      debug 'Routing', action, number
 
       @session.number_domain_data ?= await @cfg.prov
         .get "number_domain:#{@session.number_domain}"
         .catch (error) =>
-          @debug.csr "number_domain #{number_domain}: #{error}"
+          debug.csr "number_domain #{number_domain}: #{error}"
           {}
 
 * doc.local_number:allowed_groups (array of string) Contains group prefixes that the given user may eavesdrop/monitor. The convention is to use `:` as a path separator. For example: ['sales','support:modems']. See doc.local_number.groups for the groups assigned to a target.
@@ -154,11 +154,11 @@ The destination matched.
         items = @session.number_domain_data[name]
 
         unless items?
-          @debug.csr "Number domain has no #{name}."
+          debug.csr "Number domain has no #{name}."
           return
 
         unless number? and items.hasOwnProperty number
-          @debug.dev "No property #{number} in #{name} of #{@session.number_domain}"
+          debug.dev "No property #{number} in #{name} of #{@session.number_domain}"
           return
 
         item = items[number]
@@ -199,26 +199,26 @@ This works only for centrex.
         .catch -> {}
 
       failed = =>
-        @debug 'Failed'
+        debug 'Failed'
         @direction 'failed'
         @action 'hangup' # keep last
 
       switch action
 
         when ACTION_CONF_ROUTE
-          @debug 'Conf: call'
+          debug 'Conf: call'
           unless route 'conferences', 'conf'
             return failed()
           return
 
         when ACTION_MENU_ROUTE
-          @debug 'Menu: call'
+          debug 'Menu: call'
           unless route 'menus', 'menu'
             return failed()
           return
 
         when ACTION_FIFO_ROUTE
-          @debug 'FIFO: call'
+          debug 'FIFO: call'
           unless route 'fifos', 'fifo'
             return failed()
           return
@@ -227,7 +227,7 @@ This works only for centrex.
           return failed() unless number?
 
           uuid = await @local_redis.get "inbound_call:#{number}@#{@session.number_domain}"
-          @debug 'Intercept', uuid
+          debug 'Intercept', uuid
           return failed() unless uuid?
 
           await @set intercept_unbridged_only: true
@@ -238,11 +238,11 @@ This works only for centrex.
 Eavesdrop: call to listen (no notification, no whisper).
 
         when ACTION_EAVESDROP
-          @debug 'Eavesdrop', number, allowed_groups, groups
+          debug 'Eavesdrop', number, allowed_groups, groups
           return failed() unless number?
           return failed() unless is_allowed allowed_groups, groups
 
-          @debug 'Eavesdrop'
+          debug 'Eavesdrop'
           await @set
             eavesdrop_indicate_failed: 'silence_stream://125'
             eavesdrop_indicate_new: 'silence_stream://125'
@@ -256,11 +256,11 @@ Eavesdrop: call to listen (no notification, no whisper).
 Monitor: call to listen (with notification beep), and whisper
 
         when ACTION_MONITOR
-          @debug 'Monitor', number, allowed_groups, groups
+          debug 'Monitor', number, allowed_groups, groups
           return failed() unless number?
           return failed() unless is_allowed allowed_groups, groups
 
-          @debug 'Monitor'
+          debug 'Monitor'
           await @set
             eavesdrop_indicate_failed: 'tone_stream://%(125,0,300)'
             eavesdrop_indicate_new: 'tone_stream://%(125,0,600);%(125,0,450)'
@@ -272,7 +272,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_LOGIN
-          @debug 'Queuer: log in'
+          debug 'Queuer: log in'
           fifo = get 'fifos', 'fifo'
           await @action 'answer'
           await @sleep 2000
@@ -284,7 +284,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_LOGIN_SCRIPT
-          @debug 'Queuer: log in with number in script'
+          debug 'Queuer: log in with number in script'
           await @action 'answer'
           await @sleep 2000
           @session.timezone ?= @session.number.timezone
@@ -296,7 +296,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_OFFHOOK
-          @debug 'Queuer: off-hook agent'
+          debug 'Queuer: off-hook agent'
           fifo = get 'fifos', 'fifo'
           await @action 'answer'
           await @sleep 2000
@@ -308,7 +308,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_LEAVE
-          @debug 'Queuer: leave queue'
+          debug 'Queuer: leave queue'
           fifo = get 'fifos', 'fifo'
           return failed() unless fifo?
           await @action 'answer'
@@ -320,7 +320,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_LOGOUT
-          @debug 'Queuer: log out'
+          debug 'Queuer: log out'
           fifo = get 'fifos', 'fifo'
           await @action 'answer'
           await @sleep 2000
@@ -331,7 +331,7 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_FIFO_VOICEMAIL
-          @debug 'FIFO: voicemail'
+          debug 'FIFO: voicemail'
           fifo = get 'fifos', 'fifo'
           return failed() unless fifo?.user_database?
           @destination = 'inbox'
@@ -343,7 +343,7 @@ Monitor: call to listen (with notification beep), and whisper
 Menu messages
 
         when ACTION_MSG_DEACTIVATE
-          @debug 'deactivate message'
+          debug 'deactivate message'
 
           await @action 'answer'
           await @sleep 2000
@@ -358,7 +358,7 @@ Menu messages
           @direction 'completed'
 
         when ACTION_MSG_ACTIVATE
-          @debug 'activate message'
+          debug 'activate message'
 
           await @action 'answer'
           await @sleep 2000
@@ -373,7 +373,7 @@ Menu messages
           @direction 'completed'
 
         when ACTION_MSG_RECORD
-          @debug 'record message'
+          debug 'record message'
 
           await @action 'answer'
           await @sleep 2000
@@ -387,7 +387,7 @@ Menu messages
           @direction 'completed'
 
         when ACTION_MSG_LISTEN
-          @debug 'listen to message'
+          debug 'listen to message'
 
           await @action 'answer'
           await @sleep 2000
@@ -401,5 +401,5 @@ Menu messages
           @direction 'completed'
 
         else
-          @debug 'Unknown action', action
+          debug 'Unknown action', action
           return failed()

@@ -11,10 +11,10 @@
     @include = ->
       return unless @session?.direction is 'egress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
       unless @session.ccnq_from_e164? and @session.ccnq_to_e164?
-        @debug 'Missing e164 numbers'
+        debug 'Missing e164 numbers'
         return @respond '484'
 
 * session.e164_number (object) The doc.global_number record for the source of an outbound call.
@@ -43,7 +43,7 @@ The URL module parses the SIP username as `auth`.
       @session.ccnq_account ?= null
 
       unless @session.ccnq_account?
-        @debug 'Invalid Charge-Info', pci
+        debug 'Invalid Charge-Info', pci
         return @respond '403 Missing Charge-Info'
 
       await @reference.set_account @session.ccnq_account
@@ -122,4 +122,4 @@ Music
         from_e164: @session.ccnq_from_e164
         to_e164: @session.ccnq_to_e164
 
-      @debug 'OK'
+      debug 'OK'

@@ -1,6 +1,6 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:send"
-    {debug,hand} = (require 'tangible') @name
+    debug = (require 'tangible') @name
     Solid = require 'solid-gun'
 
     Unique_ID = 'Unique-ID'
@@ -15,7 +15,7 @@
 
       return unless @session?.direction is 'ingress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
 * session.initial_destinations (array) On ingress, client-side calls, list of target routes for `mod_sofia`, each route consisting of an object containing a `to_uri` URI (to be used with the standard SIP profile defined in session.sip_profile ) and an optional `parameters` array of per-leg parameter strings.
 
@@ -60,7 +60,7 @@ Transfer-disposition values:
 
       unless @call.closed or @session.dialplan isnt 'centrex'
 
-        @debug 'Set inbound eavesdrop', eavesdrop_key
+        debug 'Set inbound eavesdrop', eavesdrop_key
         await @local_redis?.setex eavesdrop_key, eavesdrop_timeout, new_uuid
 
 The new call leg will always be bound to this agent.
@@ -87,12 +87,12 @@ Send the call(s)
         else
           "[#{parameters.join ','}]sofia/#{@session.sip_profile}/#{to_uri}"
 
-      @debug 'send', sofia
+      debug 'send', sofia
 
       await @set
         continue_on_fail: true
 
-      @debug 'Bridging', sofia
+      debug 'Bridging', sofia
 
       @report state: 'ingress-bridging'
 
@@ -139,7 +139,7 @@ For example: `200`
 
       disposition = data?.variable_transfer_disposition
 
-      @debug 'Outcome', {cause,code,disposition}
+      debug 'Outcome', {cause,code,disposition}
 
 ### For transfers, we also get state information.
 
@@ -156,19 +156,19 @@ Success
 No further processing in case of success.
 
       if @session.was_connected
-        @debug "Successful call when routing #{@destination} through #{sofia.join ','}"
+        debug "Successful call when routing #{@destination} through #{sofia.join ','}"
         @notify state: 'answered'
         return
 
       if @session.was_transferred
-        @debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
+        debug "Transferred call when routing #{@destination} through #{sofia.join ','}"
         @notify state: 'transferred'
         return
 
       @notify event: 'missed'
 
       if @session.was_picked
-        @debug "Picked call when routing #{@destination} through #{sofia.join ','}"
+        debug "Picked call when routing #{@destination} through #{sofia.join ','}"
         @notify state: 'picked', from_agent: key
         return
 
@@ -180,7 +180,7 @@ Not Registered
 OpenSIPS marker for not registered
 
       if code is '604'
-        await @debug.csr 'not-registered',
+        await debug.csr 'not-registered',
           destination: @destination
           enpoint: @session.endpoint_name
           tried_cfnr: @session.tried_cfnr
@@ -190,17 +190,17 @@ OpenSIPS marker for not registered
 
         @session.reason = 'unavailable' # RFC5806
         if @session.cfnr_voicemail
-          @debug 'cfnr:voicemail'
+          debug 'cfnr:voicemail'
           @destination = @session.cfnr_voicemail_number
           @direction 'voicemail'
           return
         if @session.cfnr_number?
-          @debug 'cfnr:forward'
+          debug 'cfnr:forward'
           @session.destination = @session.cfnr_number
           @direction 'forward'
           return
         if @session.cfnr?
-          @debug 'cfnr:fallback'
+          debug 'cfnr:fallback'
           @session.tried_cfnr = true
           return send.call this, [ to_uri: @session.cfnr ]
 
@@ -208,13 +208,13 @@ Try static routing on 604 without CFNR (or CFNR already attempted)
 
       if code is '604'
         unless @session.fallback_destinations?
-          @debug 'cfnr: no fallback'
+          debug 'cfnr: no fallback'
           return @respond '500 No Fallback'
         if @session.tried_fallback
-          @debug 'cfnr: already attempted fallback'
+          debug 'cfnr: already attempted fallback'
           return @respond '500 Fallback Failed'
 
-        @debug 'cfnr: fallback on 604'
+        debug 'cfnr: fallback on 604'
         @session.tried_fallback = true
         return send.call this, @session.fallback_destinations
 
@@ -226,24 +226,24 @@ Busy
 
         @session.reason = 'user-busy' # RFC5806
         if @session.cfb_voicemail
-          @debug 'cfb: voicemail'
+          debug 'cfb: voicemail'
           @destination = @session.cfb_voicemail_number
           @direction 'voicemail'
           return
         if @session.cfb_number?
-          @debug 'cfb:number'
+          debug 'cfb:number'
           @session.destination = @session.cfb_number
           @direction 'forward'
           return
         if @session.cfb?
-          @debug 'cfb: fallback'
+          debug 'cfb: fallback'
           @session.tried_cfb = true
           return send.call this, [ to_uri: @session.cfb ]
 
 All other codes
 ---------------
 
-      @debug "Call failed: #{cause}/#{code} when routing #{@destination} through #{sofia.join ','}"
+      debug "Call failed: #{cause}/#{code} when routing #{@destination} through #{sofia.join ','}"
 
 Use CFDA if present
 
@@ -252,24 +252,24 @@ Use CFDA if present
 
         @session.reason = 'no-answer' # RFC5806
         if @session.cfda_voicemail
-          @debug 'cfda: voicemail'
+          debug 'cfda: voicemail'
           @destination = @session.cfda_voicemail_number
           @notify state: 'forward-no-answer-to-voicemail'
           @direction 'voicemail'
           return
         if @session.cfda_number?
-          @debug 'cfda:number'
+          debug 'cfda:number'
           @session.destination = @session.cfda_number
           @notify state: 'forward-no-answer-to-number'
           @direction 'forward'
           return
         if @session.cfda?
-          @debug 'cfda: fallback'
+          debug 'cfda: fallback'
           @session.tried_cfda = true
           @notify state: 'forward-no-answer'
           return send.call this, [ to_uri: @session.cfda ]
 
-      @debug 'Call Failed'
+      debug 'Call Failed'
       @session.call_failed = true
       @notify state: 'failed'
       return

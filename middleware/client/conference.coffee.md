@@ -123,11 +123,11 @@ Get a URL for recording
       return unless @session?.direction is 'conf'
 
       unless @cfg.host?
-        @debug.dev 'Missing cfg.host'
+        debug.dev 'Missing cfg.host'
         return
 
       unless @session.conf?
-        @debug.dev 'Missing conference data'
+        debug.dev 'Missing conference data'
         return
 
       conf_name = @session.conf.full_name
@@ -147,20 +147,20 @@ Conference is remote
 
         uri = "sip:localconf-#{conf_name}@#{server};xref={@session.reference}"
 
-        @debug 'Conference is remote', uri
+        debug 'Conference is remote', uri
 
 We use `deflect` (REFER) because this might happen mid-call (for example inside an IVR menu).
 
         res = await @action 'deflect', uri
 
-        @debug 'Remote conference returned', uri, res
+        debug 'Remote conference returned', uri, res
 
         return
 
 Conference is handled locally
 -----------------------------
 
-      @debug 'Conference is local'
+      debug 'Conference is local'
 
       @notify state:'conference', name:conf_name, key:key
 
@@ -199,12 +199,12 @@ Validate passcode if any.
 
       authenticated = =>
         pin = @session.conf.pin
-        @debug 'pin', pin
+        debug 'pin', pin
         if not pin?
           return true
         customer_pin = await get_conf_pin()
           .catch (error) =>
-            @debug "pin error: #{error.stack ? error}"
+            debug "pin error: #{error.stack ? error}"
             null
         pin is customer_pin
 
@@ -215,7 +215,7 @@ Validate passcode if any.
 This uses `playback`, but `@action 'phrase', 'voicemail_record_name'` (separator is `,` for parameters) should work as well.
 
         await @action 'playback', 'phrase:voicemail_record_name'
-        @debug 'record'
+        debug 'record'
         await @action 'record', "#{namefile} 2"
 
 Announce number of persons in conference
@@ -242,11 +242,11 @@ Really we should just barge on the channel if we need anything more complex than
           ].join ' '
 
         announce = =>
-          @debug 'announce'
+          debug 'announce'
           await play_in_conference 'tone_stream://%(125,0,300);%(125,0,450);%(125,0,600)'
           await play_in_conference namefile
           .catch (error) =>
-            @debug "error: #{error.stack ? error}"
+            debug "error: #{error.stack ? error}"
 
         @call.once 'cleanup_linger', =>
           await play_in_conference 'tone_stream://%(125,0,600);%(125,0,450);%(125,0,300)'
@@ -267,7 +267,7 @@ Really we should just barge on the channel if we need anything more complex than
 
 Log into the conference
 
-        @debug 'conference'
+        debug 'conference'
         await @reference.set_number_domain @session.number_domain
         @notify state: 'conference:started', name:conf_name, key:key
 

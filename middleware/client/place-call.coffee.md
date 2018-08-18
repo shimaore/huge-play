@@ -402,4 +402,4 @@ They are used in `tough-rate/middleware/call-handler`.
       if options?
         @session.call_options = options
 
-      @debug 'Ready', {destination,account,options}
+      debug 'Ready', {destination,account,options}

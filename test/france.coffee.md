@@ -9,7 +9,6 @@
             country:'fr'
           source: '0123456789'
           destination: '0987654321'
-          debug: ->
 
         m.include.apply ctx
         assert.deepEqual ctx.session.ccnq_from_e164, '33123456789'

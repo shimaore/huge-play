@@ -1,4 +1,5 @@
     @name = 'huge-play:middleware:handled'
+    debug = (require 'tangible') @name
 
     clean_uri = (t) ->
       t
@@ -14,9 +15,9 @@
       refer_to = clean_uri @req.variable 'sip_refer_to'
       d = "sofia/#{@session.sip_profile}/#{refer_to}"
 
-      @debug 'transfering call to', d
+      debug 'transfering call to', d
       @report
         state:'handled'
         handled_to: d
       res = await @action 'bridge', d
-      @debug 'call transferred', res
+      debug 'call transferred', res

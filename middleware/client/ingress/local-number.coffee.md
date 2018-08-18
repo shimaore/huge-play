@@ -27,7 +27,7 @@ These are used e.g. for Centrex, and override the destination number and number-
 Note: we still keep going through the national modules because we need source number translation from `e164` to `national`.
 
 
-      @debug 'Using local_number', @session.e164_number.local_number
+      debug 'Using local_number', @session.e164_number.local_number
 
 The dialplan and country (and other parameters) might also be available in the `number_domain:` record and should be loaded from there if the global-number does not specify them.
 
@@ -47,7 +47,7 @@ The dialplan and country (and other parameters) might also be available in the `
       @session.number_domain_data = await @cfg.prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
-          @debug "number_domain #{number_domain}: #{error.stack ? error}"
+          debug "number_domain #{number_domain}: #{error.stack ? error}"
           {}
 
       await @user_tags @session.number_domain_data.tags
@@ -66,5 +66,5 @@ The dialplan and country (and other parameters) might also be available in the `
       @report
         state:'local-number'
         number: @session.e164_number.local_number
-      @debug 'OK'
+      debug 'OK'
       return

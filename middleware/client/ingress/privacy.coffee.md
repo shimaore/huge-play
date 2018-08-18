@@ -6,7 +6,7 @@
 
       return unless @session?.direction is 'ingress'
 
-      @debug 'Ready'
+      debug 'Ready'
 
 Handle privacy request
 ======================
@@ -14,7 +14,7 @@ Handle privacy request
 Privacy: id or other requested privacy
 
       if @data['Caller-Privacy-Hide-Number'] is 'true'
-        @debug 'Privacy requested'
+        debug 'Privacy requested'
         @source = 'anonymous'
         await @action 'privacy', 'full'
         await @set
@@ -27,5 +27,5 @@ Source anonymous, either because of Privacy: id (above) or already set.
       if @source is 'anonymous'
         @session.caller_privacy = true
 
-      @debug 'OK'
+      debug 'OK'
       return
