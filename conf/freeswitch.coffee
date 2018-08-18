@@ -71,12 +71,12 @@ module.exports = renderable (cfg) ->
           param name:'nat-map', value:false
           # Inbound-Socket IP
           # cfg.socket_ip (string) IP to bind to for the event socket (defaults to `127.0.0.1`)
-          socket_ip = cfg.socket_ip ? '127.0.0.1'
-          param name:'listen-ip', value: socket_ip
+          param name:'listen-ip', value: cfg.socket_ip ? '127.0.0.1'
           # Inbound-Socket port
           # cfg.socket_port (integer) Port for the event socket for FreeSwitch (defaults to 5722)
-          socket_port = cfg.socket_port ? 5722
-          param name:'listen-port', value: socket_port
+          param name:'listen-port', value: cfg.socket_port ? 5722
+          if cfg.socket_acl?
+            param name:'apply-inbound-acl', value: cfg.socket_acl
           param name:'password', value:'ClueCon'
       configuration name:"acl.conf", ->
         network_lists ->
