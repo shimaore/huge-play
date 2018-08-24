@@ -48,6 +48,7 @@
           call:
             uuid: 'little-bear'
             emit: ->
+            on: ->
           data: # useful-wind/router
             'Channel-Context': 'sbc-ingress'
         l.include.call ctx, ctx
