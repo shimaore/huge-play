@@ -1,5 +1,4 @@
     Solid = require 'solid-gun'
-    RedisClient = require 'normal-key/client'
 
     reference_id = ->
       Solid.time() + Solid.uniqueness()
@@ -11,11 +10,24 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
     GET = (name) ->
       -> @get name
 
-    class Reference extends RedisClient
+    class Reference
       constructor: (id) ->
         id ?= reference_id()
-        super 'xref', id
         @id = id
+
+      _key: (name) -> "xref-#{@id}.#{name}"
+
+      set: (name,value) ->
+        key = @_key name
+        @interface.setup_text key, @timeout
+
+Note how we force to a string. This keeps in-line with the existing semantics.
+
+        @interface.update_text key, value.toString()
+
+      get: (name) ->
+        key = @_key name
+        @interface.get_text key
 
       set_endpoint: SET 'endpoint'
       set_destination: SET 'destination'

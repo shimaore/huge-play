@@ -2,6 +2,7 @@
     describe 'Normal modules', ->
       require '../middleware/client/commands'
     describe 'Modules', ->
+      port = 5000
       list = [
           # 'middleware/setup'
           'middleware/cdr'
@@ -61,7 +62,8 @@
         it "should load #{m}", ->
           cfg =
             prefix_admin: 'http://127.0.0.1:3987'
-            redis: host: 'redis'
+            blue_rings:
+              pub: port++
           ctx = {
             cfg
             most_shutdown: most.just yes
@@ -108,8 +110,6 @@
           await C.include.call call_ctx, call_ctx
           await M.include.call call_ctx, call_ctx
           S.end.call call_ctx, call_ctx
-
-          cfg.global_redis_client.end()
 
       for m in list
         unit m
