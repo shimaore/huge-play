@@ -7,9 +7,9 @@
     FS = require 'esl'
     LRU = require 'lru-cache'
     RedRingAxon = require 'red-rings-axon'
+    BlueRing = require 'blue-rings'
 
     Redis = require 'ioredis'
-    RedisInterface = require 'normal-key/interface'
 
     Reference = require './reference'
     {debug,foot} = (require 'tangible') @name
@@ -21,12 +21,12 @@
       Moment().tz(tz).format()
 
     default_wrapper = null
+    br = null
 
     @end = ->
       default_wrapper.end()
-      @cfg.global_redis_client.end()
-      if @cfg.local_redis_client isnt @cfg.global_redis_client
-        @cfg.local_redis_client.end()
+      br.end()
+      @cfg.local_redis_client?.end()
 
     @config = ->
       await nimble @cfg
@@ -36,13 +36,39 @@
 
 Red-Rings Axon connexion
 
+* cfg.axon RedRingAxon configuration
+
       @cfg.rr = new RedRingAxon @cfg.axon ? {}
+
+Prepare counters and registers
+
+* cfg.blue_rings BlurRing (including Axon) configuration
+
+      @cfg.blue_rings ?= {}
+      @cfg.blue_rings.Value ?= BlueRing.integer_values
+      @cfg.br = br = BlueRing.run @cfg.blue_rings
+
+Seed initial values if provided
+
+* cfg.blue_rings.seeds[] Initial values for blue-rings, including `.counter` or `.register`.
+
+      {seeds} = @cfg.blue_rings
+      for seed in seeds ? []
+        switch
+          when seed.counter?
+            @cfg.br.setup_counter seed.name, seed.expire
+            @cfg.br.update_counter seed.name, seed.counter
+          when seed.register?
+            @cfg.br.setup_text seed.name, seed.expire
+            @cfg.br.update_text seed.name, seed.register
+
+TBD: load from backup / database
 
       await nimble @cfg
       assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
-Local and Global Redis
-----------------------
+Local Redis
+-----------
 
       make_a_redis = (label,config) =>
         a_redis = Redis.createClient config
@@ -55,26 +81,18 @@ Local and Global Redis
         a_redis.on 'warning',       => debug "#{label}: warning"
         a_redis
 
-      assert @cfg.redis?, 'cfg.redis (global redis) is required for Reference'
-
-* @cfg.redis (Required) Configuration for a global redis server shared by all instances.
-
-      @cfg.global_redis_client = make_a_redis 'global redis', @cfg.redis
-
-* @cfg.local_redis (Optional, recommended) If present, used as the configuration for a local redis server. Default: use the global redis server defined in @cfg.redis
+* @cfg.local_redis (Optional, recommended) If present, used as the configuration for a local redis server.
 
       if @cfg.local_redis?
         @cfg.local_redis_client = make_a_redis 'local redis', @cfg.local_redis
-      else
-        @cfg.local_redis_client = @cfg.global_redis_client
 
 How long should we keep a reference after the last update?
 
       call_timeout = 8*3600
-      redis_interface = new RedisInterface @cfg.global_redis_client, call_timeout
 
       class HugePlayReference extends Reference
-        interface: redis_interface
+        interface: br
+        timeout: call_timeout
 
       @cfg.Reference = HugePlayReference
 
@@ -110,20 +128,14 @@ If the `local_server` parameter is not provided (it normally should), only the p
 
         key = "server for #{name}"
 
-        unless @cfg.global_redis_client?
-          debug.dev 'is_remote: Missing global redis'
-          return null
+        [coherent,existing] = @cfg.br.get_text key
 
 Just probing (this is only useful when retrieving data, never when handling calls).
 
         if not local_server?
           server = is_remote_cache.get name
           if server is undefined
-            server = await @cfg.global_redis_client
-              .get key
-              .catch (error) ->
-                debug.ops "error #{error.stack ? error}"
-                null
+            server = existing
             is_remote_cache.set name, server
 
           switch server?.substring 0, @cfg.host.length
@@ -138,21 +150,12 @@ Probe-and-update
 
         server = local_server
 
-Set if not exists, [setnx](https://redis.io/commands/setnx)
-(Note: there's also hsetnx/hget which could be used for this, not sure what's best practices.)
+        first_time = not existing?
 
-        first_time = await @cfg.global_redis_client
-          .setnx key, server
-          .catch (error) ->
-            debug.ops "error #{error.stack ? error}, forcing local server"
-            1
-
-        if not first_time
-          server = await @cfg.global_redis_client
-            .get key
-            .catch (error) ->
-              debug.ops "error #{error.stack ? error}"
-              null
+        if first_time
+          [coherent,server] = @cfg.br.set_text key, server
+        else
+          server = existing
 
 Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
@@ -161,7 +164,7 @@ Check whether handling is local (assuming FreeSwitch is co-hosted, which is our 
         switch server
 
           when null
-            debug.ops 'Redis failed'
+            debug.ops 'Something failed'
             return null
 
           when local_server
@@ -243,6 +246,9 @@ Context Extension
     @include = (ctx) ->
 
       _bus = new EventEmitter2()
+
+      ctx.call.on 'error', (error) ->
+        debug.dev 'Call Failure', error
 
       ctx[k] = v for own k,v of {
         on: (ev,cb) -> _bus.on ev, cb
@@ -454,7 +460,6 @@ Set the account so that if we redirect to an external number the egress module c
 
           dst_number
 
-        global_redis: @cfg.global_redis_client
         local_redis: @cfg.local_redis_client
 
         tag: (tag) ->
