@@ -31,7 +31,7 @@
     "moment-timezone": "^0.5.21",
     "nimble-direction": "^7.1.1",
     "normal-key": "^3.1.0",
-    "red-rings-axon": "^2.0.1",
+    "red-rings-axon": "^2.1.0",
     "request": "^2.88.0",
     "solid-gun": "^1.0.0",
     "superagent": "^3.8.3",
