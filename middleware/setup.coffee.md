@@ -16,6 +16,8 @@
 
     seconds = 1000
     minutes = 60*seconds
+    days = 24*60*minutes
+    weeks = 7*days
 
     now = (tz = 'UTC') ->
       Moment().tz(tz).format()
@@ -117,10 +119,6 @@ Returns either:
 
 If the `local_server` parameter is not provided (it normally should), only the previously stored value is checked. This should never be used when dealing with calls, since it means the call might not go through.
 
-      is_remote_cache = LRU
-        max: 2000
-        maxAge: 1*minutes
-
       @cfg.is_remote = (name,local_server) =>
 
         unless name?
@@ -128,15 +126,11 @@ If the `local_server` parameter is not provided (it normally should), only the p
 
         key = "server for #{name}"
 
-        [coherent,existing] = @cfg.br.get_text key
+        [coherent,server] = @cfg.br.get_text key
 
 Just probing (this is only useful when retrieving data, never when handling calls).
 
         if not local_server?
-          server = is_remote_cache.get name
-          if server is undefined
-            server = existing
-            is_remote_cache.set name, server
 
           switch server?.substring 0, @cfg.host.length
             when null
@@ -148,14 +142,11 @@ Just probing (this is only useful when retrieving data, never when handling call
 
 Probe-and-update
 
-        server = local_server
-
-        first_time = not existing?
+        first_time = not server?
 
         if first_time
-          [coherent,server] = @cfg.br.set_text key, server
-        else
-          server = existing
+          @cfg.br.setup_text key, Date.now() + 1*minute
+          [coherent,server] = @cfg.br.update_text key, local_server, Date.now() + 2*weeks
 
 Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
 
@@ -169,6 +160,7 @@ Check whether handling is local (assuming FreeSwitch is co-hosted, which is our 
 
           when local_server
             debug 'Handling is local'
+            @cfg.br.update_text key, server, Date.now() + 1*weeks
             return false
 
           else
