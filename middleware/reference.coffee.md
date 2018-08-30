@@ -24,10 +24,12 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
 Note how we force to a string. This keeps in-line with the existing semantics.
 
         @interface.update_text key, value.toString()
+        return
 
       get: (name) ->
         key = @_key name
-        @interface.get_text key
+        [coherent,value] = @interface.get_text key
+        value
 
       set_endpoint: SET 'endpoint'
       set_destination: SET 'destination'
