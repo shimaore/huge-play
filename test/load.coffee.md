@@ -64,6 +64,7 @@
             prefix_admin: 'http://127.0.0.1:3987'
             blue_rings:
               pub: port++
+              host: "a#{port}"
           ctx = {
             cfg
             most_shutdown: most.just yes
