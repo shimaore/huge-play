@@ -145,7 +145,7 @@ Probe-and-update
         first_time = not server?
 
         if first_time
-          @cfg.br.setup_text key, Date.now() + 1*minute
+          @cfg.br.setup_text key, Date.now() + 1*minutes
           [coherent,server] = @cfg.br.update_text key, local_server, Date.now() + 2*weeks
 
 Check whether handling is local (assuming FreeSwitch is co-hosted, which is our standard assumption).
