@@ -20,10 +20,7 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       set: (name,value) ->
         key = @_key name
         @interface.setup_text key, @timeout
-
-Note how we force to a string. This keeps in-line with the existing semantics.
-
-        @interface.update_text key, value.toString()
+        @interface.update_text key, value
         return
 
       get: (name) ->
@@ -37,8 +34,7 @@ Note how we force to a string. This keeps in-line with the existing semantics.
       set_domain: SET 'domain'
       set_dev_logger: SET 'dev_logger'
       set_account: SET 'account'
-      set_call_options: (options) ->
-        @set 'call_options', JSON.stringify options
+      set_call_options: SET 'call_options'
       set_block_dtmf: SET 'block_dtmf'
       set_number: SET 'number'
       set_number_domain: SET 'number_domain'
@@ -49,12 +45,7 @@ Note how we force to a string. This keeps in-line with the existing semantics.
       get_domain: GET 'domain'
       get_dev_logger: GET 'dev_logger'
       get_account: GET 'account'
-      get_call_options: ->
-        options = await @get 'call_options'
-        if options?
-          JSON.parse options
-        else
-          {}
+      get_call_options: GET 'call_options'
       get_block_dtmf: GET 'block_dtmf'
       get_number: GET 'number'
       get_number_domain: GET 'number_domain'
