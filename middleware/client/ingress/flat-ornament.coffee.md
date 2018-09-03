@@ -1,4 +1,5 @@
     @name = 'huge-play:middleware:client:ingress:flat-ornament'
+    {debug} = (require 'tangible') @name
 
     compile = require 'flat-ornament/compile'
 
@@ -6,6 +7,10 @@
 
       return unless @session?.direction is 'ingress'
       return if @session.forwarding is true
+
+      unless @session.number?
+        debug.dev 'Missing @session.number'
+        return
 
 Processing
 ==========
