@@ -115,7 +115,7 @@ Ensure only one FreeSwitch server processes those.
 
 Note that Centrex-redirect uses both the local-server and the client-server.
 
-        is_remote = await cfg.is_remote(domain, [local_server,client_server].join '/').catch -> true
+        is_remote = await cfg.is_remote domain, [local_server,client_server].join '/'
         return if is_remote
 
         debug 'place-call: Placing call'
@@ -216,7 +216,7 @@ A proper reference is required.
 
 Ensure we are co-located with the FreeSwitch instance serving this conference.
 
-        is_remote = await cfg.is_remote(name, local_server).catch -> true
+        is_remote = await cfg.is_remote name, local_server
         return if is_remote
 
 Load additional data from the endpoint.
@@ -303,7 +303,7 @@ The `body` should contains:
 
         agent = new Agent queuer, body.agent
 
-        is_remote = await cfg.is_remote(agent.domain, [local_server,client_server].join '/').catch -> true
+        is_remote = await cfg.is_remote agent.domain, [local_server,client_server].join '/'
         if is_remote
           debug 'create-queuer-call: not handled on this server', body
           return
