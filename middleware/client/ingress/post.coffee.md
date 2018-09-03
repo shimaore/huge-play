@@ -1,5 +1,4 @@
     pkg = require '../../../package.json'
-    assert = require 'assert'
     @name = "#{pkg.name}:middleware:client:ingress:post"
     debug = (require 'tangible') @name
     url = require 'url'
@@ -26,7 +25,9 @@ Call-Handler
         destination: @destination
         number_domain: @session.number_domain
 
-      assert @session.number_domain?, 'Missing number_domain'
+      unless @session.number_domain?
+        debug.dev 'Missing number_domain'
+        return
 
 Routing
 -------
