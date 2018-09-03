@@ -111,7 +111,7 @@ Used by billing code.
 Is-remote Cache
 ---------------
 
-Use redis to retrieve the server on which this call should be hosted, and set it to `local_server` if none was previously set.
+Use blue-rings to retrieve the server on which this call should be hosted, and set it to `local_server` if none was previously set.
 Returns either:
 - `false` to indicate the call should be handled locally;
 - the value previously stored if it is available;
