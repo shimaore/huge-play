@@ -32,6 +32,8 @@
       fun = compile @session.menu, @ornaments_commands
       if fun?
         await fun.call this
-          .catch (error) => debug.catch error
+          .catch (error) => debug.dev 'Menu', error
+      else
+        debug.dev 'Compilation failed', @session.menu
       debug 'Menu completed.'
       return
