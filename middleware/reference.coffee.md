@@ -50,4 +50,21 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       get_number: GET 'number'
       get_number_domain: GET 'number_domain'
 
+      add_tag: (tag) ->
+        key = @_key 'tags'
+        @interface.setup_set key, @timeout
+        @interface.add key, tag
+      del_tag: (tag) ->
+        key = @_key 'tags'
+        @interface.setup_set key, @timeout
+        @interface.remove key, tag
+      has_tag: (tag) ->
+        key = @_key 'tags'
+        [coherent,value] = @interface.has key, tag
+        value
+      tags: ->
+        key = @_key 'tags'
+        [coherent,value] = @interface.value key
+        value
+
     module.exports = Reference
