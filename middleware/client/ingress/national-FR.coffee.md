@@ -50,6 +50,12 @@ ARCEP, décision 2012-0856 au VI.1
           @session.ccnq_from_e164 = @source
           @source = "0#{$[1]}"
 
+from: special number
+
+        when $ = @source.match /^33_(\d+)$/
+          @session.ccnq_from_e164 = @source
+          @source = $[1]
+
 from: international number
 
         when $ = @source.match /^([1-9][0-9]+)$/

@@ -45,6 +45,10 @@ from: national number
           @session.ccnq_from_e164 = @source
           @source = "0#{$[1]}"
 
+        when $ = @source.match /^41_(\d+)$/
+          @session.ccnq_from_e164 = @source
+          @source = $[1]
+
 from: international number
 
         when $ = @source.match /^([1-9][0-9]+)$/
