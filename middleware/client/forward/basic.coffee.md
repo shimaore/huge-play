@@ -20,6 +20,21 @@
       @direction 'egress'
       await @user_tags @session.endpoint.tags
 
+      switch
+
+        when @cfg.answer_on_forward or @session.answer_on_forward
+          debug 'answer on forward'
+          await @action 'answer' # 200
+          await @set sip_wait_for_aleg_ack:false
+          @session.wait_for_aleg_ack = false
+
+        when @cfg.preanswer_on_forward or @session.preanswer_on_forward
+          debug 'pre_answer on forward'
+          await @action 'pre_answer' # 183
+
+        when @cfg.ringready_on_forward or @session.ringready_on_forward
+          debug 'ring_ready on forward'
+          await @action 'ring_ready' # 180
 
 FIXME the original URI part should be the Request-URI per RFC5806
 
