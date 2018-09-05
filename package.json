@@ -21,7 +21,7 @@
   "dependencies": {
     "acoustic-line": "^1.9.0",
     "black-metal": "^20.1.4",
-    "blue-rings": "^2.1.0",
+    "blue-rings": "^2.2.0",
     "bumpy-lawyer": "^2.7.2",
     "date-holidays": "^1.2.6",
     "esl": "^9.0.1",
