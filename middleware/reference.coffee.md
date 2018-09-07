@@ -65,6 +65,6 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       tags: ->
         key = @_key 'tags'
         [coherent,value] = @interface.value key
-        value
+        value ? []
 
     module.exports = Reference
