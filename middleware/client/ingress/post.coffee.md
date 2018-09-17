@@ -138,6 +138,27 @@ Call rejection: reject anonymous caller
           @session.number.custom_music
         ].join '/'
 
+* cfg.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
+* session.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
+* cfg.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
+* session.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
+* doc.local_number.ring_ready (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
+
+      debug 'Ringback'
+
+      if @session.number.custom_ringback
+        if @cfg.answer_for_ringback or @session.answer_for_ringback
+          debug 'answer for ringback'
+          await @action 'answer' # 200
+          @session.sip_wait_for_aleg_ack = false
+        else
+          debug 'pre_answer for ringback'
+          await @action 'pre_answer' # 183
+      else
+        if @session.cf_active or @cfg.ready_for_ringback or @session.ready_for_ringback or @session.number.ring_ready
+          debug 'cf_active'
+          await @action 'ring_ready' # 180
+
 So far we have no reason to reject the call.
 
       await set_params.call this
@@ -229,31 +250,6 @@ Do Not Disturb
           @session.initial_destinations = [ to_uri: @session.cfb ]
           return
         @session.reason = null
-
-Ringback for other Call Forward
--------------------------------
-
-* cfg.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
-* session.answer_for_ringback (boolean) If true, answer the call (200 OK) instead of pre-answering the call (183 with Media) for custom ringback.
-* cfg.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
-* session.ready_for_ringback (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
-* doc.local_number.ring_ready (boolean) If true, inbound calls are ring-ready (180 without media) immediately, without waiting for the customer device to provide ringback.
-
-      debug 'Ringback'
-
-      if @session.number.custom_ringback
-        if @cfg.answer_for_ringback or @session.answer_for_ringback
-          debug 'answer for ringback'
-          await @action 'answer' # 200
-          await @set sip_wait_for_aleg_ack:false
-          @session.sip_wait_for_aleg_ack = false
-        else
-          debug 'pre_answer for ringback'
-          await @action 'pre_answer' # 183
-      else
-        if @session.cf_active or @cfg.ready_for_ringback or @session.ready_for_ringback or @session.number.ring_ready
-          debug 'cf_active'
-          await @action 'ring_ready' # 180
 
 Build the destination FreeSwitch dialstring
 -------------------------------------------
@@ -415,9 +411,12 @@ Non-call-handling-specific parameters (these are set on all calls independently 
       @session.music ?= @cfg.music
       @session.music ?= default_music
 
+      @session.sip_wait_for_aleg_ack ?= true
+
       debug 'set_params',
         ringback: @session.ringback
         music: @session.music
+        sip_wait_for_aleg_ack : @session.sip_wait_for_aleg_ack
 
       await @set
         ccnq_endpoint: @session.endpoint_name
@@ -490,7 +489,6 @@ Codec negotiation with late-neg:
 * hdr.X-En Set on inbound calls to the endpoint of the local-number.
 
       debug 'export parameters'
-      @session.sip_wait_for_aleg_ack ?= true
       await @export
         t38_passthru:true
         sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack

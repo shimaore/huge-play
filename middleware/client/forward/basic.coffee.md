@@ -30,7 +30,7 @@ Reset the ringer timeout (which was set in `post`)
           debug 'answer on forward'
           await @action 'answer' # 200
           @session.sip_wait_for_aleg_ack = false
-          await @set sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
+          await @export sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
 
         when @cfg.preanswer_on_forward or @session.preanswer_on_forward
           debug 'pre_answer on forward'
