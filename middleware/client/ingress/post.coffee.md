@@ -339,22 +339,29 @@ The `call_options` are used by tough-rate.
             group_confirm_cancel_timeout: false
             language: language
 
+        default_params = {}
+
+Normally the x-ref parameters are already defined in `middleware/client/setup`.
+(The `call-to-conference` function needs to define them but we should not need to.)
+
+        # xref = "xref:#{@session.reference}"
+        # default_param.sip_invite_params = xref
+        # default_param.sip_invite_to_params = xref
+        # default_param.sip_invite_contact_params = xref
+        # default_param.sip_invite_from_params = xref
+
+This is similar to what is done in `middleware/forward/basic`: we override the calling number if requested to.
+
+        if @cfg.mask_source_on_forward
+          default_params.origination_caller_id_number = @session.number.asserted_number ? @session.number.number
+
 Define parameters and targets.
 
         @session.number.convergence
         .filter (o) -> o.number?
         .map (o) =>
 
-Normally the x-ref parameters are already defined in `middleware/client/setup`.
-(The `call-to-conference` function needs to define them but we should not need to.)
-
-          # xref = "xref:#{@session.reference}"
-          params = {}
-              # sip_invite_params: xref
-              # sip_invite_to_params: xref
-              # sip_invite_contact_params: xref
-              # sip_invite_from_params: xref
-              # origination_caller_id_number: @session.number.number
+          params = Object.assign {}, default_params
 
 Delay ("Follow-Me" application)
 
