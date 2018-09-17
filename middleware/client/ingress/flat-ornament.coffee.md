@@ -22,7 +22,9 @@ Processing
 
 * doc.local_number.ornaments: array of ornaments. Each ornament is a list of statements which are executed in order. Each statement contains three fields: `type`: the command to be executed; optional `param` or `params[]`; optional `not` to reverse the outcome of the statement. Valid types include Preconditions: `source(pattern)`: calling number matches pattern; `weekdays(days...)`: current weekday is one of the listed days; `time(start,end)`: current time is between start and end time, in HH:MM format; `anonymous`: caller requested privacy; `in_calendars([calendars])`: date is in one of the named calendars, stored in doc.number_domain.calendars; Postconditions: `busy`, `unavailable`, `no-answer`, `failed`; Actions: `accept`: send call to customer; `reject`: reject call (no announcement); `announce(message)`: reject call with announcement; `voicemail`: send call to voicemail; `forward(destination)`: forward call to destination. Not implemented yet: `email(recipient,template)` and `nighttime`.
 
-      fun = compile @session.number.ornaments, @ornaments_commands
+      {ornaments} = @session.number
+      return unless ornaments?
+      fun = compile ornaments, @ornaments_commands
       await fun.call this if fun?
       return
 
