@@ -246,7 +246,7 @@ Ringback for other Call Forward
           debug 'answer for ringback'
           await @action 'answer' # 200
           await @set sip_wait_for_aleg_ack:false
-          @session.wait_for_aleg_ack = false
+          @session.sip_wait_for_aleg_ack = false
         else
           debug 'pre_answer for ringback'
           await @action 'pre_answer' # 183
@@ -490,9 +490,10 @@ Codec negotiation with late-neg:
 * hdr.X-En Set on inbound calls to the endpoint of the local-number.
 
       debug 'export parameters'
+      @session.sip_wait_for_aleg_ack ?= true
       await @export
         t38_passthru:true
-        sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
         'sip_h_X-En': @session.endpoint_name
         originate_timeout:fr_inv_timeout
         bridge_answer_timeout:fr_inv_timeout

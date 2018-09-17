@@ -378,8 +378,7 @@ Force the destination for `place-call` calls (`originate` sets `Channel-Destinat
 Also, do not wait for an ACK, since we're calling out (to the "caller"),
 and therefor the call is already connected by the time we get here.
 
-        @session.wait_for_aleg_ack = false      # in huge-play
-        @session.sip_wait_for_aleg_ack = false  # in tough-rate
+        @session.sip_wait_for_aleg_ack = false
 
 Finally, generate a P-Charge-Info header so that the SBCs will allow the call through.
 

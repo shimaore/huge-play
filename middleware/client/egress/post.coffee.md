@@ -101,9 +101,10 @@ Codec negotiation with late-neg:
       if @session.ringback?
         await @set ringback: @session.ringback
 
+      @session.sip_wait_for_aleg_ack ?= true
       await @export
         t38_passthru:true
-        sip_wait_for_aleg_ack: @session.wait_for_aleg_ack ? true
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
 
 Music
 

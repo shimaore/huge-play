@@ -149,8 +149,7 @@ variable_pre_transfer_caller_id_number
           debug 'referred_by', m[1]
           referred_by = m[1]
           @session.referred_by = m[1]
-          @session.wait_for_aleg_ack = false      # in huge-play
-          @session.sip_wait_for_aleg_ack = false  # in tough-rate
+          @session.sip_wait_for_aleg_ack = false
 
         @direction 'egress'
 
@@ -219,7 +218,7 @@ Info for handling of 302 etc. for (I assume) our outbound calls. `cfg.port` is f
         profile: @session.profile
         sip_profile: @session.sip_profile
         default_transfer_context: @session.default_transfer_context
-        wait_for_aleg_ack: @session.wait_for_aleg_ack ? null
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack ? null
         local_server: @session.local_server ? null
 
       return

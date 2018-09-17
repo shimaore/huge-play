@@ -39,14 +39,14 @@ Ready to send, answer the call.
 
       debug 'Answer'
       await @action 'answer'
-      call_is_answered = true
+      @session.sip_wait_for_aleg_ack = false
 
       await @export
         t38_passthru: false
 
 Basically if the pre_answer we should wait; once the call is answered we won't be getting any more ACK, though.
 
-        sip_wait_for_aleg_ack: not call_is_answered
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
 
 * session.fifo.announce (string) Name of the FIFO announce file (attachment to the doc:number_domain document).
 * session.fifo.music (string) Name of the FIFO music file (attachment to the doc:number_domain document).

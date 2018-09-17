@@ -17,15 +17,13 @@
       @report state:'menu'
 
       await @action 'answer'
-      call_is_answered = true
+      @session.sip_wait_for_aleg_ack = false
 
       await @export
         t38_passthru: false
-        sip_wait_for_aleg_ack: not call_is_answered
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
       await @set
-        sip_wait_for_aleg_ack: not call_is_answered
-
-      @session.wait_for_aleg_ack = not call_is_answered
+        sip_wait_for_aleg_ack: @session.sip_wait_for_aleg_ack
 
       debug 'Menu starting.'
       @menu_depth = 0
