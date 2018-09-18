@@ -21,7 +21,7 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
 
       set: (name,value) ->
         key = @_key name
-        @interface.setup_text key, @expiry()
+        @interface.setup_text key, @_expiry()
         @interface.update_text key, value
         return
 
