@@ -1,4 +1,5 @@
     Solid = require 'solid-gun'
+    seconds = 1000
 
     reference_id = ->
       Solid.time() + Solid.uniqueness()
@@ -16,10 +17,11 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
         @id = id
 
       _key: (name) -> "xref-#{@id}.#{name}"
+      _expiry: -> Date.now() + @timeout*seconds
 
       set: (name,value) ->
         key = @_key name
-        @interface.setup_text key, @timeout
+        @interface.setup_text key, @expiry()
         @interface.update_text key, value
         return
 
@@ -52,11 +54,11 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
 
       add_tag: (tag) ->
         key = @_key 'tags'
-        @interface.setup_set key, @timeout
+        @interface.setup_set key, @_expiry()
         @interface.add key, tag
       del_tag: (tag) ->
         key = @_key 'tags'
-        @interface.setup_set key, @timeout
+        @interface.setup_set key, @_expiry()
         @interface.remove key, tag
       has_tag: (tag) ->
         key = @_key 'tags'
