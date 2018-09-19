@@ -295,54 +295,61 @@ start: '18:00', end: '08:00'
 More call commands, mostly call-center
 --------------------------------------
 
-      user_tag: (tag) ->
-        @user_tag tag
-        @notify state:'menu', user_tag:tag
-        true
-
       alert_info: (alert_info) ->
         await @export {alert_info}
         @session.alert_info = alert_info
         true
 
-      clear_call_center_tags: ->
-        await @clear_call_center_tags()
-        true
+User-tags
 
       clear_user_tags: ->
         await @clear_user_tags()
         true
 
-      required_skill: (skill) ->
-        await @tag "skill:#{skill}"
+      user_tag: (tag) ->
+        @user_tag tag
+        @notify state:'menu', user_tag:tag
         true
-
-      priority: (priority) ->
-        await @tag "priority:#{priority}"
-        true
-
-      queue: (queue) ->
-        await @tag "queue:#{queue}"
-        true
-
-      broadcast: ->
-        await @tag 'broadcast'
-        true
-
-      has_tag: (tag) ->
-        @has_tag tag
 
       has_user_tag: (tag) ->
         @has_user_tag tag
 
+Call-center
+-----------
+
+      clear_call_center_tags: ->
+        @reference.clear_ 'skill'
+        # Do not clear priority
+        @reference.clear_ 'queue'
+        @reference.set 'broadcast', false
+        true
+
+      required_skill: (skill) ->
+        @reference.add_ 'skill', skill
+        true
+
+      priority: (priority) ->
+        @reference.set 'priority', priority
+        true
+
+      queue: (queue) ->
+        @reference.add_ 'queue', queue
+        true
+
+      broadcast: ->
+        @reference.set 'broadcast', true
+        true
+
       has_skill: (skill) ->
-        @has_tag "skill:#{skill}"
+        @reference.has_ 'skill', skill
 
       has_queue: (queue) ->
-        @has_tag "queue:#{queue}"
+        @reference.has_ 'queue', queue
 
 Agent commands (only applicable in `login_ornaments`)
 --------------
+
+Note: these are stored in the black-metal / normal-key stack.
 
       agent_skill: (skill) ->
         return false unless typeof skill is 'string'

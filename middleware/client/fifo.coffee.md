@@ -83,16 +83,16 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
 
       if fifo.required_skills?
         for skill in fifo.required_skills
-          await @tag "skill:#{skill}"
+          @reference.add_ 'skill', skill
 
       if typeof fifo.queue is 'string'
-        await @tag "queue:#{fifo.queue}"
+        @reference.add_ 'queue', fifo.queue
 
       if fifo.priority?
-        await @tag "priority:#{fifo.priority}"
+        @reference.set 'priority', fifo.priority
 
       if fifo.broadcast
-        await @tag 'broadcast'
+        @reference.set 'broadcast', true
 
 Call-center
 ===========
@@ -106,7 +106,19 @@ If the call-group should use the queuer, then do that.
         {queuer} = @cfg
         call = await @queuer_call()
 
-        ref_tags = await @reference.tags()
+Map "reference" (i.e. blue-rings) "tags" (i.e. sets or values) to black-metal / normal-key "tags" (i.e. an array of strings).
+
+        skills_tags = @reference.all_('skill').map (s) -> "skill:#{s}"
+        queues_tags = @reference.all_('queue').map (q) -> "queue:#{q}"
+        priority  = @reference.get 'priority'
+        broadcast = @reference.get 'broadcast'
+        ref_tags = [
+          skills_tags...
+          queues_tags...
+        ]
+        ref_tags.push "priority:#{priority}" if priority?
+        ref_tags.push 'broadcast' if broadcast
+
         await call.set_tags ref_tags
 
         if music_uri?
@@ -129,19 +141,18 @@ allowing access to them if some conditions are met.
 Since we are trying to extend the pool of agents, this is only possible by adding more
 desirable queues to a given call. (Adding more required skills would build a smaller pool.)
 
-        call_tags = ref_tags.filter (tag) -> tag.match /^queue:/
-
-        if call_tags.length is 0
+        if queues_tags.length is 0
           debug 'no queues, no overflow'
           return
 
         ingress_pool = queuer.ingress_pool @session.number_domain
 
         attempt_overflow = (suffix) =>
-          debug 'attempt overflow', call_tags, suffix
+          debug 'attempt overflow', queues_tags, suffix
           if await ingress_pool.has call
             ok = false
-            for tag in call_tags when await call.has_tag tag
+            # call.has_tag() and call.add_tag() from black-metal / normal-key
+            for tag in queues_tags when await call.has_tag tag
               await call.add_tag "#{tag}:#{suffix}"
               ok = true
             ok
