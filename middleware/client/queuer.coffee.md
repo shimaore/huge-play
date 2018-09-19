@@ -84,7 +84,10 @@ HugePlayCall
               else
                 null
             presenting: await @count().catch -> null
-            tags: await @tags().catch -> []
+            skills: @reference.all_ 'skill'
+            queues: @reference.all_ 'queue'
+            priority: @reference.get 'priority'
+            broadcast: @reference.get 'broadcast'
 
           for own k,v of data when v?
             switch k
@@ -131,7 +134,7 @@ HugePlayAgent
             missed: await @get_missed().catch -> 0
             count: await @count().catch -> 0
 
-          notification.tags = await @tags().catch -> []
+          notification.tags = await @tags().catch -> []  # agent.tags() in black-metal / normal-key
           agent_name = await (@get 'name').catch -> null
           if agent_name?
             notification.agent_name = agent_name
@@ -180,7 +183,7 @@ This avoids sending two messages for the same event (one with incomplete data, t
               debug 'create_egress_call: no queuer_webhook', @domain
               return null
 
-            tags = await @tags()
+            tags = await @tags()  # agent.tags() in black-metal / normal-key
             options = {@key,@number,@domain,tags}
             debug 'create_egress_call: send request', options
             {body} = await request
@@ -214,7 +217,6 @@ FIXME This is highly inefficient, we should be able to create the structure at o
           await reference.set_destination body.destination
           await reference.set_source @number
           await reference.set_domain "#{host}:#{port}"
-          # await reference.set_tags body.tags # set_tags = clear_tags() + add_tags()
           await reference.set_block_dtmf true
 
 This is a "fake" call-data entry, to record the data we used to trigger the call for call-reporting purposes.
@@ -317,7 +319,7 @@ RedRings for agents:
               debug 'queue:log-agent-out', key
 
               agent = new HugePlayAgent key
-              await agent.clear_tags()
+              await agent.clear_tags() # in normal-key
               await agent.transition 'logout'
 
             else
@@ -336,7 +338,7 @@ RedRings for agents:
                 tags.push 'broadcast'
 
               agent = new HugePlayAgent key
-              await agent.add_tags tags
+              await agent.add_tags tags  # in normal-key
 
               ### FIXME FIXME
               if ornaments?
@@ -429,7 +431,7 @@ On-hook agent
         debug 'queuer_login', source
         agent = new Agent source
         await agent.set 'name', name
-        await agent.add_tags tags
+        await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
 * doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
@@ -454,7 +456,7 @@ On-hook agent
         debug 'queuer_logout', source
         agent = new Agent source
         await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        await agent.clear_tags()
+        await agent.clear_tags()  # in normal-key
         await agent.transition 'logout'
         await @report {state:'queuer-logout',source,fifo}
         agent
@@ -466,8 +468,8 @@ Off-hook agent
         debug 'queuer_offhook', source, uuid, fifo
         agent = new Agent source
         await agent.set 'name', name
-        agent.clear_tags()
-        await agent.add_tags tags
+        await agent.clear_tags()  # in normal-key
+        await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         call = await agent.accept_offhook uuid
         return unless call?

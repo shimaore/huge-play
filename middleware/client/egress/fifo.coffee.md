@@ -177,6 +177,8 @@ The destination matched.
         @direction type
         true
 
+Map "number" (i.e. JSON) "tags" to "agent" (i.e. black-metal / normal-key) "tags".
+
       agent_tags = =>
         tags = []
         {skills,queues,broadcast} = @session.number

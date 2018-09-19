@@ -52,20 +52,38 @@ Just like RedisClient, this needs a `redis` value, which should be an instance o
       get_number: GET 'number'
       get_number_domain: GET 'number_domain'
 
-      add_tag: (tag) ->
-        key = @_key 'tags'
+Clearable sets
+
+Currently we use three such sets: 'skill', 'queue', and 'user-tag'.
+
+      _set_key: (cat) ->
+        index_key = @_key cat
+        @interface.setup_counter index_key, @_expiry()
+        index = @get index_key
+        @_key [cat,index].join '/'
+
+      clear_: (cat) ->
+        index_key = @_key cat
+        @interface.setup_counter index_key, @_expiry()
+        @interface.increment index_key, 1
+        return
+
+      add_: (cat,value) ->
+        key = @_set_key cat
         @interface.setup_set key, @_expiry()
-        @interface.add key, tag
-      del_tag: (tag) ->
-        key = @_key 'tags'
+        @interface.add key, value
+        return
+      del_: (cat,value) ->
+        key = @_set_key cat
         @interface.setup_set key, @_expiry()
-        @interface.remove key, tag
-      has_tag: (tag) ->
-        key = @_key 'tags'
-        [coherent,value] = @interface.has key, tag
+        @interface.remove key, value
+        return
+      has_: (cat,value) ->
+        key = @_set_key cat
+        [coherent,value] = @interface.has key, value
         value
-      tags: ->
-        key = @_key 'tags'
+      all_: (cat) ->
+        key = @_set_key cat
         [coherent,value] = @interface.value key
         value ? []
 
