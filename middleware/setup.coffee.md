@@ -12,7 +12,7 @@
     Redis = require 'ioredis'
 
     Reference = require './reference'
-    {debug,foot} = (require 'tangible') @name
+    {debug,foot,heal} = (require 'tangible') @name
 
     seconds = 1000
     minutes = 60*seconds
@@ -454,50 +454,37 @@ Set the account so that if we redirect to an external number the egress module c
 
         local_redis: @cfg.local_redis_client
 
-        tag: (tag) ->
-          unless @reference?
-            debug.dev 'tag: missing @reference', tag
-            return
-          if tag?
-            await @reference.add_tag tag
-            @report {event:'tag', tag}
+User tags
 
         user_tag: (tag) ->
           unless @reference?
             debug.dev 'user_tag: missing @reference', tag
             return
           if tag?
-            await @reference.add_tag "user-tag:#{tag}"
-            @report {event:'user-tag', tag}
+            @reference.add_ 'user-tag', tag
+            heal @report {event:'user-tag', tag}
+          return
 
         user_tags: (tags) ->
           return unless tags?
           for tag in tags
             await @user_tag tag
-
-        has_tag: (tag) ->
-          tag? and await @reference?.has_tag tag
+          return
 
         has_user_tag: (tag) ->
-          tag? and await @has_tag "user-tag:#{tag}"
-
-        clear_call_center_tags: ->
           unless @reference?
-            debug.dev 'clear_call_center_tags: missing @reference'
-            return
-          tags = await @reference.tags()
-          for tag in tags when tag is 'broadcast' or tag.match /^(skill|priority|queue):/
-            await @reference.del_tag tag
-          null
+            debug.dev 'has_user_tag: missing @reference', tag
+            return false
+          tag? and @reference.has_ 'user-tag', tag
 
         clear_user_tags: ->
           unless @reference?
             debug.dev 'clear_user_tags: missing @reference'
             return
-          tags = await @reference.tags()
-          for tag in tags when tag.match /^user-tag:/
-            await @reference.del_tag tag
-          null
+          await @reference.clear_ 'user-tag'
+          return
+
+Record call
 
         record_call: (name,metadata = {}) ->
           unless @cfg.recording_uri?
