@@ -83,16 +83,16 @@ FIXME: This is taken from the centrex-{country} code, but really it should be mo
 
       if fifo.required_skills?
         for skill in fifo.required_skills
-          @reference.add_ 'skill', skill
+          await @reference.add_ 'skill', skill
 
       if typeof fifo.queue is 'string'
-        @reference.add_ 'queue', fifo.queue
+        await @reference.add_ 'queue', fifo.queue
 
       if fifo.priority?
-        @reference.set 'priority', fifo.priority
+        await @reference.set 'priority', fifo.priority
 
       if fifo.broadcast
-        @reference.set 'broadcast', true
+        await @reference.set 'broadcast', true
 
 Call-center
 ===========
@@ -108,10 +108,10 @@ If the call-group should use the queuer, then do that.
 
 Map "reference" (i.e. blue-rings) "tags" (i.e. sets or values) to black-metal / normal-key "tags" (i.e. an array of strings).
 
-        skills_tags = @reference.all_('skill').map (s) -> "skill:#{s}"
-        queues_tags = @reference.all_('queue').map (q) -> "queue:#{q}"
-        priority  = @reference.get 'priority'
-        broadcast = @reference.get 'broadcast'
+        skills_tags = (await @reference.all_ 'skill').map (s) -> "skill:#{s}"
+        queues_tags = (await @reference.all_ 'queue').map (q) -> "queue:#{q}"
+        priority  = await @reference.get 'priority'
+        broadcast = await @reference.get 'broadcast'
         ref_tags = [
           skills_tags...
           queues_tags...

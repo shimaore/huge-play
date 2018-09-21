@@ -8,10 +8,11 @@
     LRU = require 'lru-cache'
     RedRingAxon = require 'red-rings-axon'
     BlueRing = require 'blue-rings'
+    RedisInterface = require 'normal-key/interface'
 
     Redis = require 'ioredis'
 
-    Reference = require './reference'
+    {RedisInterfaceReference,BlueRingReference} = require './reference'
     {debug,foot,heal} = (require 'tangible') @name
 
     seconds = 1000
@@ -92,9 +93,15 @@ How long should we keep a reference after the last update?
 
       call_timeout = 8*3600
 
-      class HugePlayReference extends Reference
-        interface: br
-        timeout: call_timeout
+      if @cfg.use_bluerings_for_reference or not @cfg.local_redis_client?
+        class HugePlayReference extends BlueRingReference
+          interface: br
+          timeout: call_timeout
+      else
+        redis_interface = new RedisInterface @cfg.local_redis_client, call_timeout
+        class HugePlayReference extends RedisInterfaceReference
+          interface: redis_interface
+          timeout: call_timeout
 
       @cfg.Reference = HugePlayReference
 
@@ -461,7 +468,7 @@ User tags
             debug.dev 'user_tag: missing @reference', tag
             return
           if tag?
-            @reference.add_ 'user-tag', tag
+            await @reference.add_ 'user-tag', tag
             heal @report {event:'user-tag', tag}
           return
 
@@ -475,7 +482,7 @@ User tags
           unless @reference?
             debug.dev 'has_user_tag: missing @reference', tag
             return false
-          tag? and @reference.has_ 'user-tag', tag
+          tag? and await @reference.has_ 'user-tag', tag
 
         clear_user_tags: ->
           unless @reference?

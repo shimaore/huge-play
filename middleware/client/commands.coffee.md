@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:client:commands'
-    debug = (require 'tangible') @name
+    {debug,heal} = (require 'tangible') @name
     Moment = require 'moment-timezone'
     Holidays = require 'date-holidays'
     request = require 'superagent'
@@ -307,8 +307,8 @@ User-tags
         true
 
       user_tag: (tag) ->
-        @user_tag tag
-        @notify state:'menu', user_tag:tag
+        await @user_tag tag
+        heal @notify state:'menu', user_tag:tag
         true
 
       has_user_tag: (tag) ->
@@ -318,26 +318,26 @@ Call-center
 -----------
 
       clear_call_center_tags: ->
-        @reference.clear_ 'skill'
+        await @reference.clear_ 'skill'
         # Do not clear priority
-        @reference.clear_ 'queue'
-        @reference.set 'broadcast', false
+        await @reference.clear_ 'queue'
+        await @reference.set 'broadcast', false
         true
 
       required_skill: (skill) ->
-        @reference.add_ 'skill', skill
+        await @reference.add_ 'skill', skill
         true
 
       priority: (priority) ->
-        @reference.set 'priority', priority
+        await @reference.set 'priority', priority
         true
 
       queue: (queue) ->
-        @reference.add_ 'queue', queue
+        await @reference.add_ 'queue', queue
         true
 
       broadcast: ->
-        @reference.set 'broadcast', true
+        await @reference.set 'broadcast', true
         true
 
       has_skill: (skill) ->
@@ -362,10 +362,10 @@ Note: these are stored in the black-metal / normal-key stack.
         true
 
       agent_has_skill: (skill) ->
-        @agent.has_tag "skill:#{skill}"
+        @agent.has_tag "skill:#{skill}" # await
 
       agent_has_queue: (queue) ->
-        @agent.has_tag "queue:#{queue}"
+        @agent.has_tag "queue:#{queue}" # await
 
 Calendars
 
