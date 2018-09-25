@@ -111,7 +111,11 @@ Map "reference" (i.e. blue-rings) "tags" (i.e. sets or values) to black-metal / 
         skills_tags = (await @reference.all_ 'skill').map (s) -> "skill:#{s}"
         queues_tags = (await @reference.all_ 'queue').map (q) -> "queue:#{q}"
         priority  = await @reference.get 'priority'
-        broadcast = await @reference.get 'broadcast'
+        broadcast = switch await @reference.get 'broadcast'
+          when true, 'true'
+            true
+          else
+            false
         ref_tags = [
           skills_tags...
           queues_tags...
