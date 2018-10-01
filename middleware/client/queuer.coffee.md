@@ -428,6 +428,7 @@ On-hook agent
         debug 'queuer_login', source
         agent = new Agent source
         await agent.set 'name', name
+        # await agent.clear_tags()  # in normal-key
         await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
@@ -437,6 +438,7 @@ On-hook agent
           @agent = agent
           fun = compile ornaments, @ornaments_commands
           await fun.call this if fun?
+          delete @agent
 
         await agent.accept_onhook()
         await @report {state:'queuer-login',source,fifo,tags}
@@ -461,13 +463,22 @@ On-hook agent
 Off-hook agent
 --------------
 
-      @queuer_offhook = (source,name,{uuid},fifo,tags = []) ->
-        debug 'queuer_offhook', source, uuid, fifo
+      @queuer_offhook = (source,name,{uuid},fifo,tags = [],ornaments) ->
+        debug 'queuer_offhook', source, uuid
         agent = new Agent source
         await agent.set 'name', name
         await agent.clear_tags()  # in normal-key
         await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
+
+* doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
+
+        if ornaments?
+          @agent = agent
+          fun = compile ornaments, @ornaments_commands
+          await fun.call this if fun?
+          delete @agent
+
         call = await agent.accept_offhook uuid
         return unless call?
         await @report {state:'queuer-offhook',source,fifo,tags}

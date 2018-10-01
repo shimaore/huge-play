@@ -305,7 +305,7 @@ Monitor: call to listen (with notification beep), and whisper
           await @set
             hangup_after_bridge: false
             park_after_bridge: true
-          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags()
+          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags(), @session.number.login_ornaments
           @direction 'queuer-offhook'
           return
 
