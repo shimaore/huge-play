@@ -206,6 +206,11 @@ This works only for centrex.
         @direction 'failed'
         @action 'hangup' # keep last
 
+* doc.local_number.login_ornaments: (optional) applied when a call-center agent logs into the system.
+* doc.local_number.login_script: (optional) applied when a call-center agent logs into the system.
+
+      login_script = @session.number?.login_script ? @session.number?.login_ornaments
+
       switch action
 
         when ACTION_CONF_ROUTE
@@ -280,7 +285,7 @@ Monitor: call to listen (with notification beep), and whisper
           await @action 'answer'
           await @sleep 2000
           @session.timezone ?= @session.number.timezone
-          await @queuer_login agent, agent_name, fifo, agent_tags(), @session.number.login_ornaments
+          await @queuer_login agent, agent_name, fifo, agent_tags(), login_script
           await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           await @action 'hangup'
           @direction 'completed'
@@ -292,7 +297,7 @@ Monitor: call to listen (with notification beep), and whisper
           await @action 'answer'
           await @sleep 2000
           @session.timezone ?= @session.number.timezone
-          await @queuer_login agent, agent_name, null, agent_tags(), @session.number.login_ornaments
+          await @queuer_login agent, agent_name, null, agent_tags(), login_script
           await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           await @action 'hangup'
           @direction 'completed'
@@ -306,7 +311,7 @@ Monitor: call to listen (with notification beep), and whisper
           await @set
             hangup_after_bridge: false
             park_after_bridge: true
-          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags(), @session.number.login_ornaments
+          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags(), login_script
           @direction 'queuer-offhook'
           return
 
@@ -318,7 +323,7 @@ Monitor: call to listen (with notification beep), and whisper
           await @set
             hangup_after_bridge: false
             park_after_bridge: true
-          await @queuer_offhook agent, agent_name, @call, null, agent_tags(), @session.number.login_ornaments
+          await @queuer_offhook agent, agent_name, @call, null, agent_tags(), login_script
           @direction 'queuer-offhook'
           return
 

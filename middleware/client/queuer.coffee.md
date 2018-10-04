@@ -432,8 +432,6 @@ On-hook agent
         await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
-* doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
-
         if ornaments?
           @agent = agent
           fun = compile ornaments, @ornaments_commands
@@ -470,8 +468,6 @@ Off-hook agent
         await agent.clear_tags()  # in normal-key
         await agent.add_tags tags  # in normal-key
         await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-
-* doc.local_number.login_commands: (optional) array of ornaments, applied when a call-center agent logs into the system.
 
         if ornaments?
           @agent = agent
