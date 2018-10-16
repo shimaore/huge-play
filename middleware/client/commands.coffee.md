@@ -367,6 +367,10 @@ Note: these are stored in the black-metal / normal-key stack.
       agent_has_queue: (queue) ->
         @agent.has_tag "queue:#{queue}" # await
 
+      agent_clear: ->
+        await @agent.clear_tags()
+        true
+
 Calendars
 
       in_calendars: (calendars...) ->
