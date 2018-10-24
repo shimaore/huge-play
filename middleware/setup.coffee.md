@@ -509,6 +509,7 @@ Record call
             destination: @destination
             call_start: new Date().toJSON()
             recording_start: new Date().toJSON()
+            reference: @session?.reference
 
 Keep recording (async)
 
