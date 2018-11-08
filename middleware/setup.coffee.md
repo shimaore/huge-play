@@ -523,14 +523,10 @@ Keep recording (async)
 
             last_uri = uri
 
-            still_running = true
-            @call.once 'CHANNEL_HANGUP_COMPLETE', ->
-              still_running = false
-
-            while still_running
+            while @cfg.api.truthy "uuid_exists #{uuid}"
               await @sleep 29*minutes
 
-              if still_running
+              if @cfg.api.truthy "uuid_exists #{uuid}"
                 metadata.recording_start = new Date().toJSON()
                 uri = await @cfg.recording_uri name, metadata
                 debug 'Recording next segment', uuid, uri
