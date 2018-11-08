@@ -523,10 +523,10 @@ Keep recording (async)
 
             last_uri = uri
 
-            while @cfg.api.truthy "uuid_exists #{uuid}"
+            while await @cfg.api.truthy "uuid_exists #{uuid}"
               await @sleep 29*minutes
 
-              if @cfg.api.truthy "uuid_exists #{uuid}"
+              if await @cfg.api.truthy "uuid_exists #{uuid}"
                 metadata.recording_start = new Date().toJSON()
                 uri = await @cfg.recording_uri name, metadata
                 debug 'Recording next segment', uuid, uri
