@@ -540,8 +540,7 @@ Keep recording (async)
 
             return
 
-          keep_recording().catch (error) =>
-            debug.error 'record_call',  error
+          heal 'record_call', keep_recording()
 
           debug 'Going to record', name
           return true
