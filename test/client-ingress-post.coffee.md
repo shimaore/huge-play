@@ -4,7 +4,6 @@
 
     describe 'client-ingress-post', ->
       m = require '../middleware/client/ingress/post'
-      l = require 'tangible/middleware'
       s = require '../middleware/setup'
       sc = require '../middleware/client/setup'
 
@@ -51,7 +50,6 @@
             on: ->
           data: # useful-wind/router
             'Channel-Context': 'sbc-ingress'
-        l.include.call ctx, ctx
         s.include.call ctx, ctx
         sc.include.call ctx, ctx
         m.include

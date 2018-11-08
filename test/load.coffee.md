@@ -57,7 +57,6 @@
         ]
 
       unit = (m) ->
-        L = require 'tangible/middleware'
         S = require '../middleware/setup'
         it "should load #{m}", ->
           cfg =
@@ -71,7 +70,6 @@
           }
 
           M = require "../#{m}"
-          await L.server_pre.call ctx, ctx
           await S.server_pre.call ctx, ctx
           await M.server_pre?.call ctx, ctx
 
