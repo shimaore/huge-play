@@ -76,7 +76,7 @@ Local Redis
       make_a_redis = (label,config) =>
         a_redis = Redis.createClient config
         a_redis.on 'error', (error) =>
-          debug "#{label}: #{error.command} #{error.args?.join(' ')}: #{error.stack ? error}"
+          debug.error "#{label}: #{error.command} #{error.args?.join(' ')}", error
         a_redis.on 'ready',         => debug "#{label}: ready"
         a_redis.on 'connect',       => debug "#{label}: connect"
         a_redis.on 'reconnecting',  => debug "#{label}: reconnecting"
@@ -384,7 +384,7 @@ Prevent extraneous processing of this call.
           number_data = await @cfg.prov
             .get id
             .catch (error) ->
-              debug.ops "#{id} #{error.stack ? error}"
+              debug.error id, error
               {}
 
           return '' unless number_data.number?
@@ -541,7 +541,7 @@ Keep recording (async)
             return
 
           keep_recording().catch (error) =>
-            debug "record_call: #{error.stack ? error}"
+            debug.error 'record_call',  error
 
           debug 'Going to record', name
           return true
