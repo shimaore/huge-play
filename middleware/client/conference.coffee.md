@@ -3,6 +3,7 @@
     debug = (require 'tangible') @name
     fs = require 'fs'
     {SUBSCRIBE} = require 'red-rings/operations'
+    uuid = require 'uuid/v4'
 
     sleep = (timeout) ->
       new Promise (resolve) ->
@@ -210,7 +211,7 @@ Validate passcode if any.
 
       if await authenticated()
 
-        namefile = "/tmp/#{@session.logger_uuid}-name.wav"
+        namefile = "/tmp/#{uuid()}-name.wav"
 
 This uses `playback`, but `@action 'phrase', 'voicemail_record_name'` (separator is `,` for parameters) should work as well.
 
