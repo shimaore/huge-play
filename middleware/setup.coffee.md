@@ -276,7 +276,7 @@ This version is meant to be used in-call.
 
         report: (report) ->
           unless @call? and @session? and @reference?
-            debug.dev 'report: improper environment'
+            debug.dev 'report: improper environment', report
             return false
 
           report.old_state ?= @session.state
