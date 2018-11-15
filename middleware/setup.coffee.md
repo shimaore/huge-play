@@ -312,12 +312,22 @@ We have no real way to know, though, and removing it (for example in middleware/
           report.reference = @session.reference
           report.report_type = 'call'
 
+          reported = 0
           if report.agent?
             @cfg.rr.notify "agent:#{report.agent}", "call:#{report.call}", report
+            reported++
           if report.endpoint?
             @cfg.rr.notify "endpoint:#{report.endpoint}", "call:#{report.call}", report
+            reported++
           if report.number_domain?
             @cfg.rr.notify "number_domain:#{report.number_domain}", "call:#{report.call}", report
+            reported++
+
+Fall back, ensure we send _something_ (this is required for e.g. clever-note).
+
+          if reported is 0
+            @cfg.rr.notify "reference:#{report.reference}", "call:#{report.call}", report
+
           true
 
 Real-time notification (e.g. to show on a web panel).
