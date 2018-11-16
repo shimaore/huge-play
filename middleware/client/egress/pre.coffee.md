@@ -227,7 +227,7 @@ For backward-compatibility we currently ignore ICE proposals.
 Call-recording
 --------------
 
-      if @session.number.record_egress
+      if @session.number.record_egress is 'all'
         @record_call @session.number._id
 
       @report

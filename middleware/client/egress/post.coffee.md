@@ -116,6 +116,12 @@ Music
       if @session.dev_logger
         await @reference.set_dev_logger true
 
+Call-recording
+--------------
+
+      if @session.number.record_egress and @session.number.record_egress isnt 'all'
+        @record_call @session.number._id
+
       @report
         state: 'client-egress-accepted'
         account: @session.ccnq_account
