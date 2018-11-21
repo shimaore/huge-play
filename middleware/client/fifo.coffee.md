@@ -179,7 +179,7 @@ Attempt overflow after a delay
         while delay <= max_overflow
           await sleep overflow_interval*second
           delay += overflow_interval
-          unless attempt_overflow "overflow:#{delay}s"
+          unless await attempt_overflow "overflow:#{delay}s"
             return
 
         return
