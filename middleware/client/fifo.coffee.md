@@ -170,13 +170,17 @@ Attempt overflow immediately
 
 Attempt overflow after a delay
 
-        await sleep 30*second
-        unless attempt_overflow 'overflow:30s'
-          return
+        {max_overflow} = @cfg
+        max_overflow ?= 5*60
+        {overflow_interval} = @cfg
+        overflow_interval ?= 30
 
-        await sleep 30*second
-        unless attempt_overflow 'overflow:60s'
-          return
+        delay = 0
+        while delay <= max_overflow
+          await sleep overflow_interval*second
+          delay += overflow_interval
+          unless attempt_overflow "overflow:#{delay}s"
+            return
 
         return
 
