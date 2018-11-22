@@ -112,6 +112,13 @@ Which is a-leg or b-leg still needs to be confirmed, I have some suspicion this 
           await eavesdrop uuid, true
           return
 
+Enumerate the external calls linked to this agent.
+
+        await agent.forEach foot (uuid) ->
+          await agent_is_aleg()
+          await eavesdrop uuid, true
+          return
+
         return
 
 The destination matched.
