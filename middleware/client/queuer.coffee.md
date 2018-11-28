@@ -142,6 +142,9 @@ HugePlayAgent
           else
             notification.offhook = false
 
+          for own k,v of data when typeof v in ['number','string','boolean']
+            notification[k] ?= v
+
 Module `black-metal` 8.3.0 will report the call object as `data.call` (and this is currently the only parameter that might be provided).
 
 If `data.call` is present we notify using the call's process; if it isn't we notify directly.
@@ -266,7 +269,7 @@ Since we're bound to a server for domains it's OK to use the local Redis.
             now: Date.now()
 
           for own k,v of data when typeof v in ['number','string','boolean']
-            notification[k] = v
+            notification[k] ?= v
 
           if data.call?
             notification = await data.call.notify notification
