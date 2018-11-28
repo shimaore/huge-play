@@ -145,7 +145,7 @@ HugePlayAgent
           for own k,v of data when typeof v in ['number','string','boolean']
             notification[k] ?= v
 
-Module `black-metal` 8.3.0 will report the call object as `data.call` (and this is currently the only parameter that might be provided).
+Module `black-metal` 8.3.0 will report the call object as `data.call`.
 
 If `data.call` is present we notify using the call's process; if it isn't we notify directly.
 This avoids sending two messages for the same event (one with incomplete data, the other with complete data).
