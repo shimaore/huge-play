@@ -482,3 +482,33 @@ Off-hook agent
         return unless call?
         await @report {state:'queuer-offhook',source,fifo,tags}
         agent
+
+More states
+-----------
+
+      @queuer_pause = (source) ->
+        debug 'queuer_pause', source
+        agent = new Agent source
+
+        state = await agent.state()
+
+        start_pause = =>
+          await agent.accept_onhook()
+          notify_yealink socket, source, source, source, "En pause jusqu'à #{timeout}"
+
+        end_pause = =>
+          await agent.transition 'logout', reason: 'pause'
+
+        switch state
+          when 'logged_out'
+            await end_pause()
+
+          when 'waiting'
+            await start_pause()
+
+FIXME: pause duration should be set-able by domain / agent
+
+            if @cfg.pause_timeout? && @cfg.pause_timeout > 0
+              setTimeout end_pause, 1000 * @cfg.pause_timeout
+
+        agent

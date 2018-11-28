@@ -130,6 +130,7 @@ The destination matched.
       ACTION_QUEUER_LOGIN_SCRIPT = '814'
       ACTION_QUEUER_OFFHOOK_SCRIPT = '816'
       ACTION_FIFO_VOICEMAIL = '817'
+      ACTION_QUEUER_PAUSE = '818'
       ACTION_QUEUER_LOGOUT = '819'
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
@@ -342,6 +343,16 @@ Monitor: call to listen (with notification beep), and whisper
           await @sleep 2000
           await @queuer_leave agent, fifo
           await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
+          await @action 'hangup'
+          @direction 'completed'
+          return
+
+        when ACTION_QUEUER_PAUSE
+          debug 'Queuer: pause'
+          await @action 'answer'
+          await @sleep 2000
+          await @queuer_pause agent
+          await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
           await @action 'hangup'
           @direction 'completed'
           return
