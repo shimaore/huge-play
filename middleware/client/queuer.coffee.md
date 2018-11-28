@@ -1,5 +1,5 @@
     @name = 'huge-play:middleware:client:queuer'
-    {debug,foot} = (require 'tangible') @name
+    {debug,foot,heal} = (require 'tangible') @name
     pkg = name:'huge-play'
     Moment = require 'moment-timezone'
     {SUBSCRIBE,UPDATE} = require 'red-rings/operations'
@@ -244,7 +244,7 @@ Notice that for the new call we explicitely do _not_ `set_id` since this is how 
           await call.set 'timezone', timezone
 
           # async
-          @notify call_data
+          heal @notify call_data
 
           debug 'create_egress_call: complete'
 
