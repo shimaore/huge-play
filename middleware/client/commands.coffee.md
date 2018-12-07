@@ -269,7 +269,35 @@ Weekday condition
         else
           now
 
-Time condition
+In language2, allows for `if the day of the week is Tuesday` etc.
+
+      week: ->
+        debug 'weekday'
+        now = Moment()
+        if @session.timezone?
+          now = now.tz @session.timezone
+        get: (what) ->
+          switch what
+            when 'day'
+              now.day()
+            when 'number'
+              now.week()
+            when 'isoNumber'
+              now.isoWeek()
+            when 'year'
+              now.weekYear()
+            when 'isoYear'
+              now.isoWeekYear()
+
+      Sunday: -> 0
+      Monday: -> 1
+      Tuesday: -> 2
+      Wednesday: -> 3
+      Thursday: -> 4
+      Friday: -> 5
+      Saturday: -> 6
+
+Time condition (also returns the time if no parameters are provided).
 
       time: (start,end) ->
         debug 'time', start, end
@@ -372,6 +400,7 @@ Note: these are stored in the black-metal / normal-key stack.
         true
 
 Calendars
+---------
 
       in_calendars: (calendars...) ->
         debug 'calendars', calendars
@@ -412,6 +441,40 @@ Legacy format: only one argument and that argument is an array.
                 if dates? and now in dates
                   return true
         false
+
+Allow for all `get` methods on a moment: `the date of the moment`, `the month of the moment` (0 to 11), etc.
+
+      moment: ->
+        debug 'moment'
+        now = Moment()
+        if @session.timezone?
+          now = now.tz @session.timezone
+        now
+
+      January: -> 0
+      February: -> 1
+      March: -> 2
+      April: -> 3
+      May: -> 4
+      June: -> 5
+      July: -> 6
+      August: -> 7
+      September: -> 8
+      October: -> 9
+      November: -> 10
+      December: -> 11
+
+Today's date as a string (or compare, if the parameter is provided).
+
+      today: (date) ->
+        now = Moment()
+        if @session.timezone?
+          now = now.tz @session.timezone
+        now = now.format 'YYYY-MM-DD'
+        if date?
+          date is now
+        else
+          now
 
       anonymous: ->
         debug 'anonymous'
