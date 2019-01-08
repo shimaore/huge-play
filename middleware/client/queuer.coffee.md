@@ -28,6 +28,17 @@
     FS = require 'esl'
     RedisInterface = require 'normal-key/interface'
 
+    SIPSender = require 'five-toes/sip-sender'
+    yealink_message = require 'five-toes/yealink-message'
+    ccnq4_resolve = require 'five-toes/ccnq4-resolve'
+    dgram = require 'dgram'
+
+    socket = dgram.createSocket 'udp4'
+    sender = new SIPSender socket
+
+    @end = ->
+      socket.close()
+
     @server_pre = ->
 
       cfg = @cfg
@@ -486,29 +497,58 @@ Off-hook agent
 More states
 -----------
 
+      resolve = ccnq4_resolve @cfg
+
       @queuer_pause = (source) ->
         debug 'queuer_pause', source
         agent = new Agent source
 
         state = await agent.state()
+        debug 'queuer_pause: state', source, state
+
+        notify = (msg) ->
+          content = yealink_message msg
+          dest = await resolve source
+          await sender.notify dest, content
+          return
 
         start_pause = =>
-          await agent.accept_onhook()
-          notify_yealink socket, source, source, source, "En pause jusqu'à #{timeout}"
+          debug 'queuer_pause: start', source
+          await agent.transition 'logout', reason: 'pause'
+
+FIXME: pause duration should be set-able by domain / agent
+
+          if @cfg.pause_timeout? && @cfg.pause_timeout > 0
+            timeout = @cfg.pause_timeout
+            heal =>
+              while timeout > 0
+                await notify "En pause (#{timeout}s)"
+                await sleep 1000
+                timeout--
+              await end_pause()
+              return
+          else
+            await notify "En pause"
+          return
 
         end_pause = =>
-          await agent.transition 'logout', reason: 'pause'
+          debug 'queuer_pause: end', source
+          await agent.accept_onhook()
+          await notify "Pause finie"
+          return
 
         switch state
           when 'logged_out'
             await end_pause()
+            return 'end'
 
           when 'waiting'
             await start_pause()
+            return 'start'
 
-FIXME: pause duration should be set-able by domain / agent
+          else
+            notify "Erreur"
 
-            if @cfg.pause_timeout? && @cfg.pause_timeout > 0
-              setTimeout end_pause, 1000 * @cfg.pause_timeout
+        null
 
-        agent
+      return

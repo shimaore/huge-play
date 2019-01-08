@@ -25,6 +25,7 @@
     "bumpy-lawyer": "^2.7.2",
     "date-holidays": "^1.2.8",
     "esl": "^9.0.1",
+    "five-toes": "^1.0.2",
     "flat-ornament": "^5.1.2",
     "ioredis": "^4.2.0",
     "lru-cache": "^4.1.3",

@@ -351,8 +351,13 @@ Monitor: call to listen (with notification beep), and whisper
           debug 'Queuer: pause'
           await @action 'answer'
           await @sleep 2000
-          await @queuer_pause agent
-          await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
+          switch await @queuer_pause agent
+            when 'start'
+              await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
+            when 'end'
+              await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
+            else
+              await @action 'gentones', '%(100,20,450);%(100,20,450)'
           await @action 'hangup'
           @direction 'completed'
           return
