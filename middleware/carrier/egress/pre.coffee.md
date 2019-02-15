@@ -13,7 +13,7 @@
         ccnq_from_e164: @source
         ccnq_to_e164: @destination
         sip_cid_type: 'pid'
-        progress_timeout: 16
+        progress_timeout: 90
         call_timeout: 300
         t38_passthru: true
 
