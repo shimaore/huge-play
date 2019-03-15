@@ -1,6 +1,8 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:ingress:fifo"
     debug = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     @description = '''
       Maps an ingress call (which already went through the `local-number` middleware) to a FIFO/conference/menu.
@@ -39,7 +41,8 @@ In this case the conference name is the number-domain and the conference name.
         @session.number_domain = number_domain
         await @reference.set_number_domain number_domain
 
-        @session.number_domain_data = await @cfg.prov
+        prov = new CouchDB (Nimble @cfg).provisioning
+        @session.number_domain_data = await prov
           .get "number_domain:#{number_domain}"
           .catch (error) =>
             debug.dev "number_domain #{number_domain}: #{error}"

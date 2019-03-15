@@ -1,6 +1,6 @@
     chai = require 'chai'
-    chai.use require 'chai-as-promised'
     chai.should()
+    CouchDB = require 'most-couchdb'
 
     describe 'client-ingress-post', ->
       m = require '../middleware/client/ingress/post'
@@ -16,10 +16,8 @@
         get_dev_logger: ->
         get_in: -> Promise.resolve []
       cfg =
-        prov:
-          get: (id) ->
-            return Promise.resolve docs[id]
         Reference: Foo
+        prefix_admin: "http://#{process.env.COUCHDB_USER}:#{process.env.COUCHDB_PASSWORD}@127.0.0.1:5984"
 
       docs =
         'number:1234@some':
@@ -30,6 +28,14 @@
           cfnr_number:'981'
           cfnr_enabled:false
           cfda: 'sip:387@example.net'
+
+      prov = new CouchDB "#{cfg.prefix_admin}/provisioning"
+      before ->
+        await prov.destroy().catch -> yes
+        await prov.create()
+        await prov.put doc for own k,doc of docs
+      after ->
+        await prov.destroy()
 
       it 'should use cfb_number', (done) ->
         ctx =

@@ -33,6 +33,9 @@
     ccnq4_resolve = require 'five-toes/ccnq4-resolve'
     dgram = require 'dgram'
 
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
+
     socket = dgram.createSocket 'udp4'
     sender = new SIPSender socket
 
@@ -300,6 +303,8 @@ RedRings
 
 RedRings for agents:
 
+      prov = new CouchDB (Nimble cfg).provisioning
+
       cfg.rr
       .receive 'agent:*'
       .forEach (msg) ->
@@ -338,7 +343,7 @@ RedRings for agents:
               debug 'queue:log-agent-in', key
 
               tags = []
-              {skills,queues,broadcast,timezone} = await cfg.prov.get "number:#{key}"
+              {skills,queues,broadcast,timezone} = await prov.get "number:#{key}"
               if skills?
                 for skill in skills
                   tags.push "skill:#{skill}"

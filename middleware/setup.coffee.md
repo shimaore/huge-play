@@ -1,4 +1,5 @@
-    nimble = require 'nimble-direction'
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
     pkg = require '../package.json'
     {EventEmitter2} = require 'eventemitter2'
     Moment = require 'moment-timezone'
@@ -31,10 +32,6 @@
       br.end()
       @cfg.local_redis_client?.end()
 
-    @config = ->
-      await nimble @cfg
-      assert @cfg.prov?, 'Nimble did not inject cfg.prov'
-
     @server_pre = ->
 
 Red-Rings Axon connexion
@@ -64,11 +61,6 @@ Seed initial values if provided
           when seed.register?
             @cfg.br.setup_text seed.name, seed.expire
             @cfg.br.update_text seed.name, seed.register
-
-TBD: load from backup / database
-
-      await nimble @cfg
-      assert @cfg.prov?, 'Nimble did not inject cfg.prov'
 
 Local Redis
 -----------
@@ -244,6 +236,8 @@ Context Extension
 
     @include = (ctx) ->
 
+      prov = new CouchDB (Nimble @cfg).provisioning
+
       _bus = new EventEmitter2()
 
       ctx.call.on 'error', (error) ->
@@ -391,7 +385,7 @@ Prevent extraneous processing of this call.
 
           id = "number:#{number}@#{@session.number_domain}"
 
-          number_data = await @cfg.prov
+          number_data = await prov
             .get id
             .catch (error) ->
               debug.error id, error
@@ -430,7 +424,7 @@ Retrieve number data.
 * doc.local_number.disabled (boolean) If true the record is not used.
 
           dst_number = "#{@destination}@#{@session.number_domain}"
-          @session.number = await @cfg.prov
+          @session.number = await prov
             .get "number:#{dst_number}"
             .catch (error) -> {disabled:true,error}
           await @user_tags @session.number.tags

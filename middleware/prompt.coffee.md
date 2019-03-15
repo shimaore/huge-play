@@ -1,6 +1,8 @@
     pkg = require '../package.json'
     @name = "#{pkg.name}:middleware:prompt"
     debug = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     request = require 'request'
     qs = require 'querystring'
@@ -209,13 +211,13 @@ A translator for the local provisioning database (the `db` database name is igno
         'prov': (db,id,file) =>
           id = qs.escape id
           file = qs.escape file
-          base: cfg.provisioning
+          base: (Nimble cfg).provisioning
           uri: "#{id}/#{file}"
 
         'master-prov': (db,id,file) =>
           id = qs.escape id
           file = qs.escape file
-          masters = cfg.prov_master_admin
+          masters = (Nimble cfg).prov_master_admin
           if masters?
             if typeof masters is 'string'
               masters = [masters]

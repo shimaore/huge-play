@@ -1,9 +1,12 @@
 image: node:alpine
 
-services:
-- redis
-
 test:
+  services:
+  - redis
+  - couchdb
+  variables:
+    COUCHDB_USER: admin
+    COUCHDB_PASSWORD: password
   script:
   - npm install
   - npm audit

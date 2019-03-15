@@ -5,6 +5,8 @@
     request = require 'superagent'
     compile = require 'flat-ornament/compile'
     serialize = require 'useful-wind-serialize'
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     max_menu_depth = 42
 
@@ -54,8 +56,9 @@ List retriever
 --------------
 
     get_list = (list_id) ->
+      prov = new CouchDB (Nimble @cfg).provisioning
       if list_id
-        list = await @cfg.prov.get(list_id).catch -> {}
+        list = await prov.get(list_id).catch -> {}
         if list.disabled
           null
         else
@@ -152,7 +155,7 @@ These actions are terminal for the statement.
       announce: (message) ->
         debug 'announce', message
         await @action 'answer'
-        await @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/#{message}.wav"
+        await @action 'playback', "#{(Nimble @cfg).provisioning}/config%3Avoice_prompts/#{message}.wav"
         await @action 'hangup'
         'over'
 

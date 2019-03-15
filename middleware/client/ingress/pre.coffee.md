@@ -3,6 +3,10 @@ This module should be called before 'local/carrier-ingress' and before 'client-s
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:pre"
     debug = (require 'tangible') @name
+
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
+
     @include = ->
       return unless @session?.direction is 'ingress'
 
@@ -23,7 +27,9 @@ We retrieve the *global-number* record based on the destination.
 
 * session.e164_number (object) The doc.global_number record for of the destination of an inbound call.
 
-      @session.e164_number = await @cfg.prov
+      prov = new CouchDB (Nimble @cfg).provisioning
+
+      @session.e164_number = await prov
         .get "number:#{@destination}"
         .catch -> null
       return unless @session.e164_number?

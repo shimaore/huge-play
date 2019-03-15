@@ -1,6 +1,8 @@
     pkg = require '../../package.json'
     @name = "#{pkg.name}:middleware:carrier:setup"
     debug = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
 * doc.global_number Record with an identifier `number:<global-number>`. These records are used between the carrier SBCs and the client SBCs. They are one of the two types of `doc.number`.
 * doc.number If the identifier of a number does not contain a `@` character, it is a `doc.global_number`.
@@ -20,10 +22,11 @@ Create the proper profiles and ACLs
       @cfg.profiles = {}
       @cfg.acls = {}
 
+      prov = new CouchDB (Nimble @cfg).provisioning
       @cfg.host_data =
         if @cfg.host?
           debug "Retrieving data for #{@cfg.host}"
-          await @cfg.prov
+          await prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
               debug.ops "Host #{@cfg.host}: #{error}"
@@ -54,10 +57,11 @@ Server
 Load the host record so that we can retrieve the `sip_profiles` at runtime.
 
     @server_pre = ->
+      prov = new CouchDB (Nimble @cfg).provisioning
       @cfg.host_data =
         if @cfg.host?
           debug "Retrieving data for #{@cfg.host}"
-          await @cfg.prov
+          await prov
             .get "host:#{@cfg.host}"
             .catch (error) =>
               # debug.ops "Host #{@cfg.host}: #{error}"

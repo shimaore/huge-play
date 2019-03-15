@@ -1,6 +1,8 @@
     pkg = require '../../../package'
     @name = "#{pkg.name}:middleware:client:egress:fifo"
     {debug,foot} = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     @include = ->
       return unless @session?.direction is 'egress'
@@ -145,7 +147,8 @@ The destination matched.
 
       debug 'Routing', action, number
 
-      @session.number_domain_data ?= await @cfg.prov
+      prov = new CouchDB (Nimble @cfg).provisioning
+      @session.number_domain_data ?= await prov
         .get "number_domain:#{@session.number_domain}"
         .catch (error) =>
           debug.csr "number_domain #{number_domain}: #{error}"
@@ -395,7 +398,7 @@ Menu messages
           doc.msg ?= {}
           doc.msg[number] ?= {}
           doc.msg[number].active = false
-          await @cfg.master_push doc
+          await (Nimble @cfg).master_push doc
 
           await @action 'gentones', '%(200,20,600);%(200,20,450)'
           @direction 'completed'
@@ -410,7 +413,7 @@ Menu messages
           doc.msg ?= {}
           doc.msg[number] ?= {}
           doc.msg[number].active = true
-          await @cfg.master_push doc
+          await (Nimble @cfg).master_push doc
 
           await @action 'gentones', '%(200,20,450);%(200,20,600)'
           @direction 'completed'

@@ -1,6 +1,8 @@
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:ingress:local-number"
     debug = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     @include = ->
 
@@ -44,7 +46,8 @@ The dialplan and country (and other parameters) might also be available in the `
       @session.number_domain = number_domain
       await @reference.set_number_domain number_domain
 
-      @session.number_domain_data = await @cfg.prov
+      prov = new CouchDB (Nimble @cfg).provisioning
+      @session.number_domain_data = await prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
           debug "number_domain #{number_domain}: #{error.stack ? error}"

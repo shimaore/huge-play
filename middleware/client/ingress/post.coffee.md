@@ -2,6 +2,10 @@
     @name = "#{pkg.name}:middleware:client:ingress:post"
     debug = (require 'tangible') @name
     url = require 'url'
+
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
+
     tones = require '../tones'
 
 Use fr-ring for default ringback
@@ -65,9 +69,7 @@ Call rejection: reject anonymous caller
           # return @respond '603 Decline (anonymous)'
           await @action 'answer'
 
-`provisioning` is a `nimble-direction` convention.
-
-          await @action 'playback', "#{@cfg.provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
+          await @action 'playback', "#{(Nimble @cfg).provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
           return @action 'hangup'
 
 * doc.local_number.use_blacklist (boolean) If true and a `list:<destination-number>@<calling-number>` record exists, where `<destination-number>` is the identifier of a local-number (in the format `<number>@<number-domain>`), use that record to decide whether to reject the inbound call based on the calling number.
@@ -83,7 +85,8 @@ Call rejection: reject anonymous caller
         caller = if pid? then url.parse(pid).auth else @source
         list_id = "list:#{dst_number}@#{caller}"
         debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
-        list = await @cfg.prov.get(list_id).catch -> {}
+        prov = new CouchDB (Nimble cfg).provisioning
+        list = await prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
             @notify state: 'blacklisted'

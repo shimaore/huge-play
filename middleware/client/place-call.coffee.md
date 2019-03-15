@@ -12,6 +12,9 @@ This module also triggers calls from within a conference.
     Moment = require 'moment-timezone'
     {UPDATE} = require 'red-rings/operations'
 
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
+
     escape = (v) ->
       "#{v}".replace ',', ','
 
@@ -84,6 +87,8 @@ Event parameters:
 - `callee_num` (optional)
 - `call_timeout` (optional)
 
+      prov = new CouchDB (Nimble cfg).provisioning
+
       place_call = foot (_id,data) ->
         {endpoint,caller} = data
 
@@ -102,7 +107,7 @@ A proper reference is required.
 
 Load additional data from the endpoint.
 
-        endpoint_data = await cfg.prov.get("endpoint:#{endpoint}").catch -> null
+        endpoint_data = await prov.get("endpoint:#{endpoint}").catch -> null
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
@@ -203,6 +208,8 @@ Parameters:
 - `conference` (was `name`)
 - `destination`
 
+      prov = new CouchDB (Nimble cfg).provisioning
+
       call_to_conference = foot (_id,data) ->
         {endpoint,destination} = data
         debug 'Received call-to-conference', data, local_server
@@ -221,7 +228,7 @@ Ensure we are co-located with the FreeSwitch instance serving this conference.
 
 Load additional data from the endpoint.
 
-        endpoint_data = await cfg.prov.get("endpoint:#{endpoint}").catch -> null
+        endpoint_data = await prov.get("endpoint:#{endpoint}").catch -> null
         return unless endpoint_data?
         return if endpoint_data.disabled or endpoint_data.src_disabled
 
@@ -229,7 +236,7 @@ Load additional data from the endpoint.
 
 Try to get the asserted number, assuming Centrex.
 
-        number_data = await cfg.prov.get("number:#{endpoint}").catch -> {}
+        number_data = await prov.get("number:#{endpoint}").catch -> {}
         calling_number = number_data.asserted_number ? endpoint.split('@')[0]
 
         {language} = data

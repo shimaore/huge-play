@@ -4,6 +4,8 @@
     @name = "#{pkg.name}:middleware:client:egress:post"
     debug = (require 'tangible') @name
     assert = require 'assert'
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
     tones = require '../tones'
 
     default_music = tones.loop tones.fr.waiting
@@ -19,7 +21,8 @@
 
 * session.e164_number (object) The doc.global_number record for the source of an outbound call.
 
-      @session.e164_number = await @cfg.prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
+      prov = new CouchDB (Nimble @cfg).provisioning
+      @session.e164_number = await prov.get("number:#{@session.ccnq_from_e164}").catch -> {}
       await @reference.set_number @session.ccnq_from_e164
       await @user_tags @session.e164_number.tags
 

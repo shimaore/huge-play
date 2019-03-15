@@ -2,6 +2,8 @@
     @name = "#{pkg.name}:middleware:client:forward:basic"
     debug = (require 'tangible') @name
     {hostname} = require 'os'
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     @include = ->
 
@@ -10,7 +12,8 @@
       @report state:'forward'
 
       debug 'forwarding on behalf of', @session.endpoint_name
-      @session.endpoint = await @cfg.prov.get "endpoint:#{@session.endpoint_name}"
+      prov = new CouchDB (Nimble cfg).provisioning
+      @session.endpoint = await prov.get "endpoint:#{@session.endpoint_name}"
       @session.outbound_route = @session.endpoint.outbound_route
       @session.forwarding = true
       if @cfg.mask_source_on_forward

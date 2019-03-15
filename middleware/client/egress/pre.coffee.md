@@ -4,10 +4,14 @@ First-line handler for outbound calls
     pkg = require '../../../package.json'
     @name = "#{pkg.name}:middleware:client:egress:pre"
     debug = (require 'tangible') @name
+    Nimble = require 'nimble-direction'
+    CouchDB = require 'most-couchdb'
 
     @include = ->
 
       return unless @session?.direction is 'egress'
+
+      prov = new CouchDB (Nimble @cfg).provisioning
 
       music_uri = (doc) =>
         return null unless doc.music?
@@ -34,7 +38,7 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
-      @session.endpoint = await @cfg.prov.get "endpoint:#{@session.endpoint_name}"
+      @session.endpoint = await prov.get "endpoint:#{@session.endpoint_name}"
       await @reference.set_endpoint @session.endpoint_name
       if @session.endpoint.timezone?
         @session.timezone = @session.endpoint.timezone
@@ -85,7 +89,7 @@ The `number_domain` field is required, but the number-domain record is optional.
 
 * session.number_domain_data Data record of the number-domain (egress calls).
 
-      @session.number_domain_data = await @cfg.prov
+      @session.number_domain_data = await prov
         .get "number_domain:#{number_domain}"
         .catch (error) =>
           debug "number_domain #{number_domain}: #{error}"
@@ -111,7 +115,7 @@ Source (calling) number
       if @session.transfer
         @session.number = {}
       else
-        @session.number = await @cfg.prov
+        @session.number = await prov
           .get "number:#{src_number}"
 
 On a static trunk, the number might not be present.
