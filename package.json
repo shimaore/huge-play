@@ -20,15 +20,15 @@
   "homepage": "https://github.com/shimaore/huge-play",
   "dependencies": {
     "acoustic-line": "^1.9.0",
-    "black-metal": "^20.2.0",
+    "black-metal": "^20.2.1",
     "blue-rings": "^3.0.0",
     "bumpy-lawyer": "^2.7.2",
-    "date-holidays": "^1.2.8",
+    "date-holidays": "^1.3.8",
     "esl": "^9.0.1",
-    "five-toes": "^1.0.2",
+    "five-toes": "^1.0.3",
     "flat-ornament": "^5.1.2",
-    "ioredis": "^4.2.0",
-    "lru-cache": "^4.1.3",
+    "ioredis": "^4.6.2",
+    "lru-cache": "^5.1.1",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.23",
     "most-couchdb": "^2.0.0",
@@ -37,17 +37,16 @@
     "red-rings-axon": "^2.1.5",
     "request": "^2.88.0",
     "solid-gun": "^1.0.0",
-    "superagent": "^3.8.3",
+    "superagent": "^4.1.0",
     "tangible": "^3.0.0",
     "useful-wind-serialize": "^1.6.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
+    "chai": "^4.2.0",
     "coffeescript": "^2.3.2",
-    "mocha": "^5.0.0",
-    "nyc": "^13.0.1"
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   },
   "publishConfig": {
     "tag": "latest"
