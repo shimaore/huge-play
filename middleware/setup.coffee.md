@@ -452,6 +452,13 @@ Set the endpoint name so that if we redirect to voicemail the voicemail module c
           @session.endpoint_name = @session.number.endpoint
           await @reference.set_endpoint @session.number.endpoint
 
+          if @session.endpoint_name?
+            @session.endpoint = await prov
+              .get "endpoint:#{@session.endpoint_name}"
+              .catch -> null
+          else
+            @session.endpoint = null
+
 Set the account so that if we redirect to an external number the egress module can find it.
 
           await @reference.set_account @session.number.account

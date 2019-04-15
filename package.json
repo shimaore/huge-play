@@ -31,13 +31,13 @@
     "lru-cache": "^5.1.1",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.23",
-    "most-couchdb": "^2.0.0",
+    "most-couchdb": "^3.0.0",
     "nimble-direction": "^9.0.1",
     "normal-key": "^3.1.0",
     "red-rings-axon": "^2.1.5",
     "request": "^2.88.0",
     "solid-gun": "^1.0.0",
-    "superagent": "^4.1.0",
+    "superagent": "^5.0.2",
     "tangible": "^3.0.0",
     "useful-wind-serialize": "^1.6.1",
     "uuid": "^3.3.2"
@@ -46,7 +46,7 @@
     "chai": "^4.2.0",
     "coffeescript": "^2.3.2",
     "mocha": "^6.0.2",
-    "nyc": "^13.3.0"
+    "nyc": "^14.0.0"
   },
   "publishConfig": {
     "tag": "latest"

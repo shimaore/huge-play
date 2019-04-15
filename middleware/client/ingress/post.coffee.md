@@ -268,21 +268,20 @@ Note the different alternatives for routing:
 
 ### Standard destination
 
+      unless @session.endpoint?
+        return @respond '400 Missing endpoint'
+
       parameters = []
-      to_uri = "sip:#{@session.endpoint_name}" # set by validate_local_number()
 
-* cfg.ingress_target (string:domain) Inbound domain for static endpoint: inbound calls are sent to the specified domain if the endpoint's name does not contain `@`.
+* cfg.ingress_target (string:domain) Inbound domain for static endpoint: inbound calls are sent to the specified domain if the endpoint's is a static endpoint (its name does not contain `@`). (Normally points to a matching proxy.)
 
-      unless to_uri.match /@/
-        to_uri = "sip:#{@destination}@#{@cfg.ingress_target}"
+      [extension,domain] = @session.endpoint_name.split '@'
+      to_uri = "sip:#{@destination}@#{domain ? @cfg.ingress_target}"
 
-* doc.local_number.endpoint_via (string:domain) If present, inbound calls are sent to the specified server instead of the endpoint's.
+* doc.endpoint.via (string:domain) If present, inbound calls are sent to the specified server.
 
-      if @session.number.endpoint_via?
-        ## A proper way to do it:
-        # parameters.push "sip_route_uri=sip:#{@session.number.endpoint_via}"
-        ## How we've been doing it:
-        to_uri = "sip:#{@destination}@#{@session.number.endpoint_via}"
+      if @session.endpoint.via?
+        parameters.push "sip_route_uri=sip:#{@session.endpoint.via}"
 
 Convergence
 -----------
@@ -455,7 +454,7 @@ These are injected so that they may eventually show up in CDRs.
 * doc.local_number.account (string) Account information for this number. Normally not present, since the account information from the endpoint is used. Overrides the endpoint's account information if present.
 
           ccnq_direction: @session.direction
-          ccnq_account: @session.number.account
+          ccnq_account: @session.number.account ? @session.endpoint?.account
           ccnq_profile: @session.profile
           ccnq_from_e164: @session.ccnq_from_e164
           ccnq_to_e164: @session.ccnq_to_e164
