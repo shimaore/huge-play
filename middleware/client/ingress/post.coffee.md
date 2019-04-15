@@ -49,6 +49,9 @@ Retrieve number data.
         debug 'Number not found'
         return
 
+      nimble = Nimble @cfg
+      prov = new CouchDB nimble.provisioning
+
 Call rejection: reject anonymous caller
 
 * doc.local_number.reject_anonymous (boolean) If true, rejects anonymous calls.
@@ -69,7 +72,7 @@ Call rejection: reject anonymous caller
           # return @respond '603 Decline (anonymous)'
           await @action 'answer'
 
-          await @action 'playback', "#{(Nimble @cfg).provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
+          await @action 'playback', "#{nimble.provisioning}/config%3Avoice_prompts/reject-anonymous.wav"
           return @action 'hangup'
 
 * doc.local_number.use_blacklist (boolean) If true and a `list:<destination-number>@<calling-number>` record exists, where `<destination-number>` is the identifier of a local-number (in the format `<number>@<number-domain>`), use that record to decide whether to reject the inbound call based on the calling number.
@@ -85,7 +88,6 @@ Call rejection: reject anonymous caller
         caller = if pid? then url.parse(pid).auth else @source
         list_id = "list:#{dst_number}@#{caller}"
         debug "Number #{dst_number}, requesting caller #{caller} list #{list_id}"
-        prov = new CouchDB (Nimble cfg).provisioning
         list = await prov.get(list_id).catch -> {}
         unless list.disabled
           if @session.number.use_blacklist and list.blacklist
@@ -388,8 +390,6 @@ Timeout
       @notify
         state: 'ingress-call'
         endpoint: @session.endpoint_name
-
-      await @reference.set_endpoint @session.endpoint_name
 
 ### Build the set of `_in` targets for notifications of the reference data.
 
