@@ -274,14 +274,18 @@ Note the different alternatives for routing:
       parameters = []
 
 * cfg.ingress_target (string:domain) Inbound domain for static endpoint: inbound calls are sent to the specified domain if the endpoint's is a static endpoint (its name does not contain `@`). (Normally points to a matching proxy.)
+* doc.endpoint.via (string:domain) If present, inbound calls are sent to the specified name (instead of the domain name that is part of the endpoint's ID).
 
       [extension,domain] = @session.endpoint_name.split '@'
-      to_uri = "sip:#{@destination}@#{domain ? @cfg.ingress_target}"
 
-* doc.endpoint.via (string:domain) If present, inbound calls are sent to the specified server.
+      target  = @session.endpoint.via
+      target ?= domain
+      target ?= @cfg.ingress_target
 
-      if @session.endpoint.via?
-        parameters.push "sip_route_uri=sip:#{@session.endpoint.via}"
+Note how the destination URI (which will be mapped to the RURI and the To going to OpenSIPS) uses the original called number.
+This way, when OpenSIPS does the translation to an endpoint, the RURI will be the one the endpoint used to REGISTER, while the To will remain the original called number.
+
+      to_uri = "sip:#{@destination}@#{target}"
 
 Convergence
 -----------
