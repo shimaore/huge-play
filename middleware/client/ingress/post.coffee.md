@@ -279,11 +279,12 @@ Note the different alternatives for routing:
       [extension,domain] = @session.endpoint_name.split '@'
 
       target  = @session.endpoint.via
+      target ?= @session.number.endpoint_via # legacy
       target ?= domain
       target ?= @cfg.ingress_target
 
 Note how the destination URI (which will be mapped to the RURI and the To going to OpenSIPS) uses the original called number.
-This way, when OpenSIPS does the translation to an endpoint, the RURI will be the one the endpoint used to REGISTER, while the To will remain the original called number.
+This way, when OpenSIPS does the translation to an endpoint (using the `X-En` header), the RURI will be the one the endpoint used to REGISTER, while the To will remain the original called number.
 
       to_uri = "sip:#{@destination}@#{target}"
 
