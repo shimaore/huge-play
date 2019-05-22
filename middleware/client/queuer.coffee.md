@@ -47,7 +47,8 @@
       cfg = @cfg
 
       HugePlayReference = @cfg.Reference
-      {api,prov,host} = @cfg
+      {api,host} = @cfg
+      prov = new CouchDB (Nimble cfg).provisioning
       profile = @cfg.session?.profile
       p = @cfg.profiles?[profile]
       if p?
