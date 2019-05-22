@@ -15,6 +15,8 @@
 
       return unless m = @destination.match /^(80\d\d|81\d|82|83|84|87|88)(\d*)$/
 
+      prov = new CouchDB (Nimble @cfg).provisioning
+
       action = m[1]
       if m[2] is ''
         number = null
@@ -24,8 +26,8 @@
 
 * doc.local_number:groups (array of string) Contains groups the user belong too. The convention is to use `:` as a separator. For example: ['sales:internal','support:modems']
 
-        {groups} = number_data = await @cfg
-          .prov.get "number:#{key}"
+        {groups} = number_data = await prov
+          .get "number:#{key}"
           .catch -> {}
 
       events = @cfg.queuer?.Agent?.events
@@ -147,7 +149,6 @@ The destination matched.
 
       debug 'Routing', action, number
 
-      prov = new CouchDB (Nimble @cfg).provisioning
       @session.number_domain_data ?= await prov
         .get "number_domain:#{@session.number_domain}"
         .catch (error) =>
@@ -208,8 +209,8 @@ This works only for centrex.
 
       agent = @session.agent ? "#{@source}@#{@session.number_domain}"
       agent_name = @session.agent_name ? @source
-      {allowed_groups} = agent_data = await @cfg
-        .prov.get "number:#{agent}"
+      {allowed_groups} = agent_data = await prov
+        .get "number:#{agent}"
         .catch -> {}
 
       failed = =>
