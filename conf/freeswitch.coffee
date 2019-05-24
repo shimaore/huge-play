@@ -4,6 +4,8 @@
 module.exports = renderable (cfg) ->
   {doctype,document,section,configuration,settings,params,param,modules,module,load,network_lists,list,node,global_settings,profiles,profile,mappings,map,macros,callerControls,group,control} = L
 
+  {DEBUG_FREESWITCH} = process.env
+
   # cfg.name (string) Internal name for the FreeSwitch instance
   name = cfg.name ? 'server'
   # cfg.profiles (object) Maps profile name to profile definition (containg cfg.profiles[].sip_port, cfg.profiles[].socket_port, etc.)
@@ -50,7 +52,7 @@ module.exports = renderable (cfg) ->
           param name:'max-sessions', value:2000
           param name:'sessions-per-second', value:2000
           param name:'min-idle-cpu', value:1
-          param name:'loglevel', value:'err'
+          param name:'loglevel', value: if DEBUG_FREESWITCH then 'debug' else 'err'
       configuration name:'modules.conf', ->
         modules ->
           for module in modules_to_load
@@ -118,7 +120,7 @@ module.exports = renderable (cfg) ->
 
       configuration name:'sofia.conf', ->
         global_settings ->
-          param name:'log-level', value:1
+          param name:'log-level', value: if DEBUG_FREESWITCH then 7 else 1
           param name:'debug-presence', value:0
         profiles ->
           # cfg.profile_module (Node.js module) module to use to build Sofia profiles (default: huge-play's)
