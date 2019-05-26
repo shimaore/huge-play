@@ -11,10 +11,6 @@ First-line handler for outbound calls
 
       return unless @session?.direction is 'egress'
 
-      music_uri = (doc) =>
-        return null unless doc.music?
-        @prompt.uri 'prov', 'prov', doc._id, doc.music
-
 Endpoint
 --------
 * session.endpoint_name (string) The name of the calling endpoint in an egress call, set from hdr.X-En
@@ -65,6 +61,10 @@ Generic handler
     @handler = handler = ->
 
       prov = new CouchDB (Nimble @cfg).provisioning
+
+      music_uri = (doc) =>
+        return null unless doc.music?
+        @prompt.uri 'prov', 'prov', doc._id, doc.music
 
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
