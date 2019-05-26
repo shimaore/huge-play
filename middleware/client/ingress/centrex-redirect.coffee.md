@@ -21,7 +21,11 @@ Transfer Workaround
 
 Send a REFER to the carrier-side SBC.
 
-        res = await @action 'deflect', uri
+        if @data['Answer-State'] is 'answered'
+          res = await @action 'deflect', uri
+        else
+          res = await @action 'redirect', uri
+
         debug 'Redirection returned', uri, res
 
 Make sure there is no further processing.

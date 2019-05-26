@@ -152,7 +152,10 @@ Conference is remote
 
 We use `deflect` (REFER) because this might happen mid-call (for example inside an IVR menu).
 
-        res = await @action 'deflect', uri
+        if @data['Answer-State'] is 'answered'
+          res = await @action 'deflect', uri
+        else
+          res = await @action 'redirect', uri
 
         debug 'Remote conference returned', uri, res
 
