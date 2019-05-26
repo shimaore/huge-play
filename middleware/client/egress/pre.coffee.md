@@ -11,8 +11,6 @@ First-line handler for outbound calls
 
       return unless @session?.direction is 'egress'
 
-      prov = new CouchDB (Nimble @cfg).provisioning
-
       music_uri = (doc) =>
         return null unless doc.music?
         @prompt.uri 'prov', 'prov', doc._id, doc.music
@@ -36,6 +34,38 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
       await @unset 'sip_h_X-En'
 
+Check from
+----------
+
+Optionally enforce that the calling number originates from the associated endpoint (useful e.g. to prevent invalid caller-id from static endpoints).
+
+* doc.src_endpoint.check_from (boolean) If true, doc.local_number.endpoint must match the originating endpoint's name. This is used to restrict originating numbers on an endpoint to those that are provisioned on that endpoint.
+
+      if @session.endpoint.check_from
+        if @session.number.endpoint isnt @session.endpoint_name
+          debug 'From Username is not listed'
+          return @respond '403 From Username is not listed'
+
+ICE
+---
+
+For backward-compatibility we currently ignore ICE proposals.
+
+      await @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
+
+      await handler.call this
+
+      return
+
+Generic handler
+---------------
+
+(Used by the code above, and by the forwarding code.)
+
+    @handler = handler = ->
+
+      prov = new CouchDB (Nimble @cfg).provisioning
+
 * session.endpoint (object) Data from the calling `doc.endpoint` (also known as the `doc.src_endpoint`) in an egress call.
 
       @session.endpoint = await prov.get "endpoint:#{@session.endpoint_name}"
@@ -46,6 +76,8 @@ Endpoint might be provided in the reference data for example for an `originate` 
         @session.music = music_uri @session.endpoint
       if @session.endpoint.trace
         @session.dev_logger = true
+
+      await @user_tags @session.endpoint.tags
 
 If the call was blind-transfered by the agent, it will appear in a `transfer` direction, as coming from the agent (e.g. `sip_h_X-En` is copied over) even though the call actually connects the original caller and the recipient of the transfer. The call-id is the call-id of the original call (before the transfer). In this case, we should _not_ bind that call-id and the agent, since the agent is no longer part of that call.
 
@@ -96,7 +128,6 @@ The `number_domain` field is required, but the number-domain record is optional.
           {}
 
       debug 'number_domain', number_domain
-      await @reference.set_number_domain number_domain
       await @user_tags @session.number_domain_data.tags
 
 Number-domain is less specific than endpoint, so do not override.
@@ -208,25 +239,6 @@ Enforce configurable Caller-ID. (Used in particular for ported-in numbers.)
 
       @session.asserted = @session.number.asserted_number
       @session.asserted ?= @session.endpoint.asserted_number
-
-Check from
-----------
-
-Optionally enforce that the calling number originates from the associated endpoint (useful e.g. to prevent invalid caller-id from static endpoints).
-
-* doc.src_endpoint.check_from (boolean) If true, doc.local_number.endpoint must match the originating endpoint's name. This is used to restrict originating numbers on an endpoint to those that are provisioned on that endpoint.
-
-      if @session.endpoint.check_from
-        if @session.number.endpoint isnt @session.endpoint_name
-          debug 'From Username is not listed'
-          return @respond '403 From Username is not listed'
-
-ICE
----
-
-For backward-compatibility we currently ignore ICE proposals.
-
-      await @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
 
 Call-recording
 --------------
