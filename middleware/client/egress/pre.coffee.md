@@ -34,6 +34,8 @@ Endpoint might be provided in the reference data for example for an `originate` 
 
       await @unset 'sip_h_X-En'
 
+      await handler.call this
+
 Check from
 ----------
 
@@ -52,8 +54,6 @@ ICE
 For backward-compatibility we currently ignore ICE proposals.
 
       await @set ignore_sdp_ice: @session.endpoint.ignore_sdp_ice ? true
-
-      await handler.call this
 
       return
 
