@@ -9,6 +9,11 @@
     GET = (name) ->
       -> @get name
 
+    SET_JSON = (name) ->
+      (value) -> @set name, JSON.stringify value
+    GET_JSON = (name) ->
+      -> try JSON.parse await @get name
+
     class Reference
 
 This needs to be extended with ::timeout and ::interface (a blue-rings or redis instance).
@@ -25,7 +30,7 @@ This needs to be extended with ::timeout and ::interface (a blue-rings or redis 
       set_domain: SET 'domain'
       set_dev_logger: SET 'dev_logger'
       set_account: SET 'account'
-      set_call_options: SET 'call_options'
+      set_call_options: SET_JSON 'call_options'
       set_block_dtmf: SET 'block_dtmf'
       set_number: SET 'number'
       set_number_domain: SET 'number_domain'
@@ -36,7 +41,7 @@ This needs to be extended with ::timeout and ::interface (a blue-rings or redis 
       get_domain: GET 'domain'
       get_dev_logger: GET 'dev_logger'
       get_account: GET 'account'
-      get_call_options: GET 'call_options'
+      get_call_options: GET_JSON 'call_options'
       get_block_dtmf: GET 'block_dtmf'
       get_number: GET 'number'
       get_number_domain: GET 'number_domain'
