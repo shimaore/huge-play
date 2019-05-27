@@ -7,9 +7,6 @@
     request = require 'request'
     qs = require 'querystring'
 
-    @web = ->
-      @cfg.versions[pkg.name] = pkg.version
-
 Use `mod_httpapi` to support URLs.
 
     @include = ->
@@ -192,6 +189,7 @@ Attachment upload/download
 ==========================
 
     @web = ->
+      @cfg.versions[pkg.name] = pkg.version
 
       cfg = @cfg
 
@@ -232,6 +230,8 @@ A translator for the local provisioning database (the `db` database name is igno
 
         {base,uri} = translator @params.db, @params.id, @params.file
 
+        debug 'web:get', base, uri
+
         proxy = request.get
           baseUrl: base
           uri: uri
@@ -240,7 +240,7 @@ A translator for the local provisioning database (the `db` database name is igno
 
         @request.pipe proxy
          .on 'error', (error) =>
-          debug "GET #{uri} : #{error}"
+          debug.ops "GET #{uri} : #{error}"
           @next "GET #{uri} : #{error}"
           return
         proxy.pipe @response
@@ -254,6 +254,8 @@ A translator for the local provisioning database (the `db` database name is igno
 
         {base,uri} = translator @params.db, @params.id, @params.file
 
+        debug 'web:put', base, uri
+
         proxy = request.put
           baseUrl: base
           uri: uri
@@ -265,7 +267,7 @@ A translator for the local provisioning database (the `db` database name is igno
 
         @request.pipe proxy
         .on 'error', (error) =>
-          debug "GET #{uri} rev #{@params.rev} : #{error.stack ? error}"
+          debug.ops "GET #{uri} rev #{@params.rev} : #{error.stack ? error}"
           try @res.end()
           return
         proxy.pipe @response
