@@ -9,6 +9,7 @@
       it 'in calendars for a specific calendar', ->
         self =
           session:
+            timezone: 'UTC'
             number_domain_data:
               calendars: [
                 {
