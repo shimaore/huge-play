@@ -4,7 +4,7 @@
   "description": "FreeSwitch CCNQ4 middlewares and configuration",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "npm install --only=dev && rm package-lock.json && coffee -c conf/*.coffee middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
+    "build": "npm install coffeescript && rm package-lock.json && coffee -c conf/*.coffee middleware/*.coffee.md middleware/*/*.coffee.md middleware/*/*/*.coffee.md",
     "pretest": "npm run build && coffee -c test/*.coffee.md",
     "test": "nyc mocha"
   },
