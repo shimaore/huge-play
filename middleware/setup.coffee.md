@@ -6,7 +6,6 @@
     @name = "#{pkg.name}:middleware:setup"
     assert = require 'assert'
     FS = require 'esl'
-    LRU = require 'lru-cache'
     RedRingAxon = require 'red-rings-axon'
     BlueRing = require 'blue-rings'
     RedisInterface = require 'normal-key/interface'

@@ -28,7 +28,6 @@
     "five-toes": "^1.0.3",
     "flat-ornament": "^5.1.2",
     "ioredis": "^4.9.5",
-    "lru-cache": "^5.1.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
     "most-couchdb": "^3.2.0",
