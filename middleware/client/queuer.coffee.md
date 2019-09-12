@@ -497,6 +497,12 @@ More states
 
       resolve = ccnq4_resolve @cfg
 
+      @queuer_wrapup_complete = (source) ->
+        debug 'queuer_wrapup_complete', source
+        agent = new Agent source
+        await agent.transition 'complete'
+        return
+
       @queuer_pause = (source) ->
         debug 'queuer_pause', source
         agent = new Agent source

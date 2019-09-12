@@ -129,6 +129,7 @@ The destination matched.
 
       ACTION_FIFO_ROUTE = '810'
       ACTION_QUEUER_LOGIN_SCRIPT = '814'
+      ACTION_QUEUER_WRAPUP_COMPLETE = '815'
       ACTION_QUEUER_OFFHOOK_SCRIPT = '816'
       ACTION_FIFO_VOICEMAIL = '817'
       ACTION_QUEUER_FUNCTION = '818'
@@ -320,6 +321,13 @@ Monitor: call to listen (with notification beep), and whisper
             park_after_bridge: true
           await @queuer_offhook agent, agent_name, @call, agent_tags(), login_script
           @direction 'queuer-offhook'
+          return
+
+        when ACTION_QUEUER_WRAPUP_COMPLETE
+          debug 'Queuer: wrapup'
+          await @queuer_wrapup_complete agent
+          await @action 'hangup'
+          @direction 'completed'
           return
 
         when ACTION_QUEUER_FUNCTION
