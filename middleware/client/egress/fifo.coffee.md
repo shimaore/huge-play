@@ -131,7 +131,7 @@ The destination matched.
       ACTION_QUEUER_LOGIN_SCRIPT = '814'
       ACTION_QUEUER_OFFHOOK_SCRIPT = '816'
       ACTION_FIFO_VOICEMAIL = '817'
-      ACTION_QUEUER_PAUSE = '818'
+      ACTION_QUEUER_FUNCTION = '818'
       ACTION_QUEUER_LOGOUT = '819'
       ACTION_CONF_ROUTE = '82'
       ACTION_MENU_ROUTE = '83'
@@ -322,19 +322,29 @@ Monitor: call to listen (with notification beep), and whisper
           @direction 'queuer-offhook'
           return
 
-        when ACTION_QUEUER_PAUSE
-          debug 'Queuer: pause'
-          await @action 'answer'
-          await @sleep 2000
-          switch await @queuer_pause agent
-            when 'start'
-              await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
-            when 'end'
-              await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
+        when ACTION_QUEUER_FUNCTION
+          switch number
+            when 1
+
+Pause / Unpause: dial 8181
+
+              debug 'Queuer: pause'
+              await @action 'answer'
+              await @sleep 2000
+              switch await @queuer_pause agent
+                when 'start'
+                  await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
+                when 'end'
+                  await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
+                else
+                  await @action 'gentones', '%(100,20,450);%(100,20,450)'
+              await @action 'hangup'
+              @direction 'completed'
+
+Unknown function
+
             else
-              await @action 'gentones', '%(100,20,450);%(100,20,450)'
-          await @action 'hangup'
-          @direction 'completed'
+              await failed()
           return
 
         when ACTION_QUEUER_LOGOUT
