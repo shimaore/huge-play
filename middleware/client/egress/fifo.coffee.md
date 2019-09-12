@@ -128,9 +128,6 @@ Enumerate the external calls linked to this agent.
 The destination matched.
 
       ACTION_FIFO_ROUTE = '810'
-      ACTION_QUEUER_LOGIN = '811'
-      ACTION_QUEUER_LEAVE = '812'
-      ACTION_QUEUER_OFFHOOK = '813'
       ACTION_QUEUER_LOGIN_SCRIPT = '814'
       ACTION_QUEUER_OFFHOOK_SCRIPT = '816'
       ACTION_FIFO_VOICEMAIL = '817'
@@ -301,18 +298,6 @@ Monitor: call to listen (with notification beep), and whisper
           @direction 'eavesdropping'
           return
 
-        when ACTION_QUEUER_LOGIN
-          debug 'Queuer: log in'
-          fifo = get 'fifos', 'fifo'
-          await @action 'answer'
-          await @sleep 2000
-          @session.timezone ?= @session.number.timezone
-          await @queuer_login agent, agent_name, fifo, agent_tags(), login_script
-          await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
-          await @action 'hangup'
-          @direction 'completed'
-          return
-
         when ACTION_QUEUER_LOGIN_SCRIPT
           debug 'Queuer: log in with number in script'
           @destination = number
@@ -325,18 +310,6 @@ Monitor: call to listen (with notification beep), and whisper
           @direction 'completed'
           return
 
-        when ACTION_QUEUER_OFFHOOK
-          debug 'Queuer: off-hook agent'
-          fifo = get 'fifos', 'fifo'
-          await @action 'answer'
-          await @sleep 2000
-          await @set
-            hangup_after_bridge: false
-            park_after_bridge: true
-          await @queuer_offhook agent, agent_name, @call, fifo, agent_tags(), login_script
-          @direction 'queuer-offhook'
-          return
-
         when ACTION_QUEUER_OFFHOOK_SCRIPT
           debug 'Queuer: off-hook agent, log in with number in script'
           @destination = number
@@ -347,18 +320,6 @@ Monitor: call to listen (with notification beep), and whisper
             park_after_bridge: true
           await @queuer_offhook agent, agent_name, @call, null, agent_tags(), login_script
           @direction 'queuer-offhook'
-          return
-
-        when ACTION_QUEUER_LEAVE
-          debug 'Queuer: leave queue'
-          fifo = get 'fifos', 'fifo'
-          return failed() unless fifo?
-          await @action 'answer'
-          await @sleep 2000
-          await @queuer_leave agent, fifo
-          await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,600)'
-          await @action 'hangup'
-          @direction 'completed'
           return
 
         when ACTION_QUEUER_PAUSE
