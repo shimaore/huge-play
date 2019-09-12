@@ -169,6 +169,21 @@ This avoids sending two messages for the same event (one with incomplete data, t
             notification = await data.call.notify notification
 
           cfg.rr.notify "agent:#{notification.agent}", "agent:#{notification.agent}", notification
+
+          notify = (msg) =>
+            content = yealink_message msg
+            dest = await resolve @key
+            await sender.notify dest, content
+            return
+
+          switch state
+            when 'logged_out'
+              await notify 'Logout'
+            when 'wrap_up'
+              await notify 'Wrap-up'
+            when 'idle'
+              await notify 'Prêt'
+
           debug 'agent.notify: done', @key, notification
           return
 
