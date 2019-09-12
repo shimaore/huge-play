@@ -122,6 +122,8 @@ HugePlayCall
 HugePlayAgent
 -------------
 
+      resolve = ccnq4_resolve @cfg
+
       class HugePlayAgent extends TaggedAgent
 
         interface: new RedisInterface cfg.local_redis_client, agent_timeout
