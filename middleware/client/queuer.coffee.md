@@ -444,13 +444,13 @@ Agent state monitoring
 On-hook agent
 -------------
 
-      @queuer_login = (source,name,fifo,tags = [],ornaments) ->
+      @queuer_login = (source,name,tags,ornaments) ->
+        tags ?= []
         debug 'queuer_login', source
         agent = new Agent source
         await agent.set 'name', name
         # await agent.clear_tags()  # in normal-key
         await agent.add_tags tags  # in normal-key
-        await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
         if ornaments?
           @agent = agent
@@ -459,35 +459,27 @@ On-hook agent
           delete @agent
 
         await agent.accept_onhook()
-        await @report {state:'queuer-login',source,fifo,tags}
+        await @report {state:'queuer-login',source,tags}
         agent
 
-      @queuer_leave = (source,fifo) ->
-        debug 'queuer_leave', source
-        agent = new Agent source
-        await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
-        await @report {state:'queuer-leave',source,fifo}
-        agent
-
-      @queuer_logout = (source,fifo) ->
+      @queuer_logout = (source) ->
         debug 'queuer_logout', source
         agent = new Agent source
-        await agent.del_tag "queue:#{fifo.full_name}" if fifo?.full_name?
         await agent.clear_tags()  # in normal-key
         await agent.transition 'logout'
-        await @report {state:'queuer-logout',source,fifo}
+        await @report {state:'queuer-logout',source}
         agent
 
 Off-hook agent
 --------------
 
-      @queuer_offhook = (source,name,{uuid},fifo,tags = [],ornaments) ->
+      @queuer_offhook = (source,name,{uuid},tags,ornaments) ->
+        tags ?= []
         debug 'queuer_offhook', source, uuid
         agent = new Agent source
         await agent.set 'name', name
         await agent.clear_tags()  # in normal-key
         await agent.add_tags tags  # in normal-key
-        await agent.add_tag "queue:#{fifo.full_name}" if fifo?.full_name?
 
         if ornaments?
           @agent = agent
@@ -497,7 +489,7 @@ Off-hook agent
 
         call = await agent.accept_offhook uuid
         return unless call?
-        await @report {state:'queuer-offhook',source,fifo,tags}
+        await @report {state:'queuer-offhook',source,tags}
         agent
 
 More states

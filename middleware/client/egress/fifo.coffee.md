@@ -299,26 +299,26 @@ Monitor: call to listen (with notification beep), and whisper
           return
 
         when ACTION_QUEUER_LOGIN_SCRIPT
-          debug 'Queuer: log in with number in script'
+          debug 'Queuer: log in'
           @destination = number
           await @action 'answer'
           await @sleep 2000
           @session.timezone ?= @session.number.timezone
-          await @queuer_login agent, agent_name, null, agent_tags(), login_script
+          await @queuer_login agent, agent_name, agent_tags(), login_script
           await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           await @action 'hangup'
           @direction 'completed'
           return
 
         when ACTION_QUEUER_OFFHOOK_SCRIPT
-          debug 'Queuer: off-hook agent, log in with number in script'
+          debug 'Queuer: off-hook agent'
           @destination = number
           await @action 'answer'
           await @sleep 2000
           await @set
             hangup_after_bridge: false
             park_after_bridge: true
-          await @queuer_offhook agent, agent_name, @call, null, agent_tags(), login_script
+          await @queuer_offhook agent, agent_name, @call, agent_tags(), login_script
           @direction 'queuer-offhook'
           return
 
@@ -349,10 +349,9 @@ Unknown function
 
         when ACTION_QUEUER_LOGOUT
           debug 'Queuer: log out'
-          fifo = get 'fifos', 'fifo'
           await @action 'answer'
           await @sleep 2000
-          await @queuer_logout agent, fifo
+          await @queuer_logout agent
           await @action 'gentones', '%(100,20,600);%(100,20,450);%(100,20,300)'
           await @action 'hangup'
           @direction 'completed'
