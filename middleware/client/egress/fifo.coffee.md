@@ -243,6 +243,16 @@ This works only for centrex.
             return failed()
           return
 
+        when ACTION_FIFO_VOICEMAIL
+          debug 'FIFO: voicemail'
+          fifo = get 'fifos', 'fifo'
+          return failed() unless fifo?.user_database?
+          @destination = 'inbox'
+          @source = 'user-database'
+          @session.voicemail_user_database = fifo.user_database
+          @session.voicemail_user_id = fifo.full_name
+          @direction 'voicemail'
+
         when ACTION_INTERCEPT
           return failed() unless number?
 
@@ -376,16 +386,6 @@ Monitor: call to listen (with notification beep), and whisper
           await @action 'hangup'
           @direction 'completed'
           return
-
-        when ACTION_FIFO_VOICEMAIL
-          debug 'FIFO: voicemail'
-          fifo = get 'fifos', 'fifo'
-          return failed() unless fifo?.user_database?
-          @destination = 'inbox'
-          @source = 'user-database'
-          @session.voicemail_user_database = fifo.user_database
-          @session.voicemail_user_id = fifo.full_name
-          @direction 'voicemail'
 
 Menu messages
 
