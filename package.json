@@ -23,14 +23,14 @@
     "black-metal": "^21.0.0",
     "blue-rings": "^3.0.0",
     "bumpy-lawyer": "^2.7.2",
-    "date-holidays": "^1.4.1",
+    "date-holidays": "^1.4.2",
     "esl": "^10.0.0",
-    "five-toes": "^1.0.4",
+    "five-toes": "^1.1.0",
     "flat-ornament": "^5.1.2",
-    "ioredis": "^4.11.2",
+    "ioredis": "^4.14.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
-    "most-couchdb": "^3.3.3",
+    "most-couchdb": "^3.7.3",
     "nimble-direction": "^9.0.2",
     "normal-key": "^3.2.0",
     "red-rings-axon": "^2.1.5",
@@ -39,7 +39,7 @@
     "superagent": "^5.1.0",
     "tangible": "^3.1.0",
     "useful-wind-serialize": "^1.6.2",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "chai": "^4.2.0",

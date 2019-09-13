@@ -17,7 +17,7 @@
         get_in: -> Promise.resolve []
       cfg =
         Reference: Foo
-        prefix_admin: "http://#{process.env.COUCHDB_USER}:#{process.env.COUCHDB_PASSWORD}@couchdb:5984"
+        prefix_admin: "http://#{process.env.COUCHDB_USER ? 'admin'}:#{process.env.COUCHDB_PASSWORD ? 'password'}@couchdb:5984"
 
       docs =
         'number:1234@some':
