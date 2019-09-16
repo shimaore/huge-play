@@ -325,7 +325,10 @@ Monitor: call to listen (with notification beep), and whisper
 
         when ACTION_QUEUER_WRAPUP_COMPLETE
           debug 'Queuer: wrapup'
+          await @action 'answer'
+          await @sleep 2000
           await @queuer_wrapup_complete agent
+          await @action 'gentones', '%(100,20,300);%(100,20,450);%(100,20,600)'
           await @action 'hangup'
           @direction 'completed'
           return
