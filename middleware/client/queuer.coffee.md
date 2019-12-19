@@ -122,7 +122,7 @@ HugePlayCall
 HugePlayAgent
 -------------
 
-      resolve = ccnq4_resolve @cfg
+      resolve = ccnq4_resolve Nimble cfg
 
       class HugePlayAgent extends TaggedAgent
 
@@ -512,7 +512,7 @@ Off-hook agent
 More states
 -----------
 
-      resolve = ccnq4_resolve @cfg
+      resolve = ccnq4_resolve Nimble @cfg
 
       @queuer_wrapup_complete = (source) ->
         debug 'queuer_wrapup_complete', source
