@@ -194,7 +194,7 @@ OpenSIPS marker for not registered
           @destination = @session.cfnr_voicemail_number
           @direction 'voicemail'
           return
-        if @session.cfnr_number?
+        if @session.cfnr_number
           debug 'cfnr:forward'
           @session.destination = @session.cfnr_number
           @direction 'forward'
@@ -230,7 +230,7 @@ Busy
           @destination = @session.cfb_voicemail_number
           @direction 'voicemail'
           return
-        if @session.cfb_number?
+        if @session.cfb_number
           debug 'cfb:number'
           @session.destination = @session.cfb_number
           @direction 'forward'
@@ -257,7 +257,7 @@ Use CFDA if present
           @notify state: 'forward-no-answer-to-voicemail'
           @direction 'voicemail'
           return
-        if @session.cfda_number?
+        if @session.cfda_number
           debug 'cfda:number'
           @session.destination = @session.cfda_number
           @notify state: 'forward-no-answer-to-number'

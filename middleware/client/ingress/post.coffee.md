@@ -195,7 +195,7 @@ So far we have no reason to reject the call.
           v = @session["#{name}_voicemail"] = @session.number["#{name}_voicemail"]
           n = @session["#{name}_number"]    = @session.number["#{name}_number"]
           p = @session[name]                = @session.number[name]
-          @session.cf_active = @session.cf_active or v? or n? or p?
+          @session.cf_active = @session.cf_active or v or n or p?
 
 Make sure we get the messages even if the call is forwarded.
 
@@ -215,7 +215,7 @@ Call Forward All
         @destination = @session.cfa_voicemail_number
         @direction 'voicemail'
         return
-      if @session.cfa_number?
+      if @session.cfa_number
         debug 'cfa:forward'
         @notify state: 'cfa:forward'
         @session.destination = @session.cfa_number
@@ -243,7 +243,7 @@ Do Not Disturb
           @destination = @session.cfb_voicemail_number
           @direction 'voicemail'
           return
-        if @session.cfb_number?
+        if @session.cfb_number
           debug 'dnd:forward'
           @notify state: 'dnd:forward'
           @session.destination = @session.cfb_number
